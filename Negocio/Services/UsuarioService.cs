@@ -154,19 +154,33 @@ namespace Negocio.Services
             return usuarios.Select(MapearAUsuarioDto);
         }
 
-        private static UsuarioDto MapearAUsuarioDto(Usuario u)
+        private UsuarioDto MapearAUsuarioDto(Usuario usuario)
         {
+            var modulosList = new List<string>();
+
+            if (usuario.Rol != null && !string.IsNullOrWhiteSpace(usuario.Rol.ModulosPermitidos))
+            {
+                try
+                {
+                    // Deserializa la cadena JSON "[\"Socios\"]" a una lista de C# List<string>
+                    modulosList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(usuario.Rol.ModulosPermitidos)
+                                  ?? new List<string>();
+                }
+                catch
+                {
+                    modulosList = new List<string>();
+                }
+            }
+
             return new UsuarioDto
             {
-                UsuarioID = u.UsuarioID,
-                NombreCompleto = u.NombreCompleto,
-                NombreUsuario = u.NombreUsuario,
-                RolID = u.RolID,
-                RolNombre = u.Rol?.Nombre ?? string.Empty,
-                ModulosPermitidos = DeserializarModulos(u.Rol?.ModulosPermitidos),
-                Activo = u.Activo,
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt
+                UsuarioID = usuario.UsuarioID,
+                NombreUsuario = usuario.NombreUsuario,
+                NombreCompleto = usuario.NombreCompleto, // O la propiedad correspondiente de tu entidad
+                RolID = usuario.RolID,
+                RolNombre = usuario.Rol?.Nombre ?? string.Empty, // Se asigna el nombre del Rol[cite: 1]
+                ModulosPermitidos = modulosList, // Asignación de la lista deserializada
+                Activo = usuario.Activo
             };
         }
 

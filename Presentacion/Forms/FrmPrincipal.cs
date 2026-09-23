@@ -44,6 +44,9 @@ namespace Presentacion.Forms
             if (_usuarioSesion != null)
             {
                 this.Text = $"Sistema Gimnasio - Usuario: {_usuarioSesion.NombreCompleto} ({_usuarioSesion.RolNombre})";
+
+                // APLICAR PERMISOS DE ROL
+                AplicarPermisosDeRol();
             }
         }
 
@@ -52,6 +55,26 @@ namespace Presentacion.Forms
             // Forzar a que la ventana principal abra siempre en pantalla completa
             this.WindowState = FormWindowState.Maximized;
             this.StartPosition = FormStartPosition.CenterScreen;
+        }
+
+        private void AplicarPermisosDeRol()
+        {
+            // Se obtiene la lista de módulos del rol (o una lista vacía si viene nula)
+            List<string> modulosPermitidos = _usuarioSesion?.ModulosPermitidos ?? new List<string>();
+
+            // Configurar la visibilidad de cada botón del menú
+            // Ajusta los nombres de los botones y de los módulos según tu base de datos / FrmRolModal
+            if (btnUsuarios != null) btnUsuarios.Visible = modulosPermitidos.Contains("Usuarios");
+            if (btnRoles != null) btnRoles.Visible = modulosPermitidos.Contains("Roles");
+            if (btnSocios != null) btnSocios.Visible = modulosPermitidos.Contains("Socios");
+            if (btnMembresias != null) btnMembresias.Visible = modulosPermitidos.Contains("Membresias");
+            if (btnProductos != null) btnProductos.Visible = modulosPermitidos.Contains("Productos");
+            if (btnVentas != null) btnVentas.Visible = modulosPermitidos.Contains("Ventas");
+            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Productos"); // O el módulo asignado a Categorías
+            if (btnVisitas != null) btnVisitas.Visible = modulosPermitidos.Contains("Registro");
+            if (btnRegistrarVisita != null) btnRegistrarVisita.Visible = modulosPermitidos.Contains("Registro");
+            if (btnConceptos != null) btnConceptos.Visible = modulosPermitidos.Contains("Conceptos");
+            if (btnMovimientos != null) btnMovimientos.Visible = modulosPermitidos.Contains("Movimientos");
         }
 
         private void btnCategorias_Click(object sender, EventArgs e)
