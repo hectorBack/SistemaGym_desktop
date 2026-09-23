@@ -125,6 +125,13 @@ namespace Negocio.Services
                 throw new BusinessException("El usuario a desactivar no existe.");
             }
 
+            if (usuario.Rol != null &&
+                (usuario.Rol.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                    usuario.Rol.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new BusinessException("No es posible desactivar un usuario Administrador.");
+            }
+
             _unitOfWork.Usuarios.EliminarLogico(usuario);
             await _unitOfWork.SaveChangesAsync();
         }

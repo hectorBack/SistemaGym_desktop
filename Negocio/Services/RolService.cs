@@ -108,7 +108,17 @@ namespace Negocio.Services
                 throw new BusinessException(errorMsg);
             }
 
+
+
             var rol = await _unitOfWork.Rol.ObtenerPorIdAsync(dto.RolID);
+
+            if (rol.Nombre != null &&
+                (rol.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                    rol.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new BusinessException("No es posible actualizar el rol Administrador.");
+            }
+
             if (rol == null)
             {
                 throw new BusinessException("El rol que intenta actualizar no existe.");
@@ -136,6 +146,13 @@ namespace Negocio.Services
                 throw new BusinessException("El rol a desactivar no existe.");
             }
 
+            if (rol.Nombre != null &&
+                (rol.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                    rol.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new BusinessException("No es posible desactivar el rol Administrador.");
+            }
+
             _unitOfWork.Rol.EliminarLogico(rol);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -146,6 +163,13 @@ namespace Negocio.Services
             if (rol == null)
             {
                 throw new BusinessException("El rol a eliminar no existe.");
+            }
+
+            if (rol.Nombre != null &&
+                (rol.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                    rol.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new BusinessException("No es posible eliminar el rol Administrador.");
             }
 
             // Nota: Aquí se puede añadir una validación previa para verificar

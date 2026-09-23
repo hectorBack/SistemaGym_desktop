@@ -136,6 +136,15 @@ namespace Presentacion.Forms.Usuarios
             }
 
             var item = (UsuarioViewModel)dgvUsuarios.CurrentRow.DataBoundItem;
+
+            if (item.RolNombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                item.RolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("No se permite editar a un usuario con el rol de Administrador.",
+                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using var modal = new FrmUsuarioModal(_controller, _rolController, item.UsuarioID);
             if (modal.ShowDialog() == DialogResult.OK)
             {

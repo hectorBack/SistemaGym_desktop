@@ -133,6 +133,14 @@ namespace Presentacion.Forms.Roles
             }
 
             var item = (RolViewModel)dgvRoles.CurrentRow.DataBoundItem;
+            if (item.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                item.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("No se permite editar el rol de Administrador.",
+                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using var modal = new FrmRolModal(_controller, item.RolID);
             if (modal.ShowDialog() == DialogResult.OK)
             {
@@ -149,6 +157,14 @@ namespace Presentacion.Forms.Roles
             }
 
             var item = (RolViewModel)dgvRoles.CurrentRow.DataBoundItem;
+            if (item.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                item.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("No se permite desactivar el rol de Administrador.",
+                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string accion = item.Activo ? "desactivar" : "activar";
 
             if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} el rol '{item.Nombre}'?", $"Confirmar {accion.ToUpper()}"))
@@ -174,6 +190,14 @@ namespace Presentacion.Forms.Roles
             }
 
             var item = (RolViewModel)dgvRoles.CurrentRow.DataBoundItem;
+
+            if (item.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                item.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("No se permite eliminar el rol de Administrador.",
+                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE el rol '{item.Nombre}' de la base de datos?", "Eliminación Definitiva"))
             {
