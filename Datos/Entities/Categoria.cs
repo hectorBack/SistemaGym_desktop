@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Datos.Entities
+{
+    public class Categoria : BaseEntity
+    {
+        public int CategoriaID { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public bool Activo { get; set; } = true;
+    }
+}
