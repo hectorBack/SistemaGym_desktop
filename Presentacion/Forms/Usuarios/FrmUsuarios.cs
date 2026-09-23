@@ -30,6 +30,7 @@ namespace Presentacion.Forms.Usuarios
         private async void FrmUsuarios_Load(object sender, EventArgs e)
         {
             await CargarUsuariosAsync();
+            
         }
 
         private async Task CargarUsuariosAsync()
@@ -38,28 +39,16 @@ namespace Presentacion.Forms.Usuarios
             {
                 var resultado = await _controller.ObtenerUsuariosAsync(true);
                 _listaUsuarios = resultado.ToList();
-                FiltrarBusqueda();
+                dgvUsuarios.DataSource = null;
+                dgvUsuarios.DataSource = _listaUsuarios;
+
+                ConfigurarGrid();
+                dgvUsuarios.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar usuarios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtrados = _listaUsuarios
-                .Where(u => string.IsNullOrEmpty(filtro) ||
-                            u.NombreUsuario.ToLower().Contains(filtro) ||
-                            u.NombreCompleto.ToLower().Contains(filtro) ||
-                            u.RolNombre.ToLower().Contains(filtro))
-                .ToList();
-
-            dgvUsuarios.DataSource = null;
-            dgvUsuarios.DataSource = filtrados;
-            ConfigurarGrid();
-            dgvUsuarios.ClearSelection();
         }
 
         private void ConfigurarGrid()
@@ -215,11 +204,6 @@ namespace Presentacion.Forms.Usuarios
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
         }
 
         private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)

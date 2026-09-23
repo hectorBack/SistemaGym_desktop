@@ -16,7 +16,7 @@ namespace Presentacion.Forms.Ventas
     public partial class FrmVentas : Form
     {
         private readonly VentaController _ventaController;
-        private readonly ProductoController _productoController; // Se requiere para pasar al modal de venta
+        private readonly ProductoController _productoController;
         private List<VentaViewModel> _listaVentas = new();
 
         public FrmVentas(VentaController ventaController, ProductoController productoController)
@@ -51,7 +51,11 @@ namespace Presentacion.Forms.Ventas
 
                 var resultado = await _ventaController.ObtenerPorRangoFechasAsync(inicio, fin);
                 _listaVentas = resultado.ToList();
-                FiltrarBusqueda();
+                dgvVentas.DataSource = null;
+                dgvVentas.DataSource = _listaVentas;
+
+                ConfigurarGrid();
+                dgvVentas.ClearSelection();
             }
             catch (Exception ex)
             {
@@ -64,21 +68,6 @@ namespace Presentacion.Forms.Ventas
             await BuscarPorFechasAsync();
         }
 
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaVentas
-                .Where(v => string.IsNullOrEmpty(filtro) ||
-                            v.VentaID.ToString().Contains(filtro) ||
-                            v.SocioNombre.ToLower().Contains(filtro) ||
-                            v.UsuarioNombre.ToLower().Contains(filtro))
-                .ToList();
-
-            dgvVentas.DataSource = null;
-            dgvVentas.DataSource = filtradas;
-            ConfigurarGrid();
-            dgvVentas.ClearSelection();
-        }
 
         private void ConfigurarGrid()
         {
@@ -237,11 +226,6 @@ namespace Presentacion.Forms.Ventas
             }
         }
 
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
-        }
-
         private void dgvVentas_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvVentas.CurrentRow != null && dgvVentas.CurrentRow.DataBoundItem is VentaViewModel item)
@@ -263,8 +247,6 @@ namespace Presentacion.Forms.Ventas
 
         private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
         {
-            // Restablecer la búsqueda por texto sin disparar consultas repetidas
-            txtBuscar.Text = string.Empty;
 
             // Restablecer el rango de fechas al día de hoy
             dtpFechaInicio.Value = DateTime.Today;

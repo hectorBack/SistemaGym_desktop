@@ -36,25 +36,15 @@ namespace Presentacion.Forms.Membresias
             {
                 var resultado = await _controller.ObtenerMembresiasAsync(true);
                 _listaMembresias = resultado.ToList();
-                FiltrarBusqueda();
+                dgvMembresias.DataSource = null;
+                dgvMembresias.DataSource = _listaMembresias;
+                ConfigurarGrid();
+                dgvMembresias.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar membresías: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaMembresias
-                .Where(m => string.IsNullOrEmpty(filtro) || m.Nombre.ToLower().Contains(filtro))
-                .ToList();
-
-            dgvMembresias.DataSource = null;
-            dgvMembresias.DataSource = filtradas;
-            ConfigurarGrid();
-            dgvMembresias.ClearSelection();
         }
 
         private void ConfigurarGrid()
@@ -185,11 +175,6 @@ namespace Presentacion.Forms.Membresias
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
         }
 
         private void dgvMembresias_SelectionChanged(object sender, EventArgs e)

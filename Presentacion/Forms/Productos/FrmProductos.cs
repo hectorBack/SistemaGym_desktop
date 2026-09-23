@@ -39,28 +39,15 @@ namespace Presentacion.Forms.Productos
             {
                 var resultado = await _productoController.ObtenerProductosAsync(true);
                 _listaProductos = resultado.ToList();
-                FiltrarBusqueda();
+                dgvProductos.DataSource = null;
+                dgvProductos.DataSource = _listaProductos;
+                ConfigurarGrid();
+                dgvProductos.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtrados = _listaProductos
-                .Where(p => string.IsNullOrEmpty(filtro) ||
-                            p.Nombre.ToLower().Contains(filtro) ||
-                            p.CategoriaNombre.ToLower().Contains(filtro) ||
-                            (!string.IsNullOrEmpty(p.CodigoBarras) && p.CodigoBarras.ToLower().Contains(filtro)))
-                .ToList();
-
-            dgvProductos.DataSource = null;
-            dgvProductos.DataSource = filtrados;
-            ConfigurarGrid();
-            dgvProductos.ClearSelection();
         }
 
         private void ConfigurarGrid()
@@ -202,11 +189,6 @@ namespace Presentacion.Forms.Productos
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
         }
 
         private void dgvProductos_SelectionChanged(object sender, EventArgs e)

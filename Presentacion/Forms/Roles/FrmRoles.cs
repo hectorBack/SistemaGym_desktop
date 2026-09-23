@@ -36,27 +36,15 @@ namespace Presentacion.Forms.Roles
             {
                 var resultado = await _controller.ObtenerRolesAsync(true);
                 _listaRoles = resultado.ToList();
-                FiltrarBusqueda();
+                dgvRoles.DataSource = null;
+                dgvRoles.DataSource = _listaRoles;
+                ConfigurarGrid();
+                dgvRoles.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar roles: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaRoles
-                .Where(r => string.IsNullOrEmpty(filtro) ||
-                            r.Nombre.ToLower().Contains(filtro) ||
-                            (!string.IsNullOrEmpty(r.Descripcion) && r.Descripcion.ToLower().Contains(filtro)))
-                .ToList();
-
-            dgvRoles.DataSource = null;
-            dgvRoles.DataSource = filtradas;
-            ConfigurarGrid();
-            dgvRoles.ClearSelection();
         }
 
         private void ConfigurarGrid()
@@ -211,11 +199,6 @@ namespace Presentacion.Forms.Roles
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
         }
 
         private void dgvRoles_SelectionChanged(object sender, EventArgs e)

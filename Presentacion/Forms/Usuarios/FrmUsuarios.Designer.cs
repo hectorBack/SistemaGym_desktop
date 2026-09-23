@@ -17,10 +17,10 @@
 
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
             lblTitulo = new Label();
-            lblBuscar = new Label();
-            txtBuscar = new TextBox();
             btnNuevo = new Button();
             btnEditar = new Button();
             btnDesactivar = new Button();
@@ -32,10 +32,8 @@
             // 
             // panelTop
             // 
-            panelTop.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            panelTop.BackColor = Color.FromArgb(15, 42, 79);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(lblBuscar);
-            panelTop.Controls.Add(txtBuscar);
             panelTop.Controls.Add(btnNuevo);
             panelTop.Controls.Add(btnEditar);
             panelTop.Controls.Add(btnDesactivar);
@@ -50,46 +48,22 @@
             // lblTitulo
             // 
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI Bold", 14F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            lblTitulo.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(20, 15);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(190, 32);
+            lblTitulo.Size = new Size(213, 29);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión Usuarios";
-            // 
-            // lblBuscar
-            // 
-            lblBuscar.AutoSize = true;
-            lblBuscar.Font = new Font("Segoe UI", 9.5F);
-            lblBuscar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblBuscar.Location = new Point(20, 65);
-            lblBuscar.Name = "lblBuscar";
-            lblBuscar.Size = new Size(59, 21);
-            lblBuscar.TabIndex = 1;
-            lblBuscar.Text = "Buscar:";
-            // 
-            // txtBuscar
-            // 
-            txtBuscar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            txtBuscar.BorderStyle = BorderStyle.FixedSingle;
-            txtBuscar.Font = new Font("Segoe UI", 10F);
-            txtBuscar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtBuscar.Location = new Point(85, 61);
-            txtBuscar.Margin = new Padding(3, 4, 3, 4);
-            txtBuscar.Name = "txtBuscar";
-            txtBuscar.Size = new Size(250, 30);
-            txtBuscar.TabIndex = 2;
-            txtBuscar.TextChanged += txtBuscar_TextChanged;
             // 
             // btnNuevo
             // 
             btnNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnNuevo.BackColor = ColorTranslator.FromHtml("#1f6feb");
+            btnNuevo.BackColor = Color.FromArgb(31, 111, 235);
+            btnNuevo.FlatAppearance.BorderSize = 0;
             btnNuevo.FlatStyle = FlatStyle.Flat;
             btnNuevo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             btnNuevo.ForeColor = Color.White;
-            btnNuevo.FlatAppearance.BorderSize = 0;
             btnNuevo.Location = new Point(400, 56);
             btnNuevo.Margin = new Padding(3, 4, 3, 4);
             btnNuevo.Name = "btnNuevo";
@@ -102,11 +76,11 @@
             // btnEditar
             // 
             btnEditar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEditar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            btnEditar.BackColor = Color.FromArgb(11, 15, 26);
+            btnEditar.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
             btnEditar.FlatStyle = FlatStyle.Flat;
             btnEditar.Font = new Font("Segoe UI", 9F);
-            btnEditar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEditar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
+            btnEditar.ForeColor = Color.FromArgb(230, 238, 252);
             btnEditar.Location = new Point(520, 56);
             btnEditar.Margin = new Padding(3, 4, 3, 4);
             btnEditar.Name = "btnEditar";
@@ -119,11 +93,11 @@
             // btnDesactivar
             // 
             btnDesactivar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnDesactivar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            btnDesactivar.BackColor = Color.FromArgb(11, 15, 26);
+            btnDesactivar.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
             btnDesactivar.FlatStyle = FlatStyle.Flat;
             btnDesactivar.Font = new Font("Segoe UI", 9F);
-            btnDesactivar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnDesactivar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
+            btnDesactivar.ForeColor = Color.FromArgb(230, 238, 252);
             btnDesactivar.Location = new Point(630, 56);
             btnDesactivar.Margin = new Padding(3, 4, 3, 4);
             btnDesactivar.Name = "btnDesactivar";
@@ -136,11 +110,11 @@
             // btnEliminarFisico
             // 
             btnEliminarFisico.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEliminarFisico.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            btnEliminarFisico.BackColor = Color.FromArgb(11, 15, 26);
+            btnEliminarFisico.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
             btnEliminarFisico.FlatStyle = FlatStyle.Flat;
             btnEliminarFisico.Font = new Font("Segoe UI", 9F);
-            btnEliminarFisico.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEliminarFisico.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
+            btnEliminarFisico.ForeColor = Color.FromArgb(230, 238, 252);
             btnEliminarFisico.Location = new Point(750, 56);
             btnEliminarFisico.Margin = new Padding(3, 4, 3, 4);
             btnEliminarFisico.Name = "btnEliminarFisico";
@@ -155,32 +129,30 @@
             dgvUsuarios.AllowUserToAddRows = false;
             dgvUsuarios.AllowUserToDeleteRows = false;
             dgvUsuarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvUsuarios.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
+            dgvUsuarios.BackgroundColor = Color.FromArgb(11, 15, 26);
             dgvUsuarios.BorderStyle = BorderStyle.None;
-            dgvUsuarios.EnableHeadersVisualStyles = false;
-
-            // Encabezados
-            dgvUsuarios.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvUsuarios.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvUsuarios.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dgvUsuarios.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            // Relleno de celdas estandarizado (8px a la izquierda)
-            Padding margenCelda = new Padding(8, 0, 0, 0);
-            dgvUsuarios.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
-            dgvUsuarios.DefaultCellStyle.Padding = margenCelda;
-
-            // Celdas estándar y selección
-            dgvUsuarios.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvUsuarios.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvUsuarios.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvUsuarios.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvUsuarios.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvUsuarios.ScrollBars = ScrollBars.Both;
-
-            dgvUsuarios.GridColor = ColorTranslator.FromHtml("#0f2a4f");
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle1.Padding = new Padding(8, 0, 0, 0);
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvUsuarios.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvUsuarios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(11, 15, 26);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
+            dataGridViewCellStyle2.Padding = new Padding(8, 0, 0, 0);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
+            dataGridViewCellStyle2.SelectionForeColor = Color.White;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvUsuarios.DefaultCellStyle = dataGridViewCellStyle2;
             dgvUsuarios.Dock = DockStyle.Fill;
+            dgvUsuarios.EnableHeadersVisualStyles = false;
+            dgvUsuarios.GridColor = Color.FromArgb(15, 42, 79);
             dgvUsuarios.Location = new Point(0, 110);
             dgvUsuarios.Margin = new Padding(3, 4, 3, 4);
             dgvUsuarios.MultiSelect = false;
@@ -196,7 +168,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
             Controls.Add(dgvUsuarios);
             Controls.Add(panelTop);
@@ -215,8 +187,6 @@
 
         private Label lblTitulo;
         private Panel panelTop;
-        private Label lblBuscar;
-        private TextBox txtBuscar;
         private Button btnNuevo;
         private Button btnEditar;
         private Button btnDesactivar;

@@ -41,23 +41,7 @@ namespace Presentacion.Forms.Movimientos
         private async Task CargarMovimientosAsync()
         {
             await BuscarPorFechasAsync();
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaMovimientos
-                .Where(m => string.IsNullOrEmpty(filtro) ||
-                            m.Tipo.ToLower().Contains(filtro) ||
-                            m.ConceptoNombre.ToLower().Contains(filtro) ||
-                            m.FormaPago.ToLower().Contains(filtro) ||
-                            (m.Observacion != null && m.Observacion.ToLower().Contains(filtro)))
-                .ToList();
-
-            dgvMovimientos.DataSource = null;
-            dgvMovimientos.DataSource = filtradas;
-            ConfigurarGrid();
-            dgvMovimientos.ClearSelection();
+            
         }
 
         private async void btnFiltrarFechas_Click(object sender, EventArgs e)
@@ -75,11 +59,17 @@ namespace Presentacion.Forms.Movimientos
 
                 var resultado = await _controller.ObtenerPorRangoFechasAsync(inicio, fin);
                 _listaMovimientos = resultado.ToList();
-                FiltrarBusqueda();
+
+                // 🟢 VINCULAR DATOS AL DATAGRIDVIEW Y APLICAR FORMATO
+                dgvMovimientos.DataSource = null;
+                dgvMovimientos.DataSource = _listaMovimientos;
+
+                ConfigurarGrid();
+                dgvMovimientos.ClearSelection();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar visitas: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar movimientos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -232,14 +222,8 @@ namespace Presentacion.Forms.Movimientos
             }
         }
 
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
-        }
-
         private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
         {
-            txtBuscar.Text = string.Empty;
 
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;

@@ -36,28 +36,15 @@ namespace Presentacion.Forms.Conceptos
             {
                 var resultado = await _controller.ObtenerConceptosAsync(true);
                 _listaConceptos = resultado.ToList();
-                FiltrarBusqueda();
+                dgvConceptos.DataSource = null;
+                dgvConceptos.DataSource = _listaConceptos;
+                ConfigurarGrid();
+                dgvConceptos.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar conceptos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaConceptos
-                .Where(c => string.IsNullOrEmpty(filtro) ||
-                            c.Nombre.ToLower().Contains(filtro) ||
-                            c.Tipo.ToLower().Contains(filtro) ||
-                            (c.Observacion != null && c.Observacion.ToLower().Contains(filtro)))
-                .ToList();
-
-            dgvConceptos.DataSource = null;
-            dgvConceptos.DataSource = filtradas;
-            ConfigurarGrid();
-            dgvConceptos.ClearSelection();
         }
 
         private void ConfigurarGrid()
@@ -212,11 +199,6 @@ namespace Presentacion.Forms.Conceptos
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
         }
 
         private void dgvConceptos_SelectionChanged(object sender, EventArgs e)

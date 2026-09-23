@@ -19,8 +19,6 @@
         {
             panelTop = new Panel();
             lblTitulo = new Label();
-            lblBuscar = new Label();
-            txtBuscar = new TextBox();
             btnNuevo = new Button();
             btnEditar = new Button();
             btnDesactivar = new Button();
@@ -34,8 +32,6 @@
             // 
             panelTop.BackColor = ColorTranslator.FromHtml("#0f2a4f");
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(lblBuscar);
-            panelTop.Controls.Add(txtBuscar);
             panelTop.Controls.Add(btnNuevo);
             panelTop.Controls.Add(btnEditar);
             panelTop.Controls.Add(btnDesactivar);
@@ -57,30 +53,6 @@
             lblTitulo.Size = new Size(220, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión Membresías";
-            // 
-            // lblBuscar
-            // 
-            lblBuscar.AutoSize = true;
-            lblBuscar.Font = new Font("Segoe UI", 9.5F);
-            lblBuscar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblBuscar.Location = new Point(20, 65);
-            lblBuscar.Name = "lblBuscar";
-            lblBuscar.Size = new Size(59, 21);
-            lblBuscar.TabIndex = 1;
-            lblBuscar.Text = "Buscar:";
-            // 
-            // txtBuscar
-            // 
-            txtBuscar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            txtBuscar.BorderStyle = BorderStyle.FixedSingle;
-            txtBuscar.Font = new Font("Segoe UI", 10F);
-            txtBuscar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtBuscar.Location = new Point(85, 61);
-            txtBuscar.Margin = new Padding(3, 4, 3, 4);
-            txtBuscar.Name = "txtBuscar";
-            txtBuscar.Size = new Size(250, 30);
-            txtBuscar.TabIndex = 2;
-            txtBuscar.TextChanged += txtBuscar_TextChanged;
             // 
             // btnNuevo
             // 
@@ -216,8 +188,6 @@
 
         private Label lblTitulo;
         private Panel panelTop;
-        private Label lblBuscar;
-        private TextBox txtBuscar;
         private Button btnNuevo;
         private Button btnEditar;
         private Button btnDesactivar;

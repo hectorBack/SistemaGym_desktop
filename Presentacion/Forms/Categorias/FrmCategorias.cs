@@ -38,25 +38,15 @@ namespace Presentacion.Forms
             {
                 var resultado = await _controller.ObtenerCategoriasAsync(true);
                 _listaCategorias = resultado.ToList();
-                FiltrarBusqueda();
+                dgvCategorias.DataSource = null;
+                dgvCategorias.DataSource = _listaCategorias;
+                ConfigurarGrid();
+                dgvCategorias.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar categorías: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void FiltrarBusqueda()
-        {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaCategorias
-                .Where(c => string.IsNullOrEmpty(filtro) || c.Nombre.ToLower().Contains(filtro))
-                .ToList();
-
-            dgvCategorias.DataSource = null;
-            dgvCategorias.DataSource = filtradas;
-            ConfigurarGrid();
-            dgvCategorias.ClearSelection();
         }
 
         private void ConfigurarGrid()
@@ -179,11 +169,6 @@ namespace Presentacion.Forms
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
         }
 
         private void dgvCategorias_SelectionChanged(object sender, EventArgs e)
