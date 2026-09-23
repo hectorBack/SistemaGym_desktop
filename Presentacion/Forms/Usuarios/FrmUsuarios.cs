@@ -152,6 +152,14 @@ namespace Presentacion.Forms.Usuarios
             }
 
             var item = (UsuarioViewModel)dgvUsuarios.CurrentRow.DataBoundItem;
+            if (item.RolNombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                 item.RolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("No se permite desactivar a un usuario con el rol de Administrador.",
+                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string accion = item.Activo ? "desactivar" : "activar";
 
             if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} al usuario '{item.NombreUsuario}'?", $"Confirmar {accion.ToUpper()}"))
@@ -177,6 +185,14 @@ namespace Presentacion.Forms.Usuarios
             }
 
             var item = (UsuarioViewModel)dgvUsuarios.CurrentRow.DataBoundItem;
+
+            if (item.RolNombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+             item.RolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("No se permite eliminar a un usuario con el rol de Administrador.",
+                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE al usuario '{item.NombreUsuario}' de la base de datos?", "Eliminación Definitiva"))
             {

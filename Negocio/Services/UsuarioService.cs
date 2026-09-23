@@ -106,6 +106,13 @@ namespace Negocio.Services
                 throw new BusinessException("El usuario a eliminar no existe.");
             }
 
+            if (usuario.Rol != null &&
+                (usuario.Rol.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                    usuario.Rol.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new BusinessException("No es posible eliminar un usuario Administrador.");
+            }
+            
             _unitOfWork.Usuarios.EliminarFisico(usuario);
             await _unitOfWork.SaveChangesAsync();
         }
