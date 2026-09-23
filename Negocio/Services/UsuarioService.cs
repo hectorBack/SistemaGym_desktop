@@ -180,7 +180,8 @@ namespace Negocio.Services
                 RolID = usuario.RolID,
                 RolNombre = usuario.Rol?.Nombre ?? string.Empty, // Se asigna el nombre del Rol[cite: 1]
                 ModulosPermitidos = modulosList, // Asignación de la lista deserializada
-                Activo = usuario.Activo
+                Activo = usuario.Activo,
+                CreatedAt = usuario.CreatedAt
             };
         }
 
