@@ -1,6 +1,7 @@
 ﻿using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -46,6 +47,14 @@ namespace Presentacion.Forms
 
                 // Petición asíncrona al servicio de negocio
                 UsuarioDto usuario = await _usuarioService.LoginAsync(loginRequest);
+
+                // 🟢 CARGAR DATOS EN LA CLASE ESTÁTICA DE SESIÓN
+                SesionUsuario.UsuarioID = usuario.UsuarioID;
+                SesionUsuario.NombreUsuario = usuario.NombreUsuario;
+                SesionUsuario.RolNombre = usuario.RolNombre ?? string.Empty;
+
+                // Asignar los módulos permitidos del rol (si vienen nulos, se instancia una lista vacía)
+                SesionUsuario.ModulosPermitidos = usuario.ModulosPermitidos ?? new List<string>();
 
                 MessageBox.Show($"¡Bienvenido {usuario.NombreCompleto}!", "Acceso Concedido",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);

@@ -30,6 +30,7 @@ namespace Presentacion.Forms.Productos
 
         private async void FrmProductos_Load(object sender, EventArgs e)
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarProductosAsync();
         }
 

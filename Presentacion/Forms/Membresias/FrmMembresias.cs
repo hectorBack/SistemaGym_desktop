@@ -27,6 +27,7 @@ namespace Presentacion.Forms.Membresias
 
         private async void FrmMembresias_Load(object sender, EventArgs e)
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarMembresiasAsync();
         }
 

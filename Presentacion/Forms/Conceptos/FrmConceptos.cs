@@ -27,6 +27,7 @@ namespace Presentacion.Forms.Conceptos
 
         private async void FrmConceptos_Load(object sender, EventArgs e)
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarConceptosAsync();
         }
 

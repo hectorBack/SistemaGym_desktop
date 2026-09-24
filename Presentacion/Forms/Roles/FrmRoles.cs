@@ -27,6 +27,7 @@ namespace Presentacion.Forms.Roles
 
         private async void FrmRoles_Load(object sender, EventArgs e)
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarRolesAsync();
         }
 

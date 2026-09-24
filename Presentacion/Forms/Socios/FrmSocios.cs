@@ -39,6 +39,7 @@ namespace Presentacion.Forms.Socios
 
         private async void FrmSocios_Load(object sender, EventArgs e)
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarSociosAsync();
         }
 

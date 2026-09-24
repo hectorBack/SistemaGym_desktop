@@ -30,6 +30,8 @@ namespace Presentacion.Forms.Movimientos
 
         private async void FrmMovimientos_Load(object sender, EventArgs e)
         {
+
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             // Inicializar selectores de fecha con la fecha de hoy
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;

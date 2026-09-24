@@ -36,6 +36,7 @@ namespace Presentacion.Forms.Visitas
 
         private async Task CargarVisitasAsync()
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await BuscarPorFechasAsync();
         }
 

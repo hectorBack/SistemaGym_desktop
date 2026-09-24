@@ -29,6 +29,8 @@ namespace Presentacion.Forms.Usuarios
 
         private async void FrmUsuarios_Load(object sender, EventArgs e)
         {
+
+            //btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarUsuariosAsync();
             
         }

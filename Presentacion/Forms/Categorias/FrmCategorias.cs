@@ -29,6 +29,7 @@ namespace Presentacion.Forms
 
         private async void FrmCategorias_Load(object sender, EventArgs e)
         {
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarCategoriasAsync();
         }
 
