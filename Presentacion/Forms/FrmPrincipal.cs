@@ -3,6 +3,7 @@ using Negocio.DTOs;
 using Presentacion.Forms.Productos;
 using Presentacion.Forms.Ventas;
 using Presentacion.Forms.Membresias;
+using FontAwesome.Sharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -55,6 +56,37 @@ namespace Presentacion.Forms
             // Forzar a que la ventana principal abra siempre en pantalla completa
             this.WindowState = FormWindowState.Maximized;
             this.StartPosition = FormStartPosition.CenterScreen;
+
+            ConfigurarIconosMenu();
+        }
+
+        private void ConfigurarIconosMenu()
+        {
+            ConfigurarBotonMenu(btnProductos, IconChar.Box, "Productos");
+            ConfigurarBotonMenu(btnCategorias, IconChar.Tags, "Categorías");
+            ConfigurarBotonMenu(btnVentas, IconChar.ShoppingCart, "Ventas");
+            ConfigurarBotonMenu(btnMembresias, IconChar.IdCard, "Membresías");
+            ConfigurarBotonMenu(btnSocios, IconChar.Users, "Socios");
+            ConfigurarBotonMenu(btnVisitas, IconChar.ClipboardList, "Visitas");
+            ConfigurarBotonMenu(btnRegistrarVisita, IconChar.UserCheck, "Registrar Visita");
+            ConfigurarBotonMenu(btnConceptos, IconChar.FileInvoice, "Conceptos");
+            ConfigurarBotonMenu(btnMovimientos, IconChar.ChartLine, "Movimientos");
+            ConfigurarBotonMenu(btnRoles, IconChar.UserShield, "Roles");
+            ConfigurarBotonMenu(btnUsuarios, IconChar.UserGear, "Usuarios");
+        }
+
+        private void ConfigurarBotonMenu(IconButton btn, IconChar icon, string texto)
+        {
+            if (btn == null) return;
+
+            btn.IconChar = icon;
+            btn.IconColor = Color.FromArgb(230, 238, 252);
+            btn.IconSize = 26;
+            btn.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btn.ImageAlign = ContentAlignment.MiddleLeft;
+            btn.TextAlign = ContentAlignment.MiddleLeft;
+            btn.Text = $"  {texto}";
+            btn.Padding = new Padding(15, 0, 0, 0);
         }
 
         private void AplicarPermisosDeRol()
@@ -70,7 +102,7 @@ namespace Presentacion.Forms
             if (btnMembresias != null) btnMembresias.Visible = modulosPermitidos.Contains("Membresias");
             if (btnProductos != null) btnProductos.Visible = modulosPermitidos.Contains("Productos");
             if (btnVentas != null) btnVentas.Visible = modulosPermitidos.Contains("Ventas");
-            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Productos"); // O el módulo asignado a Categorías
+            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Productos"); 
             if (btnVisitas != null) btnVisitas.Visible = modulosPermitidos.Contains("Registro");
             if (btnRegistrarVisita != null) btnRegistrarVisita.Visible = modulosPermitidos.Contains("Registro");
             if (btnConceptos != null) btnConceptos.Visible = modulosPermitidos.Contains("Conceptos");

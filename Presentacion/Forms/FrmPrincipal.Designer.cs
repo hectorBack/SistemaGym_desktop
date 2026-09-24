@@ -18,20 +18,20 @@
         private void InitializeComponent()
         {
             panelSideMenu = new Panel();
-            btnRoles = new Button();
-            btnMovimientos = new Button();
-            btnConceptos = new Button();
-            btnRegistrarVisita = new Button();
-            btnVisitas = new Button();
-            btnSocios = new Button();
-            btnMembresias = new Button();
-            btnVentas = new Button();
-            btnCategorias = new Button();
-            btnProductos = new Button();
+            btnUsuarios = new FontAwesome.Sharp.IconButton();
+            btnRoles = new FontAwesome.Sharp.IconButton();
+            btnMovimientos = new FontAwesome.Sharp.IconButton();
+            btnConceptos = new FontAwesome.Sharp.IconButton();
+            btnRegistrarVisita = new FontAwesome.Sharp.IconButton();
+            btnVisitas = new FontAwesome.Sharp.IconButton();
+            btnSocios = new FontAwesome.Sharp.IconButton();
+            btnMembresias = new FontAwesome.Sharp.IconButton();
+            btnVentas = new FontAwesome.Sharp.IconButton();
+            btnCategorias = new FontAwesome.Sharp.IconButton();
+            btnProductos = new FontAwesome.Sharp.IconButton();
             panelLogo = new Panel();
             lblLogo = new Label();
             panelContenedor = new Panel();
-            btnUsuarios = new Button();
             panelSideMenu.SuspendLayout();
             panelLogo.SuspendLayout();
             SuspendLayout();
@@ -311,19 +311,19 @@
         private System.Windows.Forms.Panel panelSideMenu;
         private System.Windows.Forms.Panel panelLogo;
         private System.Windows.Forms.Label lblLogo;
-        private System.Windows.Forms.Button btnProductos;
-        private System.Windows.Forms.Button btnCategorias;
-        private System.Windows.Forms.Button btnVentas;
-        private System.Windows.Forms.Button btnMembresias;
         private System.Windows.Forms.Panel panelHeader;
         private System.Windows.Forms.Label lblTituloModulo;
         private System.Windows.Forms.Panel panelContenedor;
-        private Button btnSocios;
-        private Button btnVisitas;
-        private Button btnRegistrarVisita;
-        private Button btnConceptos;
-        private Button btnMovimientos;
-        private Button btnRoles;
-        private Button btnUsuarios;
+        private FontAwesome.Sharp.IconButton btnProductos;
+        private FontAwesome.Sharp.IconButton btnCategorias;
+        private FontAwesome.Sharp.IconButton btnVentas;
+        private FontAwesome.Sharp.IconButton btnMembresias;
+        private FontAwesome.Sharp.IconButton btnSocios;
+        private FontAwesome.Sharp.IconButton btnVisitas;
+        private FontAwesome.Sharp.IconButton btnRegistrarVisita;
+        private FontAwesome.Sharp.IconButton btnConceptos;
+        private FontAwesome.Sharp.IconButton btnMovimientos;
+        private FontAwesome.Sharp.IconButton btnRoles;
+        private FontAwesome.Sharp.IconButton btnUsuarios;
     }
 }
