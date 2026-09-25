@@ -31,9 +31,20 @@
             btnProductos = new FontAwesome.Sharp.IconButton();
             panelLogo = new Panel();
             lblLogo = new Label();
+
+            panelSuperior = new Panel();
+            btnUsuarioMenu = new FontAwesome.Sharp.IconButton();
+            menuUsuario = new ContextMenuStrip();
+            itemIniciarSesion = new ToolStripMenuItem();
+            itemCerrarSesion = new ToolStripMenuItem();
+
+            // 1. INSTANCIACIÓN REQUERIDA
             panelContenedor = new Panel();
+
             panelSideMenu.SuspendLayout();
             panelLogo.SuspendLayout();
+            panelSuperior.SuspendLayout();
+            menuUsuario.SuspendLayout();
             SuspendLayout();
             // 
             // panelSideMenu
@@ -57,6 +68,24 @@
             panelSideMenu.Name = "panelSideMenu";
             panelSideMenu.Size = new Size(229, 842);
             panelSideMenu.TabIndex = 0;
+            // 
+            // btnUsuarios
+            // 
+            btnUsuarios.Dock = DockStyle.Top;
+            btnUsuarios.FlatAppearance.BorderSize = 0;
+            btnUsuarios.FlatStyle = FlatStyle.Flat;
+            btnUsuarios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnUsuarios.ForeColor = Color.FromArgb(230, 238, 252);
+            btnUsuarios.Location = new Point(0, 770);
+            btnUsuarios.Margin = new Padding(3, 4, 3, 4);
+            btnUsuarios.Name = "btnUsuarios";
+            btnUsuarios.Padding = new Padding(11, 0, 0, 0);
+            btnUsuarios.Size = new Size(229, 67);
+            btnUsuarios.TabIndex = 11;
+            btnUsuarios.Text = "Usuarios";
+            btnUsuarios.TextAlign = ContentAlignment.MiddleLeft;
+            btnUsuarios.UseVisualStyleBackColor = true;
+            btnUsuarios.Click += btnUsuarios_Click;
             // 
             // btnRoles
             // 
@@ -261,7 +290,58 @@
             lblLogo.Text = "GYM SYSTEM";
             lblLogo.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // panelContenedor
+            // menuUsuario (Menú desplegable)
+            // 
+            menuUsuario.Items.AddRange(new ToolStripItem[] { itemIniciarSesion, itemCerrarSesion });
+            menuUsuario.Name = "menuUsuario";
+            menuUsuario.Size = new Size(150, 52);
+
+            // itemIniciarSesion
+            itemIniciarSesion.Name = "itemIniciarSesion";
+            itemIniciarSesion.Size = new Size(149, 24);
+            itemIniciarSesion.Text = "Iniciar sesión";
+            itemIniciarSesion.Click += itemIniciarSesion_Click;
+
+            // itemCerrarSesion
+            itemCerrarSesion.Name = "itemCerrarSesion";
+            itemCerrarSesion.Size = new Size(149, 24);
+            itemCerrarSesion.Text = "Cerrar sesión";
+            itemCerrarSesion.Click += itemCerrarSesion_Click;
+
+            // 
+            // panelSuperior
+            // 
+            panelSuperior.BackColor = Color.FromArgb(15, 42, 79);
+            panelSuperior.Controls.Add(btnUsuarioMenu);
+            panelSuperior.Dock = DockStyle.Top;
+            panelSuperior.Location = new Point(229, 0);
+            panelSuperior.Name = "panelSuperior";
+            panelSuperior.Size = new Size(914, 50);
+            panelSuperior.TabIndex = 2;
+
+            // 
+            // btnUsuarioMenu
+            // 
+            btnUsuarioMenu.Dock = DockStyle.Right;
+            btnUsuarioMenu.FlatAppearance.BorderSize = 0;
+            btnUsuarioMenu.FlatStyle = FlatStyle.Flat;
+            btnUsuarioMenu.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnUsuarioMenu.ForeColor = Color.FromArgb(230, 238, 252);
+            btnUsuarioMenu.IconChar = FontAwesome.Sharp.IconChar.UserCircle;
+            btnUsuarioMenu.IconColor = Color.FromArgb(45, 212, 255);
+            btnUsuarioMenu.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnUsuarioMenu.IconSize = 30;
+            btnUsuarioMenu.ImageAlign = ContentAlignment.MiddleRight;
+            btnUsuarioMenu.Location = new Point(734, 0);
+            btnUsuarioMenu.Name = "btnUsuarioMenu";
+            btnUsuarioMenu.Size = new Size(180, 50);
+            btnUsuarioMenu.TabIndex = 0;
+            btnUsuarioMenu.Text = "Usuario ▾";
+            btnUsuarioMenu.TextImageRelation = TextImageRelation.TextBeforeImage;
+            btnUsuarioMenu.UseVisualStyleBackColor = true;
+            btnUsuarioMenu.Click += btnUsuarioMenu_Click;
+            // 
+            // 2. CONFIGURACIÓN DEL PANEL CONTENEDOR
             // 
             panelContenedor.BackColor = Color.FromArgb(11, 15, 26);
             panelContenedor.Dock = DockStyle.Fill;
@@ -271,38 +351,26 @@
             panelContenedor.Size = new Size(914, 842);
             panelContenedor.TabIndex = 1;
             // 
-            // btnUsuarios
-            // 
-            btnUsuarios.Dock = DockStyle.Top;
-            btnUsuarios.FlatAppearance.BorderSize = 0;
-            btnUsuarios.FlatStyle = FlatStyle.Flat;
-            btnUsuarios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnUsuarios.ForeColor = Color.FromArgb(230, 238, 252);
-            btnUsuarios.Location = new Point(0, 770);
-            btnUsuarios.Margin = new Padding(3, 4, 3, 4);
-            btnUsuarios.Name = "btnUsuarios";
-            btnUsuarios.Padding = new Padding(11, 0, 0, 0);
-            btnUsuarios.Size = new Size(229, 67);
-            btnUsuarios.TabIndex = 11;
-            btnUsuarios.Text = "Usuarios";
-            btnUsuarios.TextAlign = ContentAlignment.MiddleLeft;
-            btnUsuarios.UseVisualStyleBackColor = true;
-            btnUsuarios.Click += btnUsuarios_Click;
-            // 
             // FrmPrincipal
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(1143, 842);
+
+            // AGREGAR LOS CONTROLES AL FORMULARIO
             Controls.Add(panelContenedor);
+            Controls.Add(panelSuperior);
             Controls.Add(panelSideMenu);
+
             Margin = new Padding(3, 4, 3, 4);
             Name = "FrmPrincipal";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Sistema Gimnasio";
             panelSideMenu.ResumeLayout(false);
             panelLogo.ResumeLayout(false);
+            panelSuperior.ResumeLayout(false);
+            menuUsuario.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -311,9 +379,6 @@
         private System.Windows.Forms.Panel panelSideMenu;
         private System.Windows.Forms.Panel panelLogo;
         private System.Windows.Forms.Label lblLogo;
-        private System.Windows.Forms.Panel panelHeader;
-        private System.Windows.Forms.Label lblTituloModulo;
-        private System.Windows.Forms.Panel panelContenedor;
         private FontAwesome.Sharp.IconButton btnProductos;
         private FontAwesome.Sharp.IconButton btnCategorias;
         private FontAwesome.Sharp.IconButton btnVentas;
@@ -325,5 +390,11 @@
         private FontAwesome.Sharp.IconButton btnMovimientos;
         private FontAwesome.Sharp.IconButton btnRoles;
         private FontAwesome.Sharp.IconButton btnUsuarios;
+        private System.Windows.Forms.Panel panelContenedor;
+        private System.Windows.Forms.Panel panelSuperior;
+        private FontAwesome.Sharp.IconButton btnUsuarioMenu;
+        private System.Windows.Forms.ContextMenuStrip menuUsuario;
+        private System.Windows.Forms.ToolStripMenuItem itemIniciarSesion;
+        private System.Windows.Forms.ToolStripMenuItem itemCerrarSesion;
     }
 }

@@ -102,7 +102,7 @@ namespace Presentacion.Forms
             if (btnMembresias != null) btnMembresias.Visible = modulosPermitidos.Contains("Membresias");
             if (btnProductos != null) btnProductos.Visible = modulosPermitidos.Contains("Productos");
             if (btnVentas != null) btnVentas.Visible = modulosPermitidos.Contains("Ventas");
-            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Productos"); 
+            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Productos");
             if (btnVisitas != null) btnVisitas.Visible = modulosPermitidos.Contains("Registro");
             if (btnRegistrarVisita != null) btnRegistrarVisita.Visible = modulosPermitidos.Contains("Registro");
             if (btnConceptos != null) btnConceptos.Visible = modulosPermitidos.Contains("Conceptos");
@@ -164,6 +164,87 @@ namespace Presentacion.Forms
             AbrirFormularioEnContenedor<FrmUsuarios>();
         }
 
+        private void btnUsuarioMenu_Click(object sender, EventArgs e)
+        {
+            // Si hay un usuario activo, habilitamos Cerrar Sesión y deshabilitamos Iniciar Sesión (o viceversa)
+            bool haySesionActiva = _usuarioSesion != null;
+
+            itemCerrarSesion.Enabled = haySesionActiva;
+            itemIniciarSesion.Enabled = !haySesionActiva;
+
+            // Cambiar el texto del botón para mostrar el nombre del usuario logueado
+            if (haySesionActiva)
+            {
+                btnUsuarioMenu.Text = $"{_usuarioSesion.NombreCompleto} ▾";
+            }
+            else
+            {
+                btnUsuarioMenu.Text = "Invitado ▾";
+            }
+
+            // Desplegar el menú debajo del botón
+            menuUsuario.Show(btnUsuarioMenu, new Point(0, btnUsuarioMenu.Height));
+        }
+
+        private void itemIniciarSesion_Click(object sender, EventArgs e)
+        {
+            // Si ya hay un usuario logueado, advertir que se cerrará la sesión actual para iniciar con otra cuenta
+            if (_usuarioSesion != null)
+            {
+                var resultado = MessageBox.Show(
+                    "Ya hay una sesión activa. ¿Desea cerrar la sesión actual para iniciar con otro usuario?",
+                    "Iniciar nueva sesión",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (resultado == DialogResult.Yes)
+                {
+                    EjecutarCierreDeSesion();
+                }
+            }
+            else
+            {
+                // Si no había usuario activo
+                EjecutarCierreDeSesion();
+            }
+        }
+
+        private void itemCerrarSesion_Click(object sender, EventArgs e)
+        {
+            // Confirmación opcional antes de cerrar sesión
+            var resultado = MessageBox.Show(
+                "¿Está seguro de que desea cerrar la sesión actual?",
+                "Confirmar Cierre de Sesión",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (resultado == DialogResult.Yes)
+            {
+                EjecutarCierreDeSesion();
+            }
+        }
+
+        private void EjecutarCierreDeSesion()
+        {
+            if (_serviceProvider == null)
+            {
+                throw new InvalidOperationException(
+                    "No se puede cerrar la sesión porque el proveedor de servicios (IServiceProvider) es nulo."
+                );
+            }
+
+            // Resolvemos la instancia de FrmLogin con sus dependencias requeridas usando Inyección de Dependencias
+            FrmLogin frmLogin = Microsoft.Extensions.DependencyInjection.ActivatorUtilities.CreateInstance<FrmLogin>(_serviceProvider);
+
+            // Mostrar la pantalla de Login
+            frmLogin.Show();
+
+            // Limpiar o cerrar la ventana principal
+            this.Close(); // O este.Hide() según la gestión de ciclo de vida de tu aplicación
+        }
+
         /// <summary>
         /// Método genérico para abrir formularios internos incrustados dentro de panelContenedor.
         /// </summary>
@@ -197,6 +278,8 @@ namespace Presentacion.Forms
 
             _formularioActivo.BringToFront();
             _formularioActivo.Show();
+
+
         }
     }
 }
