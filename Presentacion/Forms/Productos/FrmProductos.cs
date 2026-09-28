@@ -53,15 +53,25 @@ namespace Presentacion.Forms.Productos
 
         private void ConfigurarGrid()
         {
-            // 1. Ocultar columnas secundarias/técnicas
-            if (dgvProductos.Columns["CategoriaID"] != null) dgvProductos.Columns["CategoriaID"].Visible = false;
-            if (dgvProductos.Columns["Activo"] != null) dgvProductos.Columns["Activo"].Visible = false;
+            // 1. Ocultar columnas secundarias/técnicas y Stock de la grilla
+            string[] columnasAOcultar = { "CategoriaID", "Activo", "Stock" };
+            foreach (var col in columnasAOcultar)
+            {
+                if (dgvProductos.Columns[col] != null)
+                    dgvProductos.Columns[col].Visible = false;
+            }
 
-            // 2. Configurar encabezados y formatos
+            // 2. Configurar encabezados y formatos de moneda
             if (dgvProductos.Columns["ProductoID"] != null) dgvProductos.Columns["ProductoID"].HeaderText = "ID";
             if (dgvProductos.Columns["CodigoBarras"] != null) dgvProductos.Columns["CodigoBarras"].HeaderText = "Código Barras";
             if (dgvProductos.Columns["Nombre"] != null) dgvProductos.Columns["Nombre"].HeaderText = "Producto";
             if (dgvProductos.Columns["CategoriaNombre"] != null) dgvProductos.Columns["CategoriaNombre"].HeaderText = "Categoría";
+
+            if (dgvProductos.Columns["Costo"] != null)
+            {
+                dgvProductos.Columns["Costo"].HeaderText = "Costo";
+                dgvProductos.Columns["Costo"].DefaultCellStyle.Format = "C2";
+            }
 
             if (dgvProductos.Columns["Precio"] != null)
             {
@@ -69,24 +79,23 @@ namespace Presentacion.Forms.Productos
                 dgvProductos.Columns["Precio"].DefaultCellStyle.Format = "C2";
             }
 
-            if (dgvProductos.Columns["Stock"] != null) dgvProductos.Columns["Stock"].HeaderText = "Stock";
             if (dgvProductos.Columns["Estado"] != null) dgvProductos.Columns["Estado"].HeaderText = "Estado";
             if (dgvProductos.Columns["CreatedAt"] != null) dgvProductos.Columns["CreatedAt"].HeaderText = "Fecha Registro";
 
-            // 3. Estructura de ordenamiento y pesos estilo estándar
+            // 3. Estructura de ordenamiento y pesos (sin la columna Stock)
             dgvProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             string[] ordenColumnas =
             {
-        "ProductoID",
-        "CodigoBarras",
-        "Nombre",
-        "CategoriaNombre",
-        "Precio",
-        "Stock",
-        "Estado",
-        "CreatedAt"
-    };
+            "ProductoID",
+            "CodigoBarras",
+            "Nombre",
+            "CategoriaNombre",
+            "Costo",
+            "Precio",
+            "Estado",
+            "CreatedAt"
+        };
 
             var pesos = new Dictionary<string, float>
             {
@@ -94,27 +103,38 @@ namespace Presentacion.Forms.Productos
                 ["CodigoBarras"] = 100,
                 ["Nombre"] = 175,
                 ["CategoriaNombre"] = 120,
+                ["Costo"] = 80,
                 ["Precio"] = 80,
-                ["Stock"] = 65,
                 ["Estado"] = 80,
                 ["CreatedAt"] = 120
             };
 
             for (int indice = 0; indice < ordenColumnas.Length; indice++)
             {
-                if (dgvProductos.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
+                string nombreColumna = ordenColumnas[indice];
+                if (dgvProductos.Columns[nombreColumna] is not DataGridViewColumn columna)
                     continue;
 
                 columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
+                columna.FillWeight = pesos[nombreColumna];
+                columna.MinimumWidth = nombreColumna switch
                 {
                     "Nombre" or "CategoriaNombre" or "CodigoBarras" => 110,
                     "CreatedAt" => 95,
                     _ => 55
                 };
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+
+                // Alineación de moneda a la derecha
+                if (nombreColumna is "Costo" or "Precio")
+                {
+                    columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                    columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
+                }
+                else
+                {
+                    columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                }
             }
         }
 
@@ -199,12 +219,12 @@ namespace Presentacion.Forms.Productos
                 if (item.Activo)
                 {
                     btnDesactivar.Text = "Desactivar";
-                    btnDesactivar.BackColor = System.Drawing.Color.IndianRed;
+                    btnDesactivar.BackColor = Color.IndianRed;
                 }
                 else
                 {
                     btnDesactivar.Text = "Activar";
-                    btnDesactivar.BackColor = System.Drawing.Color.ForestGreen;
+                    btnDesactivar.BackColor = Color.ForestGreen;
                 }
             }
         }

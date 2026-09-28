@@ -17,6 +17,7 @@ using Presentacion.Forms.Conceptos;
 using Presentacion.Forms.Movimientos;
 using Presentacion.Forms.Roles;
 using Presentacion.Forms.Usuarios;
+using Presentacion.Forms.Compras;
 
 namespace Presentacion.Forms
 {
@@ -73,6 +74,8 @@ namespace Presentacion.Forms
             ConfigurarBotonMenu(btnMovimientos, IconChar.ChartLine, "Movimientos");
             ConfigurarBotonMenu(btnRoles, IconChar.UserShield, "Roles");
             ConfigurarBotonMenu(btnUsuarios, IconChar.UserGear, "Usuarios");
+            ConfigurarBotonMenu(btnCompras, IconChar.ShoppingCart, "Compras");
+            ConfigurarBotonMenu(btnReportes, IconChar.ChartBar, "Reportes");
         }
 
         private void ConfigurarBotonMenu(IconButton btn, IconChar icon, string texto)
@@ -107,6 +110,8 @@ namespace Presentacion.Forms
             if (btnRegistrarVisita != null) btnRegistrarVisita.Visible = modulosPermitidos.Contains("Registro");
             if (btnConceptos != null) btnConceptos.Visible = modulosPermitidos.Contains("Conceptos");
             if (btnMovimientos != null) btnMovimientos.Visible = modulosPermitidos.Contains("Movimientos");
+            if (btnCompras != null) btnCompras.Visible = modulosPermitidos.Contains("Compras");
+            if (btnReportes != null) btnReportes.Visible = modulosPermitidos.Contains("Reportes");
         }
 
         private void btnCategorias_Click(object sender, EventArgs e)
@@ -162,6 +167,11 @@ namespace Presentacion.Forms
         private void btnUsuarios_Click(object sender, EventArgs e)
         {
             AbrirFormularioEnContenedor<FrmUsuarios>();
+        }
+
+        private void btnCompras_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioEnContenedor<FrmCompras>();
         }
 
         private void btnUsuarioMenu_Click(object sender, EventArgs e)

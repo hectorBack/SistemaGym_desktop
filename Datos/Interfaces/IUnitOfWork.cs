@@ -28,6 +28,8 @@ namespace Datos.Interfaces
 
         IRolRepository Rol { get; }
 
+        ICompraRepository Compra { get; }
+
         //Task<int> CompleteAsync();
         Task<int> SaveChangesAsync();
     }

@@ -16,5 +16,7 @@ namespace Datos.Interfaces
         void EliminarLogico(Concepto concepto);
         void EliminarFisico(Concepto concepto);
         Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null);
+
+        Task<Concepto?> ObtenerPorNombreAsync(string nombre);
     }
 }

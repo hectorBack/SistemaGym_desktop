@@ -1,4 +1,5 @@
-﻿using Negocio.DTOs;
+﻿using Datos.Entities;
+using Negocio.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

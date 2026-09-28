@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Animation;
 
 namespace Presentacion.Controller
 {
@@ -29,6 +30,7 @@ namespace Presentacion.Controller
                 CategoriaNombre = p.CategoriaNombre ?? "Sin Categoría",
                 CodigoBarras = p.CodigoBarras,
                 Nombre = p.Nombre,
+                Costo = p.Costo,
                 Precio = p.Precio,
                 Stock = p.Stock,
                 Activo = p.Activo,
@@ -41,7 +43,7 @@ namespace Presentacion.Controller
             return await _productoService.ObtenerPorIdAsync(id);
         }
 
-        public async Task GuardarProductoAsync(int? id, int categoriaId, string? codigoBarras, string nombre, decimal precio, int stock, bool activo = true)
+        public async Task GuardarProductoAsync(int? id, int categoriaId, string? codigoBarras, string nombre, decimal costo, decimal precio, int stock, bool activo = true)
         {
             if (id.HasValue && id.Value > 0)
             {
@@ -51,6 +53,7 @@ namespace Presentacion.Controller
                     CategoriaID = categoriaId,
                     CodigoBarras = codigoBarras,
                     Nombre = nombre,
+                    Costo = costo,
                     Precio = precio,
                     Stock = stock,
                     Activo = activo
@@ -64,6 +67,7 @@ namespace Presentacion.Controller
                     CategoriaID = categoriaId,
                     CodigoBarras = codigoBarras,
                     Nombre = nombre,
+                    Costo = costo,
                     Precio = precio,
                     Stock = stock
                 };
@@ -79,6 +83,11 @@ namespace Presentacion.Controller
         public async Task EliminarFisicoAsync(int id)
         {
             await _productoService.EliminarFisicoAsync(id);
+        }
+
+        public async Task<ProductoDto?> ObtenerPorCodigoBarrasAsync(string codigoBarras)
+        {
+            return await _productoService.ObtenerPorCodigoBarrasAsync(codigoBarras);
         }
     }
 }

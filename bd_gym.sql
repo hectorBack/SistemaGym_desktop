@@ -62,6 +62,9 @@ CREATE TABLE Productos (
     FOREIGN KEY (CategoriaID) REFERENCES Categorias(CategoriaID)
 );
 
+ALTER TABLE Productos 
+ADD COLUMN Costo DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER Nombre;
+
 -- 6. TABLA SOCIO_MEMBRESIA (Asignación y vencimiento de pases)
 CREATE TABLE SocioMembresia (
     SocioMembresiaID INT AUTO_INCREMENT PRIMARY KEY,
@@ -281,3 +284,32 @@ ADD CONSTRAINT FK_Usuarios_Roles
     FOREIGN KEY (RolID) REFERENCES roles(RolID)
     ON DELETE RESTRICT 
     ON UPDATE CASCADE;
+    
+-- 1. Tabla Cabecera de Compras (sin Proveedor, con Codigo)
+CREATE TABLE IF NOT EXISTS Compras (
+    CompraID INT AUTO_INCREMENT PRIMARY KEY,
+    Codigo VARCHAR(50) NOT NULL UNIQUE, -- Código/Folio único de la compra (ej. COM-2026-0001)
+    Total DECIMAL(10,2) NOT NULL,
+    Estado VARCHAR(20) NOT NULL DEFAULT 'Completada', -- 'Completada', 'Cancelada'
+    Observacion VARCHAR(255) NULL,
+    UsuarioID INT NOT NULL,
+    Activo BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. Tabla Detalle de Compras (asociada a ProductoID)
+CREATE TABLE IF NOT EXISTS DetalleCompras (
+    DetalleCompraID INT AUTO_INCREMENT PRIMARY KEY,
+    CompraID INT NOT NULL,
+    ProductoID INT NOT NULL,
+    Cantidad INT NOT NULL,
+    CostoUnitario DECIMAL(10,2) NOT NULL,
+    Subtotal DECIMAL(10,2) NOT NULL,
+    Activo BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (CompraID) REFERENCES Compras(CompraID) ON DELETE CASCADE,
+    FOREIGN KEY (ProductoID) REFERENCES Productos(ProductoID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -69,5 +69,10 @@ namespace Datos.Repositories
 
             return await query.AnyAsync(c => c.Nombre.ToLower() == nombre.ToLower());
         }
+
+        public async Task<Concepto?> ObtenerPorNombreAsync(string nombre)
+        {
+            return await _context.Conceptos.FirstOrDefaultAsync(c => c.Nombre.ToLower() == nombre.ToLower());
+        }
     }
 }

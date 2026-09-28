@@ -13,6 +13,7 @@ namespace Negocio.DTOs
         public string? CategoriaNombre { get; set; }
         public string? CodigoBarras { get; set; }
         public string Nombre { get; set; } = string.Empty;
+        public decimal Costo { get; set; }
         public decimal Precio { get; set; }
         public int Stock { get; set; }
         public bool Activo { get; set; }
@@ -25,6 +26,7 @@ namespace Negocio.DTOs
         public int CategoriaID { get; set; }
         public string? CodigoBarras { get; set; }
         public string Nombre { get; set; } = string.Empty;
+        public decimal Costo { get; set; }
         public decimal Precio { get; set; }
         public int Stock { get; set; }
     }
@@ -35,6 +37,7 @@ namespace Negocio.DTOs
         public int CategoriaID { get; set; }
         public string? CodigoBarras { get; set; }
         public string Nombre { get; set; } = string.Empty;
+        public decimal Costo { get; set; }
         public decimal Precio { get; set; }
         public int Stock { get; set; }
         public bool Activo { get; set; }

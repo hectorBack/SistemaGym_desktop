@@ -25,6 +25,7 @@ using Presentacion.Forms.Conceptos;
 using Presentacion.Forms.Movimientos;
 using Presentacion.Forms.Roles;
 using Presentacion.Forms.Usuarios;
+using Presentacion.Forms.Compras;
 
 namespace Presentacion
 {
@@ -64,6 +65,7 @@ namespace Presentacion
             services.AddScoped<IMovimientoRepository, MovimientoRepository>();
             services.AddScoped<IRolRepository, RolRepository>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<ICompraRepository, CompraRepository>();
 
             // 2. Validadores
             services.AddScoped<IValidator<CategoriaCreateDto>, CategoriaCreateValidator>();
@@ -88,6 +90,8 @@ namespace Presentacion
             services.AddScoped<IValidator<RolUpdateDto>, RolUpdateValidator>();
             services.AddScoped<IValidator<UsuarioCreateDto>, UsuarioCreateValidator>();
             services.AddScoped<IValidator<UsuarioUpdateDto>, UsuarioUpdateValidator>();
+            services.AddScoped<IValidator<CompraCreateDto>, CompraCreateValidator>();
+            services.AddScoped<IValidator<CompraUpdateDto>, CompraUpdateValidator>();
 
             // 3. Servicios de Negocio
             services.AddScoped<IUsuarioService, UsuarioService>();
@@ -102,7 +106,7 @@ namespace Presentacion
             services.AddScoped<IConceptoService, ConceptoService>();
             services.AddScoped<IMovimientoService, MovimientoService>();
             services.AddScoped<IRolService, RolService>();
-            services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<ICompraService, CompraService>();
 
 
             // 4. Controladores de Presentación
@@ -118,6 +122,7 @@ namespace Presentacion
             services.AddTransient<MovimientoController>();
             services.AddTransient<RolController>();
             services.AddTransient<UsuarioController>();
+            services.AddTransient<CompraController>();
 
             // 5. Formularios
             services.AddTransient<FrmLogin>();
@@ -133,6 +138,7 @@ namespace Presentacion
             services.AddTransient<FrmMovimientos>();
             services.AddTransient<FrmRoles>();
             services.AddTransient<FrmUsuarios>();
+            services.AddTransient<FrmCompras>();
            
         }
     }

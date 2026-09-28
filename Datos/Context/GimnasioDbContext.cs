@@ -27,6 +27,8 @@ namespace Datos.Context
         public DbSet<SocioMembresia> SocioMembresia { get; set; } 
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<DetalleVenta> DetalleVentas { get; set; } 
+        public DbSet<Compra> Compras { get; set; } 
+        public DbSet<DetalleCompra> DetalleCompras { get; set; } 
         public DbSet<Visita> Visitas { get; set; }
 
         public DbSet<PagoSocioMembresia> PagoSocioMembresias { get; set; }
@@ -35,8 +37,6 @@ namespace Datos.Context
         public DbSet<Movimiento> Movimientos { get; set; }
 
         public DbSet<Rol> Roles { get; set; }
-
-
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -66,6 +66,9 @@ namespace Datos.Context
             modelBuilder.Entity<PagoSocioMembresia>().ToTable("pagos_sociomembresia");
             modelBuilder.Entity<Movimiento>().ToTable("Movimientos");
             modelBuilder.Entity<Rol>().ToTable("Roles");
+            modelBuilder.Entity<Compra>().ToTable("Compras");
+            modelBuilder.Entity<DetalleCompra>().ToTable("DetalleCompras");
+
             
 
             // Mapeo explícito de nombres de columnas que difieren del estándar de C#
@@ -82,6 +85,7 @@ namespace Datos.Context
             modelBuilder.Entity<Visita>().Property(v => v.MontoPagado).HasPrecision(10, 2);
             modelBuilder.Entity<PagoSocioMembresia>().Property(p => p.Monto).HasPrecision(10, 2);
             modelBuilder.Entity<Movimiento>().Property(m => m.Total).HasPrecision(10, 2);
+            modelBuilder.Entity<Compra>().Property(m => m.Total).HasPrecision(10, 2);
         }
     }
 }

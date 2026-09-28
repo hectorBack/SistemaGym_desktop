@@ -19,6 +19,9 @@ namespace Negocio.Validators
                 .NotEmpty().WithMessage("El nombre del producto es obligatorio.")
                 .MaximumLength(100).WithMessage("El nombre no puede exceder los 100 caracteres.");
 
+            RuleFor(x => x.Costo)
+            .GreaterThanOrEqualTo(0).WithMessage("El costo no puede ser negativo.");
+
             RuleFor(x => x.Precio)
                 .GreaterThan(0).WithMessage("El precio debe ser mayor a cero.");
 
@@ -43,6 +46,9 @@ namespace Negocio.Validators
             RuleFor(x => x.Nombre)
                 .NotEmpty().WithMessage("El nombre del producto es obligatorio.")
                 .MaximumLength(100).WithMessage("El nombre no puede exceder los 100 caracteres.");
+
+            RuleFor(x => x.Costo)
+            .GreaterThanOrEqualTo(0).WithMessage("El costo no puede ser negativo.");
 
             RuleFor(x => x.Precio)
                 .GreaterThan(0).WithMessage("El precio debe ser mayor a cero.");

@@ -17,7 +17,9 @@
 
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             panelSideMenu = new Panel();
+            btnCompras = new FontAwesome.Sharp.IconButton();
             btnUsuarios = new FontAwesome.Sharp.IconButton();
             btnRoles = new FontAwesome.Sharp.IconButton();
             btnMovimientos = new FontAwesome.Sharp.IconButton();
@@ -31,16 +33,13 @@
             btnProductos = new FontAwesome.Sharp.IconButton();
             panelLogo = new Panel();
             lblLogo = new Label();
-
             panelSuperior = new Panel();
             btnUsuarioMenu = new FontAwesome.Sharp.IconButton();
-            menuUsuario = new ContextMenuStrip();
+            menuUsuario = new ContextMenuStrip(components);
             itemIniciarSesion = new ToolStripMenuItem();
             itemCerrarSesion = new ToolStripMenuItem();
-
-            // 1. INSTANCIACIÓN REQUERIDA
             panelContenedor = new Panel();
-
+            btnReportes = new FontAwesome.Sharp.IconButton();
             panelSideMenu.SuspendLayout();
             panelLogo.SuspendLayout();
             panelSuperior.SuspendLayout();
@@ -50,6 +49,8 @@
             // panelSideMenu
             // 
             panelSideMenu.BackColor = Color.FromArgb(15, 42, 79);
+            panelSideMenu.Controls.Add(btnReportes);
+            panelSideMenu.Controls.Add(btnCompras);
             panelSideMenu.Controls.Add(btnUsuarios);
             panelSideMenu.Controls.Add(btnRoles);
             panelSideMenu.Controls.Add(btnMovimientos);
@@ -66,8 +67,29 @@
             panelSideMenu.Location = new Point(0, 0);
             panelSideMenu.Margin = new Padding(3, 4, 3, 4);
             panelSideMenu.Name = "panelSideMenu";
-            panelSideMenu.Size = new Size(229, 842);
+            panelSideMenu.Size = new Size(229, 982);
             panelSideMenu.TabIndex = 0;
+            // 
+            // btnCompras
+            // 
+            btnCompras.Dock = DockStyle.Top;
+            btnCompras.FlatAppearance.BorderSize = 0;
+            btnCompras.FlatStyle = FlatStyle.Flat;
+            btnCompras.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnCompras.ForeColor = Color.FromArgb(230, 238, 252);
+            btnCompras.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnCompras.IconColor = Color.Black;
+            btnCompras.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnCompras.Location = new Point(0, 837);
+            btnCompras.Margin = new Padding(3, 4, 3, 4);
+            btnCompras.Name = "btnCompras";
+            btnCompras.Padding = new Padding(11, 0, 0, 0);
+            btnCompras.Size = new Size(229, 67);
+            btnCompras.TabIndex = 12;
+            btnCompras.Text = "Compras";
+            btnCompras.TextAlign = ContentAlignment.MiddleLeft;
+            btnCompras.UseVisualStyleBackColor = true;
+            btnCompras.Click += btnCompras_Click;
             // 
             // btnUsuarios
             // 
@@ -76,6 +98,9 @@
             btnUsuarios.FlatStyle = FlatStyle.Flat;
             btnUsuarios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnUsuarios.ForeColor = Color.FromArgb(230, 238, 252);
+            btnUsuarios.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnUsuarios.IconColor = Color.Black;
+            btnUsuarios.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnUsuarios.Location = new Point(0, 770);
             btnUsuarios.Margin = new Padding(3, 4, 3, 4);
             btnUsuarios.Name = "btnUsuarios";
@@ -94,6 +119,9 @@
             btnRoles.FlatStyle = FlatStyle.Flat;
             btnRoles.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnRoles.ForeColor = Color.FromArgb(230, 238, 252);
+            btnRoles.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnRoles.IconColor = Color.Black;
+            btnRoles.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnRoles.Location = new Point(0, 703);
             btnRoles.Margin = new Padding(3, 4, 3, 4);
             btnRoles.Name = "btnRoles";
@@ -112,6 +140,9 @@
             btnMovimientos.FlatStyle = FlatStyle.Flat;
             btnMovimientos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnMovimientos.ForeColor = Color.FromArgb(230, 238, 252);
+            btnMovimientos.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnMovimientos.IconColor = Color.Black;
+            btnMovimientos.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnMovimientos.Location = new Point(0, 636);
             btnMovimientos.Margin = new Padding(3, 4, 3, 4);
             btnMovimientos.Name = "btnMovimientos";
@@ -130,6 +161,9 @@
             btnConceptos.FlatStyle = FlatStyle.Flat;
             btnConceptos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnConceptos.ForeColor = Color.FromArgb(230, 238, 252);
+            btnConceptos.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnConceptos.IconColor = Color.Black;
+            btnConceptos.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnConceptos.Location = new Point(0, 569);
             btnConceptos.Margin = new Padding(3, 4, 3, 4);
             btnConceptos.Name = "btnConceptos";
@@ -148,6 +182,9 @@
             btnRegistrarVisita.FlatStyle = FlatStyle.Flat;
             btnRegistrarVisita.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnRegistrarVisita.ForeColor = Color.FromArgb(230, 238, 252);
+            btnRegistrarVisita.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnRegistrarVisita.IconColor = Color.Black;
+            btnRegistrarVisita.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnRegistrarVisita.Location = new Point(0, 502);
             btnRegistrarVisita.Margin = new Padding(3, 4, 3, 4);
             btnRegistrarVisita.Name = "btnRegistrarVisita";
@@ -166,6 +203,9 @@
             btnVisitas.FlatStyle = FlatStyle.Flat;
             btnVisitas.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnVisitas.ForeColor = Color.FromArgb(230, 238, 252);
+            btnVisitas.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnVisitas.IconColor = Color.Black;
+            btnVisitas.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnVisitas.Location = new Point(0, 435);
             btnVisitas.Margin = new Padding(3, 4, 3, 4);
             btnVisitas.Name = "btnVisitas";
@@ -184,6 +224,9 @@
             btnSocios.FlatStyle = FlatStyle.Flat;
             btnSocios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnSocios.ForeColor = Color.FromArgb(230, 238, 252);
+            btnSocios.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnSocios.IconColor = Color.Black;
+            btnSocios.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnSocios.Location = new Point(0, 368);
             btnSocios.Margin = new Padding(3, 4, 3, 4);
             btnSocios.Name = "btnSocios";
@@ -202,6 +245,9 @@
             btnMembresias.FlatStyle = FlatStyle.Flat;
             btnMembresias.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnMembresias.ForeColor = Color.FromArgb(230, 238, 252);
+            btnMembresias.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnMembresias.IconColor = Color.Black;
+            btnMembresias.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnMembresias.Location = new Point(0, 301);
             btnMembresias.Margin = new Padding(3, 4, 3, 4);
             btnMembresias.Name = "btnMembresias";
@@ -220,6 +266,9 @@
             btnVentas.FlatStyle = FlatStyle.Flat;
             btnVentas.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnVentas.ForeColor = Color.FromArgb(230, 238, 252);
+            btnVentas.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnVentas.IconColor = Color.Black;
+            btnVentas.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnVentas.Location = new Point(0, 234);
             btnVentas.Margin = new Padding(3, 4, 3, 4);
             btnVentas.Name = "btnVentas";
@@ -238,6 +287,9 @@
             btnCategorias.FlatStyle = FlatStyle.Flat;
             btnCategorias.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnCategorias.ForeColor = Color.FromArgb(230, 238, 252);
+            btnCategorias.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnCategorias.IconColor = Color.Black;
+            btnCategorias.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnCategorias.Location = new Point(0, 167);
             btnCategorias.Margin = new Padding(3, 4, 3, 4);
             btnCategorias.Name = "btnCategorias";
@@ -256,6 +308,9 @@
             btnProductos.FlatStyle = FlatStyle.Flat;
             btnProductos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnProductos.ForeColor = Color.FromArgb(230, 238, 252);
+            btnProductos.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnProductos.IconColor = Color.Black;
+            btnProductos.IconFont = FontAwesome.Sharp.IconFont.Auto;
             btnProductos.Location = new Point(0, 100);
             btnProductos.Margin = new Padding(3, 4, 3, 4);
             btnProductos.Name = "btnProductos";
@@ -290,25 +345,6 @@
             lblLogo.Text = "GYM SYSTEM";
             lblLogo.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // menuUsuario (Menú desplegable)
-            // 
-            menuUsuario.Items.AddRange(new ToolStripItem[] { itemIniciarSesion, itemCerrarSesion });
-            menuUsuario.Name = "menuUsuario";
-            menuUsuario.Size = new Size(150, 52);
-
-            // itemIniciarSesion
-            itemIniciarSesion.Name = "itemIniciarSesion";
-            itemIniciarSesion.Size = new Size(149, 24);
-            itemIniciarSesion.Text = "Iniciar sesión";
-            itemIniciarSesion.Click += itemIniciarSesion_Click;
-
-            // itemCerrarSesion
-            itemCerrarSesion.Name = "itemCerrarSesion";
-            itemCerrarSesion.Size = new Size(149, 24);
-            itemCerrarSesion.Text = "Cerrar sesión";
-            itemCerrarSesion.Click += itemCerrarSesion_Click;
-
-            // 
             // panelSuperior
             // 
             panelSuperior.BackColor = Color.FromArgb(15, 42, 79);
@@ -318,7 +354,6 @@
             panelSuperior.Name = "panelSuperior";
             panelSuperior.Size = new Size(914, 50);
             panelSuperior.TabIndex = 2;
-
             // 
             // btnUsuarioMenu
             // 
@@ -341,28 +376,66 @@
             btnUsuarioMenu.UseVisualStyleBackColor = true;
             btnUsuarioMenu.Click += btnUsuarioMenu_Click;
             // 
-            // 2. CONFIGURACIÓN DEL PANEL CONTENEDOR
+            // menuUsuario
+            // 
+            menuUsuario.ImageScalingSize = new Size(20, 20);
+            menuUsuario.Items.AddRange(new ToolStripItem[] { itemIniciarSesion, itemCerrarSesion });
+            menuUsuario.Name = "menuUsuario";
+            menuUsuario.Size = new Size(164, 52);
+            // 
+            // itemIniciarSesion
+            // 
+            itemIniciarSesion.Name = "itemIniciarSesion";
+            itemIniciarSesion.Size = new Size(163, 24);
+            itemIniciarSesion.Text = "Iniciar sesión";
+            itemIniciarSesion.Click += itemIniciarSesion_Click;
+            // 
+            // itemCerrarSesion
+            // 
+            itemCerrarSesion.Name = "itemCerrarSesion";
+            itemCerrarSesion.Size = new Size(163, 24);
+            itemCerrarSesion.Text = "Cerrar sesión";
+            itemCerrarSesion.Click += itemCerrarSesion_Click;
+            // 
+            // panelContenedor
             // 
             panelContenedor.BackColor = Color.FromArgb(11, 15, 26);
             panelContenedor.Dock = DockStyle.Fill;
-            panelContenedor.Location = new Point(229, 0);
+            panelContenedor.Location = new Point(229, 50);
             panelContenedor.Margin = new Padding(3, 4, 3, 4);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(914, 842);
+            panelContenedor.Size = new Size(914, 932);
             panelContenedor.TabIndex = 1;
+            // 
+            // btnReportes
+            // 
+            btnReportes.Dock = DockStyle.Top;
+            btnReportes.FlatAppearance.BorderSize = 0;
+            btnReportes.FlatStyle = FlatStyle.Flat;
+            btnReportes.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnReportes.ForeColor = Color.FromArgb(230, 238, 252);
+            btnReportes.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnReportes.IconColor = Color.Black;
+            btnReportes.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnReportes.Location = new Point(0, 904);
+            btnReportes.Margin = new Padding(3, 4, 3, 4);
+            btnReportes.Name = "btnReportes";
+            btnReportes.Padding = new Padding(11, 0, 0, 0);
+            btnReportes.Size = new Size(229, 67);
+            btnReportes.TabIndex = 13;
+            btnReportes.Text = "Reportes";
+            btnReportes.TextAlign = ContentAlignment.MiddleLeft;
+            btnReportes.UseVisualStyleBackColor = true;
             // 
             // FrmPrincipal
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
-            ClientSize = new Size(1143, 842);
-
-            // AGREGAR LOS CONTROLES AL FORMULARIO
+            ClientSize = new Size(1143, 982);
             Controls.Add(panelContenedor);
             Controls.Add(panelSuperior);
             Controls.Add(panelSideMenu);
-
             Margin = new Padding(3, 4, 3, 4);
             Name = "FrmPrincipal";
             StartPosition = FormStartPosition.CenterScreen;
@@ -396,5 +469,7 @@
         private System.Windows.Forms.ContextMenuStrip menuUsuario;
         private System.Windows.Forms.ToolStripMenuItem itemIniciarSesion;
         private System.Windows.Forms.ToolStripMenuItem itemCerrarSesion;
+        private FontAwesome.Sharp.IconButton btnCompras;
+        private FontAwesome.Sharp.IconButton btnReportes;
     }
 }

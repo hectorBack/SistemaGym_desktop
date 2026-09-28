@@ -69,6 +69,7 @@ namespace Negocio.Services
             producto.CategoriaID = dto.CategoriaID;
             producto.CodigoBarras = string.IsNullOrWhiteSpace(dto.CodigoBarras) ? null : dto.CodigoBarras.Trim();
             producto.Nombre = dto.Nombre.Trim();
+            producto.Costo = dto.Costo;
             producto.Precio = dto.Precio;
             producto.Stock = dto.Stock;
             producto.Activo = dto.Activo;
@@ -113,6 +114,7 @@ namespace Negocio.Services
                 CategoriaID = dto.CategoriaID,
                 CodigoBarras = string.IsNullOrWhiteSpace(dto.CodigoBarras) ? null : dto.CodigoBarras.Trim(),
                 Nombre = dto.Nombre.Trim(),
+                Costo = dto.Costo,
                 Precio = dto.Precio,
                 Stock = dto.Stock,
                 Activo = true
@@ -128,6 +130,7 @@ namespace Negocio.Services
                 CategoriaNombre = categoria.Nombre,
                 CodigoBarras = nuevoProducto.CodigoBarras,
                 Nombre = nuevoProducto.Nombre,
+                Costo = nuevoProducto.Costo,
                 Precio = nuevoProducto.Precio,
                 Stock = nuevoProducto.Stock,
                 Activo = nuevoProducto.Activo,
@@ -206,6 +209,7 @@ namespace Negocio.Services
                 CategoriaNombre = producto.Categoria?.Nombre ?? "Sin Categoría",
                 CodigoBarras = producto.CodigoBarras,
                 Nombre = producto.Nombre,
+                Costo = producto.Costo,
                 Precio = producto.Precio,
                 Stock = producto.Stock,
                 Activo = producto.Activo,
@@ -226,6 +230,7 @@ namespace Negocio.Services
                 CategoriaNombre = producto.Categoria?.Nombre,
                 CodigoBarras = producto.CodigoBarras,
                 Nombre = producto.Nombre,
+                Costo = producto.Costo,
                 Precio = producto.Precio,
                 Stock = producto.Stock,
                 Activo = producto.Activo,
@@ -248,6 +253,7 @@ namespace Negocio.Services
                     CategoriaNombre = p.Categoria?.Nombre ?? "Sin Categoría",
                     CodigoBarras = p.CodigoBarras,
                     Nombre = p.Nombre,
+                    Costo = p.Costo,
                     Precio = p.Precio,
                     Stock = p.Stock,
                     Activo = p.Activo,
@@ -267,6 +273,7 @@ namespace Negocio.Services
                 CategoriaNombre = p.Categoria?.Nombre ?? "Sin Categoría",
                 CodigoBarras = p.CodigoBarras,
                 Nombre = p.Nombre,
+                Costo = p.Costo,
                 Precio = p.Precio,
                 Stock = p.Stock,
                 Activo = p.Activo,

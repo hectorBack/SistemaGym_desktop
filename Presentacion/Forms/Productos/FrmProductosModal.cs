@@ -19,6 +19,7 @@ namespace Presentacion.Forms.Productos
         private readonly ProductoController _productoController;
         private readonly CategoriaController _categoriaController;
         private readonly int? _productoId;
+        private int _stockActual = 0; // Guardará el stock existente en caso de edición
 
         public FrmProductoModal(ProductoController productoController, CategoriaController categoriaController, int? productoId = null)
         {
@@ -40,6 +41,7 @@ namespace Presentacion.Forms.Productos
             else
             {
                 lblTitulo.Text = "Nuevo Producto";
+                _stockActual = 0; // Todo producto nuevo inicia con stock en cero
             }
         }
 
@@ -47,7 +49,7 @@ namespace Presentacion.Forms.Productos
         {
             try
             {
-                var categorias = await _categoriaController.ObtenerCategoriasAsync(false); // Carga solo activas
+                var categorias = await _categoriaController.ObtenerCategoriasAsync(false);
                 cmbCategoria.DataSource = categorias.ToList();
                 cmbCategoria.DisplayMember = "Nombre";
                 cmbCategoria.ValueMember = "CategoriaID";
@@ -69,9 +71,12 @@ namespace Presentacion.Forms.Productos
                     cmbCategoria.SelectedValue = producto.CategoriaID;
                     txtCodigoBarras.Text = producto.CodigoBarras;
                     txtNombre.Text = producto.Nombre;
+                    numCosto.Value = producto.Costo;
                     numPrecio.Value = producto.Precio;
-                    numStock.Value = producto.Stock;
                     chkActivo.Checked = producto.Activo;
+
+                    // Conservamos el stock que tiene registrado en BD
+                    _stockActual = producto.Stock;
                 }
             }
             catch (Exception ex)
@@ -101,11 +106,12 @@ namespace Presentacion.Forms.Productos
                 int categoriaId = Convert.ToInt32(cmbCategoria.SelectedValue);
                 string? codigoBarras = ValidationHelper.EsTextoVacio(txtCodigoBarras.Text) ? null : txtCodigoBarras.Text.Trim();
                 string nombre = txtNombre.Text.Trim();
+                decimal costo = numCosto.Value;
                 decimal precio = numPrecio.Value;
-                int stock = Convert.ToInt32(numStock.Value);
                 bool activo = chkActivo.Checked;
 
-                await _productoController.GuardarProductoAsync(_productoId, categoriaId, codigoBarras, nombre, precio, stock, activo);
+                // Se envía _stockActual (0 si es nuevo, o su stock original si es edición)
+                await _productoController.GuardarProductoAsync(_productoId, categoriaId, codigoBarras, nombre, costo, precio, _stockActual, activo);
 
                 MessageBox.Show("Producto guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.DialogResult = DialogResult.OK;
