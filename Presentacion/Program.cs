@@ -26,6 +26,7 @@ using Presentacion.Forms.Movimientos;
 using Presentacion.Forms.Roles;
 using Presentacion.Forms.Usuarios;
 using Presentacion.Forms.Compras;
+using Presentacion.Forms.Reportes;
 
 namespace Presentacion
 {
@@ -107,6 +108,7 @@ namespace Presentacion
             services.AddScoped<IMovimientoService, MovimientoService>();
             services.AddScoped<IRolService, RolService>();
             services.AddScoped<ICompraService, CompraService>();
+            services.AddScoped<IReporteService, ReporteService>();
 
 
             // 4. Controladores de Presentación
@@ -123,6 +125,7 @@ namespace Presentacion
             services.AddTransient<RolController>();
             services.AddTransient<UsuarioController>();
             services.AddTransient<CompraController>();
+            services.AddTransient<ReporteController>();
 
             // 5. Formularios
             services.AddTransient<FrmLogin>();
@@ -139,6 +142,7 @@ namespace Presentacion
             services.AddTransient<FrmRoles>();
             services.AddTransient<FrmUsuarios>();
             services.AddTransient<FrmCompras>();
+            services.AddTransient<FrmReportes>();
            
         }
     }

@@ -18,6 +18,7 @@ using Presentacion.Forms.Movimientos;
 using Presentacion.Forms.Roles;
 using Presentacion.Forms.Usuarios;
 using Presentacion.Forms.Compras;
+using Presentacion.Forms.Reportes;
 
 namespace Presentacion.Forms
 {
@@ -174,6 +175,11 @@ namespace Presentacion.Forms
             AbrirFormularioEnContenedor<FrmCompras>();
         }
 
+        private void btnReportes_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioEnContenedor<FrmReportes>();
+        }
+
         private void btnUsuarioMenu_Click(object sender, EventArgs e)
         {
             // Si hay un usuario activo, habilitamos Cerrar Sesión y deshabilitamos Iniciar Sesión (o viceversa)
@@ -254,6 +260,8 @@ namespace Presentacion.Forms
             // Limpiar o cerrar la ventana principal
             this.Close(); // O este.Hide() según la gestión de ciclo de vida de tu aplicación
         }
+
+       
 
         /// <summary>
         /// Método genérico para abrir formularios internos incrustados dentro de panelContenedor.

@@ -19,5 +19,6 @@ namespace Datos.Interfaces
         Task<Socio?> ObtenerPorClaveAsync(string clave);
         Task<int> ObtenerSiguienteNumeroClaveAsync();
         Task<Socio?> ObtenerDetalleCompletoAsync(int socioId);
+        Task<IEnumerable<Socio>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

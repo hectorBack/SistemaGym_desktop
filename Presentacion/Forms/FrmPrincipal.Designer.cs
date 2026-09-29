@@ -19,6 +19,7 @@
         {
             components = new System.ComponentModel.Container();
             panelSideMenu = new Panel();
+            btnReportes = new FontAwesome.Sharp.IconButton();
             btnCompras = new FontAwesome.Sharp.IconButton();
             btnUsuarios = new FontAwesome.Sharp.IconButton();
             btnRoles = new FontAwesome.Sharp.IconButton();
@@ -39,7 +40,6 @@
             itemIniciarSesion = new ToolStripMenuItem();
             itemCerrarSesion = new ToolStripMenuItem();
             panelContenedor = new Panel();
-            btnReportes = new FontAwesome.Sharp.IconButton();
             panelSideMenu.SuspendLayout();
             panelLogo.SuspendLayout();
             panelSuperior.SuspendLayout();
@@ -69,6 +69,27 @@
             panelSideMenu.Name = "panelSideMenu";
             panelSideMenu.Size = new Size(229, 982);
             panelSideMenu.TabIndex = 0;
+            // 
+            // btnReportes
+            // 
+            btnReportes.Dock = DockStyle.Top;
+            btnReportes.FlatAppearance.BorderSize = 0;
+            btnReportes.FlatStyle = FlatStyle.Flat;
+            btnReportes.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnReportes.ForeColor = Color.FromArgb(230, 238, 252);
+            btnReportes.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnReportes.IconColor = Color.Black;
+            btnReportes.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnReportes.Location = new Point(0, 904);
+            btnReportes.Margin = new Padding(3, 4, 3, 4);
+            btnReportes.Name = "btnReportes";
+            btnReportes.Padding = new Padding(11, 0, 0, 0);
+            btnReportes.Size = new Size(229, 67);
+            btnReportes.TabIndex = 13;
+            btnReportes.Text = "Reportes";
+            btnReportes.TextAlign = ContentAlignment.MiddleLeft;
+            btnReportes.UseVisualStyleBackColor = true;
+            btnReportes.Click += btnReportes_Click;
             // 
             // btnCompras
             // 
@@ -406,26 +427,6 @@
             panelContenedor.Name = "panelContenedor";
             panelContenedor.Size = new Size(914, 932);
             panelContenedor.TabIndex = 1;
-            // 
-            // btnReportes
-            // 
-            btnReportes.Dock = DockStyle.Top;
-            btnReportes.FlatAppearance.BorderSize = 0;
-            btnReportes.FlatStyle = FlatStyle.Flat;
-            btnReportes.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnReportes.ForeColor = Color.FromArgb(230, 238, 252);
-            btnReportes.IconChar = FontAwesome.Sharp.IconChar.None;
-            btnReportes.IconColor = Color.Black;
-            btnReportes.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnReportes.Location = new Point(0, 904);
-            btnReportes.Margin = new Padding(3, 4, 3, 4);
-            btnReportes.Name = "btnReportes";
-            btnReportes.Padding = new Padding(11, 0, 0, 0);
-            btnReportes.Size = new Size(229, 67);
-            btnReportes.TabIndex = 13;
-            btnReportes.Text = "Reportes";
-            btnReportes.TextAlign = ContentAlignment.MiddleLeft;
-            btnReportes.UseVisualStyleBackColor = true;
             // 
             // FrmPrincipal
             // 

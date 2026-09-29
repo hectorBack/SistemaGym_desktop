@@ -91,5 +91,14 @@ namespace Datos.Repositories
 
             return await query.AnyAsync(p => p.Folio != null && p.Folio.ToLower() == folio.ToLower());
         }
+
+        public async Task<IEnumerable<PagoSocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _context.PagoSocioMembresias
+                .Include(p => p.SocioMembresia)
+                .Where(p => p.CreatedAt >= fechaInicio && p.CreatedAt <= fechaFin)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

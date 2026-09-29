@@ -20,5 +20,6 @@ namespace Datos.Interfaces
         Task<IEnumerable<PagoSocioMembresia>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = false);
         Task<decimal> ObtenerTotalPagadoPorSocioMembresiaIdAsync(int socioMembresiaId);
         Task<bool> ExisteFolioAsync(string folio, int? idExcluir = null);
+        Task<IEnumerable<PagoSocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

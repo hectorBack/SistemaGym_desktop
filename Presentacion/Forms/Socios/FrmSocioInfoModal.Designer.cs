@@ -1,4 +1,6 @@
-﻿namespace Presentacion.Forms.Socios
+﻿using Presentacion.Forms.Reportes;
+
+namespace Presentacion.Forms.Socios
 {
     partial class FrmSocioInfoModal
     {
@@ -30,7 +32,7 @@
             lblEmail = new Label();
             lblEstadoTag = new Label();
             lblEstado = new Label();
-            tabControlDetalles = new TabControl();
+            tabControlDetalles = new FlatTabControl();
             tabMembresias = new TabPage();
             dgvHistorialMembresias = new DataGridView();
             tabVisitas = new TabPage();
@@ -455,7 +457,7 @@
         private Label lblEmail;
         private Label lblEstadoTag;
         private Label lblEstado;
-        private TabControl tabControlDetalles;
+        private FlatTabControl tabControlDetalles;
         private TabPage tabMembresias;
         private DataGridView dgvHistorialMembresias;
         private TabPage tabVisitas;

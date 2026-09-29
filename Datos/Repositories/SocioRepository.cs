@@ -97,5 +97,15 @@ namespace Datos.Repositories
                 .Include(s => s.Visitas)             // Carga el historial de visitas
                 .FirstOrDefaultAsync(s => s.SocioID == socioId);
         }
+
+        public async Task<IEnumerable<Socio>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _context.Socios
+                .Include(s => s.Visitas)
+                .Include(s => s.SocioMembresias)
+                .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+        }
     }
 }
