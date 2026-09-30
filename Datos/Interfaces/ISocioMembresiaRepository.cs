@@ -15,5 +15,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(SocioMembresia socioMembresia);
         void Actualizar(SocioMembresia socioMembresia);
         void Eliminar(SocioMembresia socioMembresia);
+
+        Task<IEnumerable<SocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

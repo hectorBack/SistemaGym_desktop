@@ -24,11 +24,15 @@ namespace Negocio.DTOs
         // 2. Reporte de Membresías
         public class ReporteMembresiaDto
         {
-            public int MembresiaID { get; set; }
-            public string Nombre { get; set; } = string.Empty;
-            public int DuracionDias { get; set; }
-            public decimal Precio { get; set; }
-            public bool Activo { get; set; }
+            public int SocioMembresiaID { get; set; }
+            public string Membresia { get; set; } = string.Empty;
+            public string Socio { get; set; } = string.Empty;
+            public DateTime FechaRegistro { get; set; }
+            public DateTime FechaInicio { get; set; }
+            public DateTime Vencimiento { get; set; }
+            public decimal Precio { get; set; }          // Precio global contratado (ej. $300.00)
+            public decimal TotalAbonado { get; set; }    // Suma abonada acumulada
+            public string EstadoMembresia { get; set; } = string.Empty;
         }
 
         // 3. Reporte de Socios
@@ -76,9 +80,12 @@ namespace Negocio.DTOs
         public class ReportePagoMembresiaDto
         {
             public int PagoID { get; set; }
+            public int SocioMembresiaID { get; set; } 
             public string Socio { get; set; } = string.Empty;
             public string Membresia { get; set; } = string.Empty;
-            public decimal Monto { get; set; }
+            public decimal Monto { get; set; } // Monto abonado en esta transacción o costo
+            public decimal TotalPagado { get; set; } // <--- AGREGADO: Total acumulado pagado hasta la fecha
+            public decimal PrecioMembresia { get; set; } // <--- AGREGADO: Precio total que cuesta la membresía
             public string FormaPago { get; set; } = string.Empty;
             public DateTime FechaPago { get; set; }
         }

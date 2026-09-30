@@ -38,18 +38,46 @@ namespace Negocio.Services
             });
         }
 
-        public async Task<IEnumerable<ReporteMembresiaDto>> ObtenerMembresiasAsync()
+        public async Task<IEnumerable<ReporteMembresiaDto>> ObtenerMembresiasAsync(DateTime inicio, DateTime fin)
         {
-            var membresias = await _unitOfWork.Membresia.ObtenerTodasAsync(incluirInactivas: true);
+            ValidarRangoFechas(inicio, fin);
 
-            return membresias.Select(m => new ReporteMembresiaDto
-            {
-                MembresiaID = m.MembresiaID,
-                Nombre = m.Nombre,
-                DuracionDias = m.DuracionDias,
-                Precio = m.Precio,
-                Activo = m.Activo
-            });
+            // Consultamos la tabla SocioMembresia por rango de fechas de contratación
+            var socioMembresias = await _unitOfWork.SocioMembresia.ObtenerPorRangoFechasAsync(inicio, fin);
+
+            return socioMembresias
+                .Where(sm => sm.Activo)
+                .Select(sm =>
+                {
+                    decimal precio = sm.Membresia?.Precio ?? 0;
+                    decimal totalAbonado = sm.Pagos != null
+                        ? sm.Pagos.Where(p => p.Activo).Sum(p => p.Monto)
+                        : 0;
+
+                    // Determinar el estado exacto de la membresía vendida
+                    string estado = "Sin Pagar";
+                    if (totalAbonado >= precio && precio > 0)
+                    {
+                        estado = "Pagada";
+                    }
+                    else if (totalAbonado > 0)
+                    {
+                        estado = "Parcial";
+                    }
+
+                    return new ReporteMembresiaDto
+                    {
+                        SocioMembresiaID = sm.SocioMembresiaID,
+                        Membresia = sm.Membresia?.Nombre ?? "N/A",
+                        Socio = sm.Socio != null ? $"{sm.Socio.Nombre} {sm.Socio.Apellido}".Trim() : "N/A",
+                        FechaRegistro = sm.CreatedAt,
+                        FechaInicio = sm.FechaInicio,
+                        Vencimiento = sm.FechaFin,
+                        Precio = precio,
+                        TotalAbonado = totalAbonado,
+                        EstadoMembresia = estado
+                    };
+                });
         }
 
         public async Task<IEnumerable<ReporteMovimientoDto>> ObtenerMovimientosAsync(DateTime inicio, DateTime fin)
@@ -76,21 +104,35 @@ namespace Negocio.Services
             ValidarRangoFechas(inicio, fin);
             var pagos = await _unitOfWork.PagoSocioMembresia.ObtenerPorRangoFechasAsync(inicio, fin);
 
-            return pagos
-         .Where(p => p.Activo)
-         .Select(p => new ReportePagoMembresiaDto
-         {
-             PagoID = p.PagoID,
-             Socio = p.SocioMembresia?.Socio != null
-                 ? $"{p.SocioMembresia.Socio.Nombre} {p.SocioMembresia.Socio.Apellido}".Trim()
-                 : "N/A",
-             Membresia = p.SocioMembresia?.Membresia != null
-                 ? p.SocioMembresia.Membresia.Nombre
-                 : "N/A",
-             Monto = p.Monto,
-             FormaPago = p.FormaPago ?? "Efectivo",
-             FechaPago = p.CreatedAt // Usa CreatedAt en lugar de FechaPago
-         });
+            var resultado = new List<ReportePagoMembresiaDto>();
+
+            foreach (var p in pagos.Where(p => p.Activo))
+            {
+                // Consultamos el acumulado real abonado a esta membresía específica
+                decimal acumuladoPagado = await _unitOfWork.PagoSocioMembresia
+                    .ObtenerTotalPagadoPorSocioMembresiaIdAsync(p.SocioMembresiaID);
+
+                resultado.Add(new ReportePagoMembresiaDto
+                {
+                    PagoID = p.PagoID,
+                    SocioMembresiaID = p.SocioMembresiaID,
+                    Socio = p.SocioMembresia?.Socio != null
+                        ? $"{p.SocioMembresia.Socio.Nombre} {p.SocioMembresia.Socio.Apellido}".Trim()
+                        : "N/A",
+                    Membresia = p.SocioMembresia?.Membresia != null
+                        ? p.SocioMembresia.Membresia.Nombre
+                        : "N/A",
+                    Monto = p.Monto,
+                    TotalPagado = acumuladoPagado, // <--- Asigna los $300.00 acumulados reales
+                    PrecioMembresia = p.SocioMembresia?.Membresia != null
+                        ? p.SocioMembresia.Membresia.Precio
+                        : p.Monto,
+                    FormaPago = p.FormaPago ?? "Efectivo",
+                    FechaPago = p.CreatedAt
+                });
+            }
+
+            return resultado;
         }
 
         public async Task<IEnumerable<ReporteRegistroDto>> ObtenerRegistrosAsync(DateTime inicio, DateTime fin)

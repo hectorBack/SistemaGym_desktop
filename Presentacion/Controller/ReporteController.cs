@@ -35,17 +35,22 @@ namespace Presentacion.Controller
             });
         }
 
-        public async Task<IEnumerable<ReporteMembresiaViewModel>> ObtenerMembresiasAsync()
+        public async Task<IEnumerable<ReporteMembresiaViewModel>> ObtenerMembresiasAsync(DateTime inicio, DateTime fin)
         {
-            var dtos = await _reporteService.ObtenerMembresiasAsync();
+            // Pasamos el rango de fechas al servicio
+            var dtos = await _reporteService.ObtenerMembresiasAsync(inicio, fin);
 
             return dtos.Select(r => new ReporteMembresiaViewModel
             {
-                MembresiaID = r.MembresiaID,
-                Nombre = r.Nombre,
-                DuracionDias = r.DuracionDias,
+                SocioMembresiaID = r.SocioMembresiaID,
+                Membresia = r.Membresia,
+                Socio = r.Socio,
+                FechaRegistro = r.FechaRegistro,
+                FechaInicio = r.FechaInicio,
+                Vencimiento = r.Vencimiento,
                 Precio = r.Precio,
-                Activo = r.Activo
+                TotalAbonado = r.TotalAbonado,
+                EstadoMembresia = r.EstadoMembresia
             });
         }
 
@@ -113,9 +118,11 @@ namespace Presentacion.Controller
             return dtos.Select(r => new ReportePagoMembresiaViewModel
             {
                 PagoID = r.PagoID,
+                SocioMembresiaID = r.SocioMembresiaID,
                 Socio = r.Socio,
                 Membresia = r.Membresia,
-                Monto = r.Monto,
+                Monto = r.PrecioMembresia > 0 ? r.PrecioMembresia : r.Monto, // Precio base de la membresía
+                TotalPagado = r.TotalPagado,                                  // Suma abonada acumulada
                 FormaPago = r.FormaPago,
                 FechaPago = r.FechaPago
             });

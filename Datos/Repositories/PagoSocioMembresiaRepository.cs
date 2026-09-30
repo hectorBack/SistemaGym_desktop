@@ -96,8 +96,12 @@ namespace Datos.Repositories
         {
             return await _context.PagoSocioMembresias
                 .Include(p => p.SocioMembresia)
+                    .ThenInclude(sm => sm.Socio)       // Carga la información del Socio
+                .Include(p => p.SocioMembresia)
+                    .ThenInclude(sm => sm.Membresia)   // Carga la información de la Membresía
                 .Where(p => p.CreatedAt >= fechaInicio && p.CreatedAt <= fechaFin)
                 .OrderByDescending(p => p.CreatedAt)
+                .AsNoTracking()                        // Funciona sin problemas al remover la relación cíclica
                 .ToListAsync();
         }
     }

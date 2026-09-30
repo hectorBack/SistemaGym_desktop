@@ -61,5 +61,16 @@ namespace Datos.Repositories
         {
             _context.SocioMembresia.Remove(socioMembresia);
         }
+
+        public async Task<IEnumerable<SocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _context.SocioMembresia
+                .Include(m => m.Membresia)
+                .Include(m => m.Socio)
+                .Include(m => m.Pagos)
+                .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

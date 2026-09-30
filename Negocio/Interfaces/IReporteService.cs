@@ -10,7 +10,7 @@ namespace Negocio.Interfaces
     public interface IReporteService
     {
         Task<IEnumerable<ReporteInventarioDto>> ObtenerInventarioAsync();
-        Task<IEnumerable<ReporteMembresiaDto>> ObtenerMembresiasAsync();
+        Task<IEnumerable<ReporteMembresiaDto>> ObtenerMembresiasAsync(DateTime inicio, DateTime fin);
         Task<IEnumerable<ReporteSocioDto>> ObtenerSociosAsync();
         Task<IEnumerable<ReporteRegistroDto>> ObtenerRegistrosAsync(DateTime inicio, DateTime fin);
         Task<IEnumerable<ReporteVentaProductoDto>> ObtenerVentaProductosAsync(DateTime inicio, DateTime fin);

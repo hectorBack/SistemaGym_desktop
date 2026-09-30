@@ -22,12 +22,15 @@ namespace Presentacion.ViewModels
 
     public class ReporteMembresiaViewModel
     {
-        public int MembresiaID { get; set; }
-        public string Nombre { get; set; } = string.Empty;
-        public int DuracionDias { get; set; }
+        public int SocioMembresiaID { get; set; }
+        public string Membresia { get; set; } = string.Empty;
+        public string Socio { get; set; } = string.Empty;
+        public DateTime FechaRegistro { get; set; }
+        public DateTime FechaInicio { get; set; }
+        public DateTime Vencimiento { get; set; }
         public decimal Precio { get; set; }
-        public string Estado => Activo ? "Activo" : "Inactivo";
-        public bool Activo { get; set; }
+        public decimal TotalAbonado { get; set; }
+        public string EstadoMembresia { get; set; } = string.Empty;
     }
 
     public class ReporteSocioViewModel
@@ -73,12 +76,17 @@ namespace Presentacion.ViewModels
     public class ReportePagoMembresiaViewModel
     {
         public int PagoID { get; set; }
+        public int SocioMembresiaID { get; set; }
         public string Socio { get; set; } = string.Empty;
         public string Membresia { get; set; } = string.Empty;
-        public decimal Monto { get; set; }
+        public decimal Monto { get; set; } // O Precio de la membresía
+        public decimal TotalPagado { get; set; } // Suma abonada de los pagos
         public string FormaPago { get; set; } = string.Empty;
         public string FechaPagoTexto => FechaPago.ToString("dd/MM/yyyy HH:mm");
         public DateTime FechaPago { get; set; }
+
+        // Propiedad calculada idéntica a SocioMembresiaViewModel:
+        public string EstadoMembresia => (TotalPagado >= Monto && Monto > 0) ? "Pagada" : "Sin Pagar";
     }
 
     public class ReporteMovimientoViewModel

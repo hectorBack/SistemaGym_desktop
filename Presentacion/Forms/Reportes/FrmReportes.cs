@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Membresias;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,6 +16,7 @@ namespace Presentacion.Forms.Reportes
     {
         private readonly ReporteController _reporteController;
         private FrmInventarios? _frmInventarios;
+        private FrmMembresiasReporte? _frmMembresias;
 
         public FrmReportes(ReporteController reporteController)
         {
@@ -49,7 +51,7 @@ namespace Presentacion.Forms.Reportes
                         break;
 
                     case "tabMembresias":
-                        dgvMembresias.DataSource = await _reporteController.ObtenerMembresiasAsync();
+                        CargarFormularioMembresias();
                         break;
 
                     case "tabSocios":
@@ -160,6 +162,26 @@ namespace Presentacion.Forms.Reportes
             // Agregar el formulario al contenedor de la pestaña y mostrarlo
             tabInventario.Controls.Add(_frmInventarios);
             _frmInventarios.Show();
+        }
+
+        private void CargarFormularioMembresias()
+        {
+            if (_frmMembresias != null && !_frmMembresias.IsDisposed)
+            {
+                return;
+            }
+            tabMembresias.Controls.Clear();
+
+            _frmMembresias = new FrmMembresiasReporte(_reporteController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabMembresias.Controls.Add(_frmMembresias);
+            _frmMembresias.Show();
         }
 
         protected override void OnControlAdded(ControlEventArgs e)
