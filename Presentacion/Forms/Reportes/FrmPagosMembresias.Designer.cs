@@ -1,6 +1,6 @@
 ﻿namespace Presentacion.Forms.Reportes
 {
-    partial class FrmMembresiasReporte
+    partial class FrmPagosMembresias
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -17,10 +17,9 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
-            lblTotal = new Label();
             btnLimpiarFiltros = new Button();
             dtpFechaFin = new DateTimePicker();
             dtpFechaInicio = new DateTimePicker();
@@ -29,9 +28,10 @@
             lblFechaFin = new Label();
             btnFiltrar = new Button();
             btnExportarExcel = new Button();
-            dgvMembresias = new DataGridView();
+            dgvPagosMembresias = new DataGridView();
+            lblTotal = new Label();
             panelTop.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvMembresias).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvPagosMembresias).BeginInit();
             SuspendLayout();
             // 
             // panelTop
@@ -53,18 +53,6 @@
             panelTop.Size = new Size(914, 110);
             panelTop.TabIndex = 0;
             // 
-            // lblTotal
-            // 
-            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            lblTotal.AutoSize = true;
-            lblTotal.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
-            lblTotal.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTotal.Location = new Point(593, 68);
-            lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(128, 25);
-            lblTotal.TabIndex = 11;
-            lblTotal.Text = "Total: $0.00";
-            // 
             // btnLimpiarFiltros
             // 
             btnLimpiarFiltros.Anchor = AnchorStyles.Left;
@@ -73,7 +61,7 @@
             btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
             btnLimpiarFiltros.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
             btnLimpiarFiltros.ForeColor = Color.FromArgb(230, 238, 252);
-            btnLimpiarFiltros.Location = new Point(500, 61);
+            btnLimpiarFiltros.Location = new Point(501, 61);
             btnLimpiarFiltros.Margin = new Padding(8, 0, 0, 0);
             btnLimpiarFiltros.Name = "btnLimpiarFiltros";
             btnLimpiarFiltros.Size = new Size(90, 38);
@@ -111,9 +99,9 @@
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(20, 15);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(671, 29);
+            lblTitulo.Size = new Size(675, 29);
             lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Reporte de membresías vendidas en un rango de fechas";
+            lblTitulo.Text = "Reporte de pagos de membresías en un rango de fechas";
             // 
             // lblFechaInicio
             // 
@@ -144,7 +132,7 @@
             btnFiltrar.FlatStyle = FlatStyle.Flat;
             btnFiltrar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             btnFiltrar.ForeColor = Color.White;
-            btnFiltrar.Location = new Point(399, 59);
+            btnFiltrar.Location = new Point(400, 60);
             btnFiltrar.Margin = new Padding(3, 4, 3, 4);
             btnFiltrar.Name = "btnFiltrar";
             btnFiltrar.Size = new Size(90, 38);
@@ -161,7 +149,7 @@
             btnExportarExcel.FlatStyle = FlatStyle.Flat;
             btnExportarExcel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             btnExportarExcel.ForeColor = Color.White;
-            btnExportarExcel.Location = new Point(752, 60);
+            btnExportarExcel.Location = new Point(734, 60);
             btnExportarExcel.Margin = new Padding(3, 4, 3, 4);
             btnExportarExcel.Name = "btnExportarExcel";
             btnExportarExcel.Size = new Size(150, 38);
@@ -170,61 +158,73 @@
             btnExportarExcel.UseVisualStyleBackColor = false;
             btnExportarExcel.Click += btnExportarExcel_Click;
             // 
-            // dgvMembresias
+            // dgvPagosMembresias
             // 
-            dgvMembresias.AllowUserToAddRows = false;
-            dgvMembresias.AllowUserToDeleteRows = false;
-            dgvMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvMembresias.BackgroundColor = Color.FromArgb(11, 15, 26);
-            dgvMembresias.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.FromArgb(15, 42, 79);
-            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(45, 212, 255);
-            dataGridViewCellStyle3.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-            dgvMembresias.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            dgvMembresias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = Color.FromArgb(11, 15, 26);
-            dataGridViewCellStyle4.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle4.ForeColor = Color.FromArgb(230, 238, 252);
-            dataGridViewCellStyle4.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(31, 111, 235);
-            dataGridViewCellStyle4.SelectionForeColor = Color.White;
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
-            dgvMembresias.DefaultCellStyle = dataGridViewCellStyle4;
-            dgvMembresias.Dock = DockStyle.Fill;
-            dgvMembresias.EnableHeadersVisualStyles = false;
-            dgvMembresias.GridColor = Color.FromArgb(15, 42, 79);
-            dgvMembresias.Location = new Point(0, 110);
-            dgvMembresias.Margin = new Padding(3, 4, 3, 4);
-            dgvMembresias.MultiSelect = false;
-            dgvMembresias.Name = "dgvMembresias";
-            dgvMembresias.ReadOnly = true;
-            dgvMembresias.RowHeadersVisible = false;
-            dgvMembresias.RowHeadersWidth = 51;
-            dgvMembresias.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvMembresias.Size = new Size(914, 690);
-            dgvMembresias.TabIndex = 1;
+            dgvPagosMembresias.AllowUserToAddRows = false;
+            dgvPagosMembresias.AllowUserToDeleteRows = false;
+            dgvPagosMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvPagosMembresias.BackgroundColor = Color.FromArgb(11, 15, 26);
+            dgvPagosMembresias.BorderStyle = BorderStyle.None;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle1.Padding = new Padding(8, 0, 0, 0);
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvPagosMembresias.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dgvPagosMembresias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(11, 15, 26);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
+            dataGridViewCellStyle2.Padding = new Padding(8, 0, 0, 0);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
+            dataGridViewCellStyle2.SelectionForeColor = Color.White;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvPagosMembresias.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvPagosMembresias.Dock = DockStyle.Fill;
+            dgvPagosMembresias.EnableHeadersVisualStyles = false;
+            dgvPagosMembresias.GridColor = Color.FromArgb(15, 42, 79);
+            dgvPagosMembresias.Location = new Point(0, 110);
+            dgvPagosMembresias.Margin = new Padding(3, 4, 3, 4);
+            dgvPagosMembresias.MultiSelect = false;
+            dgvPagosMembresias.Name = "dgvPagosMembresias";
+            dgvPagosMembresias.ReadOnly = true;
+            dgvPagosMembresias.RowHeadersVisible = false;
+            dgvPagosMembresias.RowHeadersWidth = 51;
+            dgvPagosMembresias.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvPagosMembresias.Size = new Size(914, 690);
+            dgvPagosMembresias.TabIndex = 1;
             // 
-            // FrmMembresiasReporte
+            // lblTotal
+            // 
+            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            lblTotal.AutoSize = true;
+            lblTotal.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
+            lblTotal.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTotal.Location = new Point(594, 68);
+            lblTotal.Name = "lblTotal";
+            lblTotal.Size = new Size(128, 25);
+            lblTotal.TabIndex = 11;
+            lblTotal.Text = "Total: $0.00";
+            // 
+            // FrmPagosMembresias
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
-            Controls.Add(dgvMembresias);
+            Controls.Add(dgvPagosMembresias);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(3, 4, 3, 4);
-            Name = "FrmMembresiasReporte";
-            Text = "Membresías";
+            Name = "FrmPagosMembresias";
+            Text = "Pagos de Membresías";
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvMembresias).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvPagosMembresias).EndInit();
             ResumeLayout(false);
         }
 
@@ -236,7 +236,7 @@
         private Label lblFechaFin;
         private Button btnFiltrar;
         private Button btnExportarExcel;
-        private DataGridView dgvMembresias;
+        private DataGridView dgvPagosMembresias;
         private DateTimePicker dtpFechaInicio;
         private DateTimePicker dtpFechaFin;
         private Button btnLimpiarFiltros;

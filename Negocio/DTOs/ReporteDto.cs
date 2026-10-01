@@ -80,12 +80,15 @@ namespace Negocio.DTOs
         public class ReportePagoMembresiaDto
         {
             public int PagoID { get; set; }
-            public int SocioMembresiaID { get; set; } 
+            public int SocioMembresiaID { get; set; }
             public string Socio { get; set; } = string.Empty;
             public string Membresia { get; set; } = string.Empty;
-            public decimal Monto { get; set; } // Monto abonado en esta transacción o costo
-            public decimal TotalPagado { get; set; } // <--- AGREGADO: Total acumulado pagado hasta la fecha
-            public decimal PrecioMembresia { get; set; } // <--- AGREGADO: Precio total que cuesta la membresía
+            public DateTime FechaInicio { get; set; }     // AGREGADO
+            public string? Folio { get; set; }            // AGREGADO
+            public string? Observaciones { get; set; }     // AGREGADO
+            public decimal Monto { get; set; }            // Monto abonado en esta transacción
+            public decimal TotalPagado { get; set; }     // Acumulado abonado hasta hoy
+            public decimal PrecioMembresia { get; set; } // Precio total de la membresía
             public string FormaPago { get; set; } = string.Empty;
             public DateTime FechaPago { get; set; }
         }

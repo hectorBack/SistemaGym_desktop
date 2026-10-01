@@ -79,14 +79,30 @@ namespace Presentacion.ViewModels
         public int SocioMembresiaID { get; set; }
         public string Socio { get; set; } = string.Empty;
         public string Membresia { get; set; } = string.Empty;
-        public decimal Monto { get; set; } // O Precio de la membresía
-        public decimal TotalPagado { get; set; } // Suma abonada de los pagos
+        public DateTime FechaInicio { get; set; }
+        public string Folio { get; set; } = string.Empty;
+        public string Observaciones { get; set; } = string.Empty;
+        public decimal Monto { get; set; }           // Importe del pago actual ($100)
+        public decimal TotalPagado { get; set; }    // Total abonado acumulado
+        public decimal PrecioMembresia { get; set; }// Precio total ($300)
         public string FormaPago { get; set; } = string.Empty;
-        public string FechaPagoTexto => FechaPago.ToString("dd/MM/yyyy HH:mm");
         public DateTime FechaPago { get; set; }
 
-        // Propiedad calculada idéntica a SocioMembresiaViewModel:
-        public string EstadoMembresia => (TotalPagado >= Monto && Monto > 0) ? "Pagada" : "Sin Pagar";
+        public string FechaPagoTexto => FechaPago.ToString("dd/MM/yyyy HH:mm");
+        public string FechaInicioTexto => FechaInicio.ToString("dd/MM/yyyy");
+
+        // Lógica para evaluar si la membresía ligada al pago está pagada o en parcialidad
+        public string EstadoMembresia
+        {
+            get
+            {
+                if (TotalPagado >= PrecioMembresia && PrecioMembresia > 0)
+                    return "Pagada";
+                if (TotalPagado > 0)
+                    return "Parcial";
+                return "Sin Pagar";
+            }
+        }
     }
 
     public class ReporteMovimientoViewModel

@@ -85,24 +85,9 @@
             tabControlReportes.SelectedIndex = 0;
             tabControlReportes.Size = new Size(914, 740);
             tabControlReportes.TabIndex = 1;
-
-            // CONFIGURACIÓN PARA DIBUJADO PERSONALIZADO DE PESTAÑAS
-            tabControlReportes.DrawMode = TabDrawMode.OwnerDrawFixed;
-            tabControlReportes.ItemSize = new Size(110, 32);
-            tabControlReportes.SizeMode = TabSizeMode.Fixed;
-            tabControlReportes.DrawItem += tabControlReportes_DrawItem;
             tabControlReportes.SelectedIndexChanged += tabControlReportes_SelectedIndexChanged;
 
-            // Configurar Pestañas y DataGridViews
-            ConfigurarTabPage(tabInventario, "tabInventario", "Inventario", dgvInventario);
-            ConfigurarTabPage(tabMembresias, "tabMembresias", "Membresías", dgvMembresias);
-            ConfigurarTabPage(tabSocios, "tabSocios", "Socios", dgvSocios);
-            ConfigurarTabPage(tabRegistro, "tabRegistro", "Registro", dgvRegistro);
-            ConfigurarTabPage(tabVentas, "tabVentas", "Venta Productos", dgvVentas);
-            ConfigurarTabPage(tabVisitas, "tabVisitas", "Visitas", dgvVisitas);
-            ConfigurarTabPage(tabPagos, "tabPagos", "Pagos Membresías", dgvPagos);
-            ConfigurarTabPage(tabMovimientos, "tabMovimientos", "Movimientos", dgvMovimientos);
-
+            // Agregar pestañas al TabControl
             tabControlReportes.Controls.Add(tabInventario);
             tabControlReportes.Controls.Add(tabMembresias);
             tabControlReportes.Controls.Add(tabSocios);
@@ -121,6 +106,7 @@
             ClientSize = new Size(914, 800);
             Controls.Add(tabControlReportes);
             Controls.Add(panelTop);
+            DoubleBuffered = true; // Reduce el parpadeo en renderizado continuo
             FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(3, 4, 3, 4);
             Name = "FrmReportes";
@@ -164,79 +150,5 @@
         private DataGridView dgvVisitas;
         private DataGridView dgvPagos;
         private DataGridView dgvMovimientos;
-    
-
-        private void ConfigurarTabPage(TabPage page, string name, string text, DataGridView dgv)
-        {
-            page.Name = name;
-            page.Text = text;
-            page.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-
-            // Configuración del DataGridView al estilo oscuro
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToDeleteRows = false;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgv.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgv.BorderStyle = BorderStyle.None;
-            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal; // Líneas divisorias solo horizontales (más limpio)
-            dgv.EnableHeadersVisualStyles = false;
-
-            // Encabezados (Más altos y estilizados)
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Bold", 10F, FontStyle.Bold); // Fuente un poco más grande
-            dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgv.ColumnHeadersHeight = 40; // Altura fija para el encabezado
-            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-
-            // Margen interno (Padding) superior e inferior para dar "aire" a las celdas
-            Padding margenCelda = new Padding(10, 6, 10, 6);
-            dgv.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
-            dgv.DefaultCellStyle.Padding = margenCelda;
-
-            // Filas (Texto en blanco puro para mejor contraste)
-            dgv.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgv.DefaultCellStyle.ForeColor = Color.White; // Blanco puro mejora la fatiga visual
-            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
-            dgv.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            // Altura de las filas de datos
-            dgv.RowTemplate.Height = 38; // Hace que las filas se vean más modernas y táctiles/espaciosas
-
-            dgv.ScrollBars = ScrollBars.Both;
-            dgv.GridColor = ColorTranslator.FromHtml("#161b26"); // Gris muy sutil para no saturar de líneas la pantalla
-            dgv.Dock = DockStyle.Fill;
-            dgv.Margin = new Padding(3, 4, 3, 4);
-            dgv.MultiSelect = false;
-            dgv.ReadOnly = true;
-            dgv.RowHeadersVisible = false;
-            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-
-            // EVENTO CLAVE: Formatear y alinear columnas numéricas automáticamente al cargar datos
-            dgv.DataBindingComplete += (sender, e) =>
-            {
-                foreach (DataGridViewColumn col in dgv.Columns)
-                {
-                    string colName = col.Name.ToLower();
-
-                    // Detecta automáticamente columnas de dinero o cantidades
-                    if (colName.Contains("precio") || colName.Contains("costo") || colName.Contains("total") || colName.Contains("subtotal") || colName.Contains("pago"))
-                    {
-                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        col.DefaultCellStyle.Format = "C2"; // Formato de moneda local (ej. $25.00)
-                    }
-                    else if (colName.Contains("stock") || colName.Contains("cantidad") || colName.Contains("id"))
-                    {
-                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    }
-                }
-            };
-
-            page.Controls.Add(dgv);
-        }
     }
 }

@@ -86,7 +86,6 @@ namespace Presentacion.Forms.Reportes
             decimal totalContratado = _listaMembresias.Sum(m => m.Precio);
             int cantidadVendida = _listaMembresias.Count;
 
-            lblReporteInfo.Text = $"Membresías vendidas en el rango: {cantidadVendida}";
             lblTotal.Text = $"Total: {totalContratado:C2}";
         }
 

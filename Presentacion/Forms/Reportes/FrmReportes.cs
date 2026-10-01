@@ -17,15 +17,100 @@ namespace Presentacion.Forms.Reportes
         private readonly ReporteController _reporteController;
         private FrmInventarios? _frmInventarios;
         private FrmMembresiasReporte? _frmMembresias;
+        private FrmPagosMembresias? _frmPagosMembresias;
 
         public FrmReportes(ReporteController reporteController)
         {
             InitializeComponent();
             _reporteController = reporteController;
+            InicializarEstilosPestañas();
+        }
+
+        private void InicializarEstilosPestañas()
+        {
+            ConfigurarTabPage(tabInventario, "tabInventario", "Inventario", dgvInventario);
+            ConfigurarTabPage(tabMembresias, "tabMembresias", "Membresías", dgvMembresias);
+            ConfigurarTabPage(tabSocios, "tabSocios", "Socios", dgvSocios);
+            ConfigurarTabPage(tabRegistro, "tabRegistro", "Registro", dgvRegistro);
+            ConfigurarTabPage(tabVentas, "tabVentas", "Venta Productos", dgvVentas);
+            ConfigurarTabPage(tabVisitas, "tabVisitas", "Visitas", dgvVisitas);
+            ConfigurarTabPage(tabPagos, "tabPagos", "Pagos Membresías", dgvPagos);
+            ConfigurarTabPage(tabMovimientos, "tabMovimientos", "Movimientos", dgvMovimientos);
+        }
+
+        private void ConfigurarTabPage(TabPage page, string name, string text, DataGridView dgv)
+        {
+            page.Name = name;
+            page.Text = text;
+            page.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+
+            // Configuración visual del DataGridView
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgv.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.EnableHeadersVisualStyles = false;
+
+            // Estilo de Encabezados
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Bold", 10F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dgv.ColumnHeadersHeight = 40;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+
+            // Padding para celdas
+            Padding margenCelda = new Padding(10, 6, 10, 6);
+            dgv.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
+            dgv.DefaultCellStyle.Padding = margenCelda;
+
+            // Filas de datos
+            dgv.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            dgv.DefaultCellStyle.ForeColor = Color.White;
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+            dgv.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
+            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+
+            dgv.RowTemplate.Height = 38;
+            dgv.ScrollBars = ScrollBars.Both;
+            dgv.GridColor = ColorTranslator.FromHtml("#161b26");
+            dgv.Dock = DockStyle.Fill;
+            dgv.Margin = new Padding(3, 4, 3, 4);
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
+            // Alineación y formato automático según el nombre de la columna
+            dgv.DataBindingComplete += (sender, e) =>
+            {
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    string colName = col.Name.ToLower();
+
+                    if (colName.Contains("precio") || colName.Contains("costo") || colName.Contains("total") || colName.Contains("subtotal") || colName.Contains("pago"))
+                    {
+                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        col.DefaultCellStyle.Format = "C2";
+                    }
+                    else if (colName.Contains("stock") || colName.Contains("cantidad") || colName.Contains("id"))
+                    {
+                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
+                    }
+                }
+            };
+
+            page.Controls.Add(dgv);
         }
 
         private async void FrmReportes_Load(object sender, EventArgs e)
         {
+            tabControlReportes.Invalidate();
             // Cargar la pestaña inicial (Inventario)
             await CargarReporteTabActualAsync();
         }
@@ -71,7 +156,7 @@ namespace Presentacion.Forms.Reportes
                         break;
 
                     case "tabPagos":
-                        dgvPagos.DataSource = await _reporteController.ObtenerPagosMembresiasAsync(inicio, fin);
+                        CargarFormularioPagos();
                         break;
 
                     case "tabMovimientos":
@@ -86,53 +171,6 @@ namespace Presentacion.Forms.Reportes
             finally
             {
                 Cursor = Cursors.Default;
-            }
-        }
-
-        private void tabControlReportes_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            TabPage tabPage = tabControlReportes.TabPages[e.Index];
-            Rectangle tabRect = tabControlReportes.GetTabRect(e.Index);
-            bool isSelected = (tabControlReportes.SelectedIndex == e.Index);
-
-            // 1. Limpiar el fondo del encabezado de la pestaña actual para evitar bordes claros defectuosos
-            using (SolidBrush edgeBrush = new SolidBrush(ColorTranslator.FromHtml("#0b0f1a")))
-            {
-                // Creamos un rectángulo ligeramente más grande para limpiar imperfecciones visuales nativas
-                Rectangle fillRect = new Rectangle(tabRect.X - 1, tabRect.Y - 1, tabRect.Width + 2, tabRect.Height + 2);
-                e.Graphics.FillRectangle(edgeBrush, fillRect);
-            }
-
-            // 2. Definir colores según el estado (Activa: #0f2a4f | Inactiva: #161b26)
-            Color backColor = isSelected ? ColorTranslator.FromHtml("#0f2a4f") : ColorTranslator.FromHtml("#161b26");
-            Color textColor = isSelected ? ColorTranslator.FromHtml("#2dd4ff") : Color.White;
-
-            // Pintar el fondo interno de la pestaña dejando un pequeño espacio para que se note la separación
-            Rectangle innerTabRect = new Rectangle(tabRect.X + 2, tabRect.Y + 2, tabRect.Width - 4, tabRect.Height - 2);
-            using (SolidBrush bgBrush = new SolidBrush(backColor))
-            {
-                e.Graphics.FillRectangle(bgBrush, innerTabRect);
-            }
-
-            // 3. Dibujar el texto perfectamente centrado
-            TextRenderer.DrawText(e.Graphics, tabPage.Text, tabControlReportes.Font, innerTabRect, textColor,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-
-            // 4. Limpiar la franja vacía que sobra a la derecha de la última pestaña
-            if (e.Index == tabControlReportes.TabCount - 1)
-            {
-                Rectangle lastTabRect = tabControlReportes.GetTabRect(tabControlReportes.TabCount - 1);
-                Rectangle headerArea = new Rectangle(
-                    lastTabRect.Right,
-                    0,
-                    tabControlReportes.Width - lastTabRect.Right,
-                    lastTabRect.Height + 5
-                );
-
-                using (SolidBrush bgBrush = new SolidBrush(ColorTranslator.FromHtml("#0b0f1a")))
-                {
-                    e.Graphics.FillRectangle(bgBrush, headerArea);
-                }
             }
         }
 
@@ -184,6 +222,25 @@ namespace Presentacion.Forms.Reportes
             _frmMembresias.Show();
         }
 
+        private void CargarFormularioPagos()
+        {
+            if (_frmPagosMembresias != null && !_frmPagosMembresias.IsDisposed)
+            {
+                return;
+            }
+            tabPagos.Controls.Clear();
+
+            _frmPagosMembresias = new FrmPagosMembresias(_reporteController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabPagos.Controls.Add(_frmPagosMembresias);
+            _frmPagosMembresias.Show();
+        }
         protected override void OnControlAdded(ControlEventArgs e)
         {
             base.OnControlAdded(e);

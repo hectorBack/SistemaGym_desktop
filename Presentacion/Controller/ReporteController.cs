@@ -115,16 +115,20 @@ namespace Presentacion.Controller
         {
             var dtos = await _reporteService.ObtenerPagosMembresiasAsync(inicio, fin);
 
-            return dtos.Select(r => new ReportePagoMembresiaViewModel
+            return dtos.Select(p => new ReportePagoMembresiaViewModel
             {
-                PagoID = r.PagoID,
-                SocioMembresiaID = r.SocioMembresiaID,
-                Socio = r.Socio,
-                Membresia = r.Membresia,
-                Monto = r.PrecioMembresia > 0 ? r.PrecioMembresia : r.Monto, // Precio base de la membresía
-                TotalPagado = r.TotalPagado,                                  // Suma abonada acumulada
-                FormaPago = r.FormaPago,
-                FechaPago = r.FechaPago
+                PagoID = p.PagoID,
+                SocioMembresiaID = p.SocioMembresiaID,
+                Socio = p.Socio,
+                Membresia = p.Membresia,
+                FechaInicio = p.FechaInicio,
+                Folio = p.Folio ?? "N/A",
+                Observaciones = p.Observaciones ?? "N/A",
+                Monto = p.Monto,
+                TotalPagado = p.TotalPagado,
+                PrecioMembresia = p.PrecioMembresia,
+                FormaPago = p.FormaPago,
+                FechaPago = p.FechaPago
             });
         }
 

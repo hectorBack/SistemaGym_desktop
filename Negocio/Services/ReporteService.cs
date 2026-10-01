@@ -108,7 +108,6 @@ namespace Negocio.Services
 
             foreach (var p in pagos.Where(p => p.Activo))
             {
-                // Consultamos el acumulado real abonado a esta membresía específica
                 decimal acumuladoPagado = await _unitOfWork.PagoSocioMembresia
                     .ObtenerTotalPagadoPorSocioMembresiaIdAsync(p.SocioMembresiaID);
 
@@ -122,8 +121,11 @@ namespace Negocio.Services
                     Membresia = p.SocioMembresia?.Membresia != null
                         ? p.SocioMembresia.Membresia.Nombre
                         : "N/A",
+                    FechaInicio = p.SocioMembresia?.FechaInicio ?? DateTime.MinValue, 
+                    Folio = p.Folio,                                                  
+                    Observaciones = p.Observacion,                                 
                     Monto = p.Monto,
-                    TotalPagado = acumuladoPagado, // <--- Asigna los $300.00 acumulados reales
+                    TotalPagado = acumuladoPagado,
                     PrecioMembresia = p.SocioMembresia?.Membresia != null
                         ? p.SocioMembresia.Membresia.Precio
                         : p.Monto,
