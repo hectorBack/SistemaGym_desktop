@@ -154,18 +154,47 @@ namespace Negocio.Services
 
         public async Task<IEnumerable<ReporteSocioDto>> ObtenerSociosAsync()
         {
+            // 1. Obtener socios
             var socios = await _unitOfWork.Socio.ObtenerTodosAsync(incluirInactivos: true);
 
-            return socios.Select(s => new ReporteSocioDto
+            // 2. Obtener todas las asignaciones de membresías
+            var membresiasSocios = await _unitOfWork.SocioMembresia.ObtenerTodasAsync();
+
+            DateTime hoy = DateTime.Today;
+
+            return socios.Select(s =>
             {
-                SocioID = s.SocioID,
-                Clave = s.Clave ?? string.Empty,
-                NombreCompleto = $"{s.Nombre} {s.Apellido}".Trim(),
-                Telefono = s.Telefono ?? string.Empty,
-                EstadoSocio = s.Activo ? "Activo" : "Inactivo",
-                Activo = s.Activo,
-                FechaRegistro = s.CreatedAt
-            });
+                // Buscar la última membresía asociada al socio
+                var ultimaMembresia = membresiasSocios
+                    .Where(m => m.SocioID == s.SocioID)
+                    .OrderByDescending(m => m.FechaFin)
+                    .FirstOrDefault();
+
+                DateTime? fechaVencimiento = ultimaMembresia?.FechaFin;
+                string estatus;
+
+                if (fechaVencimiento == null)
+                {
+                    estatus = "Sin Membresía";
+                }
+                else if (fechaVencimiento.Value.Date >= hoy)
+                {
+                    estatus = "Sin Vencer";
+                }
+                else
+                {
+                    estatus = "Vencido";
+                }
+
+                return new ReporteSocioDto
+                {
+                    SocioID = s.SocioID,
+                    Clave = s.Clave ?? string.Empty,
+                    NombreCompleto = $"{s.Nombre} {s.Apellido}".Trim(),
+                    FechaVencimiento = fechaVencimiento,
+                    Estatus = estatus
+                };
+            }).ToList();
         }
 
         public async Task<IEnumerable<ReporteVentaProductoDto>> ObtenerVentaProductosAsync(DateTime inicio, DateTime fin)

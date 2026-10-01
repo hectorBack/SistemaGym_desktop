@@ -9,6 +9,7 @@ namespace Datos.Interfaces
 {
     public interface ISocioMembresiaRepository
     {
+        Task<IEnumerable<SocioMembresia>> ObtenerTodasAsync(bool incluirInactivos = false);
         Task<IEnumerable<SocioMembresia>> ObtenerPorSocioIdAsync(int socioId);
         Task<SocioMembresia?> ObtenerPorIdAsync(int id);
         Task<SocioMembresia?> ObtenerMembresiaActivaPorSocioIdAsync(int socioId);

@@ -41,10 +41,8 @@ namespace Negocio.DTOs
             public int SocioID { get; set; }
             public string Clave { get; set; } = string.Empty;
             public string NombreCompleto { get; set; } = string.Empty;
-            public string Telefono { get; set; } = string.Empty;
-            public string EstadoSocio { get; set; } = string.Empty;
-            public bool Activo { get; set; }
-            public DateTime FechaRegistro { get; set; }
+            public DateTime? FechaVencimiento { get; set; }
+            public string Estatus { get; set; } = string.Empty; // "Sin Vencer", "Vencido", "Sin Membresía"
         }
 
         // 4. Reporte de Registros (Nuevos socios por rango de fechas)

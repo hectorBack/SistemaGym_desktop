@@ -63,10 +63,8 @@ namespace Presentacion.Controller
                 SocioID = r.SocioID,
                 Clave = r.Clave,
                 NombreCompleto = r.NombreCompleto,
-                Telefono = r.Telefono,
-                EstadoSocio = r.EstadoSocio,
-                Activo = r.Activo,
-                FechaRegistro = r.FechaRegistro
+                FechaVencimiento = r.FechaVencimiento,
+                Estatus = r.Estatus
             });
         }
 

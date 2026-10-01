@@ -18,6 +18,7 @@ namespace Presentacion.Forms.Reportes
         private FrmInventarios? _frmInventarios;
         private FrmMembresiasReporte? _frmMembresias;
         private FrmPagosMembresias? _frmPagosMembresias;
+        private FrmSociosReporte? _frmSociosReporte;
 
         public FrmReportes(ReporteController reporteController)
         {
@@ -140,7 +141,7 @@ namespace Presentacion.Forms.Reportes
                         break;
 
                     case "tabSocios":
-                        dgvSocios.DataSource = await _reporteController.ObtenerSociosAsync();
+                        CargarFormularioSocios();
                         break;
 
                     case "tabRegistro":
@@ -241,6 +242,27 @@ namespace Presentacion.Forms.Reportes
             tabPagos.Controls.Add(_frmPagosMembresias);
             _frmPagosMembresias.Show();
         }
+
+        private void CargarFormularioSocios()
+        {
+            if (_frmSociosReporte != null && !_frmSociosReporte.IsDisposed)
+            {
+                return;
+            }
+            tabSocios.Controls.Clear();
+
+            _frmSociosReporte = new FrmSociosReporte(_reporteController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabSocios.Controls.Add(_frmSociosReporte);
+            _frmSociosReporte.Show();
+        }
+
         protected override void OnControlAdded(ControlEventArgs e)
         {
             base.OnControlAdded(e);

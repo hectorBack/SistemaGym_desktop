@@ -38,11 +38,14 @@ namespace Presentacion.ViewModels
         public int SocioID { get; set; }
         public string Clave { get; set; } = string.Empty;
         public string NombreCompleto { get; set; } = string.Empty;
-        public string Telefono { get; set; } = string.Empty;
-        public string EstadoSocio { get; set; } = string.Empty;
-        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy");
-        public DateTime FechaRegistro { get; set; }
-        public bool Activo { get; set; }
+
+        // Propiedad con formato para mostrar limpio en la tabla
+        public string FechaVencimientoTexto => FechaVencimiento.HasValue
+            ? FechaVencimiento.Value.ToString("dd/MM/yyyy")
+            : "N/A";
+
+        public DateTime? FechaVencimiento { get; set; }
+        public string Estatus { get; set; } = string.Empty; // "Sin Vencer", "Vencido", "Sin Membresía"
     }
 
     public class ReporteRegistroViewModel

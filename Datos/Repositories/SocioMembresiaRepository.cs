@@ -72,5 +72,18 @@ namespace Datos.Repositories
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<SocioMembresia>> ObtenerTodasAsync(bool incluirInactivos = false)
+        {
+            var query = _context.SocioMembresia
+                 .Include(s => s.Pagos)
+                 .AsQueryable();
+
+            if (!incluirInactivos)
+            {
+                query = query.Where(s => s.Activo);
+            }
+            return await query.ToListAsync();
+        }
     }
 }
