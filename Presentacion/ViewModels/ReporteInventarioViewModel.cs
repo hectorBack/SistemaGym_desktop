@@ -69,10 +69,10 @@ namespace Presentacion.ViewModels
     {
         public int VisitaID { get; set; }
         public int? SocioID { get; set; }
-        public string SocioNombre { get; set; } = string.Empty;
-        public string FechaHoraTexto => FechaHora.ToString("dd/MM/yyyy HH:mm");
+        public string Nombre { get; set; } = string.Empty;
+        public decimal Monto { get; set; }
         public DateTime FechaHora { get; set; }
-        public string Observacion { get; set; } = string.Empty;
+        public string FechaHoraTexto => FechaHora.ToString("dd/MM/yyyy hh:mm tt");
     }
 
     public class ReportePagoMembresiaViewModel

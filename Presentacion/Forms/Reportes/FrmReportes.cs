@@ -15,16 +15,19 @@ namespace Presentacion.Forms.Reportes
     public partial class FrmReportes : Form
     {
         private readonly ReporteController _reporteController;
+        private readonly VisitaController _visitaController;
         private FrmInventarios? _frmInventarios;
         private FrmMembresiasReporte? _frmMembresias;
         private FrmPagosMembresias? _frmPagosMembresias;
         private FrmSociosReporte? _frmSociosReporte;
         private FrmRegistrosReporte? _frmRegistrosReporte;
+        private FrmVisitasReporte? _frmVisitasReporte;
 
-        public FrmReportes(ReporteController reporteController)
+        public FrmReportes(ReporteController reporteController, VisitaController visitaController)
         {
             InitializeComponent();
             _reporteController = reporteController;
+            _visitaController = visitaController;
             InicializarEstilosPestañas();
         }
 
@@ -154,7 +157,7 @@ namespace Presentacion.Forms.Reportes
                         break;
 
                     case "tabVisitas":
-                        dgvVisitas.DataSource = await _reporteController.ObtenerVisitasAsync(inicio, fin);
+                        CargarFormularioVisitas();
                         break;
 
                     case "tabPagos":
@@ -282,6 +285,26 @@ namespace Presentacion.Forms.Reportes
 
             tabRegistro.Controls.Add(_frmRegistrosReporte);
             _frmRegistrosReporte.Show();
+        }
+
+        private void CargarFormularioVisitas()
+        {
+            if (_frmVisitasReporte != null && !_frmVisitasReporte.IsDisposed)
+            {
+                return;
+            }
+            tabVisitas.Controls.Clear();
+
+            _frmVisitasReporte = new FrmVisitasReporte(_reporteController, _visitaController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabVisitas.Controls.Add(_frmVisitasReporte);
+            _frmVisitasReporte.Show();
         }
 
         protected override void OnControlAdded(ControlEventArgs e)

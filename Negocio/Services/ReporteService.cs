@@ -225,14 +225,18 @@ namespace Negocio.Services
             ValidarRangoFechas(inicio, fin);
             var visitas = await _unitOfWork.Visita.ObtenerPorRangoFechasAsync(inicio, fin);
 
-            return visitas.Select(v => new ReporteVisitaDto
-            {
-                VisitaID = v.VisitaID,
-                SocioID = v.SocioID,
-                SocioNombre = v.Socio != null ? $"{v.Socio.Nombre} {v.Socio.Apellido}".Trim() : "Visitante General",
-                FechaHora = v.CreatedAt,
-                Observacion = v.Observaciones ?? string.Empty
-            });
+            // Filtrar para obtener ÚNICAMENTE las visitas casuales (donde SocioID es nulo)
+            return visitas
+                .Where(v => !v.SocioID.HasValue)
+                .Select(v => new ReporteVisitaDto
+                {
+                    VisitaID = v.VisitaID,
+                    SocioID = v.SocioID,
+                    // Si la entidad Visita guarda el nombre en 'v.Nombre' / 'v.Apellido', se concatena; de lo contrario "Visitante Casual"
+                    Nombre = string.IsNullOrWhiteSpace($"{v.Nombre} {v.Apellido}") ? "Visitante Casual" : $"{v.Nombre} {v.Apellido}".Trim(),
+                    FechaHora = v.CreatedAt,
+                    Monto = v.MontoPagado // Ajusta con la propiedad real de tu entidad (ej. Costo, Precio, Total)
+                });
         }
 
         #region Métodos Privados

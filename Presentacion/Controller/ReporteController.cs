@@ -101,9 +101,9 @@ namespace Presentacion.Controller
             {
                 VisitaID = r.VisitaID,
                 SocioID = r.SocioID,
-                SocioNombre = r.SocioNombre,
-                FechaHora = r.FechaHora,
-                Observacion = r.Observacion
+                Nombre = r.Nombre,
+                Monto = r.Monto,
+                FechaHora = r.FechaHora
             });
         }
 

@@ -67,9 +67,9 @@ namespace Negocio.DTOs
         {
             public int VisitaID { get; set; }
             public int? SocioID { get; set; }
-            public string SocioNombre { get; set; } = string.Empty;
+            public string Nombre { get; set; } = string.Empty; // Nombre del visitante casual
             public DateTime FechaHora { get; set; }
-            public string Observacion { get; set; } = string.Empty;
+            public decimal Monto { get; set; }                 // Precio de la visita
         }
 
         // 7. Reporte de Pagos de Membresías
