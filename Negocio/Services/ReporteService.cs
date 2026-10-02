@@ -206,18 +206,19 @@ namespace Negocio.Services
             ValidarRangoFechas(inicio, fin);
             var ventas = await _unitOfWork.Venta.ObtenerPorRangoFechasAsync(inicio, fin);
 
-            // Filtrar solo las ventas completadas/activas y agrupar sus detalles por producto
             return ventas
                 .Where(v => v.Activo)
-                .SelectMany(v => v.Detalles)
-                .GroupBy(d => new { d.ProductoID, Nombre = d.Producto != null ? d.Producto.Nombre : "Producto " + d.ProductoID })
-                .Select(g => new ReporteVentaProductoDto
+                .SelectMany(v => v.Detalles, (venta, detalle) => new ReporteVentaProductoDto
                 {
-                    ProductoID = g.Key.ProductoID,
-                    Producto = g.Key.Nombre,
-                    CantidadVendida = g.Sum(d => d.Cantidad),
-                    TotalRecaudado = g.Sum(d => d.Subtotal)
-                });
+                    VentaID = venta.VentaID,
+                    FechaRegistro = venta.CreatedAt, // O venta.FechaRegistro según tu entidad Venta
+                    ProductoID = detalle.ProductoID,
+                    Producto = detalle.Producto != null ? detalle.Producto.Nombre : $"Producto {detalle.ProductoID}",
+                    Cantidad = detalle.Cantidad,
+                    CostoUnitario = detalle.Producto != null ? detalle.Producto.Costo : 0m, // Ajusta el nombre del atributo según tu entidad Producto
+                    PrecioUnitario = detalle.PrecioUnitario
+                })
+                .OrderByDescending(x => x.FechaRegistro);
         }
 
         public async Task<IEnumerable<ReporteVisitaDto>> ObtenerVisitasAsync(DateTime inicio, DateTime fin)

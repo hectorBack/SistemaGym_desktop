@@ -59,6 +59,7 @@ namespace Datos.Repositories
         {
             return await _context.Ventas
                 .Include(v => v.Detalles)
+                .ThenInclude(d => d.Producto)
                 .Where(v => v.Activo && v.FechaVenta >= fechaInicio && v.FechaVenta <= fechaFin)
                 .OrderByDescending(v => v.FechaVenta)
                 .ToListAsync();

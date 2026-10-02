@@ -22,6 +22,7 @@ namespace Presentacion.Forms.Reportes
         private FrmSociosReporte? _frmSociosReporte;
         private FrmRegistrosReporte? _frmRegistrosReporte;
         private FrmVisitasReporte? _frmVisitasReporte;
+        private FrmVentasProductos? _frmVentasproductos;
 
         public FrmReportes(ReporteController reporteController, VisitaController visitaController)
         {
@@ -153,7 +154,7 @@ namespace Presentacion.Forms.Reportes
                         break;
 
                     case "tabVentas":
-                        dgvVentas.DataSource = await _reporteController.ObtenerVentaProductosAsync(inicio, fin);
+                        CargarFormularioVentas();
                         break;
 
                     case "tabVisitas":
@@ -305,6 +306,26 @@ namespace Presentacion.Forms.Reportes
 
             tabVisitas.Controls.Add(_frmVisitasReporte);
             _frmVisitasReporte.Show();
+        }
+
+        private void CargarFormularioVentas()
+        {
+            if (_frmVentasproductos != null && !_frmVentasproductos.IsDisposed)
+            {
+                return;
+            }
+            tabVentas.Controls.Clear();
+
+            _frmVentasproductos = new FrmVentasProductos(_reporteController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabVentas.Controls.Add(_frmVentasproductos);
+            _frmVentasproductos.Show();
         }
 
         protected override void OnControlAdded(ControlEventArgs e)

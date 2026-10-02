@@ -52,20 +52,21 @@
             panelTop.Location = new Point(0, 0);
             panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 110);
+            panelTop.Size = new Size(914, 155);
             panelTop.TabIndex = 0;
             // 
             // lblTotal
             // 
-            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            lblTotal.AutoSize = true;
-            lblTotal.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
+            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblTotal.AutoEllipsis = true;
+            lblTotal.Font = new Font("Microsoft Sans Serif", 10F, FontStyle.Bold);
             lblTotal.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTotal.Location = new Point(480, 68);
+            lblTotal.Location = new Point(77, 108);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(128, 25);
+            lblTotal.Size = new Size(313, 25);
             lblTotal.TabIndex = 11;
             lblTotal.Text = "Total: $0.00";
+            lblTotal.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // btnLimpiarFiltros
             // 
@@ -113,7 +114,7 @@
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(20, 15);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(620, 29);
+            lblTitulo.Size = new Size(599, 29);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Reporte de visitas casuales en un rango de fechas";
             // 
@@ -158,12 +159,12 @@
             // btnEliminarFisico
             // 
             btnEliminarFisico.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEliminarFisico.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnEliminarFisico.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
+            btnEliminarFisico.BackColor = Color.FromArgb(11, 15, 26);
+            btnEliminarFisico.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
             btnEliminarFisico.FlatStyle = FlatStyle.Flat;
             btnEliminarFisico.Font = new Font("Segoe UI", 9F);
-            btnEliminarFisico.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEliminarFisico.Location = new Point(630, 56);
+            btnEliminarFisico.ForeColor = Color.FromArgb(230, 238, 252);
+            btnEliminarFisico.Location = new Point(600, 61);
             btnEliminarFisico.Margin = new Padding(3, 4, 3, 4);
             btnEliminarFisico.Name = "btnEliminarFisico";
             btnEliminarFisico.Size = new Size(110, 38);
@@ -180,7 +181,7 @@
             btnExportarExcel.FlatStyle = FlatStyle.Flat;
             btnExportarExcel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             btnExportarExcel.ForeColor = Color.White;
-            btnExportarExcel.Location = new Point(752, 56);
+            btnExportarExcel.Location = new Point(718, 61);
             btnExportarExcel.Margin = new Padding(3, 4, 3, 4);
             btnExportarExcel.Name = "btnExportarExcel";
             btnExportarExcel.Size = new Size(150, 38);
@@ -218,7 +219,7 @@
             dgvVisitas.Dock = DockStyle.Fill;
             dgvVisitas.EnableHeadersVisualStyles = false;
             dgvVisitas.GridColor = Color.FromArgb(15, 42, 79);
-            dgvVisitas.Location = new Point(0, 110);
+            dgvVisitas.Location = new Point(0, 155);
             dgvVisitas.Margin = new Padding(3, 4, 3, 4);
             dgvVisitas.MultiSelect = false;
             dgvVisitas.Name = "dgvVisitas";
@@ -226,7 +227,7 @@
             dgvVisitas.RowHeadersVisible = false;
             dgvVisitas.RowHeadersWidth = 51;
             dgvVisitas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvVisitas.Size = new Size(914, 690);
+            dgvVisitas.Size = new Size(914, 645);
             dgvVisitas.TabIndex = 1;
             // 
             // FrmVisitasReporte

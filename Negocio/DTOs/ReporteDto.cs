@@ -56,10 +56,16 @@ namespace Negocio.DTOs
         // 5. Reporte de Venta de Productos
         public class ReporteVentaProductoDto
         {
+            public int VentaID { get; set; }
+            public DateTime FechaRegistro { get; set; }
             public int ProductoID { get; set; }
             public string Producto { get; set; } = string.Empty;
-            public int CantidadVendida { get; set; }
-            public decimal TotalRecaudado { get; set; }
+            public int Cantidad { get; set; }
+            public decimal CostoUnitario { get; set; }
+            public decimal PrecioUnitario { get; set; }
+            public decimal Subtotal => Cantidad * PrecioUnitario;
+            public decimal CostoTotal => Cantidad * CostoUnitario;
+            public decimal Ganancia => Subtotal - CostoTotal;
         }
 
         // 6. Reporte de Visitas

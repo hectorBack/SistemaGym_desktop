@@ -50,7 +50,7 @@
             panelTop.Location = new Point(0, 0);
             panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 110);
+            panelTop.Size = new Size(914, 155);
             panelTop.TabIndex = 0;
             // 
             // btnLimpiarFiltros
@@ -149,7 +149,7 @@
             btnExportarExcel.FlatStyle = FlatStyle.Flat;
             btnExportarExcel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             btnExportarExcel.ForeColor = Color.White;
-            btnExportarExcel.Location = new Point(734, 60);
+            btnExportarExcel.Location = new Point(718, 61);
             btnExportarExcel.Margin = new Padding(3, 4, 3, 4);
             btnExportarExcel.Name = "btnExportarExcel";
             btnExportarExcel.Size = new Size(150, 38);
@@ -200,15 +200,17 @@
             // 
             // lblTotal
             // 
-            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            lblTotal.AutoSize = true;
-            lblTotal.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
+            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            lblTotal.AutoEllipsis = true;
+            lblTotal.AutoSize = false;
+            lblTotal.Font = new Font("Microsoft Sans Serif", 10F, FontStyle.Bold);
             lblTotal.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTotal.Location = new Point(594, 68);
+            lblTotal.Location = new Point(77, 108);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(128, 25);
+            lblTotal.Size = new Size(400, 25);
             lblTotal.TabIndex = 11;
             lblTotal.Text = "Total: $0.00";
+            lblTotal.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // FrmPagosMembresias
             // 

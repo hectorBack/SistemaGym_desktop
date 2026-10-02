@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -58,11 +59,15 @@ namespace Presentacion.ViewModels
     }
 
     public class ReporteVentaProductoViewModel
-    {
+    {   
         public int ProductoID { get; set; }
+        public string FechaRegistro { get; set; } = string.Empty;
         public string Producto { get; set; } = string.Empty;
         public int CantidadVendida { get; set; }
-        public decimal TotalRecaudado { get; set; }
+        public string CostoUnitario { get; set; } = string.Empty;       
+        public string PrecioUnitario { get; set; } = string.Empty;
+
+        public string Ganancia { get; set; } = string.Empty;
     }
 
     public class ReporteVisitaViewModel
