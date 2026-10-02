@@ -51,11 +51,10 @@ namespace Presentacion.ViewModels
     public class ReporteRegistroViewModel
     {
         public int SocioID { get; set; }
-        public string Clave { get; set; } = string.Empty;
         public string NombreCompleto { get; set; } = string.Empty;
-        public string Telefono { get; set; } = string.Empty;
-        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy HH:mm");
         public DateTime FechaRegistro { get; set; }
+
+        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy HH:mm");
     }
 
     public class ReporteVentaProductoViewModel

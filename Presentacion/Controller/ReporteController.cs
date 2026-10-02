@@ -75,9 +75,7 @@ namespace Presentacion.Controller
             return dtos.Select(r => new ReporteRegistroViewModel
             {
                 SocioID = r.SocioID,
-                Clave = r.Clave,
                 NombreCompleto = r.NombreCompleto,
-                Telefono = r.Telefono,
                 FechaRegistro = r.FechaRegistro
             });
         }

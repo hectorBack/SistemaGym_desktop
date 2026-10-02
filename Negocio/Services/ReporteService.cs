@@ -140,17 +140,21 @@ namespace Negocio.Services
         public async Task<IEnumerable<ReporteRegistroDto>> ObtenerRegistrosAsync(DateTime inicio, DateTime fin)
         {
             ValidarRangoFechas(inicio, fin);
-            var socios = await _unitOfWork.Socio.ObtenerPorRangoFechasAsync(inicio, fin);
 
-            return socios.Select(s => new ReporteRegistroDto
-            {
-                SocioID = s.SocioID,
-                Clave = s.Clave ?? string.Empty,
-                NombreCompleto = $"{s.Nombre} {s.Apellido}".Trim(),
-                Telefono = s.Telefono ?? string.Empty,
-                FechaRegistro = s.CreatedAt
-            });
-        }
+            var registros = await _unitOfWork.Visita.ObtenerPorRangoFechasAsync(inicio, fin);
+
+            // Filtrar para obtener ÚNICAMENTE las visitas que corresponden a un socio registrado
+            return registros
+                .Where(r => r.SocioID.HasValue)
+                .Select(r => new ReporteRegistroDto
+                {
+                    SocioID = r.SocioID!.Value,
+                    NombreCompleto = r.Socio != null
+                        ? $"{r.Socio.Nombre} {r.Socio.Apellido}".Trim()
+                        : $"{r.Nombre} {r.Apellido}".Trim(),
+                    FechaRegistro = r.CreatedAt
+                });
+        } 
 
         public async Task<IEnumerable<ReporteSocioDto>> ObtenerSociosAsync()
         {

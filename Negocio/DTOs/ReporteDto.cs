@@ -49,9 +49,7 @@ namespace Negocio.DTOs
         public class ReporteRegistroDto
         {
             public int SocioID { get; set; }
-            public string Clave { get; set; } = string.Empty;
             public string NombreCompleto { get; set; } = string.Empty;
-            public string Telefono { get; set; } = string.Empty;
             public DateTime FechaRegistro { get; set; }
         }
 
