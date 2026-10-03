@@ -1,5 +1,4 @@
-﻿using Negocio.DTOs;
-using Presentacion.Controller;
+﻿using Presentacion.Controller;
 using Presentacion.Forms.Socios;
 using Presentacion.ViewModels;
 using System;
@@ -12,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Presentacion.Forms
+namespace Presentacion.Forms.Visitas
 {
     public partial class FrmRegistroVisita : Form
     {
@@ -21,10 +20,10 @@ namespace Presentacion.Forms
         private readonly SocioMembresiaController _socioMembresiaController;
         private readonly MembresiaController _membresiaController;
         private readonly PagoSocioMembresiaController _pagoSocioMembresiaController;
-        private int? _socioIdActual; 
+        private int? _socioIdActual;
         private int? _ultimaVisitaId;
 
-        public FrmRegistroVisita(VisitaController visitaController, 
+        public FrmRegistroVisita(VisitaController visitaController,
             SocioController socioController,
             SocioMembresiaController socioMembresiaController,
             MembresiaController membresiaController,

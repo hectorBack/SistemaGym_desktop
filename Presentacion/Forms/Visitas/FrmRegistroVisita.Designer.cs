@@ -1,4 +1,4 @@
-﻿namespace Presentacion.Forms
+﻿namespace Presentacion.Forms.Visitas
 {
     partial class FrmRegistroVisita
     {

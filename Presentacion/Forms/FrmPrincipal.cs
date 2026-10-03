@@ -69,7 +69,6 @@ namespace Presentacion.Forms
             ConfigurarBotonMenu(btnVentas, IconChar.ShoppingCart, "Ventas");
             ConfigurarBotonMenu(btnMembresias, IconChar.IdCard, "Membresías");
             ConfigurarBotonMenu(btnSocios, IconChar.Users, "Socios");
-            ConfigurarBotonMenu(btnVisitas, IconChar.ClipboardList, "Visitas");
             ConfigurarBotonMenu(btnRegistrarVisita, IconChar.UserCheck, "Registrar Visita");
             ConfigurarBotonMenu(btnConceptos, IconChar.FileInvoice, "Conceptos");
             ConfigurarBotonMenu(btnMovimientos, IconChar.ChartLine, "Movimientos");
@@ -106,8 +105,7 @@ namespace Presentacion.Forms
             if (btnMembresias != null) btnMembresias.Visible = modulosPermitidos.Contains("Membresias");
             if (btnProductos != null) btnProductos.Visible = modulosPermitidos.Contains("Productos");
             if (btnVentas != null) btnVentas.Visible = modulosPermitidos.Contains("Ventas");
-            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Productos");
-            if (btnVisitas != null) btnVisitas.Visible = modulosPermitidos.Contains("Registro");
+            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Categorias");
             if (btnRegistrarVisita != null) btnRegistrarVisita.Visible = modulosPermitidos.Contains("Registro");
             if (btnConceptos != null) btnConceptos.Visible = modulosPermitidos.Contains("Conceptos");
             if (btnMovimientos != null) btnMovimientos.Visible = modulosPermitidos.Contains("Movimientos");
@@ -138,11 +136,6 @@ namespace Presentacion.Forms
         private void btnSocios_Click(object sender, EventArgs e)
         {
             AbrirFormularioEnContenedor<FrmSocios>();
-        }
-
-        private void btnVisitas_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmVisitas>();
         }
 
         private void btnRegistrarVisita_Click(object sender, EventArgs e)

@@ -26,7 +26,6 @@
             btnMovimientos = new FontAwesome.Sharp.IconButton();
             btnConceptos = new FontAwesome.Sharp.IconButton();
             btnRegistrarVisita = new FontAwesome.Sharp.IconButton();
-            btnVisitas = new FontAwesome.Sharp.IconButton();
             btnSocios = new FontAwesome.Sharp.IconButton();
             btnMembresias = new FontAwesome.Sharp.IconButton();
             btnVentas = new FontAwesome.Sharp.IconButton();
@@ -56,7 +55,6 @@
             panelSideMenu.Controls.Add(btnMovimientos);
             panelSideMenu.Controls.Add(btnConceptos);
             panelSideMenu.Controls.Add(btnRegistrarVisita);
-            panelSideMenu.Controls.Add(btnVisitas);
             panelSideMenu.Controls.Add(btnSocios);
             panelSideMenu.Controls.Add(btnMembresias);
             panelSideMenu.Controls.Add(btnVentas);
@@ -216,27 +214,6 @@
             btnRegistrarVisita.TextAlign = ContentAlignment.MiddleLeft;
             btnRegistrarVisita.UseVisualStyleBackColor = true;
             btnRegistrarVisita.Click += btnRegistrarVisita_Click;
-            // 
-            // btnVisitas
-            // 
-            btnVisitas.Dock = DockStyle.Top;
-            btnVisitas.FlatAppearance.BorderSize = 0;
-            btnVisitas.FlatStyle = FlatStyle.Flat;
-            btnVisitas.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnVisitas.ForeColor = Color.FromArgb(230, 238, 252);
-            btnVisitas.IconChar = FontAwesome.Sharp.IconChar.None;
-            btnVisitas.IconColor = Color.Black;
-            btnVisitas.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnVisitas.Location = new Point(0, 435);
-            btnVisitas.Margin = new Padding(3, 4, 3, 4);
-            btnVisitas.Name = "btnVisitas";
-            btnVisitas.Padding = new Padding(11, 0, 0, 0);
-            btnVisitas.Size = new Size(229, 67);
-            btnVisitas.TabIndex = 6;
-            btnVisitas.Text = "Visitas";
-            btnVisitas.TextAlign = ContentAlignment.MiddleLeft;
-            btnVisitas.UseVisualStyleBackColor = true;
-            btnVisitas.Click += btnVisitas_Click;
             // 
             // btnSocios
             // 
@@ -458,7 +435,6 @@
         private FontAwesome.Sharp.IconButton btnVentas;
         private FontAwesome.Sharp.IconButton btnMembresias;
         private FontAwesome.Sharp.IconButton btnSocios;
-        private FontAwesome.Sharp.IconButton btnVisitas;
         private FontAwesome.Sharp.IconButton btnRegistrarVisita;
         private FontAwesome.Sharp.IconButton btnConceptos;
         private FontAwesome.Sharp.IconButton btnMovimientos;

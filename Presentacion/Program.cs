@@ -135,7 +135,6 @@ namespace Presentacion
             services.AddTransient<FrmVentas>();
             services.AddTransient<FrmMembresias>();
             services.AddTransient<FrmSocios>();
-            services.AddTransient<FrmVisitas>();
             services.AddTransient<FrmRegistroVisita>();
             services.AddTransient<FrmConceptos>();
             services.AddTransient<FrmMovimientos>();
