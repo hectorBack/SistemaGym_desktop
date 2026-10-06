@@ -30,6 +30,8 @@ namespace Datos.Interfaces
 
         ICompraRepository Compra { get; }
 
+        ICorteRepository Corte { get; }
+
         //Task<int> CompleteAsync();
         Task<int> SaveChangesAsync();
     }

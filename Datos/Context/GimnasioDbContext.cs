@@ -37,6 +37,7 @@ namespace Datos.Context
         public DbSet<Movimiento> Movimientos { get; set; }
 
         public DbSet<Rol> Roles { get; set; }
+        public DbSet<Corte> Cortes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -68,6 +69,8 @@ namespace Datos.Context
             modelBuilder.Entity<Rol>().ToTable("Roles");
             modelBuilder.Entity<Compra>().ToTable("Compras");
             modelBuilder.Entity<DetalleCompra>().ToTable("DetalleCompras");
+            modelBuilder.Entity<Corte>().ToTable("Cortes");
+
 
             
 

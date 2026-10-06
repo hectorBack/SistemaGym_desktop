@@ -17,9 +17,15 @@ namespace Negocio.DTOs
         public string? Observacion { get; set; }
         public int? CorteID { get; set; }
         public int? UsuarioID { get; set; }
+
+        public string? UsuarioNombre { get; set; }
         public bool Activo { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        public DateTime FechaMovimiento => CreatedAt ?? DateTime.Now;
+        public string? Concepto => ConceptoNombre;
+        public string TipoPago => FormaPago;
     }
 
     public class MovimientoCreateDto

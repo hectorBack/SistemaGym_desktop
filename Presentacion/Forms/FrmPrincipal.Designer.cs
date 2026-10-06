@@ -19,6 +19,7 @@
         {
             components = new System.ComponentModel.Container();
             panelSideMenu = new Panel();
+            btnCorte = new FontAwesome.Sharp.IconButton();
             btnReportes = new FontAwesome.Sharp.IconButton();
             btnCompras = new FontAwesome.Sharp.IconButton();
             btnUsuarios = new FontAwesome.Sharp.IconButton();
@@ -48,6 +49,7 @@
             // panelSideMenu
             // 
             panelSideMenu.BackColor = Color.FromArgb(15, 42, 79);
+            panelSideMenu.Controls.Add(btnCorte);
             panelSideMenu.Controls.Add(btnReportes);
             panelSideMenu.Controls.Add(btnCompras);
             panelSideMenu.Controls.Add(btnUsuarios);
@@ -68,6 +70,27 @@
             panelSideMenu.Size = new Size(229, 982);
             panelSideMenu.TabIndex = 0;
             // 
+            // btnCorte
+            // 
+            btnCorte.Dock = DockStyle.Top;
+            btnCorte.FlatAppearance.BorderSize = 0;
+            btnCorte.FlatStyle = FlatStyle.Flat;
+            btnCorte.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnCorte.ForeColor = Color.FromArgb(230, 238, 252);
+            btnCorte.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnCorte.IconColor = Color.Black;
+            btnCorte.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnCorte.Location = new Point(0, 904);
+            btnCorte.Margin = new Padding(3, 4, 3, 4);
+            btnCorte.Name = "btnCorte";
+            btnCorte.Padding = new Padding(11, 0, 0, 0);
+            btnCorte.Size = new Size(229, 67);
+            btnCorte.TabIndex = 14;
+            btnCorte.Text = "Corte";
+            btnCorte.TextAlign = ContentAlignment.MiddleLeft;
+            btnCorte.UseVisualStyleBackColor = true;
+            btnCorte.Click += btnCorte_Click;
+            // 
             // btnReportes
             // 
             btnReportes.Dock = DockStyle.Top;
@@ -78,7 +101,7 @@
             btnReportes.IconChar = FontAwesome.Sharp.IconChar.None;
             btnReportes.IconColor = Color.Black;
             btnReportes.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnReportes.Location = new Point(0, 904);
+            btnReportes.Location = new Point(0, 837);
             btnReportes.Margin = new Padding(3, 4, 3, 4);
             btnReportes.Name = "btnReportes";
             btnReportes.Padding = new Padding(11, 0, 0, 0);
@@ -99,7 +122,7 @@
             btnCompras.IconChar = FontAwesome.Sharp.IconChar.None;
             btnCompras.IconColor = Color.Black;
             btnCompras.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnCompras.Location = new Point(0, 837);
+            btnCompras.Location = new Point(0, 770);
             btnCompras.Margin = new Padding(3, 4, 3, 4);
             btnCompras.Name = "btnCompras";
             btnCompras.Padding = new Padding(11, 0, 0, 0);
@@ -120,7 +143,7 @@
             btnUsuarios.IconChar = FontAwesome.Sharp.IconChar.None;
             btnUsuarios.IconColor = Color.Black;
             btnUsuarios.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnUsuarios.Location = new Point(0, 770);
+            btnUsuarios.Location = new Point(0, 703);
             btnUsuarios.Margin = new Padding(3, 4, 3, 4);
             btnUsuarios.Name = "btnUsuarios";
             btnUsuarios.Padding = new Padding(11, 0, 0, 0);
@@ -141,7 +164,7 @@
             btnRoles.IconChar = FontAwesome.Sharp.IconChar.None;
             btnRoles.IconColor = Color.Black;
             btnRoles.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnRoles.Location = new Point(0, 703);
+            btnRoles.Location = new Point(0, 636);
             btnRoles.Margin = new Padding(3, 4, 3, 4);
             btnRoles.Name = "btnRoles";
             btnRoles.Padding = new Padding(11, 0, 0, 0);
@@ -162,7 +185,7 @@
             btnMovimientos.IconChar = FontAwesome.Sharp.IconChar.None;
             btnMovimientos.IconColor = Color.Black;
             btnMovimientos.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnMovimientos.Location = new Point(0, 636);
+            btnMovimientos.Location = new Point(0, 569);
             btnMovimientos.Margin = new Padding(3, 4, 3, 4);
             btnMovimientos.Name = "btnMovimientos";
             btnMovimientos.Padding = new Padding(11, 0, 0, 0);
@@ -183,7 +206,7 @@
             btnConceptos.IconChar = FontAwesome.Sharp.IconChar.None;
             btnConceptos.IconColor = Color.Black;
             btnConceptos.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnConceptos.Location = new Point(0, 569);
+            btnConceptos.Location = new Point(0, 502);
             btnConceptos.Margin = new Padding(3, 4, 3, 4);
             btnConceptos.Name = "btnConceptos";
             btnConceptos.Padding = new Padding(11, 0, 0, 0);
@@ -204,7 +227,7 @@
             btnRegistrarVisita.IconChar = FontAwesome.Sharp.IconChar.None;
             btnRegistrarVisita.IconColor = Color.Black;
             btnRegistrarVisita.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            btnRegistrarVisita.Location = new Point(0, 502);
+            btnRegistrarVisita.Location = new Point(0, 435);
             btnRegistrarVisita.Margin = new Padding(3, 4, 3, 4);
             btnRegistrarVisita.Name = "btnRegistrarVisita";
             btnRegistrarVisita.Padding = new Padding(11, 0, 0, 0);
@@ -448,5 +471,6 @@
         private System.Windows.Forms.ToolStripMenuItem itemCerrarSesion;
         private FontAwesome.Sharp.IconButton btnCompras;
         private FontAwesome.Sharp.IconButton btnReportes;
+        private FontAwesome.Sharp.IconButton btnCorte;
     }
 }

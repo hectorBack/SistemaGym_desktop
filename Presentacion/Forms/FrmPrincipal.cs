@@ -19,6 +19,7 @@ using Presentacion.Forms.Roles;
 using Presentacion.Forms.Usuarios;
 using Presentacion.Forms.Compras;
 using Presentacion.Forms.Reportes;
+using Presentacion.Forms.Corte;
 
 namespace Presentacion.Forms
 {
@@ -75,7 +76,7 @@ namespace Presentacion.Forms
             ConfigurarBotonMenu(btnRoles, IconChar.UserShield, "Roles");
             ConfigurarBotonMenu(btnUsuarios, IconChar.UserGear, "Usuarios");
             ConfigurarBotonMenu(btnCompras, IconChar.ShoppingCart, "Compras");
-            ConfigurarBotonMenu(btnReportes, IconChar.ChartBar, "Reportes");
+            ConfigurarBotonMenu(btnCorte, IconChar.CashRegister, "Cortes");
         }
 
         private void ConfigurarBotonMenu(IconButton btn, IconChar icon, string texto)
@@ -111,6 +112,7 @@ namespace Presentacion.Forms
             if (btnMovimientos != null) btnMovimientos.Visible = modulosPermitidos.Contains("Movimientos");
             if (btnCompras != null) btnCompras.Visible = modulosPermitidos.Contains("Compras");
             if (btnReportes != null) btnReportes.Visible = modulosPermitidos.Contains("Reportes");
+            if (btnCorte != null) btnCorte.Visible = modulosPermitidos.Contains("Corte de Caja");
         }
 
         private void btnCategorias_Click(object sender, EventArgs e)
@@ -171,6 +173,11 @@ namespace Presentacion.Forms
         private void btnReportes_Click(object sender, EventArgs e)
         {
             AbrirFormularioEnContenedor<FrmReportes>();
+        }
+
+        private void btnCorte_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioEnContenedor<FrmCortes>();
         }
 
         private void btnUsuarioMenu_Click(object sender, EventArgs e)
@@ -254,7 +261,6 @@ namespace Presentacion.Forms
             this.Close(); // O este.Hide() según la gestión de ciclo de vida de tu aplicación
         }
 
-       
 
         /// <summary>
         /// Método genérico para abrir formularios internos incrustados dentro de panelContenedor.
