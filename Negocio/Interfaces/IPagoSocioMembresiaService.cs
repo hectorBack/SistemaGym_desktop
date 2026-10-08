@@ -19,5 +19,6 @@ namespace Negocio.Interfaces
         // Métodos específicos para la gestión de pagos/abonos de membresías
         Task<IEnumerable<PagoSocioMembresiaDto>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = false);
         Task<decimal> ObtenerTotalPagadoPorSocioMembresiaIdAsync(int socioMembresiaId);
+        Task AnularPagoAsync(int pagoId, int usuarioId, string? motivo = null);
     }
 }

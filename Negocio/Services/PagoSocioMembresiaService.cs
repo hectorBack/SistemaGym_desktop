@@ -72,10 +72,33 @@ namespace Negocio.Services
                 Folio = dto.Folio?.Trim(),
                 FormaPago = string.IsNullOrWhiteSpace(dto.FormaPago) ? "Efectivo" : dto.FormaPago.Trim(),
                 Observacion = dto.Observacion?.Trim(),
+                UsuarioID = dto.UsuarioID,
                 Activo = true
             };
 
             await _unitOfWork.PagoSocioMembresia.AgregarAsync(nuevoPago);
+
+            // 1. REGISTRAR INGRESO EN CAJA - ConceptoID 3 ('Pago Membresia')
+            if (dto.Monto > 0)
+            {
+                // Obtiene el corte abierto o lo abre automáticamente si no existe
+                var corteAbierto = await ObtenerOAbrirCorteAsync(dto.UsuarioID);
+
+                var movimientoIngreso = new Movimiento
+                {
+                    CorteID = corteAbierto.CorteID,
+                    UsuarioID = dto.UsuarioID,
+                    ConceptoID = 3, // 3: 'Pago Membresia' (Ingreso)
+                    Tipo = "Ingreso",
+                    FormaPago = string.IsNullOrWhiteSpace(dto.FormaPago) ? "Efectivo" : dto.FormaPago.Trim(),
+                    Total = dto.Monto,
+                    Observacion = $"Pago Membresía ID: {dto.SocioMembresiaID}. {dto.Observacion}".Trim(),
+                    Activo = true
+                };
+
+                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+            }
+
             await _unitOfWork.SaveChangesAsync();
 
             return MapToDto(nuevoPago);
@@ -148,6 +171,51 @@ namespace Negocio.Services
             return await _unitOfWork.PagoSocioMembresia.ObtenerTotalPagadoPorSocioMembresiaIdAsync(socioMembresiaId);
         }
 
+        public async Task AnularPagoAsync(int pagoId, int usuarioId, string? motivo = null)
+        {
+            var pago = await _unitOfWork.PagoSocioMembresia.ObtenerPorIdAsync(pagoId);
+            if (pago == null)
+            {
+                throw new BusinessException("El pago que intenta anular no existe.");
+            }
+
+            if (!pago.Activo)
+            {
+                throw new BusinessException("El pago seleccionado ya se encuentra anulado o inactivo.");
+            }
+
+            // 1. Desactivar el pago y actualizar observación
+            pago.Activo = false;
+            pago.Observacion = string.IsNullOrEmpty(pago.Observacion)
+                ? $"[ANULADO]: {motivo}"
+                : $"{pago.Observacion} | [ANULADO]: {motivo}";
+
+            _unitOfWork.PagoSocioMembresia.Actualizar(pago);
+
+            // 2. REGISTRAR EGRESO EN CAJA - ConceptoID 4 ('Cancelacion Pago Membresia')
+            if (pago.Monto > 0)
+            {
+                // Obtiene el corte abierto o lo abre automáticamente si no existe
+                var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioId);
+
+                var movimientoEgreso = new Movimiento
+                {
+                    CorteID = corteAbierto.CorteID,
+                    UsuarioID = usuarioId,
+                    ConceptoID = 4, // 4: 'Cancelacion Pago Membresia' (Egreso)
+                    Tipo = "Egreso",
+                    FormaPago = string.IsNullOrWhiteSpace(pago.FormaPago) ? "Efectivo" : pago.FormaPago,
+                    Total = pago.Monto,
+                    Observacion = $"Cancelación Pago Membresía Folio/ID: {pago.Folio ?? pago.PagoID.ToString()}. Motivo: {motivo}".Trim(),
+                    Activo = true
+                };
+
+                await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         private static PagoSocioMembresiaDto MapToDto(PagoSocioMembresia pago)
         {
             return new PagoSocioMembresiaDto
@@ -162,6 +230,42 @@ namespace Negocio.Services
                 CreatedAt = pago.CreatedAt,
                 UpdatedAt = pago.UpdatedAt
             };
+        }
+
+        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
+        {
+            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+
+            if (corteAbierto == null)
+            {
+                // 1. Consultar la configuración del Efectivo Inicial predeterminado
+                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
+                decimal efectivoInicial = 0.00m;
+
+                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
+                {
+                    efectivoInicial = monto;
+                }
+
+                // 2. Crear automáticamente la caja para el usuario actual
+                corteAbierto = new Corte
+                {
+                    UsuarioID = usuarioId,
+                    FechaApertura = DateTime.Now,
+                    MontoInicial = efectivoInicial,
+                    TotalIngresos = 0m,
+                    TotalEgresos = 0m,
+                    MontoFinal = efectivoInicial,
+                    Observaciones = "Apertura automática iniciada por cobro/movimiento de Membresía",
+                    Estado = "Abierto",
+                    Activo = true
+                };
+
+                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return corteAbierto;
         }
     }
 }

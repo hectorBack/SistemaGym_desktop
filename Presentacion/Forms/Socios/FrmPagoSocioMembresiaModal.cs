@@ -18,15 +18,18 @@ namespace Presentacion.Forms.Socios
     {
         private readonly PagoSocioMembresiaController _controller;
         private readonly SocioMembresiaViewModel _socioMembresia;
+        private readonly int _usuarioId;
         private decimal _montoTotalMembresia;
 
         public FrmPagoSocioMembresiaModal(
             PagoSocioMembresiaController controller,
-            SocioMembresiaViewModel socioMembresia)
+            SocioMembresiaViewModel socioMembresia,
+            int usuarioId)
         {
             InitializeComponent();
             _controller = controller;
             _socioMembresia = socioMembresia;
+            _usuarioId = usuarioId;
         }
 
         private async void FrmPagoSocioMembresiaModal_Load(object sender, EventArgs e)
@@ -161,6 +164,7 @@ namespace Presentacion.Forms.Socios
                 await _controller.GuardarPagoAsync(
                     pagoId: null,
                     socioMembresiaId: _socioMembresia.SocioMembresiaID,
+                    usuarioId: _usuarioId,
                     monto: monto,
                     folio: folio,
                     formaPago: formaPago,
@@ -202,10 +206,11 @@ namespace Presentacion.Forms.Socios
 
             if (confirmacion == DialogResult.Yes)
             {
+
                 try
                 {
-                    await _controller.EliminarFisicoAsync(pagoSeleccionado.PagoID);
-                    MessageBox.Show("El pago ha sido eliminado.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await _controller.AnularPagoAsync(pagoSeleccionado.PagoID, _usuarioId, "Cancelación de pago realizada desde el modal.");
+                    MessageBox.Show("El pago ha sido anulado y registrado en caja con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     await CargarHistorialPagosAsync();
                 }
                 catch (Exception ex)

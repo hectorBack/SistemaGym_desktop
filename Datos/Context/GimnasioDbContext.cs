@@ -38,6 +38,7 @@ namespace Datos.Context
 
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Corte> Cortes { get; set; }
+        public DbSet<Configuracion> Configuraciones { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -70,9 +71,8 @@ namespace Datos.Context
             modelBuilder.Entity<Compra>().ToTable("Compras");
             modelBuilder.Entity<DetalleCompra>().ToTable("DetalleCompras");
             modelBuilder.Entity<Corte>().ToTable("Cortes");
+            modelBuilder.Entity<Configuracion>().ToTable("Configuraciones");
 
-
-            
 
             // Mapeo explícito de nombres de columnas que difieren del estándar de C#
             modelBuilder.Entity<Usuario>()

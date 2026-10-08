@@ -23,6 +23,8 @@ namespace Datos.Repositories
         {
             var query = _context.Movimientos
                 .Include(m => m.Concepto) // Se incluye la navegación a Concepto para consultar el nombre
+                .Include(m => m.Corte)
+                .Include(m => m.Usuario)
                 .AsQueryable();
 
             if (!incluirInactivos)
@@ -37,6 +39,8 @@ namespace Datos.Repositories
         {
             return await _context.Movimientos
                 .Include(m => m.Concepto)
+                .Include(m => m.Corte)
+                .Include(m => m.Usuario)
                 .FirstOrDefaultAsync(m => m.MovimientoID == id);
         }
 
@@ -66,6 +70,8 @@ namespace Datos.Repositories
         {
            return await _context.Movimientos
                 .Include(m => m.Concepto)
+                .Include(m => m.Corte)
+                .Include(m => m.Usuario)
                 .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();

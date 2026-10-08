@@ -14,7 +14,7 @@ namespace Negocio.Interfaces
         Task<CompraDto?> ObtenerPorCodigoAsync(string codigo);
         Task<IEnumerable<CompraDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
         Task<CompraDto> CrearAsync(CompraCreateDto dto);
-        Task CancelarCompraAsync(int id, string? observacion = null);
+        Task CancelarCompraAsync(int id, int usuarioId, string? observacion = null);
         Task EliminarLogicoAsync(int id);
         Task EliminarFisicoAsync(int id);
         Task<string> ObtenerSiguienteCodigoAsync();

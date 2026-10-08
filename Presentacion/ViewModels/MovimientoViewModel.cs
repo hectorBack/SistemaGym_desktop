@@ -16,7 +16,9 @@ namespace Presentacion.ViewModels
         public decimal Total { get; set; }
         public string? Observacion { get; set; }
         public int? CorteID { get; set; }
+        public DateTime? FechaCorte { get; set; } 
         public int? UsuarioID { get; set; }
+        public string UsuarioNombre { get; set; } = string.Empty;
         public bool Activo { get; set; }
         public string Estado => Activo ? "Activo" : "Inactivo";
         public DateTime? CreatedAt { get; set; }

@@ -20,6 +20,7 @@ using Presentacion.Forms.Usuarios;
 using Presentacion.Forms.Compras;
 using Presentacion.Forms.Reportes;
 using Presentacion.Forms.Corte;
+using Presentacion.Forms.Configuracion;
 
 namespace Presentacion.Forms
 {
@@ -75,8 +76,10 @@ namespace Presentacion.Forms
             ConfigurarBotonMenu(btnMovimientos, IconChar.ChartLine, "Movimientos");
             ConfigurarBotonMenu(btnRoles, IconChar.UserShield, "Roles");
             ConfigurarBotonMenu(btnUsuarios, IconChar.UserGear, "Usuarios");
+            ConfigurarBotonMenu(btnReportes, IconChar.ChartBar, "Reportes");
             ConfigurarBotonMenu(btnCompras, IconChar.ShoppingCart, "Compras");
             ConfigurarBotonMenu(btnCorte, IconChar.CashRegister, "Cortes");
+            ConfigurarBotonMenu(btnConfiguracion, IconChar.Gear, "Configuraciones");
         }
 
         private void ConfigurarBotonMenu(IconButton btn, IconChar icon, string texto)
@@ -113,6 +116,8 @@ namespace Presentacion.Forms
             if (btnCompras != null) btnCompras.Visible = modulosPermitidos.Contains("Compras");
             if (btnReportes != null) btnReportes.Visible = modulosPermitidos.Contains("Reportes");
             if (btnCorte != null) btnCorte.Visible = modulosPermitidos.Contains("Corte de Caja");
+            if (btnConfiguracion != null) btnConfiguracion.Visible = modulosPermitidos.Contains("Configuracion");
+
         }
 
         private void btnCategorias_Click(object sender, EventArgs e)
@@ -179,6 +184,12 @@ namespace Presentacion.Forms
         {
             AbrirFormularioEnContenedor<FrmCortes>();
         }
+
+        private void btnConfiguracion_Click(object sender, EventArgs e)
+        {
+            AbrirFormularioEnContenedor<FrmConfiguraciones>();
+        }
+
 
         private void btnUsuarioMenu_Click(object sender, EventArgs e)
         {

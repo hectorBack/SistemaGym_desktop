@@ -121,9 +121,9 @@ namespace Presentacion.Controller
             await _visitaService.EliminarFisicoAsync(id);
         }
 
-        public async Task<AccesoResultadoViewModel> ProcesarAccesoRapidoAsync(string clave)
+        public async Task<AccesoResultadoViewModel> ProcesarAccesoRapidoAsync(string clave, int usuarioIdSesion)
         {
-            var dto = await _visitaService.ProcesarAccesoRapidoAsync(clave);
+            var dto = await _visitaService.ProcesarAccesoRapidoAsync(clave, usuarioIdSesion);
 
             return new AccesoResultadoViewModel
             {
@@ -166,9 +166,9 @@ namespace Presentacion.Controller
             });
         }
 
-        public async Task CancelarVisitaAsync(int id, string? motivo = null)
+        public async Task CancelarVisitaAsync(int id, int usuarioId, string? motivo = null)
         {
-            await _visitaService.CancelarVisitaAsync(id, motivo);
+            await _visitaService.CancelarVisitaAsync(id, usuarioId, motivo);
         }
     }
 }

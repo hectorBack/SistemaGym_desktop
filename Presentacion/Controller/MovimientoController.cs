@@ -32,7 +32,9 @@ namespace Presentacion.Controller
                 Total = m.Total,
                 Observacion = m.Observacion,
                 CorteID = m.CorteID,
+                FechaCorte = m.FechaAperturaCorte,
                 UsuarioID = m.UsuarioID,
+                UsuarioNombre = m.UsuarioNombre,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt
             });
@@ -109,7 +111,9 @@ namespace Presentacion.Controller
                 Total = m.Total,
                 Observacion = m.Observacion,
                 CorteID = m.CorteID,
+                FechaCorte = m.FechaAperturaCorte,
                 UsuarioID = m.UsuarioID,
+                UsuarioNombre = m.UsuarioNombre,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt
             });

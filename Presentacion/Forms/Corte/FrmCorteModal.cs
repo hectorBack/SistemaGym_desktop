@@ -18,8 +18,9 @@ namespace Presentacion.Forms.Corte
     {
         private readonly CorteController _corteController;
         private readonly MovimientoController _movimientoController;
+        private readonly decimal _efectivoInicialPredeterminado;
 
-        private readonly int _usuarioIdActual = 1;
+        private readonly int _usuarioIdActual;
         private List<MovimientoViewModel> _movimientosActuales = new();
 
         private decimal _totalIngresos;
@@ -27,21 +28,40 @@ namespace Presentacion.Forms.Corte
         private decimal _montoFinalCalculado;
 
         public FrmCorteModal(
-            CorteController corteController,
-            MovimientoController movimientoController)
+         CorteController corteController,
+         MovimientoController movimientoController,
+         int usuarioIdActual)
+         : this(corteController, movimientoController, 0m, usuarioIdActual)
+        {
+        }
+
+        public FrmCorteModal(
+         CorteController corteController,
+         MovimientoController movimientoController,
+         decimal efectivoInicialPredeterminado,
+         int usuarioIdActual)
         {
             InitializeComponent();
 
             _corteController = corteController;
             _movimientoController = movimientoController;
+            _efectivoInicialPredeterminado = efectivoInicialPredeterminado;
+            _usuarioIdActual = usuarioIdActual;
 
             lblTitulo.Text = "Corte de Caja / Flujo de Efectivo";
         }
 
         private async void FrmCorteModal_Load(object sender, EventArgs e)
         {
+            // Configurar el formato visual para incluir fecha y hora
+            dtpFechaInicio.Format = DateTimePickerFormat.Custom;
+            dtpFechaInicio.CustomFormat = "dd/MM/yyyy HH:mm";
+
+            dtpFechaFin.Format = DateTimePickerFormat.Custom;
+            dtpFechaFin.CustomFormat = "dd/MM/yyyy HH:mm";
+
             dtpFechaInicio.Value = DateTime.Today;
-            dtpFechaFin.Value = DateTime.Today.AddDays(1).AddTicks(-1);
+            dtpFechaFin.Value = DateTime.Now;
 
             await ConsultarMovimientosAsync();
         }
@@ -57,15 +77,17 @@ namespace Presentacion.Forms.Corte
             {
                 btnConsultar.Enabled = false;
 
-                DateTime fechaInicio = dtpFechaInicio.Value.Date;
-                DateTime fechaFin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+                DateTime fechaInicio = dtpFechaInicio.Value;
+                DateTime fechaFin = dtpFechaFin.Value;
 
                 // Obtener movimientos por rango utilizando MovimientoController
                 var movimientos = await _movimientoController.ObtenerPorRangoFechasAsync(fechaInicio, fechaFin);
                 _movimientosActuales = movimientos.Where(m => m.Activo).ToList();
 
-                // LLAMADA CORREGIDA: sin parámetro y utilizando el nombre exacto de tu controller
-                decimal efectivoInicial = await _corteController.ObtenerEfectivoEnCajaAsync();
+                // Si se recibió un efectivo inicial de la configuración, se usa; en caso contrario, se consulta el actual
+                decimal efectivoInicial = _efectivoInicialPredeterminado > 0
+                ? _efectivoInicialPredeterminado
+                : await _corteController.ObtenerEfectivoEnCajaAsync();
 
                 LlenarGridMovimientos(_movimientosActuales);
                 CalcularTotales(efectivoInicial);
@@ -85,7 +107,6 @@ namespace Presentacion.Forms.Corte
             dgvMovimientos.DataSource = null;
             dgvMovimientos.DataSource = lista.Select(m => new
             {
-                ID = m.MovimientoID,
                 Fecha = m.CreatedAt.HasValue ? m.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A",
                 Concepto = m.ConceptoNombre,
                 Tipo = m.Tipo,
@@ -141,21 +162,30 @@ namespace Presentacion.Forms.Corte
             {
                 btnRealizarCorte.Enabled = false;
 
-                // 1. Validar que exista un corte abierto para el usuario
+                // 1. Consultar si el usuario en sesión tiene un corte abierto
                 var corteAbierto = await _corteController.ObtenerCorteAbiertoPorUsuarioAsync(_usuarioIdActual);
+
+                int corteIdAProcesar;
 
                 if (corteAbierto == null)
                 {
-                    MessageBox.Show("No se encontró ningún corte de caja abierto para este usuario.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    // Si no existe un registro de apertura previo, lo abrimos automáticamente
+                    var nuevoCorteDto = await _corteController.AbrirCorteAsync(_usuarioIdActual, _efectivoInicialPredeterminado);
+
+                    // Accedemos a la propiedad .CorteID de la respuesta
+                    corteIdAProcesar = nuevoCorteDto.CorteID;
+                }
+                else
+                {
+                    corteIdAProcesar = corteAbierto.CorteID;
                 }
 
-                // 2. Ejecutar el cierre utilizando el método exacto de CorteController
+                // 2. Realizar el cierre/corte definitivo de la caja
                 await _corteController.CerrarCorteAsync(
-                    corteId: corteAbierto.CorteID,
-                    totalIngresos: _totalIngresos,       // Cambia por tu variable con el total de ingresos calculados
-                    totalEgresos: _totalEgresos,         // Cambia por tu variable con el total de egresos calculados
-                    montoFinal: _montoFinalCalculado,    // Cambia por tu variable con el monto final de caja
+                    corteId: corteIdAProcesar,
+                    totalIngresos: _totalIngresos,
+                    totalEgresos: _totalEgresos,
+                    montoFinal: _montoFinalCalculado,
                     observaciones: txtObservaciones.Text.Trim()
                 );
 
@@ -183,8 +213,6 @@ namespace Presentacion.Forms.Corte
         private void ConfigurarEstiloGrid()
         {
             if (dgvMovimientos.Columns.Count == 0) return;
-
-            dgvMovimientos.Columns["ID"].HeaderText = "ID";
             dgvMovimientos.Columns["Fecha"].HeaderText = "Fecha";
             dgvMovimientos.Columns["Concepto"].HeaderText = "Concepto";
             dgvMovimientos.Columns["Tipo"].HeaderText = "Tipo";

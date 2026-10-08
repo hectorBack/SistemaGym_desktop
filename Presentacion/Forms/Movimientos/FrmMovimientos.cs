@@ -80,16 +80,17 @@ namespace Presentacion.Forms.Movimientos
             // 1. Ocultar columnas técnicas y de FKs brutas
             if (dgvMovimientos.Columns["Activo"] != null) dgvMovimientos.Columns["Activo"].Visible = false;
             if (dgvMovimientos.Columns["ConceptoID"] != null) dgvMovimientos.Columns["ConceptoID"].Visible = false;
+            if (dgvMovimientos.Columns["CorteID"] != null) dgvMovimientos.Columns["CorteID"].Visible = false;     // Ocultar ID del corte
+            if (dgvMovimientos.Columns["UsuarioID"] != null) dgvMovimientos.Columns["UsuarioID"].Visible = false; // Ocultar ID del usuario
 
             // 2. Configurar encabezados
-            if (dgvMovimientos.Columns["MovimientoID"] != null) dgvMovimientos.Columns["MovimientoID"].HeaderText = "ID";
             if (dgvMovimientos.Columns["Tipo"] != null) dgvMovimientos.Columns["Tipo"].HeaderText = "Tipo";
             if (dgvMovimientos.Columns["ConceptoNombre"] != null) dgvMovimientos.Columns["ConceptoNombre"].HeaderText = "Concepto";
             if (dgvMovimientos.Columns["FormaPago"] != null) dgvMovimientos.Columns["FormaPago"].HeaderText = "Forma Pago";
             if (dgvMovimientos.Columns["Total"] != null) dgvMovimientos.Columns["Total"].HeaderText = "Total";
             if (dgvMovimientos.Columns["Observacion"] != null) dgvMovimientos.Columns["Observacion"].HeaderText = "Observaciones";
-            if (dgvMovimientos.Columns["CorteID"] != null) dgvMovimientos.Columns["CorteID"].HeaderText = "Corte ID";
-            if (dgvMovimientos.Columns["UsuarioID"] != null) dgvMovimientos.Columns["UsuarioID"].HeaderText = "Usuario ID";
+            if (dgvMovimientos.Columns["FechaCorte"] != null) dgvMovimientos.Columns["FechaCorte"].HeaderText = "Fecha Corte";   // 🟢 Encabezado para Fecha Corte
+            if (dgvMovimientos.Columns["UsuarioNombre"] != null) dgvMovimientos.Columns["UsuarioNombre"].HeaderText = "Usuario"; // 🟢 Encabezado para Usuario
             if (dgvMovimientos.Columns["Estado"] != null) dgvMovimientos.Columns["Estado"].HeaderText = "Estado";
             if (dgvMovimientos.Columns["CreatedAt"] != null) dgvMovimientos.Columns["CreatedAt"].HeaderText = "Fecha Registro";
 
@@ -104,28 +105,26 @@ namespace Presentacion.Forms.Movimientos
 
             string[] ordenColumnas =
             {
-                "MovimientoID",
-                "Tipo",
-                "ConceptoNombre",
-                "FormaPago",
-                "Total",
-                "Observacion",
-                "CorteID",
-                "UsuarioID",
-                "Estado",
-                "CreatedAt"
-            };
+            "Tipo",
+            "ConceptoNombre",
+            "FormaPago",
+            "Total",
+            "Observacion",
+            "FechaCorte",    
+            "UsuarioNombre", 
+            "Estado",
+            "CreatedAt"
+        };
 
             var pesos = new Dictionary<string, float>
             {
-                ["MovimientoID"] = 45,
                 ["Tipo"] = 70,
                 ["ConceptoNombre"] = 140,
                 ["FormaPago"] = 90,
                 ["Total"] = 85,
                 ["Observacion"] = 150,
-                ["CorteID"] = 60,
-                ["UsuarioID"] = 60,
+                ["FechaCorte"] = 110,   
+                ["UsuarioNombre"] = 100, 
                 ["Estado"] = 70,
                 ["CreatedAt"] = 110
             };
@@ -141,6 +140,8 @@ namespace Presentacion.Forms.Movimientos
                 {
                     "ConceptoNombre" => 100,
                     "Observacion" => 100,
+                    "FechaCorte" => 100,
+                    "UsuarioNombre" => 90,
                     "CreatedAt" => 95,
                     _ => 50
                 };

@@ -19,6 +19,7 @@
         {
             components = new System.ComponentModel.Container();
             panelSideMenu = new Panel();
+            btnConfiguracion = new FontAwesome.Sharp.IconButton();
             btnCorte = new FontAwesome.Sharp.IconButton();
             btnReportes = new FontAwesome.Sharp.IconButton();
             btnCompras = new FontAwesome.Sharp.IconButton();
@@ -49,6 +50,7 @@
             // panelSideMenu
             // 
             panelSideMenu.BackColor = Color.FromArgb(15, 42, 79);
+            panelSideMenu.Controls.Add(btnConfiguracion);
             panelSideMenu.Controls.Add(btnCorte);
             panelSideMenu.Controls.Add(btnReportes);
             panelSideMenu.Controls.Add(btnCompras);
@@ -67,8 +69,29 @@
             panelSideMenu.Location = new Point(0, 0);
             panelSideMenu.Margin = new Padding(3, 4, 3, 4);
             panelSideMenu.Name = "panelSideMenu";
-            panelSideMenu.Size = new Size(229, 982);
+            panelSideMenu.Size = new Size(229, 1055);
             panelSideMenu.TabIndex = 0;
+            // 
+            // btnConfiguracion
+            // 
+            btnConfiguracion.Dock = DockStyle.Top;
+            btnConfiguracion.FlatAppearance.BorderSize = 0;
+            btnConfiguracion.FlatStyle = FlatStyle.Flat;
+            btnConfiguracion.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnConfiguracion.ForeColor = Color.FromArgb(230, 238, 252);
+            btnConfiguracion.IconChar = FontAwesome.Sharp.IconChar.None;
+            btnConfiguracion.IconColor = Color.Black;
+            btnConfiguracion.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnConfiguracion.Location = new Point(0, 971);
+            btnConfiguracion.Margin = new Padding(3, 4, 3, 4);
+            btnConfiguracion.Name = "btnConfiguracion";
+            btnConfiguracion.Padding = new Padding(11, 0, 0, 0);
+            btnConfiguracion.Size = new Size(229, 67);
+            btnConfiguracion.TabIndex = 15;
+            btnConfiguracion.Text = "Configuracion";
+            btnConfiguracion.TextAlign = ContentAlignment.MiddleLeft;
+            btnConfiguracion.UseVisualStyleBackColor = true;
+            btnConfiguracion.Click += btnConfiguracion_Click;
             // 
             // btnCorte
             // 
@@ -425,7 +448,7 @@
             panelContenedor.Location = new Point(229, 50);
             panelContenedor.Margin = new Padding(3, 4, 3, 4);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(914, 932);
+            panelContenedor.Size = new Size(914, 1005);
             panelContenedor.TabIndex = 1;
             // 
             // FrmPrincipal
@@ -433,7 +456,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
-            ClientSize = new Size(1143, 982);
+            ClientSize = new Size(1143, 1055);
             Controls.Add(panelContenedor);
             Controls.Add(panelSuperior);
             Controls.Add(panelSideMenu);
@@ -472,5 +495,6 @@
         private FontAwesome.Sharp.IconButton btnCompras;
         private FontAwesome.Sharp.IconButton btnReportes;
         private FontAwesome.Sharp.IconButton btnCorte;
+        private FontAwesome.Sharp.IconButton btnConfiguracion;
     }
 }

@@ -164,16 +164,23 @@ namespace Presentacion.Forms.Compras
                 return;
             }
 
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de cancelar la compra con folio '{item.Codigo}' por {item.TotalTexto}?\nEsta acción devolverá el stock de los productos.", "Confirmar Cancelación"))
+            if (FormHelper.ConfirmarAccion($"¿Está seguro de cancelar la compra con folio '{item.Codigo}' por {item.TotalTexto}?\nEsta acción reajustará el stock y registrará la devolución del importe en el corte de caja.", "Confirmar Cancelación"))
             {
                 try
                 {
-                    await _controller.CancelarCompraAsync(item.CompraID, "Cancelado desde módulo de compras");
+                    int usuarioIdSesion = SesionUsuario.UsuarioID;
+                    string observacion = "Cancelado desde módulo de compras";
+
+                    // Se envía el usuarioIdSesion como nuevo parámetro requerido
+                    await _controller.CancelarCompraAsync(item.CompraID, usuarioIdSesion, observacion);
+
+                    MessageBox.Show("La compra se ha cancelado correctamente y se devolvió el efectivo a la caja.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                     await CargarComprasAsync();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Error al cancelar compra", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

@@ -45,9 +45,9 @@ namespace Presentacion.Controller
             return await _compraService.CrearAsync(createDto);
         }
 
-        public async Task CancelarCompraAsync(int id, string? observacion = null)
+        public async Task CancelarCompraAsync(int id, int usuarioId, string? observacion = null)
         {
-            await _compraService.CancelarCompraAsync(id, observacion);
+            await _compraService.CancelarCompraAsync(id, usuarioId, observacion);
         }
 
         public async Task CambiarEstadoLogicoAsync(int id)

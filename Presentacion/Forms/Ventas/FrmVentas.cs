@@ -193,7 +193,11 @@ namespace Presentacion.Forms.Ventas
             {
                 try
                 {
-                    await _ventaController.AnularVentaAsync(item.VentaID);
+                    // Se obtiene el ID del usuario logueado en la sesión activa
+                    int usuarioId = SesionUsuario.UsuarioID;
+                    string motivo = "Anulación de venta desde el módulo de ventas";
+
+                    await _ventaController.AnularVentaAsync(item.VentaID, usuarioId, motivo);
                     await CargarVentasAsync();
                 }
                 catch (Exception ex)

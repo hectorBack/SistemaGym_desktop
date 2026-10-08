@@ -123,7 +123,7 @@ namespace Negocio.Services
             });
         }
 
-        public async Task<VisitaDto> RegistrarVisitaAsync(VisitaCreateDto dto)
+        public async Task<VisitaDto> RegistrarVisitaAsync(VisitaCreateDto dto, int? usuarioIdSesion = null)
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
@@ -134,6 +134,7 @@ namespace Negocio.Services
 
             string claveLimpia = dto.Clave.Trim();
             Visita nuevaVisita;
+            decimal montoCobrado = 0.00m;
 
             // CASO 1: Visita Casual (Clave = 100)
             if (claveLimpia == CLAVE_VISITA_CASUAL)
@@ -143,6 +144,8 @@ namespace Negocio.Services
                 {
                     throw new BusinessException("La membresía o pase de visita seleccionado no existe o está inactivo.");
                 }
+
+                montoCobrado = membresia.Precio;
 
                 nuevaVisita = new Visita
                 {
@@ -195,6 +198,28 @@ namespace Negocio.Services
 
             await _unitOfWork.Visita.AgregarAsync(nuevaVisita);
             await _unitOfWork.SaveChangesAsync();
+
+            // 🟢 REGISTRAR MOVIMIENTO SI ES VISITA CASUAL Y TIENE COSTO
+            if (montoCobrado > 0 && usuarioIdSesion.HasValue)
+            {
+                // Obtiene el corte abierto o lo abre automáticamente si no existe
+                var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioIdSesion.Value);
+
+                var movimientoIngreso = new Movimiento
+                {
+                    CorteID = corteAbierto.CorteID,
+                    UsuarioID = usuarioIdSesion.Value,
+                    ConceptoID = 7, // 7: 'Visita' (Ingreso)
+                    Tipo = "Ingreso",
+                    FormaPago = "Efectivo",
+                    Total = montoCobrado,
+                    Observacion = $"Cobro Visita Casual - {nuevaVisita.Nombre} {nuevaVisita.Apellido}".Trim(),
+                    Activo = true
+                };
+
+                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+                await _unitOfWork.SaveChangesAsync();
+            }
 
             // Cargar datos de navegación para armar el DTO de respuesta
             var visitaGuardada = await _unitOfWork.Visita.ObtenerPorIdAsync(nuevaVisita.VisitaID);
@@ -255,7 +280,7 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<AccesoResultadoDto> ProcesarAccesoRapidoAsync(string clave)
+        public async Task<AccesoResultadoDto> ProcesarAccesoRapidoAsync(string clave, int usuarioIdSesion)
         {
             string claveLimpia = clave?.Trim() ?? string.Empty;
 
@@ -266,7 +291,7 @@ namespace Negocio.Services
 
             if (claveLimpia == CLAVE_VISITA_CASUAL)
             {
-                return await ProcesarVisitaCasualAsync();
+                return await ProcesarVisitaCasualAsync(usuarioIdSesion);
             }
 
             return await ProcesarAccesoSocioAsync(claveLimpia);
@@ -276,11 +301,16 @@ namespace Negocio.Services
         // MÉTODOS AUXILIARES PRIVADOS
         // =========================================================================
 
-        private async Task<AccesoResultadoDto> ProcesarVisitaCasualAsync()
+        private async Task<AccesoResultadoDto> ProcesarVisitaCasualAsync(int usuarioIdSesion)
         {
             var membresias = await _unitOfWork.Membresia.ObtenerTodasAsync();
             var membresiaVisita = membresias.FirstOrDefault(m => m.Activo && m.Nombre.Contains("Visita"))
-                                  ?? membresias.FirstOrDefault(m => m.Activo);
+                                   ?? membresias.FirstOrDefault(m => m.Activo);
+
+            decimal monto = membresiaVisita?.Precio ?? 35.00m;
+
+            // Obtener o crear caja automáticamente antes de procesar el acceso
+            var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioIdSesion);
 
             var nuevaVisitaCasual = new Visita
             {
@@ -289,7 +319,7 @@ namespace Negocio.Services
                 Clave = CLAVE_VISITA_CASUAL,
                 Nombre = "VISITA",
                 Apellido = "CASUAL",
-                MontoPagado = membresiaVisita?.Precio ?? 35.00m,
+                MontoPagado = monto,
                 TipoAcceso = "Visita Casual",
                 Observaciones = "Casual",
                 Activo = true
@@ -297,6 +327,25 @@ namespace Negocio.Services
 
             await _unitOfWork.Visita.AgregarAsync(nuevaVisitaCasual);
             await _unitOfWork.SaveChangesAsync();
+
+            // Registrar el Movimiento de Ingreso con ConceptoID = 7
+            if (monto > 0)
+            {
+                var movimientoIngreso = new Movimiento
+                {
+                    CorteID = corteAbierto.CorteID,
+                    UsuarioID = usuarioIdSesion,
+                    ConceptoID = 7, // 7: 'Visita' (Ingreso)
+                    Tipo = "Ingreso",
+                    FormaPago = "Efectivo",
+                    Total = monto,
+                    Observacion = "Cobro de Visita Casual - Acceso Rápido",
+                    Activo = true
+                };
+
+                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+                await _unitOfWork.SaveChangesAsync();
+            }
 
             return new AccesoResultadoDto
             {
@@ -437,7 +486,7 @@ namespace Negocio.Services
             });
         }
 
-        public async Task CancelarVisitaAsync(int id, string? motivo = null)
+        public async Task CancelarVisitaAsync(int id, int usuarioId, string? motivo = null)
         {
             var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(id);
             if (visita == null)
@@ -450,6 +499,8 @@ namespace Negocio.Services
                 throw new BusinessException("La visita ya se encuentra inactiva o cancelada.");
             }
 
+            decimal montoDevuelto = visita.MontoPagado;
+
             visita.MontoPagado = 0.00m;
             visita.Activo = false;
 
@@ -458,7 +509,66 @@ namespace Negocio.Services
                  : $"Cancelada: {motivo.Trim()}";
 
             _unitOfWork.Visita.Actualizar(visita);
+
+            // Si la visita tuvo un cobro previo, registramos el egreso por cancelación (Concepto 8)
+            if (montoDevuelto > 0)
+            {
+                var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+                if (corteAbierto != null)
+                {
+                    var movimientoEgreso = new Movimiento
+                    {
+                        CorteID = corteAbierto.CorteID,
+                        UsuarioID = usuarioId,
+                        ConceptoID = 8, // 8: 'Cancelacion Visita' (Egreso)
+                        Tipo = "Egreso",
+                        FormaPago = "Efectivo",
+                        Total = montoDevuelto,
+                        Observacion = $"Devolución por cancelación de visita ID {visita.VisitaID}: {motivo?.Trim()}".Trim(),
+                        Activo = true
+                    };
+
+                    await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
+                }
+            }
+
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
+        {
+            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+
+            if (corteAbierto == null)
+            {
+                // 1. Consultar la configuración del Efectivo Inicial predeterminado
+                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
+                decimal efectivoInicial = 0.00m;
+
+                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
+                {
+                    efectivoInicial = monto;
+                }
+
+                // 2. Crear automáticamente la caja para el usuario actual
+                corteAbierto = new Corte
+                {
+                    UsuarioID = usuarioId,
+                    FechaApertura = DateTime.Now,
+                    MontoInicial = efectivoInicial,
+                    TotalIngresos = 0m,
+                    TotalEgresos = 0m,
+                    MontoFinal = efectivoInicial,
+                    Observaciones = "Apertura automática iniciada por cobro de Visita Casual",
+                    Estado = "Abierto",
+                    Activo = true
+                };
+
+                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return corteAbierto;
         }
     }
 }

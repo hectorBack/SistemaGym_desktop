@@ -12,7 +12,7 @@ namespace Negocio.Interfaces
         Task<IEnumerable<VentaDto>> ObtenerTodasAsync(bool incluirInactivas = false);
         Task<VentaDto?> ObtenerPorIdAsync(int id);
         Task<VentaDto> CrearAsync(VentaCreateDto dto);
-        Task EliminarLogicoAsync(int id); // Anular venta
+        Task EliminarLogicoAsync(int id, int usuarioId, string? motivo = null); // Anular venta
         Task EliminarFisicoAsync(int id);
 
         // --- MÉTODOS ADICIONALES DE NEGOCIO PARA VENTAS ---

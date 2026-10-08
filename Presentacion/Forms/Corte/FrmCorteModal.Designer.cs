@@ -85,7 +85,7 @@
             dtpFechaInicio.Location = new Point(29, 113);
             dtpFechaInicio.Margin = new Padding(3, 4, 3, 4);
             dtpFechaInicio.Name = "dtpFechaInicio";
-            dtpFechaInicio.Size = new Size(160, 30);
+            dtpFechaInicio.Size = new Size(204, 30);
             dtpFechaInicio.TabIndex = 2;
             // 
             // lblFechaFin
@@ -93,7 +93,7 @@
             lblFechaFin.AutoSize = true;
             lblFechaFin.Font = new Font("Segoe UI", 9.5F);
             lblFechaFin.ForeColor = Color.FromArgb(230, 238, 252);
-            lblFechaFin.Location = new Point(210, 87);
+            lblFechaFin.Location = new Point(249, 87);
             lblFechaFin.Name = "lblFechaFin";
             lblFechaFin.Size = new Size(78, 21);
             lblFechaFin.TabIndex = 3;
@@ -105,10 +105,10 @@
             dtpFechaFin.CalendarMonthBackground = Color.FromArgb(15, 42, 79);
             dtpFechaFin.Font = new Font("Segoe UI", 10F);
             dtpFechaFin.Format = DateTimePickerFormat.Short;
-            dtpFechaFin.Location = new Point(210, 113);
+            dtpFechaFin.Location = new Point(250, 113);
             dtpFechaFin.Margin = new Padding(3, 4, 3, 4);
             dtpFechaFin.Name = "dtpFechaFin";
-            dtpFechaFin.Size = new Size(160, 30);
+            dtpFechaFin.Size = new Size(195, 30);
             dtpFechaFin.TabIndex = 4;
             // 
             // btnConsultar
@@ -118,7 +118,7 @@
             btnConsultar.FlatStyle = FlatStyle.Flat;
             btnConsultar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             btnConsultar.ForeColor = Color.White;
-            btnConsultar.Location = new Point(390, 110);
+            btnConsultar.Location = new Point(511, 108);
             btnConsultar.Margin = new Padding(3, 4, 3, 4);
             btnConsultar.Name = "btnConsultar";
             btnConsultar.Size = new Size(120, 35);

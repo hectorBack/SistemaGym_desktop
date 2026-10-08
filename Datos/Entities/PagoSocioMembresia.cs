@@ -14,6 +14,7 @@ namespace Datos.Entities
 
         // Clave foránea
         public int SocioMembresiaID { get; set; }
+        public int UsuarioID { get; set; }
 
         public decimal Monto { get; set; }
         public string? Folio { get; set; }
@@ -22,5 +23,6 @@ namespace Datos.Entities
 
         // Propiedad de navegación (Relación 1 a N)
         public virtual SocioMembresia SocioMembresia { get; set; } = null!;
+        public virtual Usuario? Usuario { get; set; }
     }
 }

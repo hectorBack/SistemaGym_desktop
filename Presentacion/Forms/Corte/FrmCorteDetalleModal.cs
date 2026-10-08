@@ -1,4 +1,5 @@
 ﻿using Negocio.DTOs;
+using Presentacion.Controller;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,11 +15,13 @@ namespace Presentacion.Forms.Corte
     public partial class FrmCorteDetalleModal : Form
     {
         private readonly CorteDto _corte;
+        private readonly MovimientoController _movimientoController;
 
-        public FrmCorteDetalleModal(CorteDto corte)
+        public FrmCorteDetalleModal(CorteDto corte, MovimientoController movimientoController)
         {
             InitializeComponent();
             _corte = corte ?? throw new ArgumentNullException(nameof(corte));
+            _movimientoController = movimientoController ?? throw new ArgumentNullException(nameof(movimientoController));
         }
 
         private void FrmCorteDetalleModal_Load(object sender, EventArgs e)
@@ -26,7 +29,7 @@ namespace Presentacion.Forms.Corte
             CargarDatosCorte();
         }
 
-        private void CargarDatosCorte()
+        private async void CargarDatosCorte()
         {
             // 1. Cabecera - Datos Generales del Corte
             // Se corrige UsuarioNombre -> NombreUsuario
@@ -57,23 +60,36 @@ namespace Presentacion.Forms.Corte
             lblTotalEgresosValor.Text = _corte.TotalEgresos.ToString("C2");
             lblEfectivoFinalValor.Text = _corte.MontoFinal.ToString("C2");
 
-            // 3. Cargar tabla de movimientos asociados
-            // (Asegúrate de agregar 'public List<MovimientoDto> Movimientos { get; set; }' en CorteDto si usas _corte.Movimientos)
-            if (_corte.Movimientos != null && _corte.Movimientos.Any())
+            // 3. Consultar los movimientos en la Base de Datos según el rango del corte
+            try
             {
-                dgvMovimientos.DataSource = _corte.Movimientos.Select(m => new
+                DateTime fechaInicio = _corte.FechaApertura;
+                DateTime fechaFin = _corte.FechaCierre ?? DateTime.Now;
+
+                // Consultar a la base de datos los movimientos de este rango
+                var movimientos = await _movimientoController.ObtenerPorRangoFechasAsync(fechaInicio, fechaFin);
+                var movimientosActivos = movimientos.Where(m => m.Activo).ToList();
+
+                if (movimientosActivos.Any())
                 {
-                    Fecha = m.FechaMovimiento.ToString("dd/MM/yyyy HH:mm"),
-                    Concepto = m.Concepto,
-                    TipoPago = string.IsNullOrWhiteSpace(m.TipoPago) ? "Efectivo" : m.TipoPago,
-                    Usuario = string.IsNullOrWhiteSpace(m.UsuarioNombre) ? "N/A" : m.UsuarioNombre,
-                    Ingresos = EsIngreso(m.Tipo) ? m.Total.ToString("C2") : "$0.00",
-                    Egresos = !EsIngreso(m.Tipo) ? m.Total.ToString("C2") : "$0.00"
-                }).ToList();
+                    dgvMovimientos.DataSource = movimientosActivos.Select(m => new
+                    {
+                        Fecha = m.CreatedAt.HasValue ? m.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A",
+                        Concepto = m.ConceptoNombre,
+                        TipoPago = string.IsNullOrWhiteSpace(m.FormaPago) ? "Efectivo" : m.FormaPago,
+                        Usuario = string.IsNullOrWhiteSpace(_corte.NombreUsuario) ? "N/A" : _corte.NombreUsuario,
+                        Ingresos = EsIngreso(m.Tipo) ? m.Total.ToString("C2") : "$0.00",
+                        Egresos = !EsIngreso(m.Tipo) ? m.Total.ToString("C2") : "$0.00"
+                    }).ToList();
+                }
+                else
+                {
+                    dgvMovimientos.DataSource = null;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                dgvMovimientos.DataSource = null;
+                MessageBox.Show($"Error al cargar el detalle de movimientos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             ConfigurarGrid();

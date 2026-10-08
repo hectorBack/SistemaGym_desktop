@@ -42,7 +42,9 @@ namespace Negocio.Services
                 Total = m.Total,
                 Observacion = m.Observacion,
                 CorteID = m.CorteID,
+                FechaAperturaCorte = m.Corte?.FechaApertura,
                 UsuarioID = m.UsuarioID,
+                UsuarioNombre = m.Usuario?.NombreUsuario,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt
@@ -64,7 +66,9 @@ namespace Negocio.Services
                 Total = movimiento.Total,
                 Observacion = movimiento.Observacion,
                 CorteID = movimiento.CorteID,
+                FechaAperturaCorte = movimiento.Corte?.FechaApertura,
                 UsuarioID = movimiento.UsuarioID,
+                UsuarioNombre = movimiento.Usuario?.NombreUsuario,
                 Activo = movimiento.Activo,
                 CreatedAt = movimiento.CreatedAt,
                 UpdatedAt = movimiento.UpdatedAt
@@ -177,7 +181,9 @@ namespace Negocio.Services
                 Total = m.Total,
                 Observacion = m.Observacion,
                 CorteID = m.CorteID,
+                FechaAperturaCorte = m.Corte?.FechaApertura,
                 UsuarioID = m.UsuarioID,
+                UsuarioNombre = m.Usuario?.NombreUsuario,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt

@@ -43,9 +43,9 @@ namespace Presentacion.Controller
             return await _ventaService.CrearAsync(createDto);
         }
 
-        public async Task AnularVentaAsync(int id)
+        public async Task AnularVentaAsync(int id, int usuarioId, string? motivo = null)
         {
-            await _ventaService.EliminarLogicoAsync(id);
+            await _ventaService.EliminarLogicoAsync(id, usuarioId, motivo);
         }
 
         public async Task EliminarFisicoAsync(int id)

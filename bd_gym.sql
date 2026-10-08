@@ -146,6 +146,14 @@ CREATE TABLE pagos_sociomembresia (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE pagos_sociomembresia 
+ADD COLUMN UsuarioID INT NULL AFTER SocioMembresiaID,
+ADD CONSTRAINT FK_Pagos_Usuarios 
+    FOREIGN KEY (UsuarioID) 
+    REFERENCES Usuarios(UsuarioID) 
+    ON DELETE SET NULL 
+    ON UPDATE CASCADE;
+
 CREATE TABLE Conceptos (
     ConceptoID INT AUTO_INCREMENT PRIMARY KEY,
     Nombre VARCHAR(100) NOT NULL,
@@ -334,3 +342,18 @@ CREATE TABLE Cortes (
         ON DELETE RESTRICT 
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE Configuraciones (
+    ConfiguracionID INT AUTO_INCREMENT PRIMARY KEY,
+    Clave VARCHAR(100) NOT NULL UNIQUE,
+    Valor TEXT NULL,
+    Descripcion VARCHAR(255) NULL,
+    Activo BOOLEAN NOT NULL DEFAULT TRUE,
+    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Registros iniciales para la pestaña "Corte de Caja"
+INSERT INTO Configuraciones (Clave, Valor, Descripcion) VALUES
+('Corte_EfectivoInicial', '0.00', 'Monto de efectivo inicial predeterminado para la caja'),
+('Corte_EmailNotificacion', 'admin@gimnasio.com', 'Correo electrónico donde se enviarán los reportes de cortes de caja');

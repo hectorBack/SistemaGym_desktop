@@ -245,12 +245,15 @@ namespace Presentacion.Forms.Socios
 
             var socioSeleccionado = (SocioViewModel)dgvSocios.CurrentRow.DataBoundItem;
 
+            int usuarioIdActivo = SesionUsuario.UsuarioID;
+
             // Se pasa la instancia completa de socioSeleccionado (SocioViewModel)
             using var modal = new FrmSocioMembresiaModal(
                 _socioMembresiaController,
                 _membresiaController,
                 _pagoSocioMembresiaController,
-                socioSeleccionado);
+                socioSeleccionado,
+                usuarioIdActivo);
 
             if (modal.ShowDialog() == DialogResult.OK)
             {

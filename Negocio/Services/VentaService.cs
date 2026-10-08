@@ -102,10 +102,33 @@ namespace Negocio.Services
             await _unitOfWork.Venta.AgregarAsync(nuevaVenta);
             await _unitOfWork.SaveChangesAsync();
 
+            // REGISTRAR INGRESO EN CAJA - ConceptoID 1 ('Venta Producto')
+            if (nuevaVenta.Total > 0)
+            {
+                var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(dto.UsuarioID);
+                if (corteAbierto != null)
+                {
+                    var movimientoIngreso = new Movimiento
+                    {
+                        CorteID = corteAbierto.CorteID,
+                        UsuarioID = dto.UsuarioID,
+                        ConceptoID = 1, // 1: 'Venta Producto' (Ingreso)
+                        Tipo = "Ingreso",
+                        FormaPago = "Efectivo",
+                        Total = nuevaVenta.Total,
+                        Observacion = $"Cobro por venta de productos - Venta ID #{nuevaVenta.VentaID}",
+                        Activo = true
+                    };
+
+                    await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+            }
+
             return MapToDto(nuevaVenta);
         }
 
-        public async Task EliminarLogicoAsync(int id)
+        public async Task EliminarLogicoAsync(int id, int usuarioId, string? motivo = null)
         {
             var venta = await _unitOfWork.Venta.ObtenerPorIdAsync(id);
             if (venta == null)
@@ -117,6 +140,8 @@ namespace Negocio.Services
             {
                 throw new BusinessException("La venta ya se encuentra anulada.");
             }
+
+            decimal montoDevuelto = venta.Total;
 
             // Revertir el stock de los productos al anular la venta
             foreach (var detalle in venta.Detalles)
@@ -130,6 +155,29 @@ namespace Negocio.Services
             }
 
             _unitOfWork.Venta.EliminarLogico(venta);
+
+            // REGISTRAR EGRESO EN CAJA - ConceptoID 5 ('Cancelacion Venta Producto')
+            if (montoDevuelto > 0)
+            {
+                var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+                if (corteAbierto != null)
+                {
+                    var movimientoEgreso = new Movimiento
+                    {
+                        CorteID = corteAbierto.CorteID,
+                        UsuarioID = usuarioId,
+                        ConceptoID = 5, // 5: 'Cancelacion Venta Producto' (Egreso)
+                        Tipo = "Egreso",
+                        FormaPago = "Efectivo",
+                        Total = montoDevuelto,
+                        Observacion = $"Devolución por cancelación de venta ID #{venta.VentaID}. {motivo?.Trim()}".Trim(),
+                        Activo = true
+                    };
+
+                    await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
+                }
+            }
+
             await _unitOfWork.SaveChangesAsync();
         }
 

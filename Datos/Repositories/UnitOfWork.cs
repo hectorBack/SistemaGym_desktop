@@ -25,6 +25,7 @@ namespace Datos.Repositories
         private IRolRepository _roles;
         private ICompraRepository _compras;
         private ICorteRepository _cortes;
+        private IConfiguracionRepository _configuracion;
 
         public UnitOfWork(GimnasioDbContext context)
         {
@@ -53,6 +54,7 @@ namespace Datos.Repositories
         public IRolRepository Rol => _roles ??= new RolRepository(_context);
         public ICompraRepository Compra => _compras ??= new CompraRepository(_context);
         public ICorteRepository Corte => _cortes ??= new CorteRepository(_context);
+        public IConfiguracionRepository Configuracion => _configuracion ??= new ConfiguracionRepository(_context);
 
         public async Task<int> CompleteAsync()
         {

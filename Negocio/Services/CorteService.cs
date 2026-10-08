@@ -161,7 +161,7 @@ namespace Negocio.Services
             {
                 CorteID = c.CorteID,
                 UsuarioID = c.UsuarioID,
-                NombreUsuario = c.Usuario != null ? c.Usuario.NombreCompleto : $"Usuario {c.UsuarioID}",
+                NombreUsuario = c.Usuario != null ? c.Usuario.NombreUsuario : $"Usuario {c.UsuarioID}",
                 FechaApertura = c.FechaApertura,
                 FechaCierre = c.FechaCierre,
                 MontoInicial = c.MontoInicial,

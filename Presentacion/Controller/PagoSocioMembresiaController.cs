@@ -42,7 +42,7 @@ namespace Presentacion.Controller
             return await _pagoSocioMembresiaService.ObtenerTotalPagadoPorSocioMembresiaIdAsync(socioMembresiaId);
         }
 
-        public async Task GuardarPagoAsync(int? pagoId, int socioMembresiaId, decimal monto, string? folio, string formaPago, string? observacion)
+        public async Task GuardarPagoAsync(int? pagoId, int socioMembresiaId, int usuarioId, decimal monto, string? folio, string formaPago, string? observacion)
         {
             if (pagoId.HasValue && pagoId.Value > 0)
             {
@@ -62,6 +62,7 @@ namespace Presentacion.Controller
                 var createDto = new PagoSocioMembresiaCreateDto
                 {
                     SocioMembresiaID = socioMembresiaId,
+                    UsuarioID = usuarioId,
                     Monto = monto,
                     Folio = folio,
                     FormaPago = formaPago,
@@ -79,6 +80,11 @@ namespace Presentacion.Controller
         public async Task EliminarFisicoAsync(int id)
         {
             await _pagoSocioMembresiaService.EliminarFisicoAsync(id);
+        }
+
+        public async Task AnularPagoAsync(int pagoId, int usuarioId, string? motivo = null)
+        {
+            await _pagoSocioMembresiaService.AnularPagoAsync(pagoId, usuarioId, motivo);
         }
 
         private static PagoSocioMembresiaViewModel MapToViewModel(PagoSocioMembresiaDto dto)

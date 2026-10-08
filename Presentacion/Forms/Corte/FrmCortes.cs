@@ -16,13 +16,17 @@ namespace Presentacion.Forms.Corte
     {
         private readonly CorteController _corteController;
         private readonly MovimientoController _movimientoController;
+        private readonly ConfiguracionController _configuracionController;
+        private readonly int _usuarioIdSesion;
         private List<CorteViewModel> _listaCortes = new();
 
-        public FrmCortes(CorteController corteController, MovimientoController movimientoController)
+        public FrmCortes(CorteController corteController, MovimientoController movimientoController, ConfiguracionController configuracionController, int usuarioIdSesion = 1)
         {
             InitializeComponent();
             _corteController = corteController;
             _movimientoController = movimientoController;
+            _configuracionController = configuracionController;
+            _usuarioIdSesion = usuarioIdSesion;
 
 
             dgvCortes.SelectionChanged += dgvCortes_SelectionChanged;
@@ -59,7 +63,6 @@ namespace Presentacion.Forms.Corte
                 // Proyección anónima para incluir todas las columnas solicitadas
                 dgvCortes.DataSource = _listaCortes.Select(c => new
                 {
-                    c.CorteID,
                     FechaInicio = c.FechaApertura,
                     FechaFinal = c.FechaCierre,
                     Ingresos = c.TotalIngresos, // Si en tu ViewModel se llama TotalVentas, usa c.TotalVentas
@@ -84,8 +87,17 @@ namespace Presentacion.Forms.Corte
         {
             try
             {
-                decimal efectivoActual = await _corteController.ObtenerEfectivoEnCajaAsync();
-                lblEfectivoCaja.Text = $"Efectivo en Caja: {efectivoActual:C2}";
+                // 1. Obtener el efectivo inicial guardado en la Configuración
+                var configCaja = await _configuracionController.ObtenerConfigCorteCajaAsync();
+                decimal efectivoInicialConfig = configCaja?.EfectivoInicial ?? 0m;
+
+                // 2. Obtener el flujo/acumulado de la caja desde el controller
+                decimal efectivoCalculado = await _corteController.ObtenerEfectivoEnCajaAsync();
+
+                // 3. Sumar el base configurado + el saldo dinámico
+                decimal efectivoTotal = efectivoInicialConfig + efectivoCalculado;
+
+                lblEfectivoCaja.Text = $"Efectivo en Caja: {efectivoTotal:C2}";
             }
             catch (Exception ex)
             {
@@ -96,11 +108,33 @@ namespace Presentacion.Forms.Corte
 
         private async void btnNuevo_Click(object sender, EventArgs e)
         {
-            // Abre la pantalla/modal para registrar un nuevo corte de caja
-            using var modal = new FrmCorteModal(_corteController, _movimientoController);
-            if (modal.ShowDialog() == DialogResult.OK)
+            try
             {
-                await CargarCortesAsync();
+                Cursor = Cursors.WaitCursor;
+
+                // 2. Obtener el valor de "Efectivo Inicial" guardado en Configuraciones
+                var configCaja = await _configuracionController.ObtenerConfigCorteCajaAsync();
+                decimal efectivoInicialPredeterminado = configCaja?.EfectivoInicial ?? 0m;
+
+                int idUsuario = _usuarioIdSesion > 0 ? _usuarioIdSesion : 1;
+
+                // 3. Pasar el valor al modal FrmCorteModal (o a su constructor/propiedad)
+                using var modal = new FrmCorteModal(_corteController, _movimientoController, efectivoInicialPredeterminado, idUsuario);
+
+                Cursor = Cursors.Default;
+
+                if (modal.ShowDialog() == DialogResult.OK)
+                {
+                    await CargarCortesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al abrir el registro de corte: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
             }
         }
 
@@ -132,7 +166,7 @@ namespace Presentacion.Forms.Corte
 
                 if (corteDto != null)
                 {
-                    using var modal = new FrmCorteDetalleModal(corteDto);
+                    using var modal = new FrmCorteDetalleModal(corteDto, _movimientoController);
                     modal.ShowDialog();
                 }
             }

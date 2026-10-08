@@ -28,6 +28,7 @@ using Presentacion.Forms.Usuarios;
 using Presentacion.Forms.Compras;
 using Presentacion.Forms.Reportes;
 using Presentacion.Forms.Corte;
+using Presentacion.Forms.Configuracion;
 
 namespace Presentacion
 {
@@ -69,6 +70,7 @@ namespace Presentacion
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<ICompraRepository, CompraRepository>();
             services.AddScoped<ICorteRepository, CorteRepository>();
+            services.AddScoped<IConfiguracionRepository, ConfiguracionRepository>();
 
             // 2. Validadores
             services.AddScoped<IValidator<CategoriaCreateDto>, CategoriaCreateValidator>();
@@ -97,6 +99,7 @@ namespace Presentacion
             services.AddScoped<IValidator<CompraUpdateDto>, CompraUpdateValidator>();
             services.AddScoped<IValidator<CorteCreateDto>, CorteCreateValidator>();
             services.AddScoped<IValidator<CorteUpdateDto>, CorteUpdateValidator>();
+            services.AddScoped<IValidator<CorteConfiguracionDto>, CorteConfiguracionValidator>();
 
             // 3. Servicios de Negocio
             services.AddScoped<IUsuarioService, UsuarioService>();
@@ -114,6 +117,7 @@ namespace Presentacion
             services.AddScoped<ICompraService, CompraService>();
             services.AddScoped<IReporteService, ReporteService>();
             services.AddScoped<ICorteService, CorteService>();
+            services.AddScoped<IConfiguracionService, ConfiguracionService>();
 
 
             // 4. Controladores de Presentación
@@ -132,6 +136,8 @@ namespace Presentacion
             services.AddTransient<CompraController>();
             services.AddTransient<ReporteController>();
             services.AddTransient<CorteController>();
+            services.AddTransient<ConfiguracionController>();
+
 
             // 5. Formularios
             services.AddTransient<FrmLogin>();
@@ -149,6 +155,7 @@ namespace Presentacion
             services.AddTransient<FrmCompras>();
             services.AddTransient<FrmReportes>();
             services.AddTransient<FrmCortes>();
+            services.AddTransient<FrmConfiguraciones>();
            
         }
     }

@@ -10,6 +10,7 @@ namespace Negocio.DTOs
     {
         public int PagoID { get; set; }
         public int SocioMembresiaID { get; set; }
+        public int UsuarioID { get; set; }
         public decimal Monto { get; set; }
         public string? Folio { get; set; }
         public string FormaPago { get; set; } = "Efectivo";
@@ -23,6 +24,7 @@ namespace Negocio.DTOs
     public class PagoSocioMembresiaCreateDto
     {
         public int SocioMembresiaID { get; set; }
+        public int UsuarioID { get; set; }
         public decimal Monto { get; set; }
         public string? Folio { get; set; }
         public string FormaPago { get; set; } = "Efectivo";

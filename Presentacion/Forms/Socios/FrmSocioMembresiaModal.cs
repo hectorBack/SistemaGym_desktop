@@ -21,19 +21,22 @@ namespace Presentacion.Forms.Socios
         private readonly MembresiaController _membresiaController;
         private readonly PagoSocioMembresiaController _pagoController;
         private readonly SocioViewModel _socio;
+        private readonly int _usuarioId;
         private List<MembresiaViewModel> _listaMembresias = new();
 
         public FrmSocioMembresiaModal(
             SocioMembresiaController controller,
             MembresiaController membresiaController,
             PagoSocioMembresiaController pagoController,
-            SocioViewModel socio)
+            SocioViewModel socio,
+            int usuarioId)
         {
             InitializeComponent();
             _controller = controller;
             _membresiaController = membresiaController;
             _pagoController = pagoController;
             _socio = socio;
+            _usuarioId = usuarioId;
         }
 
         private async void FrmSocioMembresiaModal_Load(object sender, EventArgs e)
@@ -204,7 +207,7 @@ namespace Presentacion.Forms.Socios
                 return;
             }
 
-            using (var frmPago = new FrmPagoSocioMembresiaModal(_pagoController, membresiaSeleccionada))
+            using (var frmPago = new FrmPagoSocioMembresiaModal(_pagoController, membresiaSeleccionada, _usuarioId))
             {
                 frmPago.ShowDialog();
             }

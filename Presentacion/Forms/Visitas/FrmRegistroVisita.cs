@@ -20,6 +20,8 @@ namespace Presentacion.Forms.Visitas
         private readonly SocioMembresiaController _socioMembresiaController;
         private readonly MembresiaController _membresiaController;
         private readonly PagoSocioMembresiaController _pagoSocioMembresiaController;
+
+        private readonly int _usuarioIdSesion;
         private int? _socioIdActual;
         private int? _ultimaVisitaId;
 
@@ -27,7 +29,8 @@ namespace Presentacion.Forms.Visitas
             SocioController socioController,
             SocioMembresiaController socioMembresiaController,
             MembresiaController membresiaController,
-            PagoSocioMembresiaController pagoSocioMembresiaController)
+            PagoSocioMembresiaController pagoSocioMembresiaController,
+            int usuarioIdSesion = 1)
         {
             InitializeComponent();
             _visitaController = visitaController;
@@ -35,6 +38,7 @@ namespace Presentacion.Forms.Visitas
             _socioMembresiaController = socioMembresiaController;
             _membresiaController = membresiaController;
             _pagoSocioMembresiaController = pagoSocioMembresiaController;
+            _usuarioIdSesion = usuarioIdSesion;
         }
 
         private void FrmRegistroVisita_Load(object sender, EventArgs e)
@@ -84,7 +88,7 @@ namespace Presentacion.Forms.Visitas
             string clave = txtClave.Text.Trim();
             if (string.IsNullOrEmpty(clave)) return;
 
-            var resultado = await _visitaController.ProcesarAccesoRapidoAsync(clave);
+            var resultado = await _visitaController.ProcesarAccesoRapidoAsync(clave, _usuarioIdSesion);
 
             if (!resultado.Exitoso)
             {
@@ -222,7 +226,7 @@ namespace Presentacion.Forms.Visitas
             {
                 try
                 {
-                    await _visitaController.CancelarVisitaAsync(_ultimaVisitaId.Value, null);
+                    await _visitaController.CancelarVisitaAsync(_ultimaVisitaId.Value, _usuarioIdSesion, "Cancelación desde pantalla de acceso");
 
                     MessageBox.Show("La visita se ha cancelado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -280,7 +284,8 @@ namespace Presentacion.Forms.Visitas
                     _socioMembresiaController,
                     _membresiaController,
                     _pagoSocioMembresiaController,
-                    socioViewModel))
+                    socioViewModel,
+                    _usuarioIdSesion))
                 {
                     modal.ShowDialog(this);
                 }

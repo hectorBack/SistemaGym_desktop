@@ -16,6 +16,7 @@ namespace Negocio.DTOs
         public decimal Total { get; set; }
         public string? Observacion { get; set; }
         public int? CorteID { get; set; }
+        public DateTime? FechaAperturaCorte { get; set; }
         public int? UsuarioID { get; set; }
 
         public string? UsuarioNombre { get; set; }

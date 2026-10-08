@@ -20,5 +20,7 @@ namespace Datos.Entities
 
         // Propiedad de navegación (opcional según el uso en tu capa de dominio)
         public virtual Concepto? Concepto { get; set; }
+        public virtual Corte? Corte { get; set; }
+        public virtual Usuario? Usuario { get; set; }
     }
 }
