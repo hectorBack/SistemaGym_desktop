@@ -28,22 +28,19 @@ namespace Presentacion.Forms.Ventas
 
         private void CargarDatosVenta()
         {
-            // Cargar cabecera
-            lblFolioValor.Text = $"#{_venta.VentaID}";
+            // 1. Cargar cabecera (Solo Fecha y Total)
             lblFechaValor.Text = _venta.FechaVenta.ToString("dd/MM/yyyy HH:mm");
-            lblAtendidoValor.Text = string.IsNullOrWhiteSpace(_venta.UsuarioNombre) ? "N/A" : _venta.UsuarioNombre;
-            lblSocioValor.Text = string.IsNullOrWhiteSpace(_venta.SocioNombre) ? "Cliente Casual" : _venta.SocioNombre;
-            lblEstadoValor.Text = _venta.Activo ? "Completada" : "Anulada";
+            lblTotalCalculado.Text = _venta.Total.ToString("C2");
 
-            if (!_venta.Activo)
-            {
-                lblEstadoValor.ForeColor = System.Drawing.Color.IndianRed;
-            }
+            // (Opcional) Si quieres ocultar etiquetas secundarias de la interfaz gráfica si aún existen en el diseñador:
+            // lblFolioValor.Visible = false;
+            // lblAtendidoValor.Visible = false;
+            // lblSocioValor.Visible = false;
+            // lblEstadoValor.Visible = false;
 
-            // Cargar desglose de ítems
+            // 2. Cargar desglose de la tabla solo con Producto, Cantidad, Precio Unitario y Subtotal/Total
             dgvDetalles.DataSource = _venta.Detalles.Select(d => new
             {
-                d.ProductoID,
                 Producto = d.ProductoNombre,
                 d.Cantidad,
                 PrecioUnitario = d.PrecioUnitario.ToString("C2"),
@@ -51,36 +48,41 @@ namespace Presentacion.Forms.Ventas
             }).ToList();
 
             ConfigurarGrid();
-
-            // Cargar total
-            lblTotalCalculado.Text = _venta.Total.ToString("C2");
         }
 
         private void ConfigurarGrid()
         {
+            // Ocultar ProductoID o cualquier columna residual por si acaso
             if (dgvDetalles.Columns["ProductoID"] != null)
-                dgvDetalles.Columns["ProductoID"].HeaderText = "Código";
+                dgvDetalles.Columns["ProductoID"].Visible = false;
 
+            // Configuración de encabezados y alineaciones
             if (dgvDetalles.Columns["Producto"] != null)
-                dgvDetalles.Columns["Producto"].HeaderText = "Producto";
+            {
+                dgvDetalles.Columns["Producto"].HeaderText = "Nombre";
+                dgvDetalles.Columns["Producto"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            }
 
             if (dgvDetalles.Columns["Cantidad"] != null)
             {
-                dgvDetalles.Columns["Cantidad"].HeaderText = "Cant.";
+                dgvDetalles.Columns["Cantidad"].HeaderText = "Cantidad";
                 dgvDetalles.Columns["Cantidad"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
 
             if (dgvDetalles.Columns["PrecioUnitario"] != null)
             {
-                dgvDetalles.Columns["PrecioUnitario"].HeaderText = "Precio Unit.";
+                dgvDetalles.Columns["PrecioUnitario"].HeaderText = "Precio Unitario";
                 dgvDetalles.Columns["PrecioUnitario"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
 
             if (dgvDetalles.Columns["Subtotal"] != null)
             {
-                dgvDetalles.Columns["Subtotal"].HeaderText = "Subtotal";
+                dgvDetalles.Columns["Subtotal"].HeaderText = "Total";
                 dgvDetalles.Columns["Subtotal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
+
+            // Ajuste de ancho de columnas para ocupar toda la tabla
+            dgvDetalles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)

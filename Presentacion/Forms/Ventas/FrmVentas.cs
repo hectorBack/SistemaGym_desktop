@@ -72,59 +72,49 @@ namespace Presentacion.Forms.Ventas
 
         private void ConfigurarGrid()
         {
-            // 1. Ocultar columnas secundarias/técnicas
+            // 1. Ocultar todas las columnas que NO quieres mostrar
+            if (dgvVentas.Columns["VentaID"] != null) dgvVentas.Columns["VentaID"].Visible = false;
             if (dgvVentas.Columns["UsuarioID"] != null) dgvVentas.Columns["UsuarioID"].Visible = false;
+            if (dgvVentas.Columns["UsuarioNombre"] != null) dgvVentas.Columns["UsuarioNombre"].Visible = false;
             if (dgvVentas.Columns["SocioID"] != null) dgvVentas.Columns["SocioID"].Visible = false;
+            if (dgvVentas.Columns["SocioNombre"] != null) dgvVentas.Columns["SocioNombre"].Visible = false;
+            if (dgvVentas.Columns["CantidadProductos"] != null) dgvVentas.Columns["CantidadProductos"].Visible = false;
             if (dgvVentas.Columns["Activo"] != null) dgvVentas.Columns["Activo"].Visible = false;
             if (dgvVentas.Columns["CreatedAt"] != null) dgvVentas.Columns["CreatedAt"].Visible = false;
 
-            // 2. Configurar encabezados y formatos especiales
-            if (dgvVentas.Columns["VentaID"] != null) dgvVentas.Columns["VentaID"].HeaderText = "Folio / ID";
-            if (dgvVentas.Columns["SocioNombre"] != null) dgvVentas.Columns["SocioNombre"].HeaderText = "Cliente / Socio";
-            if (dgvVentas.Columns["UsuarioNombre"] != null) dgvVentas.Columns["UsuarioNombre"].HeaderText = "Atendido Por";
-
+            // 2. Configurar los encabezados y formatos de las 3 columnas visibles
             if (dgvVentas.Columns["Total"] != null)
             {
                 dgvVentas.Columns["Total"].HeaderText = "Total ($)";
                 dgvVentas.Columns["Total"].DefaultCellStyle.Format = "C2";
             }
 
-            if (dgvVentas.Columns["CantidadProductos"] != null)
-            {
-                dgvVentas.Columns["CantidadProductos"].HeaderText = "Cant. Ítems";
-            }
-
             if (dgvVentas.Columns["FechaVenta"] != null)
             {
-                dgvVentas.Columns["FechaVenta"].HeaderText = "Fecha de Venta";
+                dgvVentas.Columns["FechaVenta"].HeaderText = "Fecha de Registro";
                 dgvVentas.Columns["FechaVenta"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
             }
 
-            if (dgvVentas.Columns["Estado"] != null) dgvVentas.Columns["Estado"].HeaderText = "Estado";
+            if (dgvVentas.Columns["Estado"] != null)
+            {
+                dgvVentas.Columns["Estado"].HeaderText = "Estado";
+            }
 
-            // 3. Estructura de ordenamiento y pesos
+            // 3. Definir orden y distribución de espacio
             dgvVentas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             string[] ordenColumnas =
             {
-        "VentaID",
-        "SocioNombre",
-        "UsuarioNombre",
-        "CantidadProductos",
         "Total",
         "FechaVenta",
         "Estado"
-    };
+            };
 
             var pesos = new Dictionary<string, float>
             {
-                ["VentaID"] = 60,
-                ["SocioNombre"] = 175,
-                ["UsuarioNombre"] = 150,
-                ["CantidadProductos"] = 85,
                 ["Total"] = 100,
-                ["FechaVenta"] = 130,
-                ["Estado"] = 80
+                ["FechaVenta"] = 150,
+                ["Estado"] = 100
             };
 
             for (int indice = 0; indice < ordenColumnas.Length; indice++)
@@ -134,12 +124,7 @@ namespace Presentacion.Forms.Ventas
 
                 columna.DisplayIndex = indice;
                 columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
-                {
-                    "SocioNombre" or "UsuarioNombre" => 110,
-                    "FechaVenta" => 100,
-                    _ => 55
-                };
+                columna.MinimumWidth = 80;
                 columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
                 columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
             }

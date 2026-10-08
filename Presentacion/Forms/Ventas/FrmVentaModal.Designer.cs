@@ -17,16 +17,14 @@
 
         private void InitializeComponent()
         {
-          
-
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelHeader = new Panel();
             lblTitulo = new Label();
-            lblSocio = new Label();
-            txtSocioId = new TextBox();
             lblCodigoBarras = new Label();
             txtCodigoBarras = new TextBox();
+            lblProducto = new Label();
+            cmbProductos = new ComboBox();
             lblCantidad = new Label();
             numCantidad = new NumericUpDown();
             btnAgregar = new Button();
@@ -63,39 +61,16 @@
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Nueva Venta / Punto de Venta";
             // 
-            // lblSocio
-            // 
-            lblSocio.AutoSize = true;
-            lblSocio.Font = new Font("Segoe UI", 9.5F);
-            lblSocio.ForeColor = Color.FromArgb(230, 238, 252);
-            lblSocio.Location = new Point(29, 87);
-            lblSocio.Name = "lblSocio";
-            lblSocio.Size = new Size(146, 21);
-            lblSocio.TabIndex = 1;
-            lblSocio.Text = "ID Socio (Opcional):";
-            // 
-            // txtSocioId
-            // 
-            txtSocioId.BackColor = Color.FromArgb(15, 42, 79);
-            txtSocioId.BorderStyle = BorderStyle.FixedSingle;
-            txtSocioId.Font = new Font("Segoe UI", 10F);
-            txtSocioId.ForeColor = Color.FromArgb(230, 238, 252);
-            txtSocioId.Location = new Point(29, 113);
-            txtSocioId.Margin = new Padding(3, 4, 3, 4);
-            txtSocioId.Name = "txtSocioId";
-            txtSocioId.Size = new Size(148, 30);
-            txtSocioId.TabIndex = 2;
-            // 
             // lblCodigoBarras
             // 
             lblCodigoBarras.AutoSize = true;
             lblCodigoBarras.Font = new Font("Segoe UI", 9.5F);
             lblCodigoBarras.ForeColor = Color.FromArgb(230, 238, 252);
-            lblCodigoBarras.Location = new Point(200, 87);
+            lblCodigoBarras.Location = new Point(29, 87);
             lblCodigoBarras.Name = "lblCodigoBarras";
-            lblCodigoBarras.Size = new Size(159, 21);
+            lblCodigoBarras.Size = new Size(108, 21);
             lblCodigoBarras.TabIndex = 3;
-            lblCodigoBarras.Text = "Codigo Barras";
+            lblCodigoBarras.Text = "Código Barras:";
             // 
             // txtCodigoBarras
             // 
@@ -103,12 +78,38 @@
             txtCodigoBarras.BorderStyle = BorderStyle.FixedSingle;
             txtCodigoBarras.Font = new Font("Segoe UI", 10F);
             txtCodigoBarras.ForeColor = Color.FromArgb(230, 238, 252);
-            txtCodigoBarras.Location = new Point(200, 113);
+            txtCodigoBarras.Location = new Point(29, 113);
             txtCodigoBarras.Margin = new Padding(3, 4, 3, 4);
             txtCodigoBarras.Name = "txtCodigoBarras";
-            txtCodigoBarras.Size = new Size(251, 30);
+            txtCodigoBarras.Size = new Size(160, 30);
             txtCodigoBarras.TabIndex = 4;
             txtCodigoBarras.KeyDown += txtCodigoBarras_KeyDown;
+            // 
+            // lblProducto
+            // 
+            lblProducto.AutoSize = true;
+            lblProducto.Font = new Font("Segoe UI", 9.5F);
+            lblProducto.ForeColor = Color.FromArgb(230, 238, 252);
+            lblProducto.Location = new Point(205, 87);
+            lblProducto.Name = "lblProducto";
+            lblProducto.Size = new Size(76, 21);
+            lblProducto.TabIndex = 14;
+            lblProducto.Text = "Producto:";
+            // 
+            // cmbProductos
+            // 
+            cmbProductos.BackColor = Color.FromArgb(15, 42, 79);
+            cmbProductos.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbProductos.FlatStyle = FlatStyle.Flat;
+            cmbProductos.Font = new Font("Segoe UI", 10F);
+            cmbProductos.ForeColor = Color.FromArgb(230, 238, 252);
+            cmbProductos.FormattingEnabled = true;
+            cmbProductos.Location = new Point(205, 113);
+            cmbProductos.Margin = new Padding(3, 4, 3, 4);
+            cmbProductos.Name = "cmbProductos";
+            cmbProductos.Size = new Size(245, 31);
+            cmbProductos.TabIndex = 15;
+            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
             // 
             // lblCantidad
             // 
@@ -265,6 +266,8 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(707, 627);
+            Controls.Add(cmbProductos);
+            Controls.Add(lblProducto);
             Controls.Add(btnCancelar);
             Controls.Add(btnGuardar);
             Controls.Add(lblTotalCalculado);
@@ -276,19 +279,17 @@
             Controls.Add(lblCantidad);
             Controls.Add(txtCodigoBarras);
             Controls.Add(lblCodigoBarras);
-            Controls.Add(txtSocioId);
-            Controls.Add(lblSocio);
             Controls.Add(panelHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
+            KeyPreview = true;
             Margin = new Padding(3, 4, 3, 4);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "FrmVentaModal";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Punto de Venta";
-            KeyPreview = true;
-            KeyDown += FrmVentaModal_KeyDown;
             Load += FrmVentaModal_Load;
+            KeyDown += FrmVentaModal_KeyDown;
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numCantidad).EndInit();
@@ -301,10 +302,10 @@
 
         private Panel panelHeader;
         private Label lblTitulo;
-        private Label lblSocio;
-        private TextBox txtSocioId;
         private Label lblCodigoBarras;
         private TextBox txtCodigoBarras;
+        private Label lblProducto;
+        private ComboBox cmbProductos;
         private Label lblCantidad;
         private NumericUpDown numCantidad;
         private Button btnAgregar;

@@ -22,7 +22,6 @@ namespace Presentacion.Forms.Ventas
         private readonly List<DetalleVentaCreateDto> _carrito = new();
         private List<ProductoViewModel> _productosDisponibles = new();
 
-        // Puedes simular o inyectar el ID del usuario/cajero actual
         private readonly int _usuarioIdActual = 1;
 
         public FrmVentaModal(VentaController ventaController, ProductoController productoController)
@@ -45,10 +44,39 @@ namespace Presentacion.Forms.Ventas
             {
                 var productos = await _productoController.ObtenerProductosAsync(incluirInactivos: false);
                 _productosDisponibles = productos.ToList();
+
+                // 🟢 Llenar el ComboBox de productos al cargar
+                CargarComboBoxProductos();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CargarComboBoxProductos()
+        {
+            // Se suscribe temporalmente al evento para evitar disparos durante el llenado de datos
+            cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
+
+            cmbProductos.DataSource = null;
+            cmbProductos.DataSource = _productosDisponibles;
+            cmbProductos.DisplayMember = "Nombre"; // Propiedad a mostrar en la lista
+            cmbProductos.ValueMember = "ProductoID"; // Propiedad que representa el ID
+            cmbProductos.SelectedIndex = -1; // Dejar sin selección inicial
+
+            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
+        }
+
+        // 🟢 Evento al seleccionar un producto del desplegable ComboBox
+        private void cmbProductos_SelectedIndexChanged(object sender, EventArgs? e)
+        {
+            if (cmbProductos.SelectedItem is ProductoViewModel productoSeleccionado)
+            {
+                // Sincroniza el código de barras del producto seleccionado en el TextBox
+                txtCodigoBarras.Text = !string.IsNullOrEmpty(productoSeleccionado.CodigoBarras)
+                    ? productoSeleccionado.CodigoBarras
+                    : productoSeleccionado.ProductoID.ToString();
             }
         }
 
@@ -69,23 +97,24 @@ namespace Presentacion.Forms.Ventas
         private void ProcesarAgregarProducto()
         {
             string codigo = txtCodigoBarras.Text.Trim();
+            ProductoViewModel? prodSeleccionado = null;
 
-            if (string.IsNullOrWhiteSpace(codigo))
+            // 1. Si hay texto en el código de barras, buscar coincidencia por código o ID
+            if (!string.IsNullOrWhiteSpace(codigo))
             {
-                MessageBox.Show("Ingrese o escanee un código de barras.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtCodigoBarras.Focus();
-                return;
+                prodSeleccionado = _productosDisponibles.FirstOrDefault(p =>
+                    (p.CodigoBarras != null && p.CodigoBarras.Equals(codigo, StringComparison.OrdinalIgnoreCase)) ||
+                    p.ProductoID.ToString() == codigo);
             }
-
-            // Busca coincidencia por Código de Barras (o por ProductoID en caso de que coincida)
-            var prodSeleccionado = _productosDisponibles.FirstOrDefault(p =>
-                (p.CodigoBarras != null && p.CodigoBarras.Equals(codigo, StringComparison.OrdinalIgnoreCase)) ||
-                p.ProductoID.ToString() == codigo);
+            // 2. Si el código de barras está vacío, tomar la opción seleccionada en el ComboBox
+            else if (cmbProductos.SelectedItem is ProductoViewModel prodCombo)
+            {
+                prodSeleccionado = prodCombo;
+            }
 
             if (prodSeleccionado == null)
             {
-                MessageBox.Show("Producto no encontrado o inactivo.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtCodigoBarras.SelectAll();
+                MessageBox.Show("Seleccione o ingrese un producto válido.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtCodigoBarras.Focus();
                 return;
             }
@@ -115,8 +144,12 @@ namespace Presentacion.Forms.Ventas
 
             ActualizarGridCarrito();
 
-            // Limpia el campo para la siguiente lectura del escáner
+            // Restablecer campos para el siguiente producto
             txtCodigoBarras.Clear();
+            cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
+            cmbProductos.SelectedIndex = -1;
+            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
+
             numCantidad.Value = 1;
             txtCodigoBarras.Focus();
         }
@@ -139,7 +172,6 @@ namespace Presentacion.Forms.Ventas
 
         private void FrmVentaModal_KeyDown(object sender, KeyEventArgs e)
         {
-            // Solo incrementa/decremanta si el foco no está escribiendo un texto en el buscador
             if (!txtCodigoBarras.Focused || string.IsNullOrEmpty(txtCodigoBarras.Text))
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
@@ -165,7 +197,6 @@ namespace Presentacion.Forms.Ventas
                 var item = _carrito[index];
                 item.Cantidad += cambio;
 
-                // Si la cantidad disminuye a 0 o menos, elimina el registro
                 if (item.Cantidad <= 0)
                 {
                     _carrito.RemoveAt(index);
@@ -173,7 +204,6 @@ namespace Presentacion.Forms.Ventas
 
                 ActualizarGridCarrito();
 
-                // Mantiene el foco en la fila correcta del DataGridView tras refrescar
                 if (_carrito.Count > 0)
                 {
                     int nuevoIndex = Math.Min(index, _carrito.Count - 1);
@@ -206,7 +236,6 @@ namespace Presentacion.Forms.Ventas
             dgvCarrito.DataSource = null;
             dgvCarrito.DataSource = _carrito.Select(c => new
             {
-                c.ProductoID,
                 Producto = _productosDisponibles.FirstOrDefault(p => p.ProductoID == c.ProductoID)?.Nombre ?? "N/A",
                 c.Cantidad,
                 PrecioUnitario = c.PrecioUnitario.ToString("C2"),
@@ -225,7 +254,7 @@ namespace Presentacion.Forms.Ventas
                 return;
             }
 
-            int? socioId = string.IsNullOrWhiteSpace(txtSocioId.Text) ? null : int.Parse(txtSocioId.Text.Trim());
+            int? socioId = null;
             decimal totalVenta = _carrito.Sum(c => c.Cantidad * c.PrecioUnitario);
 
             try
