@@ -24,6 +24,8 @@
             lblTitulo = new Label();
             lblFormaPago = new Label();
             cmbFormaPago = new ComboBox();
+            lblProducto = new Label();
+            cmbProductos = new ComboBox();
             lblBuscarProducto = new Label();
             txtBuscarProducto = new TextBox();
             lblCantidad = new Label();
@@ -94,6 +96,33 @@
             cmbFormaPago.Name = "cmbFormaPago";
             cmbFormaPago.Size = new Size(200, 25);
             cmbFormaPago.TabIndex = 2;
+
+            // 
+            // lblProducto
+            // 
+            lblProducto.AutoSize = true;
+            lblProducto.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            lblProducto.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            lblProducto.Location = new Point(245, 65);
+            lblProducto.Name = "lblProducto";
+            lblProducto.Size = new Size(130, 17);
+            lblProducto.TabIndex = 18;
+            lblProducto.Text = "Seleccionar Producto:";
+
+            // 
+            // cmbProductos
+            // 
+            cmbProductos.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            cmbProductos.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbProductos.FlatStyle = FlatStyle.Flat;
+            cmbProductos.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
+            cmbProductos.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            cmbProductos.FormattingEnabled = true;
+            cmbProductos.Location = new Point(245, 87);
+            cmbProductos.Name = "cmbProductos";
+            cmbProductos.Size = new Size(355, 25);
+            cmbProductos.TabIndex = 19;
+            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
 
             // 
             // lblBuscarProducto
@@ -326,6 +355,8 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = ColorTranslator.FromHtml("#0b0f1a");
             ClientSize = new Size(800, 490);
+            Controls.Add(cmbProductos);
+            Controls.Add(lblProducto);
             Controls.Add(btnCancelar);
             Controls.Add(btnGuardar);
             Controls.Add(lblTotalCalculado);
@@ -365,6 +396,8 @@
         private Label lblTitulo;
         private Label lblFormaPago;
         private ComboBox cmbFormaPago;
+        private Label lblProducto;
+        private ComboBox cmbProductos;
         private Label lblBuscarProducto;
         private TextBox txtBuscarProducto;
         private Label lblCantidad;

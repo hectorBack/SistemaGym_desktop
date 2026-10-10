@@ -215,30 +215,32 @@
             dgvCompras.AllowUserToAddRows = false;
             dgvCompras.AllowUserToDeleteRows = false;
             dgvCompras.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvCompras.BackgroundColor = Color.FromArgb(11, 15, 26);
+            dgvCompras.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
             dgvCompras.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(15, 42, 79);
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
-            dataGridViewCellStyle1.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvCompras.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvCompras.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(11, 15, 26);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
-            dataGridViewCellStyle2.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvCompras.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvCompras.Dock = DockStyle.Fill;
             dgvCompras.EnableHeadersVisualStyles = false;
-            dgvCompras.GridColor = Color.FromArgb(15, 42, 79);
+
+            // Encabezados
+            dgvCompras.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            dgvCompras.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            dgvCompras.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dgvCompras.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+
+            // Relleno de celdas estandarizado (8px a la izquierda)
+            Padding margenCeldaCompras = new Padding(8, 0, 0, 0);
+            dgvCompras.ColumnHeadersDefaultCellStyle.Padding = margenCeldaCompras;
+            dgvCompras.DefaultCellStyle.Padding = margenCeldaCompras;
+
+            // Celdas estándar y selección
+            dgvCompras.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            dgvCompras.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            dgvCompras.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
+            dgvCompras.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgvCompras.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dgvCompras.ScrollBars = ScrollBars.Both;
+
+            dgvCompras.GridColor = ColorTranslator.FromHtml("#0f2a4f");
+            dgvCompras.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvCompras.Dock = DockStyle.Fill;
             dgvCompras.Location = new Point(0, 110);
             dgvCompras.Margin = new Padding(3, 4, 3, 4);
             dgvCompras.MultiSelect = false;

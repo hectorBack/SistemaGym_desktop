@@ -50,55 +50,62 @@ namespace Presentacion.Forms.Compras
                 var resultado = await _controller.ObtenerPorRangoFechasAsync(fechaInicio, fechaFin);
                 _listaCompras = resultado.ToList();
 
-                // Desactivar temporalmente el evento para evitar disparar IndexOutOfRangeException
+                // Pausar layout y desvincular evento de selección
+                dgvCompras.SuspendLayout();
                 dgvCompras.SelectionChanged -= dgvCompras_SelectionChanged;
 
-                dgvCompras.DataSource = null;
+                // Asignación directa sin limpiar a null para evitar IndexOutOfRangeException
                 dgvCompras.AutoGenerateColumns = true;
                 dgvCompras.DataSource = _listaCompras;
+
                 ConfigurarGrid();
                 dgvCompras.ClearSelection();
-
-                // Volver a activar el evento y restaurar el estado inicial de los botones
-                dgvCompras.SelectionChanged += dgvCompras_SelectionChanged;
-                ActualizarEstadoBotones();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al cargar compras: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                // Restaurar evento y refrescar estado de UI
+                dgvCompras.SelectionChanged += dgvCompras_SelectionChanged;
+                dgvCompras.ResumeLayout();
+                ActualizarEstadoBotones();
+            }
         }
 
         private void ConfigurarGrid()
         {
-            // 1. Ocultar todas las columnas no requeridas (incluyendo Codigo y Estado original para evitar duplicados)
+            if (dgvCompras.Columns.Count == 0) return;
+
+            // 1. Ocultar todas las columnas no requeridas
             string[] columnasAOcultar = { "CompraID", "UsuarioID", "UsuarioNombre", "Activo", "Observacion", "Detalles", "Total", "CreatedAt", "Codigo", "Estado" };
             foreach (var col in columnasAOcultar)
             {
-                if (dgvCompras.Columns[col] != null)
+                if (dgvCompras.Columns.Contains(col))
                     dgvCompras.Columns[col].Visible = false;
             }
 
-            // 2. Mostrar y configurar únicamente las columnas solicitadas
-            if (dgvCompras.Columns["TotalTexto"] != null)
+            // 2. Configurar las columnas visibles
+            if (dgvCompras.Columns.Contains("TotalTexto"))
             {
                 dgvCompras.Columns["TotalTexto"].Visible = true;
                 dgvCompras.Columns["TotalTexto"].HeaderText = "Total";
             }
 
-            if (dgvCompras.Columns["FechaTexto"] != null)
+            if (dgvCompras.Columns.Contains("FechaTexto"))
             {
                 dgvCompras.Columns["FechaTexto"].Visible = true;
                 dgvCompras.Columns["FechaTexto"].HeaderText = "Fecha de Registro";
             }
 
-            if (dgvCompras.Columns["EstadoTexto"] != null)
+            if (dgvCompras.Columns.Contains("EstadoTexto"))
             {
                 dgvCompras.Columns["EstadoTexto"].Visible = true;
                 dgvCompras.Columns["EstadoTexto"].HeaderText = "Estado";
             }
 
-            // 3. Estructura de ordenamiento y pesos (sin la columna Codigo)
+            // 3. Formato y ordenamiento de columnas
             dgvCompras.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             string[] ordenColumnas = { "TotalTexto", "FechaTexto", "EstadoTexto" };
@@ -110,31 +117,31 @@ namespace Presentacion.Forms.Compras
                 ["EstadoTexto"] = 90
             };
 
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
+            int index = 0;
+            foreach (string nombreColumna in ordenColumnas)
             {
-                string nombreColumna = ordenColumnas[indice];
-                if (dgvCompras.Columns[nombreColumna] is not DataGridViewColumn columna)
-                    continue;
+                if (dgvCompras.Columns.Contains(nombreColumna))
+                {
+                    var columna = dgvCompras.Columns[nombreColumna];
+                    columna.DisplayIndex = index++;
+                    columna.FillWeight = pesos[nombreColumna];
+                    columna.MinimumWidth = nombreColumna switch
+                    {
+                        "FechaTexto" => 110,
+                        "TotalTexto" => 90,
+                        _ => 70
+                    };
 
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[nombreColumna];
-                columna.MinimumWidth = nombreColumna switch
-                {
-                    "FechaTexto" => 110,
-                    "TotalTexto" => 90,
-                    _ => 70
-                };
-
-                // Alineación a la derecha para el total acumulado
-                if (nombreColumna == "TotalTexto")
-                {
-                    columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-                }
-                else
-                {
-                    columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                    columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    if (nombreColumna == "TotalTexto")
+                    {
+                        columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                        columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
+                    }
+                    else
+                    {
+                        columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                        columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    }
                 }
             }
         }

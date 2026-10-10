@@ -20,8 +20,12 @@ namespace Presentacion.Forms.Compras
         private readonly CompraController _compraController;
         private readonly ProductoController _productoController;
         private readonly List<DetalleCompraViewModel> _listaDetalles = new();
+        private readonly BindingSource _detallesBindingSource = new();
+
+        private List<ProductoViewModel> _productosDisponibles = new();
+
         private decimal _totalAcumulado = 0;
-        private ProductoDto? _productoEncontrado = null; // Guardar temporalmente el producto escaneado
+        private ProductoViewModel? _productoEncontrado = null; 
 
         public FrmCompraModal(
             CompraController compraController,
@@ -32,7 +36,7 @@ namespace Presentacion.Forms.Compras
             _productoController = productoController;
         }
 
-        private void FrmCompraModal_Load(object sender, EventArgs e)
+        private async void FrmCompraModal_Load(object sender, EventArgs e)
         {
             lblTitulo.Text = "Registrar Nueva Compra";
             cmbFormaPago.SelectedIndex = 0; // "Efectivo" por defecto
@@ -40,17 +44,28 @@ namespace Presentacion.Forms.Compras
             // Prevenir que la grilla genere columnas automáticas adicionales
             dgvDetalles.AutoGenerateColumns = false;
 
+            ConfigurarGridDetalles();
+            _detallesBindingSource.DataSource = _listaDetalles;
+            dgvDetalles.DataSource = _detallesBindingSource;
+
             InicializarLabelsInformativos();
             ActualizarGridYTotal();
+            await CargarProductosAsync();
         }
 
-        private async void btnAgregarProducto_Click(object sender, EventArgs e)
+        private void btnAgregarProducto_Click(object sender, EventArgs e)
         {
             string codigoOBusqueda = txtBuscarProducto.Text.Trim();
 
-            if (ValidationHelper.EsTextoVacio(codigoOBusqueda))
+            // Si el usuario seleccionó un producto del combo pero no hay texto en el buscador
+            if (_productoEncontrado == null && cmbProductos.SelectedItem is ProductoViewModel prodCombo)
             {
-                MessageBox.Show("Ingrese un código de barras o nombre de producto.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _productoEncontrado = prodCombo;
+            }
+
+            if (_productoEncontrado == null && string.IsNullOrWhiteSpace(codigoOBusqueda))
+            {
+                MessageBox.Show("Seleccione un producto o ingrese un código de barras.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -62,15 +77,18 @@ namespace Presentacion.Forms.Compras
 
             try
             {
-                // 1. Obtener producto por código de barras si no ha sido buscado previamente
-                if (_productoEncontrado == null || _productoEncontrado.CodigoBarras != codigoOBusqueda)
+                // 1. Si se escribió/escaneó un código manual distinto al del objeto guardado
+                if (_productoEncontrado == null ||
+                    (_productoEncontrado.CodigoBarras != codigoOBusqueda && _productoEncontrado.ProductoID.ToString() != codigoOBusqueda))
                 {
-                    _productoEncontrado = await _productoController.ObtenerPorCodigoBarrasAsync(codigoOBusqueda);
+                    _productoEncontrado = _productosDisponibles.FirstOrDefault(p =>
+                        (p.CodigoBarras != null && p.CodigoBarras.Equals(codigoOBusqueda, StringComparison.OrdinalIgnoreCase)) ||
+                        p.ProductoID.ToString() == codigoOBusqueda);
                 }
 
                 if (_productoEncontrado == null)
                 {
-                    MessageBox.Show("Producto no encontrado.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Producto no encontrado o inactivo.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -98,8 +116,14 @@ namespace Presentacion.Forms.Compras
 
                 // 4. Limpiar selección rápida
                 txtBuscarProducto.Clear();
+
+                cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
+                cmbProductos.SelectedIndex = -1;
+                cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
+
                 numCantidad.Value = 1;
                 _productoEncontrado = null;
+                InicializarLabelsInformativos();
                 txtBuscarProducto.Focus();
 
                 ActualizarGridYTotal();
@@ -111,20 +135,37 @@ namespace Presentacion.Forms.Compras
         }
 
         // Evento opcional para que al escribir/esccanear el código se muestren inmediatamente costo y precio
-        private async void txtBuscarProducto_KeyDown(object sender, KeyEventArgs e)
+        private void txtBuscarProducto_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter && !string.IsNullOrWhiteSpace(txtBuscarProducto.Text))
+            if (e.KeyCode == Keys.Enter)
             {
                 e.SuppressKeyPress = true;
-                _productoEncontrado = await _productoController.ObtenerPorCodigoBarrasAsync(txtBuscarProducto.Text.Trim());
-                if (_productoEncontrado != null)
+                string codigo = txtBuscarProducto.Text.Trim();
+
+                if (!string.IsNullOrWhiteSpace(codigo))
                 {
-                    lblCostoValor.Text = _productoEncontrado.Costo.ToString("C2");
-                    lblPrecioValor.Text = _productoEncontrado.Precio.ToString("C2");
-                }
-                else
-                {
-                    InicializarLabelsInformativos();
+                    var prod = _productosDisponibles.FirstOrDefault(p =>
+                        (p.CodigoBarras != null && p.CodigoBarras.Equals(codigo, StringComparison.OrdinalIgnoreCase)) ||
+                        p.ProductoID.ToString() == codigo);
+
+                    if (prod != null)
+                    {
+                        _productoEncontrado = prod;
+
+                        // Sincronizar ComboBox
+                        cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
+                        cmbProductos.SelectedValue = prod.ProductoID;
+                        cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
+
+                        lblCostoValor.Text = prod.Costo.ToString("C2");
+                        lblPrecioValor.Text = prod.Precio.ToString("C2");
+                    }
+                    else
+                    {
+                        _productoEncontrado = null;
+                        InicializarLabelsInformativos();
+                        MessageBox.Show("Producto no encontrado.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
             }
         }
@@ -190,6 +231,64 @@ namespace Presentacion.Forms.Compras
             this.Close();
         }
 
+        private async Task CargarProductosAsync()
+        {
+            try
+            {
+                var productos = await _productoController.ObtenerProductosAsync(incluirInactivos: false);
+                _productosDisponibles = productos.ToList();
+
+                CargarComboBoxProductos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar lista de productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CargarComboBoxProductos()
+        {
+            // Se desvincula temporalmente el evento para evitar disparos en cascada al llenar los datos
+            cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
+
+            cmbProductos.DataSource = null;
+            cmbProductos.DataSource = _productosDisponibles;
+            cmbProductos.DisplayMember = "Nombre";
+            cmbProductos.ValueMember = "ProductoID";
+            cmbProductos.SelectedIndex = -1; // Inicia deseleccionado
+
+            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
+        }
+
+        // Evento al seleccionar una opción dentro del ComboBox de productos
+        private void cmbProductos_SelectedIndexChanged(object sender, EventArgs? e)
+        {
+            // 1. Validar que la selección no sea -1 o nula
+            if (cmbProductos.SelectedIndex < 0 || cmbProductos.SelectedItem == null)
+            {
+                return;
+            }
+
+            if (cmbProductos.SelectedItem is ProductoViewModel prodCombo)
+            {
+                _productoEncontrado = prodCombo;
+
+                // 2. Asignar el valor asegurando que no haya conflictos de selección en el TextBox
+                string codigo = !string.IsNullOrEmpty(prodCombo.CodigoBarras)
+                    ? prodCombo.CodigoBarras
+                    : prodCombo.ProductoID.ToString();
+
+                if (txtBuscarProducto.Text != codigo)
+                {
+                    txtBuscarProducto.Text = codigo;
+                    txtBuscarProducto.SelectionStart = txtBuscarProducto.Text.Length; // Mover cursor al final sin seleccionar -1
+                }
+
+                lblCostoValor.Text = prodCombo.Costo.ToString("C2");
+                lblPrecioValor.Text = prodCombo.Precio.ToString("C2");
+            }
+        }
+
         #region Métodos Privados
         private void InicializarLabelsInformativos()
         {
@@ -199,13 +298,10 @@ namespace Presentacion.Forms.Compras
 
         private void ActualizarGridYTotal()
         {
-            dgvDetalles.DataSource = null;
-            dgvDetalles.DataSource = _listaDetalles;
+            _detallesBindingSource.ResetBindings(false);
 
             _totalAcumulado = _listaDetalles.Sum(d => d.Cantidad * d.CostoUnitario);
             lblTotalCalculado.Text = _totalAcumulado.ToString("C2");
-
-            ConfigurarGridDetalles();
         }
 
         private void ConfigurarGridDetalles()
