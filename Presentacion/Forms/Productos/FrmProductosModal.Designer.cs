@@ -25,20 +25,20 @@
             txtCodigoBarras = new TextBox();
             lblNombre = new Label();
             txtNombre = new TextBox();
+            lblCosto = new Label();
+            numCosto = new NumericUpDown();
             lblPrecio = new Label();
             numPrecio = new NumericUpDown();
             chkActivo = new CheckBox();
-            btnGuardar = new Button();
-            btnCancelar = new Button();
-            numCosto = new NumericUpDown();
-            label1 = new Label();
+            btnGuardar = new BotonTema();
+            btnCancelar = new BotonTema();
             panelHeader.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numPrecio).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numCosto).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numPrecio).BeginInit();
             SuspendLayout();
-            // 
+            //
             // panelHeader
-            // 
+            //
             panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
@@ -47,9 +47,9 @@
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(434, 67);
             panelHeader.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
@@ -58,20 +58,20 @@
             lblTitulo.Size = new Size(161, 28);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Nuevo Producto";
-            // 
+            //
             // lblCategoria
-            // 
+            //
             lblCategoria.AutoSize = true;
             lblCategoria.Font = new Font("Segoe UI", 9.5F);
             lblCategoria.ForeColor = Color.FromArgb(230, 238, 252);
             lblCategoria.Location = new Point(29, 87);
             lblCategoria.Name = "lblCategoria";
             lblCategoria.Size = new Size(80, 21);
-            lblCategoria.TabIndex = 1;
+            lblCategoria.TabIndex = 20;
             lblCategoria.Text = "Categoría:";
-            // 
+            //
             // cmbCategoria
-            // 
+            //
             cmbCategoria.BackColor = Color.FromArgb(15, 42, 79);
             cmbCategoria.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbCategoria.FlatStyle = FlatStyle.Flat;
@@ -82,21 +82,21 @@
             cmbCategoria.Margin = new Padding(3, 4, 3, 4);
             cmbCategoria.Name = "cmbCategoria";
             cmbCategoria.Size = new Size(377, 29);
-            cmbCategoria.TabIndex = 2;
-            // 
+            cmbCategoria.TabIndex = 1;
+            //
             // lblCodigoBarras
-            // 
+            //
             lblCodigoBarras.AutoSize = true;
             lblCodigoBarras.Font = new Font("Segoe UI", 9.5F);
             lblCodigoBarras.ForeColor = Color.FromArgb(230, 238, 252);
             lblCodigoBarras.Location = new Point(29, 160);
             lblCodigoBarras.Name = "lblCodigoBarras";
             lblCodigoBarras.Size = new Size(132, 21);
-            lblCodigoBarras.TabIndex = 3;
+            lblCodigoBarras.TabIndex = 21;
             lblCodigoBarras.Text = "Código de Barras:";
-            // 
+            //
             // txtCodigoBarras
-            // 
+            //
             txtCodigoBarras.BackColor = Color.FromArgb(15, 42, 79);
             txtCodigoBarras.BorderStyle = BorderStyle.FixedSingle;
             txtCodigoBarras.Font = new Font("Segoe UI", 10F);
@@ -105,21 +105,21 @@
             txtCodigoBarras.Margin = new Padding(3, 4, 3, 4);
             txtCodigoBarras.Name = "txtCodigoBarras";
             txtCodigoBarras.Size = new Size(377, 30);
-            txtCodigoBarras.TabIndex = 4;
-            // 
+            txtCodigoBarras.TabIndex = 2;
+            //
             // lblNombre
-            // 
+            //
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9.5F);
             lblNombre.ForeColor = Color.FromArgb(230, 238, 252);
             lblNombre.Location = new Point(29, 233);
             lblNombre.Name = "lblNombre";
             lblNombre.Size = new Size(138, 21);
-            lblNombre.TabIndex = 5;
+            lblNombre.TabIndex = 22;
             lblNombre.Text = "Nombre Producto:";
-            // 
+            //
             // txtNombre
-            // 
+            //
             txtNombre.BackColor = Color.FromArgb(15, 42, 79);
             txtNombre.BorderStyle = BorderStyle.FixedSingle;
             txtNombre.Font = new Font("Segoe UI", 10F);
@@ -128,117 +128,109 @@
             txtNombre.Margin = new Padding(3, 4, 3, 4);
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(377, 30);
-            txtNombre.TabIndex = 6;
-            // 
+            txtNombre.TabIndex = 3;
+            //
+            // lblCosto
+            //
+            lblCosto.AutoSize = true;
+            lblCosto.Font = new Font("Segoe UI", 9.5F);
+            lblCosto.ForeColor = Color.FromArgb(230, 238, 252);
+            lblCosto.Location = new Point(29, 307);
+            lblCosto.Name = "lblCosto";
+            lblCosto.Size = new Size(53, 21);
+            lblCosto.TabIndex = 23;
+            lblCosto.Text = "Costo:";
+            //
+            // numCosto
+            //
+            numCosto.BackColor = Color.FromArgb(15, 42, 79);
+            numCosto.BorderStyle = BorderStyle.FixedSingle;
+            numCosto.DecimalPlaces = 2;
+            numCosto.Font = new Font("Segoe UI", 10F);
+            numCosto.ForeColor = Color.FromArgb(230, 238, 252);
+            numCosto.Location = new Point(29, 333);
+            numCosto.Margin = new Padding(3, 4, 3, 4);
+            numCosto.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
+            numCosto.Name = "numCosto";
+            numCosto.Size = new Size(177, 30);
+            numCosto.TabIndex = 4;
+            //
             // lblPrecio
-            // 
+            //
             lblPrecio.AutoSize = true;
             lblPrecio.Font = new Font("Segoe UI", 9.5F);
             lblPrecio.ForeColor = Color.FromArgb(230, 238, 252);
-            lblPrecio.Location = new Point(29, 307);
+            lblPrecio.Location = new Point(229, 307);
             lblPrecio.Name = "lblPrecio";
             lblPrecio.Size = new Size(56, 21);
-            lblPrecio.TabIndex = 7;
+            lblPrecio.TabIndex = 24;
             lblPrecio.Text = "Precio:";
-            // 
+            //
             // numPrecio
-            // 
+            //
             numPrecio.BackColor = Color.FromArgb(15, 42, 79);
             numPrecio.BorderStyle = BorderStyle.FixedSingle;
             numPrecio.DecimalPlaces = 2;
             numPrecio.Font = new Font("Segoe UI", 10F);
             numPrecio.ForeColor = Color.FromArgb(230, 238, 252);
-            numPrecio.Location = new Point(29, 333);
+            numPrecio.Location = new Point(229, 333);
             numPrecio.Margin = new Padding(3, 4, 3, 4);
             numPrecio.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
             numPrecio.Name = "numPrecio";
             numPrecio.Size = new Size(177, 30);
-            numPrecio.TabIndex = 8;
-            // 
+            numPrecio.TabIndex = 5;
+            //
             // chkActivo
-            // 
+            //
             chkActivo.AutoSize = true;
             chkActivo.Checked = true;
             chkActivo.CheckState = CheckState.Checked;
             chkActivo.Font = new Font("Segoe UI", 9.5F);
             chkActivo.ForeColor = Color.FromArgb(230, 238, 252);
-            chkActivo.Location = new Point(29, 460);
+            chkActivo.Location = new Point(29, 385);
             chkActivo.Margin = new Padding(3, 4, 3, 4);
             chkActivo.Name = "chkActivo";
             chkActivo.Size = new Size(75, 25);
-            chkActivo.TabIndex = 11;
+            chkActivo.TabIndex = 6;
             chkActivo.Text = "Activo";
             chkActivo.UseVisualStyleBackColor = true;
-            // 
+            //
             // btnGuardar
-            // 
-            btnGuardar.BackColor = Color.FromArgb(31, 111, 235);
-            btnGuardar.FlatAppearance.BorderSize = 0;
-            btnGuardar.FlatStyle = FlatStyle.Flat;
-            btnGuardar.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            btnGuardar.ForeColor = Color.White;
-            btnGuardar.Location = new Point(189, 513);
+            //
+            btnGuardar.Estilo = EstiloBoton.Primario;
+            btnGuardar.Location = new Point(189, 435);
             btnGuardar.Margin = new Padding(3, 4, 3, 4);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(103, 43);
-            btnGuardar.TabIndex = 12;
+            btnGuardar.TabIndex = 7;
             btnGuardar.Text = "Guardar";
-            btnGuardar.UseVisualStyleBackColor = false;
             btnGuardar.Click += btnGuardar_Click;
-            // 
+            //
             // btnCancelar
-            // 
-            btnCancelar.BackColor = Color.FromArgb(15, 42, 79);
-            btnCancelar.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnCancelar.FlatStyle = FlatStyle.Flat;
-            btnCancelar.Font = new Font("Segoe UI", 9.5F);
-            btnCancelar.ForeColor = Color.FromArgb(230, 238, 252);
-            btnCancelar.Location = new Point(303, 513);
+            //
+            btnCancelar.DialogResult = DialogResult.Cancel;
+            btnCancelar.Location = new Point(303, 435);
             btnCancelar.Margin = new Padding(3, 4, 3, 4);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(103, 43);
-            btnCancelar.TabIndex = 13;
+            btnCancelar.TabIndex = 8;
             btnCancelar.Text = "Cancelar";
-            btnCancelar.UseVisualStyleBackColor = false;
-            btnCancelar.Click += btnCancelar_Click;
-            // 
-            // numCosto
-            // 
-            numCosto.BackColor = Color.FromArgb(15, 42, 79);
-            numCosto.BorderStyle = BorderStyle.FixedSingle;
-            numCosto.Font = new Font("Segoe UI", 10F);
-            numCosto.ForeColor = Color.FromArgb(230, 238, 252);
-            numCosto.Location = new Point(29, 408);
-            numCosto.Margin = new Padding(3, 4, 3, 4);
-            numCosto.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
-            numCosto.Name = "numCosto";
-            numCosto.Size = new Size(177, 30);
-            numCosto.TabIndex = 15;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 9.5F);
-            label1.ForeColor = Color.FromArgb(230, 238, 252);
-            label1.Location = new Point(29, 382);
-            label1.Name = "label1";
-            label1.Size = new Size(53, 21);
-            label1.TabIndex = 14;
-            label1.Text = "Costo:";
-            // 
+            //
             // FrmProductoModal
-            // 
+            //
+            AcceptButton = btnGuardar;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
-            ClientSize = new Size(434, 596);
-            Controls.Add(numCosto);
-            Controls.Add(label1);
+            CancelButton = btnCancelar;
+            ClientSize = new Size(434, 510);
             Controls.Add(btnCancelar);
             Controls.Add(btnGuardar);
             Controls.Add(chkActivo);
             Controls.Add(numPrecio);
             Controls.Add(lblPrecio);
+            Controls.Add(numCosto);
+            Controls.Add(lblCosto);
             Controls.Add(txtNombre);
             Controls.Add(lblNombre);
             Controls.Add(txtCodigoBarras);
@@ -256,8 +248,8 @@
             Load += FrmProductoModal_Load;
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)numPrecio).EndInit();
             ((System.ComponentModel.ISupportInitialize)numCosto).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numPrecio).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -272,12 +264,12 @@
         private TextBox txtCodigoBarras;
         private Label lblNombre;
         private TextBox txtNombre;
+        private Label lblCosto;
+        private NumericUpDown numCosto;
         private Label lblPrecio;
         private NumericUpDown numPrecio;
         private CheckBox chkActivo;
-        private Button btnGuardar;
-        private Button btnCancelar;
-        private NumericUpDown numCosto;
-        private Label label1;
+        private BotonTema btnGuardar;
+        private BotonTema btnCancelar;
     }
 }
