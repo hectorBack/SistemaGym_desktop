@@ -26,288 +26,166 @@ namespace Presentacion.Forms
 {
     public partial class FrmPrincipal : Form
     {
-        private readonly UsuarioDto _usuarioSesion;
-        private readonly IServiceProvider _serviceProvider;
-        private Form _formularioActivo = null;
-
-        // Constructor por defecto
-        public FrmPrincipal()
+        // Nombres de módulo tal como se guardan en la BD (los mismos de FrmRolModal).
+        // Si alguno cambia, se corrige solo aquí.
+        private static class Permiso
         {
-            InitializeComponent();
-            ConfigurarFormularioPrincipal();
+            public const string Productos = "Productos";
+            public const string Categorias = "Categorias";
+            public const string Ventas = "Ventas";
+            public const string Membresias = "Membresias";
+            public const string Socios = "Socios";
+            public const string Registro = "Registro";
+            public const string Conceptos = "Conceptos";
+            public const string Movimientos = "Movimientos";
+            public const string Roles = "Roles";
+            public const string Usuarios = "Usuarios";
+            public const string Compras = "Compras";
+            public const string Reportes = "Reportes";
+            public const string CorteDeCaja = "Corte de Caja";
+            public const string Configuracion = "Configuracion";
         }
 
-        // Constructor que recibe la sesión del usuario logueado
-        public FrmPrincipal(UsuarioDto usuario, IServiceProvider serviceProvider = null)
+        // Un módulo del menú: su botón, el permiso necesario y el formulario que abre.
+        // El aspecto del botón (icono, texto, colores) vive en el Designer.
+        private sealed record ModuloMenu(IconButton Boton, string Permiso, Type Formulario);
+
+        private readonly UsuarioDto _usuarioSesion;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly List<ModuloMenu> _modulos = new();
+
+        private Form _formularioActivo;
+        private IconButton _botonActivo;
+
+        /// <summary>
+        /// Es true cuando el usuario eligió "Cerrar sesión". Program.cs lo revisa para volver
+        /// a mostrar el login; si es false (se cerró la ventana con la X), la aplicación termina.
+        /// </summary>
+        public bool CerrarSesionSolicitado { get; private set; }
+
+        public FrmPrincipal(UsuarioDto usuario, IServiceProvider serviceProvider)
         {
+            // Se validan una sola vez aquí, no en cada clic.
+            _usuarioSesion = usuario ?? throw new ArgumentNullException(nameof(usuario));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
             InitializeComponent();
-            _usuarioSesion = usuario;
-            _serviceProvider = serviceProvider;
 
-            ConfigurarFormularioPrincipal();
+            Text = $"Sistema Gimnasio - Usuario: {_usuarioSesion.NombreCompleto} ({_usuarioSesion.RolNombre})";
+            btnUsuarioMenu.Text = $"{_usuarioSesion.NombreCompleto} ▾";
 
-            if (_usuarioSesion != null)
+            ConfigurarMenu();
+
+            // Cuando exista el dashboard de inicio, ábrelo aquí:
+            // AbrirFormulario(typeof(FrmDashboard), null);
+        }
+
+        // ───────────── Menú lateral ─────────────
+
+        private void ConfigurarMenu()
+        {
+            // Para agregar un módulo nuevo: botón en el Designer + una línea aquí.
+            _modulos.AddRange(new ModuloMenu[]
             {
-                this.Text = $"Sistema Gimnasio - Usuario: {_usuarioSesion.NombreCompleto} ({_usuarioSesion.RolNombre})";
+            new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
+            new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
+            new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
+            new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
+            new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
+            new(btnRegistrarVisita, Permiso.Registro,      typeof(FrmRegistroVisita)),
+            new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
+            new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
+            new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
+            new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
+            new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
+            new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
+            new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
+            new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
+            });
 
-                // APLICAR PERMISOS DE ROL
-                AplicarPermisosDeRol();
+            // Búsqueda rápida y sin distinguir mayúsculas de minúsculas.
+            var permitidos = new HashSet<string>(
+                _usuarioSesion.ModulosPermitidos ?? new List<string>(),
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (var modulo in _modulos)
+            {
+                // Ojo: ocultar el botón solo protege la interfaz.
+                // La capa de Negocio también debe validar el permiso en acciones sensibles.
+                modulo.Boton.Visible = permitidos.Contains(modulo.Permiso);
+
+                modulo.Boton.Click += (s, e) => AbrirFormulario(modulo.Formulario, modulo.Boton);
             }
         }
 
-        private void ConfigurarFormularioPrincipal()
+        private void MarcarBotonActivo(IconButton boton)
         {
-            // Forzar a que la ventana principal abra siempre en pantalla completa
-            this.WindowState = FormWindowState.Maximized;
-            this.StartPosition = FormStartPosition.CenterScreen;
+            if (boton == null) return;
 
-            ConfigurarIconosMenu();
+            if (_botonActivo != null)
+                _botonActivo.BackColor = Tema.AzulBase;
+
+            boton.BackColor = Tema.AzulHover;
+            _botonActivo = boton;
         }
 
-        private void ConfigurarIconosMenu()
+        // ───────────── Formularios dentro del contenedor ─────────────
+
+        /// <summary>
+        /// Abre un formulario interno incrustado en panelContenedor, resuelto por inyección de dependencias.
+        /// </summary>
+        private void AbrirFormulario(Type tipoFormulario, IconButton botonOrigen)
         {
-            ConfigurarBotonMenu(btnProductos, IconChar.Box, "Productos");
-            ConfigurarBotonMenu(btnCategorias, IconChar.Tags, "Categorías");
-            ConfigurarBotonMenu(btnVentas, IconChar.ShoppingCart, "Ventas");
-            ConfigurarBotonMenu(btnMembresias, IconChar.IdCard, "Membresías");
-            ConfigurarBotonMenu(btnSocios, IconChar.Users, "Socios");
-            ConfigurarBotonMenu(btnRegistrarVisita, IconChar.UserCheck, "Registrar Visita");
-            ConfigurarBotonMenu(btnConceptos, IconChar.FileInvoice, "Conceptos");
-            ConfigurarBotonMenu(btnMovimientos, IconChar.ChartLine, "Movimientos");
-            ConfigurarBotonMenu(btnRoles, IconChar.UserShield, "Roles");
-            ConfigurarBotonMenu(btnUsuarios, IconChar.UserGear, "Usuarios");
-            ConfigurarBotonMenu(btnReportes, IconChar.ChartBar, "Reportes");
-            ConfigurarBotonMenu(btnCompras, IconChar.ShoppingCart, "Compras");
-            ConfigurarBotonMenu(btnCorte, IconChar.CashRegister, "Cortes");
-            ConfigurarBotonMenu(btnConfiguracion, IconChar.Gear, "Configuraciones");
+            // Si ya está abierto ese módulo, no lo cierres y reabras.
+            if (_formularioActivo != null
+                && !_formularioActivo.IsDisposed
+                && _formularioActivo.GetType() == tipoFormulario)
+            {
+                return;
+            }
+
+            if (_formularioActivo != null)
+            {
+                _formularioActivo.Close();
+
+                // Si el formulario canceló su cierre (por ejemplo, cambios sin guardar), no se abre el nuevo.
+                if (!_formularioActivo.IsDisposed) return;
+            }
+
+            var formulario = (Form)ActivatorUtilities.CreateInstance(_serviceProvider, tipoFormulario);
+            formulario.TopLevel = false;
+            formulario.FormBorderStyle = FormBorderStyle.None;
+            formulario.Dock = DockStyle.Fill;
+
+            panelContenedor.Controls.Add(formulario);
+            formulario.BringToFront();
+            formulario.Show();
+
+            _formularioActivo = formulario;
+            MarcarBotonActivo(botonOrigen);
         }
 
-        private void ConfigurarBotonMenu(IconButton btn, IconChar icon, string texto)
-        {
-            if (btn == null) return;
-
-            btn.IconChar = icon;
-            btn.IconColor = Color.FromArgb(230, 238, 252);
-            btn.IconSize = 26;
-            btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-            btn.ImageAlign = ContentAlignment.MiddleLeft;
-            btn.TextAlign = ContentAlignment.MiddleLeft;
-            btn.Text = $"  {texto}";
-            btn.Padding = new Padding(15, 0, 0, 0);
-        }
-
-        private void AplicarPermisosDeRol()
-        {
-            // Se obtiene la lista de módulos del rol (o una lista vacía si viene nula)
-            List<string> modulosPermitidos = _usuarioSesion?.ModulosPermitidos ?? new List<string>();
-
-            // Configurar la visibilidad de cada botón del menú
-            // Ajusta los nombres de los botones y de los módulos según tu base de datos / FrmRolModal
-            if (btnUsuarios != null) btnUsuarios.Visible = modulosPermitidos.Contains("Usuarios");
-            if (btnRoles != null) btnRoles.Visible = modulosPermitidos.Contains("Roles");
-            if (btnSocios != null) btnSocios.Visible = modulosPermitidos.Contains("Socios");
-            if (btnMembresias != null) btnMembresias.Visible = modulosPermitidos.Contains("Membresias");
-            if (btnProductos != null) btnProductos.Visible = modulosPermitidos.Contains("Productos");
-            if (btnVentas != null) btnVentas.Visible = modulosPermitidos.Contains("Ventas");
-            if (btnCategorias != null) btnCategorias.Visible = modulosPermitidos.Contains("Categorias");
-            if (btnRegistrarVisita != null) btnRegistrarVisita.Visible = modulosPermitidos.Contains("Registro");
-            if (btnConceptos != null) btnConceptos.Visible = modulosPermitidos.Contains("Conceptos");
-            if (btnMovimientos != null) btnMovimientos.Visible = modulosPermitidos.Contains("Movimientos");
-            if (btnCompras != null) btnCompras.Visible = modulosPermitidos.Contains("Compras");
-            if (btnReportes != null) btnReportes.Visible = modulosPermitidos.Contains("Reportes");
-            if (btnCorte != null) btnCorte.Visible = modulosPermitidos.Contains("Corte de Caja");
-            if (btnConfiguracion != null) btnConfiguracion.Visible = modulosPermitidos.Contains("Configuracion");
-
-        }
-
-        private void btnCategorias_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmCategorias>();
-        }
-
-        private void btnProductos_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmProductos>();
-        }
-
-        private void btnVentas_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmVentas>();
-        }
-
-        private void btnMembresias_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmMembresias>();
-        }
-
-        private void btnSocios_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmSocios>();
-        }
-
-        private void btnRegistrarVisita_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmRegistroVisita>();
-        }
-
-        private void btnConceptos_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmConceptos>();
-        }
-
-        private void btnMovimientos_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmMovimientos>();
-        }
-
-        private void btnRoles_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmRoles>();
-        }
-
-        private void btnUsuarios_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmUsuarios>();
-        }
-
-        private void btnCompras_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmCompras>();
-        }
-
-        private void btnReportes_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmReportes>();
-        }
-
-        private void btnCorte_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmCortes>();
-        }
-
-        private void btnConfiguracion_Click(object sender, EventArgs e)
-        {
-            AbrirFormularioEnContenedor<FrmConfiguraciones>();
-        }
-
+        // ───────────── Sesión de usuario ─────────────
 
         private void btnUsuarioMenu_Click(object sender, EventArgs e)
         {
-            // Si hay un usuario activo, habilitamos Cerrar Sesión y deshabilitamos Iniciar Sesión (o viceversa)
-            bool haySesionActiva = _usuarioSesion != null;
-
-            itemCerrarSesion.Enabled = haySesionActiva;
-            itemIniciarSesion.Enabled = !haySesionActiva;
-
-            // Cambiar el texto del botón para mostrar el nombre del usuario logueado
-            if (haySesionActiva)
-            {
-                btnUsuarioMenu.Text = $"{_usuarioSesion.NombreCompleto} ▾";
-            }
-            else
-            {
-                btnUsuarioMenu.Text = "Invitado ▾";
-            }
-
-            // Desplegar el menú debajo del botón
             menuUsuario.Show(btnUsuarioMenu, new Point(0, btnUsuarioMenu.Height));
-        }
-
-        private void itemIniciarSesion_Click(object sender, EventArgs e)
-        {
-            // Si ya hay un usuario logueado, advertir que se cerrará la sesión actual para iniciar con otra cuenta
-            if (_usuarioSesion != null)
-            {
-                var resultado = MessageBox.Show(
-                    "Ya hay una sesión activa. ¿Desea cerrar la sesión actual para iniciar con otro usuario?",
-                    "Iniciar nueva sesión",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question
-                );
-
-                if (resultado == DialogResult.Yes)
-                {
-                    EjecutarCierreDeSesion();
-                }
-            }
-            else
-            {
-                // Si no había usuario activo
-                EjecutarCierreDeSesion();
-            }
         }
 
         private void itemCerrarSesion_Click(object sender, EventArgs e)
         {
-            // Confirmación opcional antes de cerrar sesión
             var resultado = MessageBox.Show(
                 "¿Está seguro de que desea cerrar la sesión actual?",
-                "Confirmar Cierre de Sesión",
+                "Confirmar cierre de sesión",
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+                MessageBoxIcon.Question);
 
-            if (resultado == DialogResult.Yes)
-            {
-                EjecutarCierreDeSesion();
-            }
-        }
+            if (resultado != DialogResult.Yes) return;
 
-        private void EjecutarCierreDeSesion()
-        {
-            if (_serviceProvider == null)
-            {
-                throw new InvalidOperationException(
-                    "No se puede cerrar la sesión porque el proveedor de servicios (IServiceProvider) es nulo."
-                );
-            }
-
-            // Resolvemos la instancia de FrmLogin con sus dependencias requeridas usando Inyección de Dependencias
-            FrmLogin frmLogin = Microsoft.Extensions.DependencyInjection.ActivatorUtilities.CreateInstance<FrmLogin>(_serviceProvider);
-
-            // Mostrar la pantalla de Login
-            frmLogin.Show();
-
-            // Limpiar o cerrar la ventana principal
-            this.Close(); // O este.Hide() según la gestión de ciclo de vida de tu aplicación
-        }
-
-
-        /// <summary>
-        /// Método genérico para abrir formularios internos incrustados dentro de panelContenedor.
-        /// </summary>
-        private void AbrirFormularioEnContenedor<TForm>() where TForm : Form
-        {
-            // Cierra el formulario activo previo
-            if (_formularioActivo != null)
-            {
-                _formularioActivo.Close();
-            }
-
-            // Instanciación resuelta por inyección de dependencias
-            if (_serviceProvider != null)
-            {
-                _formularioActivo = ActivatorUtilities.CreateInstance<TForm>(_serviceProvider);
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    "El proveedor de servicios (IServiceProvider) no ha sido inicializado en FrmPrincipal."
-                );
-            }
-
-            // Configuración para incrustar el Form dentro del panelContenedor
-            _formularioActivo.TopLevel = false;
-            _formularioActivo.FormBorderStyle = FormBorderStyle.None;
-            _formularioActivo.Dock = DockStyle.Fill; // Asegura que llene todo el panel disponible
-
-            panelContenedor.Controls.Add(_formularioActivo);
-            panelContenedor.Tag = _formularioActivo;
-
-            _formularioActivo.BringToFront();
-            _formularioActivo.Show();
-
-
+            // Ya no se crea el login aquí: solo se avisa y se cierra.
+            // Program.cs vuelve a mostrar el login al ver CerrarSesionSolicitado = true.
+            CerrarSesionSolicitado = true;
+            Close();
         }
     }
 }

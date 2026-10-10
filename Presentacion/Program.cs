@@ -32,7 +32,7 @@ using Presentacion.Forms.Configuracion;
 
 namespace Presentacion
 {
-    internal static class Program
+    public static class Program
     {
         public static IServiceProvider ServiceProvider { get; private set; }
 
@@ -43,12 +43,23 @@ namespace Presentacion
 
             var services = new ServiceCollection();
             ConfigureServices(services);
-
             ServiceProvider = services.BuildServiceProvider();
 
-            // Iniciar aplicación inyectando dependencias desde el contenedor
-            var loginForm = ServiceProvider.GetRequiredService<FrmLogin>();
-            Application.Run(loginForm);
+            while (true)
+            {
+                // Una sesión = un scope: DbContext y servicios nuevos en cada inicio de sesión
+                using var scope = ServiceProvider.CreateScope();
+                var sp = scope.ServiceProvider;
+
+                using var login = sp.GetRequiredService<FrmLogin>();
+                if (login.ShowDialog() != DialogResult.OK) break;
+
+                using var principal = ActivatorUtilities.CreateInstance<FrmPrincipal>(sp, login.UsuarioAutenticado);
+                Application.Run(principal);
+
+                // SesionUsuario.Limpiar();   // descomenta cuando crees ese método
+                if (!principal.CerrarSesionSolicitado) break;
+            }
         }
 
         private static void ConfigureServices(IServiceCollection services)

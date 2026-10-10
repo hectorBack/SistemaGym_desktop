@@ -24,14 +24,16 @@
             lblUsuario = new Label();
             txtUsuario = new TextBox();
             lblPassword = new Label();
+            lblAvisoMayus = new Label();
             txtPassword = new TextBox();
+            chkMostrarPassword = new CheckBox();
             btnLogin = new Button();
             btnCancelar = new Button();
             panelLateral.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelLateral
-            // 
+            //
             panelLateral.BackColor = ColorTranslator.FromHtml("#0f2a4f");
             panelLateral.Controls.Add(lblSubtituloLogo);
             panelLateral.Controls.Add(lblLogoGym);
@@ -40,9 +42,9 @@
             panelLateral.Name = "panelLateral";
             panelLateral.Size = new Size(200, 330);
             panelLateral.TabIndex = 0;
-            // 
+            //
             // lblSubtituloLogo
-            // 
+            //
             lblSubtituloLogo.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
             lblSubtituloLogo.ForeColor = ColorTranslator.FromHtml("#e6eefc");
             lblSubtituloLogo.Location = new Point(10, 175);
@@ -51,9 +53,9 @@
             lblSubtituloLogo.TabIndex = 1;
             lblSubtituloLogo.Text = "Gestión de Socios y Membresías";
             lblSubtituloLogo.TextAlign = ContentAlignment.TopCenter;
-            // 
+            //
             // lblLogoGym
-            // 
+            //
             lblLogoGym.Font = new Font("Segoe UI Black", 18F, FontStyle.Bold, GraphicsUnit.Point);
             lblLogoGym.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
             lblLogoGym.Location = new Point(10, 110);
@@ -62,9 +64,9 @@
             lblLogoGym.TabIndex = 0;
             lblLogoGym.Text = "GYM\r\nSYSTEM";
             lblLogoGym.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            //
             // lblTituloLogin
-            // 
+            //
             lblTituloLogin.AutoSize = true;
             lblTituloLogin.Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold, GraphicsUnit.Point);
             lblTituloLogin.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
@@ -73,9 +75,9 @@
             lblTituloLogin.Size = new Size(160, 30);
             lblTituloLogin.TabIndex = 1;
             lblTituloLogin.Text = "Iniciar Sesión";
-            // 
+            //
             // lblUsuario
-            // 
+            //
             lblUsuario.AutoSize = true;
             lblUsuario.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
             lblUsuario.ForeColor = ColorTranslator.FromHtml("#e6eefc");
@@ -84,9 +86,9 @@
             lblUsuario.Size = new Size(56, 17);
             lblUsuario.TabIndex = 2;
             lblUsuario.Text = "Usuario";
-            // 
+            //
             // txtUsuario
-            // 
+            //
             txtUsuario.BackColor = ColorTranslator.FromHtml("#0f2a4f");
             txtUsuario.BorderStyle = BorderStyle.FixedSingle;
             txtUsuario.Font = new Font("Segoe UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point);
@@ -95,9 +97,9 @@
             txtUsuario.Name = "txtUsuario";
             txtUsuario.Size = new Size(240, 26);
             txtUsuario.TabIndex = 3;
-            // 
+            //
             // lblPassword
-            // 
+            //
             lblPassword.AutoSize = true;
             lblPassword.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
             lblPassword.ForeColor = ColorTranslator.FromHtml("#e6eefc");
@@ -106,9 +108,21 @@
             lblPassword.Size = new Size(74, 17);
             lblPassword.TabIndex = 4;
             lblPassword.Text = "Contraseña";
-            // 
+            //
+            // lblAvisoMayus
+            //
+            lblAvisoMayus.AutoSize = true;
+            lblAvisoMayus.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold, GraphicsUnit.Point);
+            lblAvisoMayus.ForeColor = ColorTranslator.FromHtml("#f5b53d");
+            lblAvisoMayus.Location = new Point(340, 137);
+            lblAvisoMayus.Name = "lblAvisoMayus";
+            lblAvisoMayus.Size = new Size(122, 15);
+            lblAvisoMayus.TabIndex = 9;
+            lblAvisoMayus.Text = "Bloq Mayús activado";
+            lblAvisoMayus.Visible = false;
+            //
             // txtPassword
-            // 
+            //
             txtPassword.BackColor = ColorTranslator.FromHtml("#0f2a4f");
             txtPassword.BorderStyle = BorderStyle.FixedSingle;
             txtPassword.Font = new Font("Segoe UI", 10.5F, FontStyle.Regular, GraphicsUnit.Point);
@@ -118,9 +132,26 @@
             txtPassword.PasswordChar = '*';
             txtPassword.Size = new Size(240, 26);
             txtPassword.TabIndex = 5;
-            // 
+            txtPassword.Enter += ActualizarAvisoMayus;
+            txtPassword.KeyUp += ActualizarAvisoMayus;
+            txtPassword.Leave += txtPassword_Leave;
+            //
+            // chkMostrarPassword
+            //
+            chkMostrarPassword.AutoSize = true;
+            chkMostrarPassword.Cursor = Cursors.Hand;
+            chkMostrarPassword.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            chkMostrarPassword.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            chkMostrarPassword.Location = new Point(230, 187);
+            chkMostrarPassword.Name = "chkMostrarPassword";
+            chkMostrarPassword.Size = new Size(131, 19);
+            chkMostrarPassword.TabIndex = 6;
+            chkMostrarPassword.Text = "Mostrar contraseña";
+            chkMostrarPassword.UseVisualStyleBackColor = true;
+            chkMostrarPassword.CheckedChanged += chkMostrarPassword_CheckedChanged;
+            //
             // btnLogin
-            // 
+            //
             btnLogin.BackColor = ColorTranslator.FromHtml("#1f6feb");
             btnLogin.Cursor = Cursors.Hand;
             btnLogin.FlatAppearance.BorderSize = 0;
@@ -130,15 +161,16 @@
             btnLogin.Location = new Point(230, 215);
             btnLogin.Name = "btnLogin";
             btnLogin.Size = new Size(240, 38);
-            btnLogin.TabIndex = 6;
+            btnLogin.TabIndex = 7;
             btnLogin.Text = "Ingresar";
             btnLogin.UseVisualStyleBackColor = false;
             btnLogin.Click += btnLogin_Click;
-            // 
+            //
             // btnCancelar
-            // 
+            //
             btnCancelar.BackColor = ColorTranslator.FromHtml("#0f2a4f");
             btnCancelar.Cursor = Cursors.Hand;
+            btnCancelar.DialogResult = DialogResult.Cancel;
             btnCancelar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
             btnCancelar.FlatStyle = FlatStyle.Flat;
             btnCancelar.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
@@ -146,18 +178,20 @@
             btnCancelar.Location = new Point(230, 263);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(240, 32);
-            btnCancelar.TabIndex = 7;
+            btnCancelar.TabIndex = 8;
             btnCancelar.Text = "Cancelar";
             btnCancelar.UseVisualStyleBackColor = false;
-            btnCancelar.Click += btnCancelar_Click;
-            // 
+            //
             // FrmLogin
-            // 
+            //
             AcceptButton = btnLogin;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            CancelButton = btnCancelar;
             ClientSize = new Size(510, 330);
+            Controls.Add(lblAvisoMayus);
+            Controls.Add(chkMostrarPassword);
             Controls.Add(btnCancelar);
             Controls.Add(btnLogin);
             Controls.Add(txtPassword);
@@ -185,7 +219,9 @@
         private System.Windows.Forms.Label lblUsuario;
         private System.Windows.Forms.TextBox txtUsuario;
         private System.Windows.Forms.Label lblPassword;
+        private System.Windows.Forms.Label lblAvisoMayus;
         private System.Windows.Forms.TextBox txtPassword;
+        private System.Windows.Forms.CheckBox chkMostrarPassword;
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Button btnCancelar;
     }
