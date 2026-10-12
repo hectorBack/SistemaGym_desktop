@@ -17,238 +17,267 @@ namespace Presentacion.Forms.Movimientos
     {
         private readonly MovimientoController _controller;
         private readonly ConceptoController _conceptoController;
-        private List<MovimientoViewModel> _listaMovimientos = new();
 
-        public FrmMovimientos(MovimientoController controller,
-            ConceptoController conceptoController)
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<MovimientoViewModel> _vista = new();
+
+        // Rango que se aplicó en la última búsqueda. Al recargar tras editar o eliminar se usa este,
+        // no lo que haya en los selectores (el usuario pudo moverlos sin pulsar "Filtrar").
+        private DateTime _inicioAplicado = DateTime.Today;
+        private DateTime _finAplicado = DateTime.Today.AddDays(1).AddTicks(-1);
+
+        public FrmMovimientos(MovimientoController controller, ConceptoController conceptoController)
         {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _conceptoController = conceptoController ?? throw new ArgumentNullException(nameof(conceptoController));
+
             InitializeComponent();
-            _controller = controller;
-            _conceptoController = conceptoController;
-            dgvMovimientos.SelectionChanged += dgvMovimientos_SelectionChanged;
+            ConfigurarColumnas();
         }
 
-        private async void FrmMovimientos_Load(object sender, EventArgs e)
-        {
+        /// <summary>Movimiento de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private MovimientoViewModel? MovimientoSeleccionado =>
+            dgvMovimientos.SelectedRows.Count > 0
+                ? dgvMovimientos.SelectedRows[0].DataBoundItem as MovimientoViewModel
+                : null;
 
+        private static bool EsEgreso(MovimientoViewModel m) =>
+            string.Equals(m.Tipo?.Trim(), "Egreso", StringComparison.OrdinalIgnoreCase);
+
+        // Texto para identificar un movimiento en los mensajes (antes se mostraba solo el ID interno).
+        private static string Describir(MovimientoViewModel m) => $"{m.Tipo} de {m.Total:C2} ({m.ConceptoNombre})";
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmMovimientos_Load(object? sender, EventArgs e)
+        {
             btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
-            // Inicializar selectores de fecha con la fecha de hoy
-            dtpFechaInicio.Value = DateTime.Today;
-            dtpFechaFin.Value = DateTime.Today;
-
-            // Cargar inicialmente los datos según el rango de fechas actual
-            await BuscarPorFechasAsync();
-        }
-
-        private async Task CargarMovimientosAsync()
-        {
-            await BuscarPorFechasAsync();
-            
-        }
-
-        private async void btnFiltrarFechas_Click(object sender, EventArgs e)
-        {
-            await BuscarPorFechasAsync();
-        }
-
-        private async Task BuscarPorFechasAsync()
-        {
-            try
-            {
-                // Cubre las 24 horas del día final (hasta las 23:59:59.999)
-                DateTime inicio = dtpFechaInicio.Value.Date;
-                DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
-
-                var resultado = await _controller.ObtenerPorRangoFechasAsync(inicio, fin);
-                _listaMovimientos = resultado.ToList();
-
-                // 🟢 VINCULAR DATOS AL DATAGRIDVIEW Y APLICAR FORMATO
-                dgvMovimientos.DataSource = null;
-                dgvMovimientos.DataSource = _listaMovimientos;
-
-                ConfigurarGrid();
-                dgvMovimientos.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar movimientos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void ConfigurarGrid()
-        {
-            // 1. Ocultar columnas técnicas y de FKs brutas
-            if (dgvMovimientos.Columns["Activo"] != null) dgvMovimientos.Columns["Activo"].Visible = false;
-            if (dgvMovimientos.Columns["ConceptoID"] != null) dgvMovimientos.Columns["ConceptoID"].Visible = false;
-            if (dgvMovimientos.Columns["CorteID"] != null) dgvMovimientos.Columns["CorteID"].Visible = false;     // Ocultar ID del corte
-            if (dgvMovimientos.Columns["UsuarioID"] != null) dgvMovimientos.Columns["UsuarioID"].Visible = false; // Ocultar ID del usuario
-
-            // 2. Configurar encabezados
-            if (dgvMovimientos.Columns["Tipo"] != null) dgvMovimientos.Columns["Tipo"].HeaderText = "Tipo";
-            if (dgvMovimientos.Columns["ConceptoNombre"] != null) dgvMovimientos.Columns["ConceptoNombre"].HeaderText = "Concepto";
-            if (dgvMovimientos.Columns["FormaPago"] != null) dgvMovimientos.Columns["FormaPago"].HeaderText = "Forma Pago";
-            if (dgvMovimientos.Columns["Total"] != null) dgvMovimientos.Columns["Total"].HeaderText = "Total";
-            if (dgvMovimientos.Columns["Observacion"] != null) dgvMovimientos.Columns["Observacion"].HeaderText = "Observaciones";
-            if (dgvMovimientos.Columns["FechaCorte"] != null) dgvMovimientos.Columns["FechaCorte"].HeaderText = "Fecha Corte";   // 🟢 Encabezado para Fecha Corte
-            if (dgvMovimientos.Columns["UsuarioNombre"] != null) dgvMovimientos.Columns["UsuarioNombre"].HeaderText = "Usuario"; // 🟢 Encabezado para Usuario
-            if (dgvMovimientos.Columns["Estado"] != null) dgvMovimientos.Columns["Estado"].HeaderText = "Estado";
-            if (dgvMovimientos.Columns["CreatedAt"] != null) dgvMovimientos.Columns["CreatedAt"].HeaderText = "Fecha Registro";
-
-            // Formato de moneda para el Total
-            if (dgvMovimientos.Columns["Total"] != null)
-            {
-                dgvMovimientos.Columns["Total"].DefaultCellStyle.Format = "C2";
-            }
-
-            // 3. Estructura de ordenamiento y pesos
-            dgvMovimientos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            string[] ordenColumnas =
-            {
-            "Tipo",
-            "ConceptoNombre",
-            "FormaPago",
-            "Total",
-            "Observacion",
-            "FechaCorte",    
-            "UsuarioNombre", 
-            "Estado",
-            "CreatedAt"
-        };
-
-            var pesos = new Dictionary<string, float>
-            {
-                ["Tipo"] = 70,
-                ["ConceptoNombre"] = 140,
-                ["FormaPago"] = 90,
-                ["Total"] = 85,
-                ["Observacion"] = 150,
-                ["FechaCorte"] = 110,   
-                ["UsuarioNombre"] = 100, 
-                ["Estado"] = 70,
-                ["CreatedAt"] = 110
-            };
-
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                if (dgvMovimientos.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                    continue;
-
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
-                {
-                    "ConceptoNombre" => 100,
-                    "Observacion" => 100,
-                    "FechaCorte" => 100,
-                    "UsuarioNombre" => 90,
-                    "CreatedAt" => 95,
-                    _ => 50
-                };
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            }
-        }
-
-        private async void btnNuevo_Click(object sender, EventArgs e)
-        {
-            // Nota: Pasar la instancia del controller de movimientos y el de conceptos en la modal cuando se construya el FrmMovimientoModal
-            using var modal = new FrmMovimientoModal(_controller, null, _conceptoController);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarMovimientosAsync();
-            }
-        }
-
-        private async void btnEditar_Click(object sender, EventArgs e)
-        {
-            if (dgvMovimientos.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un movimiento de la lista para editar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (MovimientoViewModel)dgvMovimientos.CurrentRow.DataBoundItem;
-            using var modal = new FrmMovimientoModal(_controller, item.MovimientoID, _conceptoController);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarMovimientosAsync();
-            }
-        }
-
-        private async void btnDesactivar_Click(object sender, EventArgs e)
-        {
-            if (dgvMovimientos.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un movimiento de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (MovimientoViewModel)dgvMovimientos.CurrentRow.DataBoundItem;
-            string accion = item.Activo ? "desactivar" : "activar";
-
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} el movimiento con ID '{item.MovimientoID}'?", $"Confirmar {accion.ToUpper()}"))
-            {
-                try
-                {
-                    await _controller.CambiarEstadoLogicoAsync(item.MovimientoID);
-                    await CargarMovimientosAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvMovimientos.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un movimiento de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (MovimientoViewModel)dgvMovimientos.CurrentRow.DataBoundItem;
-
-            if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE el movimiento con ID '{item.MovimientoID}' de la base de datos?", "Eliminación Definitiva"))
-            {
-                try
-                {
-                    await _controller.EliminarFisicoAsync(item.MovimientoID);
-                    await CargarMovimientosAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
-        {
 
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
-            await BuscarPorFechasAsync();
+            await FiltrarAsync();
         }
 
-        private void dgvMovimientos_SelectionChanged(object sender, EventArgs e)
+        // Las columnas se definen una sola vez. ConceptoID, CorteID, UsuarioID y Activo ya no se ocultan:
+        // simplemente no se definen. Total y fechas se enlazan como valores reales para que ordenen bien.
+        private void ConfigurarColumnas()
         {
-            if (dgvMovimientos.CurrentRow != null && dgvMovimientos.CurrentRow.DataBoundItem is MovimientoViewModel item)
+            dgvMovimientos.AutoGenerateColumns = false;
+
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Tipo), "Tipo", 70, 60);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.ConceptoNombre), "Concepto", 140, 100);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FormaPago), "Forma de pago", 90, 80);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Total), "Total", 85, 80, "C2", alinearDerecha: true);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Observacion), "Observaciones", 150, 100);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FechaCorte), "Fecha de corte", 110, 100, "dd/MM/yyyy");
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.UsuarioNombre), "Usuario", 100, 90);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Estado), "Estado", 70, 65);
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.CreatedAt), "Fecha de registro", 120, 110, "dd/MM/yyyy HH:mm");
+        }
+
+        // Lee y valida el rango de los selectores; si es válido lo aplica y busca.
+        private async Task FiltrarAsync()
+        {
+            DateTime desde = dtpFechaInicio.Value.Date;
+            DateTime hasta = dtpFechaFin.Value.Date;
+
+            if (desde > hasta)
             {
-                if (item.Activo)
+                FormHelper.MostrarAdvertencia("La fecha inicial no puede ser posterior a la fecha final.", "Rango de fechas");
+                return;
+            }
+
+            _inicioAplicado = desde;
+            _finAplicado = hasta.AddDays(1).AddTicks(-1); // cubre todo el día final
+
+            await CargarMovimientosAsync();
+        }
+
+        private async Task CargarMovimientosAsync(int? idASeleccionar = null)
+        {
+            // Si no se pide otro, se conserva la selección actual.
+            int? idObjetivo = idASeleccionar ?? MovimientoSeleccionado?.MovimientoID;
+
+            await FormHelper.EjecutarAsync(async () =>
+            {
+                var movimientos = await _controller.ObtenerPorRangoFechasAsync(_inicioAplicado, _finAplicado);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
+
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvMovimientos.SortedColumn;
+                var sentidoOrden = dgvMovimientos.SortOrder;
+
+                _vista = new ListaOrdenable<MovimientoViewModel>(movimientos);
+                dgvMovimientos.DataSource = _vista;
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    btnDesactivar.Text = "Desactivar";
-                    btnDesactivar.BackColor = Color.IndianRed;
+                    dgvMovimientos.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
                 }
-                else
+
+                ActualizarResumen();
+                SeleccionarMovimiento(idObjetivo);
+            },
+            "No se pudieron cargar los movimientos.",
+            panelTop, panelFiltros);
+        }
+
+        // Totales del rango mostrado. Solo cuentan los movimientos activos (los desactivados no afectan la caja).
+        private void ActualizarResumen()
+        {
+            var activos = _vista.Where(m => m.Activo).ToList();
+
+            decimal ingresos = activos.Where(m => !EsEgreso(m)).Sum(m => m.Total);
+            decimal egresos = activos.Where(EsEgreso).Sum(m => m.Total);
+            decimal balance = ingresos - egresos;
+
+            lblIngresos.Text = $"Ingresos: {ingresos:C2}";
+            lblEgresos.Text = $"Egresos: {egresos:C2}";
+            lblBalance.Text = $"Balance: {balance:C2}";
+            lblBalance.ForeColor = balance >= 0 ? Tema.Exito : Tema.Peligro;
+            lblCantidad.Text = $"{_vista.Count} movimiento(s)";
+        }
+
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarMovimiento(int? id)
+        {
+            dgvMovimientos.ClearSelection();
+
+            if (id.HasValue)
+            {
+                for (int i = 0; i < _vista.Count; i++)
                 {
-                    btnDesactivar.Text = "Activar";
-                    btnDesactivar.BackColor = Color.ForestGreen;
+                    if (_vista[i].MovimientoID != id.Value) continue;
+
+                    dgvMovimientos.Rows[i].Selected = true;
+                    dgvMovimientos.CurrentCell = dgvMovimientos.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
                 }
             }
+
+            ActualizarEstadoBotones();
+        }
+
+        // Editar, Activar/Desactivar y Eliminar solo tienen sentido con una fila seleccionada.
+        private void ActualizarEstadoBotones()
+        {
+            var movimiento = MovimientoSeleccionado;
+            bool haySeleccion = movimiento != null;
+
+            btnEditar.Enabled = haySeleccion;
+            btnDesactivar.Enabled = haySeleccion;
+            btnEliminarFisico.Enabled = haySeleccion;
+
+            bool inactivo = movimiento is { Activo: false };
+            btnDesactivar.Text = inactivo ? "Activar" : "Desactivar";
+            btnDesactivar.Estilo = inactivo ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+        }
+
+        private void dgvMovimientos_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Inactivos en gris; Tipo y Total en verde (ingreso) o rojo (egreso); "Activo" en verde.
+        private void dgvMovimientos_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
+
+            var movimiento = _vista[e.RowIndex];
+
+            if (!movimiento.Activo)
+            {
+                e.CellStyle.ForeColor = Tema.TextoAtenuado;
+                return;
+            }
+
+            string propiedad = dgvMovimientos.Columns[e.ColumnIndex].DataPropertyName;
+
+            if (propiedad is nameof(MovimientoViewModel.Tipo) or nameof(MovimientoViewModel.Total))
+                e.CellStyle.ForeColor = EsEgreso(movimiento) ? Tema.Peligro : Tema.Exito;
+            else if (propiedad == nameof(MovimientoViewModel.Estado))
+                e.CellStyle.ForeColor = Tema.Exito;
+        }
+
+        private async void dgvMovimientos_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            await AbrirModalAsync(_vista[e.RowIndex].MovimientoID);
+        }
+
+        // ───────────── Filtros ─────────────
+
+        private async void btnFiltrarFechas_Click(object? sender, EventArgs e) => await FiltrarAsync();
+
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
+        {
+            dtpFechaInicio.Value = DateTime.Today;
+            dtpFechaFin.Value = DateTime.Today;
+
+            await FiltrarAsync();
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevo_Click(object? sender, EventArgs e) => await AbrirModalAsync(null);
+
+        private async void btnEditar_Click(object? sender, EventArgs e)
+        {
+            var movimiento = MovimientoSeleccionado;
+            if (movimiento == null) return; // el botón ya está deshabilitado sin selección; esto es solo defensivo
+
+            await AbrirModalAsync(movimiento.MovimientoID);
+        }
+
+        private async Task AbrirModalAsync(int? movimientoId)
+        {
+            using var modal = new FrmMovimientoModal(_controller, movimientoId, _conceptoController);
+
+            if (modal.ShowDialog() == DialogResult.OK)
+                await CargarMovimientosAsync(movimientoId); // para uno nuevo (null) se conserva la selección actual
+        }
+
+        private async void btnDesactivar_Click(object? sender, EventArgs e)
+        {
+            var movimiento = MovimientoSeleccionado;
+            if (movimiento == null) return;
+
+            string accion = movimiento.Activo ? "desactivar" : "activar";
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de {accion} el movimiento: {Describir(movimiento)}?",
+                    $"Confirmar {accion.ToUpper()}"))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.CambiarEstadoLogicoAsync(movimiento.MovimientoID),
+                "No se pudo cambiar el estado del movimiento.",
+                panelTop);
+
+            if (correcto)
+                await CargarMovimientosAsync(movimiento.MovimientoID);
+        }
+
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var movimiento = MovimientoSeleccionado;
+            if (movimiento == null) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar PERMANENTEMENTE el movimiento: {Describir(movimiento)}?\n\nEsta acción no se puede deshacer.",
+                    "Eliminación definitiva",
+                    destructiva: true))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.EliminarFisicoAsync(movimiento.MovimientoID),
+                "No se pudo eliminar el movimiento.",
+                panelTop);
+
+            if (correcto)
+                await CargarMovimientosAsync();
         }
     }
 }

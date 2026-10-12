@@ -17,190 +17,180 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
-            lblTotal = new Label();
-            btnExportarExcel = new Button();
-            btnLimpiarFiltros = new Button();
-            btnFiltrar = new Button();
-            cboEstatus = new ComboBox();
-            lblEstatus = new Label();
             lblTitulo = new Label();
-            dgvSocios = new DataGridView();
+            flowAcciones = new FlowLayoutPanel();
+            btnExportarExcel = new BotonTema();
+            panelFiltros = new Panel();
+            flowFiltros = new FlowLayoutPanel();
+            lblEstatus = new Label();
+            cboEstatus = new ComboBox();
+            btnFiltrar = new BotonTema();
+            btnLimpiarFiltros = new BotonTema();
+            lblTotal = new Label();
+            dgvSocios = new GridTema();
             panelTop.SuspendLayout();
+            flowAcciones.SuspendLayout();
+            panelFiltros.SuspendLayout();
+            flowFiltros.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSocios).BeginInit();
             SuspendLayout();
-            // 
+            //
             // panelTop
-            // 
+            //
             panelTop.BackColor = Color.FromArgb(15, 42, 79);
-            panelTop.Controls.Add(lblTotal);
-            panelTop.Controls.Add(btnExportarExcel);
-            panelTop.Controls.Add(btnLimpiarFiltros);
-            panelTop.Controls.Add(btnFiltrar);
-            panelTop.Controls.Add(cboEstatus);
-            panelTop.Controls.Add(lblEstatus);
+            panelTop.Controls.Add(flowAcciones);
             panelTop.Controls.Add(lblTitulo);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 155);
+            panelTop.Size = new Size(914, 70);
             panelTop.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(330, 29);
+            lblTitulo.Size = new Size(330, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Reporte general de socios";
-            // 
+            //
+            // flowAcciones
+            //
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnExportarExcel);
+            flowAcciones.Dock = DockStyle.Right;
+            flowAcciones.Location = new Point(750, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(0, 16, 12, 0);
+            flowAcciones.Size = new Size(164, 70);
+            flowAcciones.TabIndex = 1;
+            flowAcciones.WrapContents = false;
+            //
+            // btnExportarExcel
+            //
+            btnExportarExcel.Enabled = false;
+            btnExportarExcel.Margin = new Padding(0);
+            btnExportarExcel.Name = "btnExportarExcel";
+            btnExportarExcel.Size = new Size(140, 38);
+            btnExportarExcel.TabIndex = 0;
+            btnExportarExcel.Text = "Exportar CSV";
+            btnExportarExcel.Click += btnExportarExcel_Click;
+            //
+            // panelFiltros
+            //
+            panelFiltros.BackColor = Color.FromArgb(14, 20, 36);
+            panelFiltros.Controls.Add(lblTotal);
+            panelFiltros.Controls.Add(flowFiltros);
+            panelFiltros.Dock = DockStyle.Top;
+            panelFiltros.Location = new Point(0, 70);
+            panelFiltros.Name = "panelFiltros";
+            panelFiltros.Size = new Size(914, 56);
+            panelFiltros.TabIndex = 1;
+            //
+            // flowFiltros
+            //
+            flowFiltros.AutoSize = true;
+            flowFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowFiltros.Controls.Add(lblEstatus);
+            flowFiltros.Controls.Add(cboEstatus);
+            flowFiltros.Controls.Add(btnFiltrar);
+            flowFiltros.Controls.Add(btnLimpiarFiltros);
+            flowFiltros.Dock = DockStyle.Left;
+            flowFiltros.Location = new Point(0, 0);
+            flowFiltros.Name = "flowFiltros";
+            flowFiltros.Padding = new Padding(20, 10, 0, 0);
+            flowFiltros.Size = new Size(520, 56);
+            flowFiltros.TabIndex = 0;
+            flowFiltros.WrapContents = false;
+            //
             // lblEstatus
-            // 
+            //
             lblEstatus.AutoSize = true;
-            lblEstatus.Font = new Font("Segoe UI", 9F);
+            lblEstatus.Font = new Font("Segoe UI", 9.5F);
             lblEstatus.ForeColor = Color.FromArgb(230, 238, 252);
-            lblEstatus.Location = new Point(20, 68);
-            lblEstatus.Name = "lblEstatus";
-            lblEstatus.Size = new Size(59, 20);
-            lblEstatus.TabIndex = 1;
+            lblEstatus.Margin = new Padding(0, 7, 6, 0);
             lblEstatus.Text = "Estatus:";
-            // 
+            lblEstatus.Name = "lblEstatus";
+            lblEstatus.TabIndex = 0;
+            //
             // cboEstatus
-            // 
-            cboEstatus.Anchor = AnchorStyles.Left;
+            //
+            cboEstatus.BackColor = Color.FromArgb(15, 42, 79);
             cboEstatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cboEstatus.Font = new Font("Segoe UI", 9F);
+            cboEstatus.ForeColor = Color.FromArgb(230, 238, 252);
             cboEstatus.FormattingEnabled = true;
-            cboEstatus.Location = new Point(85, 64);
-            cboEstatus.Name = "cboEstatus";
+            cboEstatus.Margin = new Padding(0, 4, 16, 0);
             cboEstatus.Size = new Size(180, 28);
-            cboEstatus.TabIndex = 2;
-            // 
+            cboEstatus.Name = "cboEstatus";
+            cboEstatus.TabIndex = 1;
+            //
             // btnFiltrar
-            // 
-            btnFiltrar.BackColor = Color.FromArgb(31, 111, 235);
-            btnFiltrar.FlatAppearance.BorderSize = 0;
-            btnFiltrar.FlatStyle = FlatStyle.Flat;
-            btnFiltrar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnFiltrar.ForeColor = Color.White;
-            btnFiltrar.Location = new Point(280, 59);
-            btnFiltrar.Margin = new Padding(3, 4, 3, 4);
-            btnFiltrar.Name = "btnFiltrar";
-            btnFiltrar.Size = new Size(90, 38);
-            btnFiltrar.TabIndex = 3;
+            //
+            btnFiltrar.Estilo = EstiloBoton.Primario;
+            btnFiltrar.Margin = new Padding(0, 1, 8, 0);
+            btnFiltrar.Size = new Size(86, 32);
             btnFiltrar.Text = "Filtrar";
-            btnFiltrar.UseVisualStyleBackColor = false;
             btnFiltrar.Click += btnFiltrar_Click;
-            // 
+            btnFiltrar.Name = "btnFiltrar";
+            btnFiltrar.TabIndex = 2;
+            //
             // btnLimpiarFiltros
-            // 
-            btnLimpiarFiltros.Anchor = AnchorStyles.Left;
-            btnLimpiarFiltros.BackColor = Color.FromArgb(11, 15, 26);
-            btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
-            btnLimpiarFiltros.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnLimpiarFiltros.ForeColor = Color.FromArgb(230, 238, 252);
-            btnLimpiarFiltros.Location = new Point(378, 59);
-            btnLimpiarFiltros.Margin = new Padding(8, 0, 0, 0);
-            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
-            btnLimpiarFiltros.Size = new Size(90, 38);
-            btnLimpiarFiltros.TabIndex = 4;
+            //
+            btnLimpiarFiltros.Margin = new Padding(0, 1, 0, 0);
+            btnLimpiarFiltros.Size = new Size(86, 32);
             btnLimpiarFiltros.Text = "Limpiar";
-            btnLimpiarFiltros.UseVisualStyleBackColor = false;
             btnLimpiarFiltros.Click += btnLimpiarFiltros_Click;
-            // 
+            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+            btnLimpiarFiltros.TabIndex = 3;
+            //
             // lblTotal
-            // 
-            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            lblTotal.AutoEllipsis = true;
-            lblTotal.AutoSize = false;
-            lblTotal.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
+            //
+            lblTotal.Dock = DockStyle.Right;
+            lblTotal.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             lblTotal.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTotal.Location = new Point(85, 108);
+            lblTotal.Location = new Point(514, 0);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(400, 25);
-            lblTotal.TabIndex = 5;
+            lblTotal.Padding = new Padding(0, 0, 20, 0);
+            lblTotal.Size = new Size(400, 56);
+            lblTotal.TabIndex = 1;
             lblTotal.Text = "Total de Socios: 0";
-            lblTotal.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // btnExportarExcel
-            // 
-            btnExportarExcel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnExportarExcel.BackColor = Color.FromArgb(31, 111, 235);
-            btnExportarExcel.FlatAppearance.BorderSize = 0;
-            btnExportarExcel.FlatStyle = FlatStyle.Flat;
-            btnExportarExcel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnExportarExcel.ForeColor = Color.White;
-            btnExportarExcel.Location = new Point(718, 61);
-            btnExportarExcel.Margin = new Padding(3, 4, 3, 4);
-            btnExportarExcel.Name = "btnExportarExcel";
-            btnExportarExcel.Size = new Size(150, 38);
-            btnExportarExcel.TabIndex = 6;
-            btnExportarExcel.Text = "Exportar a Excel";
-            btnExportarExcel.UseVisualStyleBackColor = false;
-            btnExportarExcel.Click += btnExportarExcel_Click;
-            // 
+            lblTotal.TextAlign = ContentAlignment.MiddleRight;
+            //
             // dgvSocios
-            // 
-            dgvSocios.AllowUserToAddRows = false;
-            dgvSocios.AllowUserToDeleteRows = false;
-            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvSocios.BackgroundColor = Color.FromArgb(11, 15, 26);
-            dgvSocios.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(15, 42, 79);
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
-            dataGridViewCellStyle1.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvSocios.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvSocios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(11, 15, 26);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
-            dataGridViewCellStyle2.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvSocios.DefaultCellStyle = dataGridViewCellStyle2;
+            //
             dgvSocios.Dock = DockStyle.Fill;
-            dgvSocios.EnableHeadersVisualStyles = false;
-            dgvSocios.GridColor = Color.FromArgb(15, 42, 79);
-            dgvSocios.Location = new Point(0, 110);
-            dgvSocios.Margin = new Padding(3, 4, 3, 4);
-            dgvSocios.MultiSelect = false;
+            dgvSocios.Location = new Point(0, 126);
             dgvSocios.Name = "dgvSocios";
-            dgvSocios.ReadOnly = true;
-            dgvSocios.RowHeadersVisible = false;
-            dgvSocios.RowHeadersWidth = 51;
-            dgvSocios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvSocios.Size = new Size(914, 690);
-            dgvSocios.TabIndex = 1;
-            // 
+            dgvSocios.Size = new Size(914, 674);
+            dgvSocios.TabIndex = 2;
+            dgvSocios.CellFormatting += dgvSocios_CellFormatting;
+            //
             // FrmSociosReporte
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
             Controls.Add(dgvSocios);
+            Controls.Add(panelFiltros);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmSociosReporte";
             Text = "Socios";
             Load += FrmSociosReporte_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            flowAcciones.ResumeLayout(false);
+            panelFiltros.ResumeLayout(false);
+            panelFiltros.PerformLayout();
+            flowFiltros.ResumeLayout(false);
+            flowFiltros.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSocios).EndInit();
             ResumeLayout(false);
         }
@@ -209,12 +199,15 @@
 
         private Panel panelTop;
         private Label lblTitulo;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnExportarExcel;
+        private Panel panelFiltros;
+        private FlowLayoutPanel flowFiltros;
         private Label lblEstatus;
         private ComboBox cboEstatus;
-        private Button btnFiltrar;
-        private Button btnLimpiarFiltros;
+        private BotonTema btnFiltrar;
+        private BotonTema btnLimpiarFiltros;
         private Label lblTotal;
-        private Button btnExportarExcel;
-        private DataGridView dgvSocios;
+        private GridTema dgvSocios;
     }
 }

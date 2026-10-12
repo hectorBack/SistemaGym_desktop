@@ -1,6 +1,7 @@
 ﻿using Negocio.DTOs;
 using Negocio.Exceptions;
 using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -16,215 +17,241 @@ namespace Presentacion.Forms.Corte
 {
     public partial class FrmCorteModal : Form
     {
+        /// <summary>Una fila del grid. Los importes son decimal (no texto) para que se alineen y ordenen bien.</summary>
+        private sealed record FilaMovimiento(
+            DateTime? Fecha,
+            string Concepto,
+            string Tipo,
+            string FormaPago,
+            decimal Ingresos,
+            decimal Egresos,
+            string Observacion);
+
         private readonly CorteController _corteController;
         private readonly MovimientoController _movimientoController;
         private readonly decimal _efectivoInicialPredeterminado;
-
         private readonly int _usuarioIdActual;
-        private List<MovimientoViewModel> _movimientosActuales = new();
 
+        private List<MovimientoViewModel> _movimientos = new();
+        private decimal _efectivoInicial;
         private decimal _totalIngresos;
         private decimal _totalEgresos;
-        private decimal _montoFinalCalculado;
+        private decimal _montoFinal;
+
+        private bool _guardando;
+        private bool _asignandoFechas;
+
+        // Mientras el usuario no toque "Fecha fin", se entiende como "hasta este momento":
+        // al realizar el corte se actualiza a la hora exacta para no dejar movimientos fuera.
+        private bool _finAutomatico = true;
 
         public FrmCorteModal(
-         CorteController corteController,
-         MovimientoController movimientoController,
-         int usuarioIdActual)
-         : this(corteController, movimientoController, 0m, usuarioIdActual)
+            CorteController corteController,
+            MovimientoController movimientoController,
+            int usuarioIdActual)
+            : this(corteController, movimientoController, 0m, usuarioIdActual)
         {
         }
 
         public FrmCorteModal(
-         CorteController corteController,
-         MovimientoController movimientoController,
-         decimal efectivoInicialPredeterminado,
-         int usuarioIdActual)
+            CorteController corteController,
+            MovimientoController movimientoController,
+            decimal efectivoInicialPredeterminado,
+            int usuarioIdActual)
         {
-            InitializeComponent();
-
-            _corteController = corteController;
-            _movimientoController = movimientoController;
+            _corteController = corteController ?? throw new ArgumentNullException(nameof(corteController));
+            _movimientoController = movimientoController ?? throw new ArgumentNullException(nameof(movimientoController));
             _efectivoInicialPredeterminado = efectivoInicialPredeterminado;
-            _usuarioIdActual = usuarioIdActual;
+            _usuarioIdActual = usuarioIdActual > 0 ? usuarioIdActual : SesionUsuario.UsuarioID;
 
-            lblTitulo.Text = "Corte de Caja / Flujo de Efectivo";
+            InitializeComponent();
+            ConfigurarColumnas();
         }
 
-        private async void FrmCorteModal_Load(object sender, EventArgs e)
+        // ───────────── Carga ─────────────
+
+        private async void FrmCorteModal_Load(object? sender, EventArgs e)
         {
-            // Configurar el formato visual para incluir fecha y hora
-            dtpFechaInicio.Format = DateTimePickerFormat.Custom;
-            dtpFechaInicio.CustomFormat = "dd/MM/yyyy HH:mm";
-
-            dtpFechaFin.Format = DateTimePickerFormat.Custom;
-            dtpFechaFin.CustomFormat = "dd/MM/yyyy HH:mm";
-
+            _asignandoFechas = true;
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Now;
+            _asignandoFechas = false;
 
-            await ConsultarMovimientosAsync();
+            await ConsultarAsync();
         }
 
-        private async void btnConsultar_Click(object sender, EventArgs e)
+        private void ConfigurarColumnas()
         {
-            await ConsultarMovimientosAsync();
+            dgvMovimientos.AutoGenerateColumns = false;
+
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 110, 110, "dd/MM/yyyy HH:mm");
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Concepto), "Concepto", 150, 100);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Tipo), "Tipo", 70, 70);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.FormaPago), "Forma de pago", 90, 90);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Ingresos), "Ingresos", 80, 85, "C2", alinearDerecha: true)
+                .DefaultCellStyle.ForeColor = Tema.Exito;
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Egresos), "Egresos", 80, 85, "C2", alinearDerecha: true)
+                .DefaultCellStyle.ForeColor = Tema.Peligro;
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Observacion), "Observación", 130, 100);
         }
 
-        private async Task ConsultarMovimientosAsync()
+        // Los importes en cero se dejan en blanco para que se lea mejor qué es ingreso y qué es egreso.
+        private void dgvMovimientos_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            try
+            if (e.RowIndex < 0 || e.Value is not decimal valor || valor != 0m) return;
+
+            string propiedad = dgvMovimientos.Columns[e.ColumnIndex].DataPropertyName;
+            if (propiedad == nameof(FilaMovimiento.Ingresos) || propiedad == nameof(FilaMovimiento.Egresos))
             {
-                btnConsultar.Enabled = false;
+                e.Value = string.Empty;
+                e.FormattingApplied = true;
+            }
+        }
 
-                DateTime fechaInicio = dtpFechaInicio.Value;
-                DateTime fechaFin = dtpFechaFin.Value;
+        // ───────────── Consulta ─────────────
 
-                // Obtener movimientos por rango utilizando MovimientoController
-                var movimientos = await _movimientoController.ObtenerPorRangoFechasAsync(fechaInicio, fechaFin);
-                _movimientosActuales = movimientos.Where(m => m.Activo).ToList();
+        private void dtpFechaFin_ValueChanged(object? sender, EventArgs e)
+        {
+            if (!_asignandoFechas)
+                _finAutomatico = false; // el usuario eligió una fecha concreta
+        }
 
-                // Si se recibió un efectivo inicial de la configuración, se usa; en caso contrario, se consulta el actual
+        private async void btnConsultar_Click(object? sender, EventArgs e) => await ConsultarAsync();
+
+        private async Task<bool> ConsultarAsync()
+        {
+            DateTime inicio = dtpFechaInicio.Value;
+            DateTime fin = dtpFechaFin.Value;
+
+            if (inicio > fin)
+            {
+                FormHelper.MostrarAdvertencia("La fecha de inicio no puede ser posterior a la fecha fin.", "Rango de fechas");
+                return false;
+            }
+
+            return await FormHelper.EjecutarAsync(async () =>
+            {
+                var movimientos = await _movimientoController.ObtenerPorRangoFechasAsync(inicio, fin);
+
+                // Si se recibió un efectivo inicial de la configuración se usa; si no, el que hay actualmente en caja.
                 decimal efectivoInicial = _efectivoInicialPredeterminado > 0
-                ? _efectivoInicialPredeterminado
-                : await _corteController.ObtenerEfectivoEnCajaAsync();
+                    ? _efectivoInicialPredeterminado
+                    : await _corteController.ObtenerEfectivoEnCajaAsync();
 
-                LlenarGridMovimientos(_movimientosActuales);
-                CalcularTotales(efectivoInicial);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar datos del corte: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                btnConsultar.Enabled = true;
-            }
+                if (IsDisposed) return;
+
+                _movimientos = movimientos.Where(m => m.Activo).ToList();
+                _efectivoInicial = efectivoInicial;
+
+                MostrarMovimientos();
+                CalcularTotales();
+            },
+            "No se pudieron cargar los datos del corte.",
+            panelFiltros, btnRealizarCorte);
         }
 
-        private void LlenarGridMovimientos(List<MovimientoViewModel> lista)
+        private void MostrarMovimientos()
         {
-            dgvMovimientos.DataSource = null;
-            dgvMovimientos.DataSource = lista.Select(m => new
-            {
-                Fecha = m.CreatedAt.HasValue ? m.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "N/A",
-                Concepto = m.ConceptoNombre,
-                Tipo = m.Tipo,
-                FormaPago = m.FormaPago,
-                Ingresos = EsIngreso(m.Tipo) ? m.Total.ToString("C2") : "$0.00",
-                Egresos = !EsIngreso(m.Tipo) ? m.Total.ToString("C2") : "$0.00",
-                Observacion = m.Observacion ?? string.Empty
-            }).ToList();
+            var filas = _movimientos
+                .Select(m =>
+                {
+                    bool ingreso = TipoMovimiento.EsIngreso(m.Tipo);
+                    return new FilaMovimiento(
+                        m.CreatedAt,
+                        m.ConceptoNombre ?? string.Empty,
+                        m.Tipo ?? string.Empty,
+                        m.FormaPago ?? string.Empty,
+                        ingreso ? m.Total : 0m,
+                        ingreso ? 0m : m.Total,
+                        m.Observacion ?? string.Empty);
+                })
+                .ToList();
 
-            ConfigurarEstiloGrid();
+            dgvMovimientos.DataSource = new ListaOrdenable<FilaMovimiento>(filas);
+            dgvMovimientos.ClearSelection();
+
+            lblConteo.Text = $"{filas.Count} movimiento(s)";
         }
 
-        private bool EsIngreso(string tipo)
+        private void CalcularTotales()
         {
-            return string.Equals(tipo, "Ingreso", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(tipo, "Entrada", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(tipo, "Venta", StringComparison.OrdinalIgnoreCase);
-        }
+            _totalIngresos = _movimientos.Where(m => TipoMovimiento.EsIngreso(m.Tipo)).Sum(m => m.Total);
+            _totalEgresos = _movimientos.Where(m => !TipoMovimiento.EsIngreso(m.Tipo)).Sum(m => m.Total);
+            _montoFinal = _efectivoInicial + _totalIngresos - _totalEgresos;
 
-        private void CalcularTotales(decimal efectivoInicial)
-        {
-            // Asignar directamente a las variables privadas de la clase
-            _totalIngresos = _movimientosActuales
-                .Where(m => EsIngreso(m.Tipo))
-                .Sum(m => m.Total);
-
-            _totalEgresos = _movimientosActuales
-                .Where(m => !EsIngreso(m.Tipo))
-                .Sum(m => m.Total);
-
-            _montoFinalCalculado = efectivoInicial + _totalIngresos - _totalEgresos;
-
+            lblEfectivoInicialValue.Text = _efectivoInicial.ToString("C2");
             lblTotalIngresosValue.Text = _totalIngresos.ToString("C2");
             lblTotalEgresosValue.Text = _totalEgresos.ToString("C2");
-            lblEfectivoInicialValue.Text = efectivoInicial.ToString("C2");
-            lblEfectivoFinalValue.Text = _montoFinalCalculado.ToString("C2");
+            lblEfectivoFinalValue.Text = _montoFinal.ToString("C2");
         }
 
-        private async void btnRealizarCorte_Click(object sender, EventArgs e)
-        {
-            if (!_movimientosActuales.Any())
-            {
-                var result = MessageBox.Show(
-                    "No se encontraron movimientos activos registrados en este rango. ¿Deseas realizar el corte de todas formas?",
-                    "Confirmación",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
+        // ───────────── Realizar el corte ─────────────
 
-                if (result == DialogResult.No) return;
+        private async void btnRealizarCorte_Click(object? sender, EventArgs e)
+        {
+            if (_guardando) return;
+
+            // Con "fecha fin" automática se toma el momento exacto del corte y se vuelve a consultar,
+            // para que lo que se confirma sea justo lo que se guarda.
+            if (_finAutomatico)
+            {
+                _asignandoFechas = true;
+                dtpFechaFin.Value = DateTime.Now;
+                _asignandoFechas = false;
             }
 
-            try
-            {
-                btnRealizarCorte.Enabled = false;
+            if (!await ConsultarAsync() || IsDisposed) return;
 
-                // 1. Consultar si el usuario en sesión tiene un corte abierto
+            string aviso = _movimientos.Count == 0
+                ? "No hay movimientos activos en este rango.\n\n"
+                : string.Empty;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"{aviso}¿Realizar el corte de caja con estos totales?\n\n" +
+                    $"Ingresos:  {_totalIngresos:C2}\n" +
+                    $"Egresos:  {_totalEgresos:C2}\n" +
+                    $"Total en caja:  {_montoFinal:C2}",
+                    "Confirmar corte de caja"))
+                return;
+
+            // Se toman los valores antes del await: lo guardado es exactamente lo confirmado.
+            decimal ingresos = _totalIngresos;
+            decimal egresos = _totalEgresos;
+            decimal montoFinal = _montoFinal;
+            string observaciones = txtObservaciones.Text.Trim();
+
+            _guardando = true;
+            bool realizado = await FormHelper.EjecutarAsync(async () =>
+            {
+                // Si el usuario no tiene un corte abierto, se abre automáticamente.
                 var corteAbierto = await _corteController.ObtenerCorteAbiertoPorUsuarioAsync(_usuarioIdActual);
 
-                int corteIdAProcesar;
+                int corteId = corteAbierto != null
+                    ? corteAbierto.CorteID
+                    : (await _corteController.AbrirCorteAsync(_usuarioIdActual, _efectivoInicialPredeterminado)).CorteID;
 
-                if (corteAbierto == null)
-                {
-                    // Si no existe un registro de apertura previo, lo abrimos automáticamente
-                    var nuevoCorteDto = await _corteController.AbrirCorteAsync(_usuarioIdActual, _efectivoInicialPredeterminado);
-
-                    // Accedemos a la propiedad .CorteID de la respuesta
-                    corteIdAProcesar = nuevoCorteDto.CorteID;
-                }
-                else
-                {
-                    corteIdAProcesar = corteAbierto.CorteID;
-                }
-
-                // 2. Realizar el cierre/corte definitivo de la caja
                 await _corteController.CerrarCorteAsync(
-                    corteId: corteIdAProcesar,
-                    totalIngresos: _totalIngresos,
-                    totalEgresos: _totalEgresos,
-                    montoFinal: _montoFinalCalculado,
-                    observaciones: txtObservaciones.Text.Trim()
-                );
+                    corteId: corteId,
+                    totalIngresos: ingresos,
+                    totalEgresos: egresos,
+                    montoFinal: montoFinal,
+                    observaciones: observaciones);
+            },
+            "No se pudo realizar el corte de caja.",
+            btnRealizarCorte, btnCancelar, panelFiltros, txtObservaciones);
+            _guardando = false;
 
-                MessageBox.Show("El corte de caja se ha realizado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error al procesar el corte: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                btnRealizarCorte.Enabled = true;
-            }
+            if (realizado && !IsDisposed)
+                DialogResult = DialogResult.OK; // cierra el diálogo; el historial se recarga solo
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
+            // No cerrar mientras se está guardando el corte.
+            if (_guardando)
+                e.Cancel = true;
 
-        private void ConfigurarEstiloGrid()
-        {
-            if (dgvMovimientos.Columns.Count == 0) return;
-            dgvMovimientos.Columns["Fecha"].HeaderText = "Fecha";
-            dgvMovimientos.Columns["Concepto"].HeaderText = "Concepto";
-            dgvMovimientos.Columns["Tipo"].HeaderText = "Tipo";
-            dgvMovimientos.Columns["FormaPago"].HeaderText = "Forma Pago";
-            dgvMovimientos.Columns["Ingresos"].HeaderText = "Ingresos";
-            dgvMovimientos.Columns["Egresos"].HeaderText = "Egresos";
-            dgvMovimientos.Columns["Observacion"].HeaderText = "Observación";
-
-            dgvMovimientos.Columns["Ingresos"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dgvMovimientos.Columns["Egresos"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-
-            dgvMovimientos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            base.OnFormClosing(e);
         }
     }
 }

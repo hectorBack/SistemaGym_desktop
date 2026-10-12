@@ -17,249 +17,264 @@
 
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             panelTop = new Panel();
             lblTitulo = new Label();
+            flowBusqueda = new FlowLayoutPanel();
             lblBuscar = new Label();
             txtBuscar = new TextBox();
-            btnNuevo = new Button();
-            btnEditar = new Button();
-            btnInfo = new Button();
-            btnMembresia = new Button();
-            btnDesactivar = new Button();
-            btnEliminarFisico = new Button();
-            dgvSocios = new DataGridView();
+            panelAcciones = new Panel();
+            flowAcciones = new FlowLayoutPanel();
+            btnNuevo = new BotonTema();
+            btnEditar = new BotonTema();
+            btnInfo = new BotonTema();
+            btnMembresia = new BotonTema();
+            btnDesactivar = new BotonTema();
+            btnEliminarFisico = new BotonTema();
+            dgvSocios = new GridTema();
+            panelPie = new Panel();
+            lblResumen = new Label();
+            temporizadorBusqueda = new System.Windows.Forms.Timer(components);
             panelTop.SuspendLayout();
+            flowBusqueda.SuspendLayout();
+            panelAcciones.SuspendLayout();
+            flowAcciones.SuspendLayout();
+            panelPie.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvSocios).BeginInit();
             SuspendLayout();
-            // 
-            // panelTop (Contiene los controles y detalles en la parte superior)
-            // 
-            panelTop.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            // panelTop
+            //
+            panelTop.BackColor = Color.FromArgb(15, 42, 79);
+            panelTop.Controls.Add(flowBusqueda);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(lblBuscar);
-            panelTop.Controls.Add(txtBuscar);
-            panelTop.Controls.Add(btnNuevo);
-            panelTop.Controls.Add(btnEditar);
-            panelTop.Controls.Add(btnInfo);
-            panelTop.Controls.Add(btnMembresia);
-            panelTop.Controls.Add(btnDesactivar);
-            panelTop.Controls.Add(btnEliminarFisico);
-            panelTop.Dock = DockStyle.Top; // Permanece en la parte superior
+            panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 150); // Se incrementa la altura si agregas más detalles
+            panelTop.Size = new Size(914, 64);
             panelTop.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI Bold", 14F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTitulo.Location = new Point(20, 16);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(180, 32);
             lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Gestión Socios";
-            // 
+            lblTitulo.Text = "Gestión de Socios";
+            //
+            // flowBusqueda
+            //
+            flowBusqueda.AutoSize = true;
+            flowBusqueda.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowBusqueda.Controls.Add(lblBuscar);
+            flowBusqueda.Controls.Add(txtBuscar);
+            flowBusqueda.Dock = DockStyle.Right;
+            flowBusqueda.Location = new Point(600, 0);
+            flowBusqueda.Name = "flowBusqueda";
+            flowBusqueda.Padding = new Padding(0, 17, 20, 0);
+            flowBusqueda.Size = new Size(314, 64);
+            flowBusqueda.TabIndex = 1;
+            flowBusqueda.WrapContents = false;
+            //
             // lblBuscar
-            // 
+            //
             lblBuscar.AutoSize = true;
             lblBuscar.Font = new Font("Segoe UI", 9.5F);
-            lblBuscar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblBuscar.Location = new Point(20, 105);
+            lblBuscar.ForeColor = Color.FromArgb(230, 238, 252);
+            lblBuscar.Margin = new Padding(0, 6, 8, 0);
             lblBuscar.Name = "lblBuscar";
             lblBuscar.Size = new Size(59, 21);
-            lblBuscar.TabIndex = 1;
+            lblBuscar.TabIndex = 0;
             lblBuscar.Text = "Buscar:";
-            // 
+            //
             // txtBuscar
-            // 
-            txtBuscar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            //
+            txtBuscar.BackColor = Color.FromArgb(11, 15, 26);
             txtBuscar.BorderStyle = BorderStyle.FixedSingle;
             txtBuscar.Font = new Font("Segoe UI", 10F);
-            txtBuscar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtBuscar.Location = new Point(85, 101);
-            txtBuscar.Margin = new Padding(3, 4, 3, 4);
+            txtBuscar.ForeColor = Color.FromArgb(230, 238, 252);
+            txtBuscar.Margin = new Padding(0);
             txtBuscar.Name = "txtBuscar";
-            txtBuscar.Size = new Size(160, 30);
-            txtBuscar.TabIndex = 2;
+            txtBuscar.PlaceholderText = "Nombre, clave, teléfono o correo";
+            txtBuscar.Size = new Size(227, 30);
+            txtBuscar.TabIndex = 1;
             txtBuscar.TextChanged += txtBuscar_TextChanged;
-            // 
+            txtBuscar.KeyDown += txtBuscar_KeyDown;
+            //
+            // panelAcciones
+            //
+            panelAcciones.BackColor = Color.FromArgb(14, 20, 36);
+            panelAcciones.Controls.Add(flowAcciones);
+            panelAcciones.Dock = DockStyle.Top;
+            panelAcciones.Location = new Point(0, 64);
+            panelAcciones.Name = "panelAcciones";
+            panelAcciones.Size = new Size(914, 58);
+            panelAcciones.TabIndex = 1;
+            //
+            // flowAcciones
+            //
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnNuevo);
+            flowAcciones.Controls.Add(btnEditar);
+            flowAcciones.Controls.Add(btnInfo);
+            flowAcciones.Controls.Add(btnMembresia);
+            flowAcciones.Controls.Add(btnDesactivar);
+            flowAcciones.Controls.Add(btnEliminarFisico);
+            flowAcciones.Dock = DockStyle.Left;
+            flowAcciones.Location = new Point(0, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(20, 10, 0, 0);
+            flowAcciones.Size = new Size(660, 58);
+            flowAcciones.TabIndex = 0;
+            flowAcciones.WrapContents = false;
+            //
             // btnNuevo
-            // 
-            btnNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnNuevo.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnNuevo.FlatAppearance.BorderSize = 0;
-            btnNuevo.FlatStyle = FlatStyle.Flat;
-            btnNuevo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnNuevo.ForeColor = Color.White;
-            btnNuevo.Location = new Point(260, 96);
-            btnNuevo.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnNuevo.Estilo = EstiloBoton.Primario;
+            btnNuevo.Margin = new Padding(0, 0, 8, 0);
             btnNuevo.Name = "btnNuevo";
             btnNuevo.Size = new Size(90, 38);
-            btnNuevo.TabIndex = 3;
+            btnNuevo.TabIndex = 0;
             btnNuevo.Text = "+ Nuevo";
-            btnNuevo.UseVisualStyleBackColor = false;
             btnNuevo.Click += btnNuevo_Click;
-            // 
+            //
             // btnEditar
-            // 
-            btnEditar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEditar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnEditar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnEditar.FlatStyle = FlatStyle.Flat;
-            btnEditar.Font = new Font("Segoe UI", 9F);
-            btnEditar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEditar.Location = new Point(360, 96);
-            btnEditar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnEditar.Enabled = false;
+            btnEditar.Margin = new Padding(0, 0, 8, 0);
             btnEditar.Name = "btnEditar";
-            btnEditar.Size = new Size(90, 38);
-            btnEditar.TabIndex = 4;
+            btnEditar.Size = new Size(80, 38);
+            btnEditar.TabIndex = 1;
             btnEditar.Text = "Editar";
-            btnEditar.UseVisualStyleBackColor = false;
             btnEditar.Click += btnEditar_Click;
-            // 
+            //
             // btnInfo
-            // 
-            btnInfo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnInfo.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnInfo.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#2dd4ff");
-            btnInfo.FlatStyle = FlatStyle.Flat;
-            btnInfo.Font = new Font("Segoe UI", 9F);
-            btnInfo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            btnInfo.Location = new Point(460, 96);
-            btnInfo.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnInfo.Enabled = false;
+            btnInfo.Margin = new Padding(0, 0, 8, 0);
             btnInfo.Name = "btnInfo";
-            btnInfo.Size = new Size(100, 38);
-            btnInfo.TabIndex = 5;
+            btnInfo.Size = new Size(105, 38);
+            btnInfo.TabIndex = 2;
             btnInfo.Text = "Información";
-            btnInfo.UseVisualStyleBackColor = false;
             btnInfo.Click += btnInfo_Click;
-            // 
+            //
             // btnMembresia
-            // 
-            btnMembresia.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnMembresia.BackColor = ColorTranslator.FromHtml("#00b4d8");
-            btnMembresia.FlatAppearance.BorderSize = 0;
-            btnMembresia.FlatStyle = FlatStyle.Flat;
-            btnMembresia.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnMembresia.ForeColor = Color.White;
-            btnMembresia.Location = new Point(570, 96);
-            btnMembresia.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnMembresia.Enabled = false;
+            btnMembresia.Margin = new Padding(0, 0, 8, 0);
             btnMembresia.Name = "btnMembresia";
             btnMembresia.Size = new Size(105, 38);
-            btnMembresia.TabIndex = 6;
+            btnMembresia.TabIndex = 3;
             btnMembresia.Text = "Membresía";
-            btnMembresia.UseVisualStyleBackColor = false;
             btnMembresia.Click += btnMembresia_Click;
-            // 
+            //
             // btnDesactivar
-            // 
-            btnDesactivar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnDesactivar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnDesactivar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnDesactivar.FlatStyle = FlatStyle.Flat;
-            btnDesactivar.Font = new Font("Segoe UI", 9F);
-            btnDesactivar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnDesactivar.Location = new Point(685, 96);
-            btnDesactivar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnDesactivar.Enabled = false;
+            btnDesactivar.Estilo = EstiloBoton.Advertencia;
+            btnDesactivar.Margin = new Padding(0, 0, 8, 0);
             btnDesactivar.Name = "btnDesactivar";
-            btnDesactivar.Size = new Size(100, 38);
-            btnDesactivar.TabIndex = 7;
+            btnDesactivar.Size = new Size(105, 38);
+            btnDesactivar.TabIndex = 4;
             btnDesactivar.Text = "Desactivar";
-            btnDesactivar.UseVisualStyleBackColor = false;
             btnDesactivar.Click += btnDesactivar_Click;
-            // 
+            //
             // btnEliminarFisico
-            // 
-            btnEliminarFisico.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEliminarFisico.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnEliminarFisico.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnEliminarFisico.FlatStyle = FlatStyle.Flat;
-            btnEliminarFisico.Font = new Font("Segoe UI", 9F);
-            btnEliminarFisico.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEliminarFisico.Location = new Point(795, 96);
-            btnEliminarFisico.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnEliminarFisico.Enabled = false;
+            btnEliminarFisico.Estilo = EstiloBoton.Peligro;
+            btnEliminarFisico.Margin = new Padding(0, 0, 8, 0);
             btnEliminarFisico.Name = "btnEliminarFisico";
-            btnEliminarFisico.Size = new Size(95, 38);
-            btnEliminarFisico.TabIndex = 8;
+            btnEliminarFisico.Size = new Size(90, 38);
+            btnEliminarFisico.TabIndex = 5;
             btnEliminarFisico.Text = "Eliminar";
-            btnEliminarFisico.UseVisualStyleBackColor = false;
             btnEliminarFisico.Click += btnEliminarFisico_Click;
-            // 
-            // dgvSocios (Tabla acoplada abajo ocupando el resto de la pantalla)
-            // 
-            dgvSocios.AllowUserToAddRows = false;
-            dgvSocios.AllowUserToDeleteRows = false;
-            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvSocios.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvSocios.BorderStyle = BorderStyle.None;
-            dgvSocios.EnableHeadersVisualStyles = false;
-
-            // Encabezados
-            dgvSocios.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvSocios.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvSocios.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dgvSocios.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            Padding margenCelda = new Padding(8, 0, 0, 0);
-            dgvSocios.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
-            dgvSocios.DefaultCellStyle.Padding = margenCelda;
-
-            // Celdas estándar y selección
-            dgvSocios.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvSocios.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvSocios.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvSocios.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvSocios.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvSocios.ScrollBars = ScrollBars.Both;
-
-            dgvSocios.GridColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvSocios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvSocios.Dock = DockStyle.Fill; // Se expande en el espacio restante debajo del panel
-            dgvSocios.Location = new Point(0, 150);
-            dgvSocios.Margin = new Padding(3, 4, 3, 4);
-            dgvSocios.MultiSelect = false;
+            //
+            // dgvSocios
+            //
+            dgvSocios.Dock = DockStyle.Fill;
+            dgvSocios.Location = new Point(0, 122);
             dgvSocios.Name = "dgvSocios";
-            dgvSocios.ReadOnly = true;
-            dgvSocios.RowHeadersVisible = false;
-            dgvSocios.RowHeadersWidth = 51;
-            dgvSocios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvSocios.Size = new Size(914, 650);
-            dgvSocios.TabIndex = 1;
-            // 
+            dgvSocios.Size = new Size(914, 646);
+            dgvSocios.TabIndex = 2;
+            dgvSocios.CellDoubleClick += dgvSocios_CellDoubleClick;
+            dgvSocios.CellFormatting += dgvSocios_CellFormatting;
+            dgvSocios.SelectionChanged += dgvSocios_SelectionChanged;
+            //
+            // panelPie
+            //
+            panelPie.BackColor = Color.FromArgb(14, 20, 36);
+            panelPie.Controls.Add(lblResumen);
+            panelPie.Dock = DockStyle.Bottom;
+            panelPie.Location = new Point(0, 768);
+            panelPie.Name = "panelPie";
+            panelPie.Size = new Size(914, 32);
+            panelPie.TabIndex = 3;
+            //
+            // lblResumen
+            //
+            lblResumen.Dock = DockStyle.Fill;
+            lblResumen.Font = new Font("Segoe UI", 9.5F);
+            lblResumen.ForeColor = Color.FromArgb(124, 138, 165);
+            lblResumen.Name = "lblResumen";
+            lblResumen.Padding = new Padding(20, 0, 0, 0);
+            lblResumen.Size = new Size(914, 32);
+            lblResumen.TabIndex = 0;
+            lblResumen.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // temporizadorBusqueda
+            //
+            temporizadorBusqueda.Interval = 250;
+            temporizadorBusqueda.Tick += temporizadorBusqueda_Tick;
+            //
             // FrmSocios
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
-            Controls.Add(dgvSocios); // dgvSocios se agrega primero para rellenar
-            Controls.Add(panelTop);   // panelTop se acopla arriba
+            Controls.Add(dgvSocios);
+            Controls.Add(panelPie);
+            Controls.Add(panelAcciones);
+            Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmSocios";
             Text = "Socios";
             Load += FrmSocios_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            flowBusqueda.ResumeLayout(false);
+            flowBusqueda.PerformLayout();
+            panelAcciones.ResumeLayout(false);
+            panelAcciones.PerformLayout();
+            flowAcciones.ResumeLayout(false);
+            panelPie.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvSocios).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Label lblTitulo;
         private Panel panelTop;
+        private Label lblTitulo;
+        private FlowLayoutPanel flowBusqueda;
         private Label lblBuscar;
         private TextBox txtBuscar;
-        private Button btnNuevo;
-        private Button btnEditar;
-        private Button btnInfo;
-        private Button btnMembresia;
-        private Button btnDesactivar;
-        private Button btnEliminarFisico;
-        private DataGridView dgvSocios;
+        private Panel panelAcciones;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnNuevo;
+        private BotonTema btnEditar;
+        private BotonTema btnInfo;
+        private BotonTema btnMembresia;
+        private BotonTema btnDesactivar;
+        private BotonTema btnEliminarFisico;
+        private GridTema dgvSocios;
+        private Panel panelPie;
+        private Label lblResumen;
+        private System.Windows.Forms.Timer temporizadorBusqueda;
     }
 }

@@ -105,24 +105,23 @@ namespace Negocio.Services
             // REGISTRAR INGRESO EN CAJA - ConceptoID 1 ('Venta Producto')
             if (nuevaVenta.Total > 0)
             {
-                var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(dto.UsuarioID);
-                if (corteAbierto != null)
-                {
-                    var movimientoIngreso = new Movimiento
-                    {
-                        CorteID = corteAbierto.CorteID,
-                        UsuarioID = dto.UsuarioID,
-                        ConceptoID = 1, // 1: 'Venta Producto' (Ingreso)
-                        Tipo = "Ingreso",
-                        FormaPago = "Efectivo",
-                        Total = nuevaVenta.Total,
-                        Observacion = $"Cobro por venta de productos - Venta ID #{nuevaVenta.VentaID}",
-                        Activo = true
-                    };
+                // Obtiene el corte abierto o lo abre automáticamente si no existe
+                var corteAbierto = await ObtenerOAbrirCorteAsync(dto.UsuarioID);
 
-                    await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
-                    await _unitOfWork.SaveChangesAsync();
-                }
+                var movimientoIngreso = new Movimiento
+                {
+                    CorteID = corteAbierto.CorteID,
+                    UsuarioID = dto.UsuarioID,
+                    ConceptoID = 1, // 1: 'Venta Producto' (Ingreso)
+                    Tipo = "Ingreso",
+                    FormaPago = "Efectivo",
+                    Total = nuevaVenta.Total,
+                    Observacion = $"Cobro por venta de productos - Venta ID #{nuevaVenta.VentaID}",
+                    Activo = true
+                };
+
+                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+                await _unitOfWork.SaveChangesAsync();
             }
 
             return MapToDto(nuevaVenta);
@@ -228,6 +227,42 @@ namespace Negocio.Services
                     PrecioUnitario = d.PrecioUnitario
                 }).ToList() ?? new List<DetalleVentaDto>()
             };
+        }
+
+        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
+        {
+            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+
+            if (corteAbierto == null)
+            {
+                // 1. Consultar la configuración del Efectivo Inicial predeterminado
+                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
+                decimal efectivoInicial = 0.00m;
+
+                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
+                {
+                    efectivoInicial = monto;
+                }
+
+                // 2. Crear automáticamente la caja para el usuario actual
+                corteAbierto = new Corte
+                {
+                    UsuarioID = usuarioId,
+                    FechaApertura = DateTime.Now,
+                    MontoInicial = efectivoInicial,
+                    TotalIngresos = 0m,
+                    TotalEgresos = 0m,
+                    MontoFinal = efectivoInicial,
+                    Observaciones = "Apertura automática iniciada por venta de productos",
+                    Estado = "Abierto",
+                    Activo = true
+                };
+
+                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return corteAbierto;
         }
     }
 }

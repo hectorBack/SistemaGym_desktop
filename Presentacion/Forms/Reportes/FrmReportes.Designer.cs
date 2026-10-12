@@ -30,14 +30,14 @@
             tabPagos = new TabPage();
             tabMovimientos = new TabPage();
 
-            dgvInventario = new DataGridView();
-            dgvMembresias = new DataGridView();
-            dgvSocios = new DataGridView();
-            dgvRegistro = new DataGridView();
-            dgvVentas = new DataGridView();
-            dgvVisitas = new DataGridView();
-            dgvPagos = new DataGridView();
-            dgvMovimientos = new DataGridView();
+            dgvInventario = new GridTema();
+            dgvMembresias = new GridTema();
+            dgvSocios = new GridTema();
+            dgvRegistro = new GridTema();
+            dgvVentas = new GridTema();
+            dgvVisitas = new GridTema();
+            dgvPagos = new GridTema();
+            dgvMovimientos = new GridTema();
 
             panelTop.SuspendLayout();
             tabControlReportes.SuspendLayout();
@@ -54,22 +54,21 @@
             // 
             // panelTop
             // 
-            panelTop.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            panelTop.BackColor = Color.FromArgb(15, 42, 79);
             panelTop.Controls.Add(lblTitulo);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 60);
+            panelTop.Size = new Size(914, 70);
             panelTop.TabIndex = 0;
 
             // 
             // lblTitulo
             // 
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI Bold", 14F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(240, 32);
             lblTitulo.TabIndex = 0;
@@ -80,10 +79,10 @@
             // 
             tabControlReportes.Dock = DockStyle.Fill;
             tabControlReportes.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            tabControlReportes.Location = new Point(0, 60);
+            tabControlReportes.Location = new Point(0, 70);
             tabControlReportes.Name = "tabControlReportes";
             tabControlReportes.SelectedIndex = 0;
-            tabControlReportes.Size = new Size(914, 740);
+            tabControlReportes.Size = new Size(914, 730);
             tabControlReportes.TabIndex = 1;
             tabControlReportes.SelectedIndexChanged += tabControlReportes_SelectedIndexChanged;
 
@@ -102,13 +101,12 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
             Controls.Add(tabControlReportes);
             Controls.Add(panelTop);
             DoubleBuffered = true; // Reduce el parpadeo en renderizado continuo
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmReportes";
             Text = "Reportes";
             Load += FrmReportes_Load;
@@ -142,13 +140,13 @@
         private TabPage tabPagos;
         private TabPage tabMovimientos;
 
-        private DataGridView dgvInventario;
-        private DataGridView dgvMembresias;
-        private DataGridView dgvSocios;
-        private DataGridView dgvRegistro;
-        private DataGridView dgvVentas;
-        private DataGridView dgvVisitas;
-        private DataGridView dgvPagos;
-        private DataGridView dgvMovimientos;
+        private GridTema dgvInventario;
+        private GridTema dgvMembresias;
+        private GridTema dgvSocios;
+        private GridTema dgvRegistro;
+        private GridTema dgvVentas;
+        private GridTema dgvVisitas;
+        private GridTema dgvPagos;
+        private GridTema dgvMovimientos;
     }
 }

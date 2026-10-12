@@ -25,137 +25,131 @@
             cmbTipo = new ComboBox();
             lblObservacion = new Label();
             txtObservacion = new TextBox();
-            btnGuardar = new Button();
-            btnCancelar = new Button();
+            btnGuardar = new BotonTema();
+            btnCancelar = new BotonTema();
             panelHeader.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelHeader
-            // 
-            panelHeader.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(380, 50);
             panelHeader.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(20, 14);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(125, 21);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Nuevo Concepto";
-            // 
+            //
             // lblNombre
-            // 
+            //
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
-            lblNombre.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            lblNombre.ForeColor = Color.FromArgb(230, 238, 252);
             lblNombre.Location = new Point(25, 65);
             lblNombre.Name = "lblNombre";
             lblNombre.Size = new Size(118, 17);
             lblNombre.TabIndex = 1;
             lblNombre.Text = "Nombre Concepto:";
-            // 
+            //
             // txtNombre
-            // 
-            txtNombre.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtNombre.BackColor = Color.FromArgb(15, 42, 79);
             txtNombre.BorderStyle = BorderStyle.FixedSingle;
             txtNombre.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            txtNombre.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            txtNombre.ForeColor = Color.FromArgb(230, 238, 252);
             txtNombre.Location = new Point(25, 85);
+            txtNombre.MaxLength = 100;
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(330, 25);
             txtNombre.TabIndex = 2;
-            // 
+            //
             // lblTipo
-            // 
+            //
             lblTipo.AutoSize = true;
             lblTipo.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
-            lblTipo.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            lblTipo.ForeColor = Color.FromArgb(230, 238, 252);
             lblTipo.Location = new Point(25, 125);
             lblTipo.Name = "lblTipo";
             lblTipo.Size = new Size(37, 17);
             lblTipo.TabIndex = 3;
             lblTipo.Text = "Tipo:";
-            // 
+            //
             // cmbTipo
-            // 
-            cmbTipo.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            cmbTipo.BackColor = Color.FromArgb(15, 42, 79);
             cmbTipo.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbTipo.FlatStyle = FlatStyle.Flat;
             cmbTipo.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            cmbTipo.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            cmbTipo.ForeColor = Color.FromArgb(230, 238, 252);
             cmbTipo.FormattingEnabled = true;
             cmbTipo.Location = new Point(25, 145);
             cmbTipo.Name = "cmbTipo";
             cmbTipo.Size = new Size(330, 25);
             cmbTipo.TabIndex = 4;
-            // 
+            //
             // lblObservacion
-            // 
+            //
             lblObservacion.AutoSize = true;
             lblObservacion.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
-            lblObservacion.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            lblObservacion.ForeColor = Color.FromArgb(230, 238, 252);
             lblObservacion.Location = new Point(25, 185);
             lblObservacion.Name = "lblObservacion";
             lblObservacion.Size = new Size(83, 17);
             lblObservacion.TabIndex = 5;
             lblObservacion.Text = "Observación:";
-            // 
+            //
             // txtObservacion
-            // 
-            txtObservacion.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtObservacion.AcceptsReturn = true; // Enter escribe un salto de línea en lugar de pulsar "Guardar"
+            txtObservacion.BackColor = Color.FromArgb(15, 42, 79);
             txtObservacion.BorderStyle = BorderStyle.FixedSingle;
             txtObservacion.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            txtObservacion.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            txtObservacion.ForeColor = Color.FromArgb(230, 238, 252);
             txtObservacion.Location = new Point(25, 205);
+            txtObservacion.MaxLength = 250;
             txtObservacion.Multiline = true;
             txtObservacion.Name = "txtObservacion";
             txtObservacion.ScrollBars = ScrollBars.Vertical;
             txtObservacion.Size = new Size(330, 65);
             txtObservacion.TabIndex = 6;
-            // 
+            //
             // btnGuardar
-            // 
-            btnGuardar.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnGuardar.FlatStyle = FlatStyle.Flat;
-            btnGuardar.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold, GraphicsUnit.Point);
-            btnGuardar.ForeColor = Color.White;
-            btnGuardar.FlatAppearance.BorderSize = 0;
+            //
+            btnGuardar.Estilo = EstiloBoton.Primario;
             btnGuardar.Location = new Point(165, 290);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(90, 32);
             btnGuardar.TabIndex = 7;
             btnGuardar.Text = "Guardar";
-            btnGuardar.UseVisualStyleBackColor = false;
             btnGuardar.Click += btnGuardar_Click;
-            // 
+            //
             // btnCancelar
-            // 
-            btnCancelar.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            btnCancelar.FlatStyle = FlatStyle.Flat;
-            btnCancelar.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point);
-            btnCancelar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnCancelar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
+            //
+            btnCancelar.DialogResult = DialogResult.Cancel;
             btnCancelar.Location = new Point(265, 290);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(90, 32);
             btnCancelar.TabIndex = 8;
             btnCancelar.Text = "Cancelar";
-            btnCancelar.UseVisualStyleBackColor = false;
-            btnCancelar.Click += btnCancelar_Click;
-            // 
+            //
             // FrmConceptoModal
-            // 
+            //
+            AcceptButton = btnGuardar;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            BackColor = Color.FromArgb(11, 15, 26);
+            CancelButton = btnCancelar;
             ClientSize = new Size(380, 340);
             Controls.Add(btnCancelar);
             Controls.Add(btnGuardar);
@@ -188,7 +182,7 @@
         private ComboBox cmbTipo;
         private Label lblObservacion;
         private TextBox txtObservacion;
-        private Button btnGuardar;
-        private Button btnCancelar;
+        private BotonTema btnGuardar;
+        private BotonTema btnCancelar;
     }
 }

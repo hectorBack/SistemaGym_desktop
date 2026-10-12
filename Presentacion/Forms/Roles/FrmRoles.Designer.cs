@@ -19,168 +19,153 @@
         {
             panelTop = new Panel();
             lblTitulo = new Label();
-            btnNuevo = new Button();
-            btnEditar = new Button();
-            btnDesactivar = new Button();
-            btnEliminarFisico = new Button();
-            dgvRoles = new DataGridView();
+            flowAcciones = new FlowLayoutPanel();
+            btnNuevo = new BotonTema();
+            btnEditar = new BotonTema();
+            btnDesactivar = new BotonTema();
+            btnEliminarFisico = new BotonTema();
+            dgvRoles = new GridTema();
+            panelPie = new Panel();
+            lblNotaProteccion = new Label();
             panelTop.SuspendLayout();
+            flowAcciones.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvRoles).BeginInit();
+            panelPie.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelTop
-            // 
-            panelTop.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            panelTop.BackColor = Color.FromArgb(15, 42, 79);
+            panelTop.Controls.Add(flowAcciones);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(btnNuevo);
-            panelTop.Controls.Add(btnEditar);
-            panelTop.Controls.Add(btnDesactivar);
-            panelTop.Controls.Add(btnEliminarFisico);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 110);
+            panelTop.Size = new Size(914, 70);
             panelTop.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI Bold", 14F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(185, 32);
+            lblTitulo.Size = new Size(240, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Gestión de Roles";
-            // 
+            //
+            // flowAcciones
+            //
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnNuevo);
+            flowAcciones.Controls.Add(btnEditar);
+            flowAcciones.Controls.Add(btnDesactivar);
+            flowAcciones.Controls.Add(btnEliminarFisico);
+            flowAcciones.Dock = DockStyle.Right;
+            flowAcciones.Location = new Point(440, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(0, 16, 12, 0);
+            flowAcciones.Size = new Size(474, 70);
+            flowAcciones.TabIndex = 1;
+            flowAcciones.WrapContents = false;
+            //
             // btnNuevo
-            // 
-            btnNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnNuevo.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnNuevo.FlatAppearance.BorderSize = 0;
-            btnNuevo.FlatStyle = FlatStyle.Flat;
-            btnNuevo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnNuevo.ForeColor = Color.White;
-            btnNuevo.Location = new Point(400, 56);
-            btnNuevo.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnNuevo.Estilo = EstiloBoton.Primario;
+            btnNuevo.Margin = new Padding(0, 0, 8, 0);
             btnNuevo.Name = "btnNuevo";
             btnNuevo.Size = new Size(110, 38);
-            btnNuevo.TabIndex = 3;
+            btnNuevo.TabIndex = 0;
             btnNuevo.Text = "+ Nuevo";
-            btnNuevo.UseVisualStyleBackColor = false;
             btnNuevo.Click += btnNuevo_Click;
-            // 
+            //
             // btnEditar
-            // 
-            btnEditar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEditar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnEditar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnEditar.FlatStyle = FlatStyle.Flat;
-            btnEditar.Font = new Font("Segoe UI", 9F);
-            btnEditar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEditar.Location = new Point(520, 56);
-            btnEditar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnEditar.Enabled = false;
+            btnEditar.Margin = new Padding(0, 0, 8, 0);
             btnEditar.Name = "btnEditar";
             btnEditar.Size = new Size(100, 38);
-            btnEditar.TabIndex = 4;
+            btnEditar.TabIndex = 1;
             btnEditar.Text = "Editar";
-            btnEditar.UseVisualStyleBackColor = false;
             btnEditar.Click += btnEditar_Click;
-            // 
+            //
             // btnDesactivar
-            // 
-            btnDesactivar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnDesactivar.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnDesactivar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnDesactivar.FlatStyle = FlatStyle.Flat;
-            btnDesactivar.Font = new Font("Segoe UI", 9F);
-            btnDesactivar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnDesactivar.Location = new Point(630, 56);
-            btnDesactivar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnDesactivar.Enabled = false;
+            btnDesactivar.Estilo = EstiloBoton.Advertencia;
+            btnDesactivar.Margin = new Padding(0, 0, 8, 0);
             btnDesactivar.Name = "btnDesactivar";
             btnDesactivar.Size = new Size(110, 38);
-            btnDesactivar.TabIndex = 5;
+            btnDesactivar.TabIndex = 2;
             btnDesactivar.Text = "Desactivar";
-            btnDesactivar.UseVisualStyleBackColor = false;
             btnDesactivar.Click += btnDesactivar_Click;
-            // 
+            //
             // btnEliminarFisico
-            // 
-            btnEliminarFisico.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEliminarFisico.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnEliminarFisico.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnEliminarFisico.FlatStyle = FlatStyle.Flat;
-            btnEliminarFisico.Font = new Font("Segoe UI", 9F);
-            btnEliminarFisico.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEliminarFisico.Location = new Point(750, 56);
-            btnEliminarFisico.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnEliminarFisico.Enabled = false;
+            btnEliminarFisico.Estilo = EstiloBoton.Peligro;
+            btnEliminarFisico.Margin = new Padding(0, 0, 8, 0);
             btnEliminarFisico.Name = "btnEliminarFisico";
             btnEliminarFisico.Size = new Size(110, 38);
-            btnEliminarFisico.TabIndex = 6;
+            btnEliminarFisico.TabIndex = 3;
             btnEliminarFisico.Text = "Eliminar";
-            btnEliminarFisico.UseVisualStyleBackColor = false;
             btnEliminarFisico.Click += btnEliminarFisico_Click;
-            // 
+            //
             // dgvRoles
-            // 
-            // Configuración estilo oscuro en dgvRoles
-            dgvRoles.AllowUserToAddRows = false;
-            dgvRoles.AllowUserToDeleteRows = false;
-            dgvRoles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvRoles.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvRoles.BorderStyle = BorderStyle.None;
-            dgvRoles.EnableHeadersVisualStyles = false;
-
-            // Encabezados
-            dgvRoles.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvRoles.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvRoles.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dgvRoles.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            // Relleno de celdas estandarizado (8px a la izquierda)
-            Padding margenCelda = new Padding(8, 0, 0, 0);
-            dgvRoles.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
-            dgvRoles.DefaultCellStyle.Padding = margenCelda;
-
-            // Celdas estándar y selección
-            dgvRoles.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvRoles.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvRoles.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvRoles.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvRoles.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvRoles.ScrollBars = ScrollBars.Both;
-
-            dgvRoles.GridColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvRoles.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            //
             dgvRoles.Dock = DockStyle.Fill;
-            dgvRoles.Location = new Point(0, 110);
-            dgvRoles.Margin = new Padding(3, 4, 3, 4);
-            dgvRoles.MultiSelect = false;
+            dgvRoles.Location = new Point(0, 70);
             dgvRoles.Name = "dgvRoles";
-            dgvRoles.ReadOnly = true;
-            dgvRoles.RowHeadersVisible = false;
-            dgvRoles.RowHeadersWidth = 51;
-            dgvRoles.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvRoles.Size = new Size(914, 690);
+            dgvRoles.Size = new Size(914, 696);
             dgvRoles.TabIndex = 1;
-            // 
+            dgvRoles.CellDoubleClick += dgvRoles_CellDoubleClick;
+            dgvRoles.CellFormatting += dgvRoles_CellFormatting;
+            dgvRoles.SelectionChanged += dgvRoles_SelectionChanged;
+            //
+            // panelPie
+            //
+            panelPie.BackColor = Color.FromArgb(14, 20, 36);
+            panelPie.Controls.Add(lblNotaProteccion);
+            panelPie.Dock = DockStyle.Bottom;
+            panelPie.Location = new Point(0, 766);
+            panelPie.Name = "panelPie";
+            panelPie.Size = new Size(914, 34);
+            panelPie.TabIndex = 2;
+            //
+            // lblNotaProteccion
+            //
+            lblNotaProteccion.Dock = DockStyle.Fill;
+            lblNotaProteccion.Font = new Font("Segoe UI", 9F);
+            lblNotaProteccion.ForeColor = Color.FromArgb(124, 138, 165);
+            lblNotaProteccion.Location = new Point(0, 0);
+            lblNotaProteccion.Name = "lblNotaProteccion";
+            lblNotaProteccion.Padding = new Padding(20, 0, 0, 0);
+            lblNotaProteccion.Size = new Size(914, 34);
+            lblNotaProteccion.TabIndex = 0;
+            lblNotaProteccion.Text = "Rol de Administrador: no se puede editar, desactivar ni eliminar.";
+            lblNotaProteccion.TextAlign = ContentAlignment.MiddleLeft;
+            lblNotaProteccion.Visible = false;
+            //
             // FrmRoles
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
             Controls.Add(dgvRoles);
+            Controls.Add(panelPie);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmRoles";
             Text = "Roles";
             Load += FrmRoles_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            flowAcciones.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvRoles).EndInit();
+            panelPie.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -188,10 +173,13 @@
 
         private Panel panelTop;
         private Label lblTitulo;
-        private Button btnNuevo;
-        private Button btnEditar;
-        private Button btnDesactivar;
-        private Button btnEliminarFisico;
-        private DataGridView dgvRoles;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnNuevo;
+        private BotonTema btnEditar;
+        private BotonTema btnDesactivar;
+        private BotonTema btnEliminarFisico;
+        private GridTema dgvRoles;
+        private Panel panelPie;
+        private Label lblNotaProteccion;
     }
 }

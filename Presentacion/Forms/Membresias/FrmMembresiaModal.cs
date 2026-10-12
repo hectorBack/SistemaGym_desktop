@@ -17,73 +17,73 @@ namespace Presentacion.Forms.Membresias
     {
         private readonly MembresiaController _controller;
         private readonly int? _membresiaId;
+        private bool _guardando;
 
         public FrmMembresiaModal(MembresiaController controller, int? membresiaId = null, string nombreActual = "", decimal precioActual = 0, int duracionDiasActual = 0)
         {
-            InitializeComponent();
-            _controller = controller;
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             _membresiaId = membresiaId;
+
+            InitializeComponent();
+
+            lblTitulo.Text = _membresiaId.HasValue ? "Editar Membresía" : "Nueva Membresía";
 
             if (_membresiaId.HasValue)
             {
-                lblTitulo.Text = "Editar Membresía";
                 txtNombre.Text = nombreActual;
-                numPrecio.Value = precioActual;
-                numDuracionDias.Value = duracionDiasActual;
-            }
-            else
-            {
-                lblTitulo.Text = "Nueva Membresía";
+
+                // Math.Clamp evita que un valor fuera de rango en la base de datos
+                // lance una excepción al abrir el formulario.
+                numPrecio.Value = Math.Clamp(precioActual, numPrecio.Minimum, numPrecio.Maximum);
+                numDuracionDias.Value = Math.Clamp(duracionDiasActual, (int)numDuracionDias.Minimum, (int)numDuracionDias.Maximum);
             }
         }
 
-        private async void btnGuardar_Click(object sender, EventArgs e)
+        private async void btnGuardar_Click(object? sender, EventArgs e)
         {
             if (ValidationHelper.EsTextoVacio(txtNombre.Text))
             {
-                MessageBox.Show("Debe ingresar un nombre para la membresía.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar un nombre para la membresía.", "Validación");
+                txtNombre.Focus();
                 return;
             }
 
             if (numPrecio.Value <= 0)
             {
-                MessageBox.Show("Debe ingresar un precio mayor a 0.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar un precio mayor a 0.", "Validación");
+                numPrecio.Focus();
                 return;
             }
 
             if (numDuracionDias.Value <= 0)
             {
-                MessageBox.Show("Debe ingresar una duración en días mayor a 0.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar una duración en días mayor a 0.", "Validación");
+                numDuracionDias.Focus();
                 return;
             }
 
-            try
-            {
-                await _controller.GuardarMembresiaAsync(
-                    _membresiaId,
-                    txtNombre.Text.Trim(),
-                    numPrecio.Value,
-                    (int)numDuracionDias.Value
-                );
+            string nombre = txtNombre.Text.Trim();
+            decimal precio = numPrecio.Value;
+            int duracionDias = (int)numDuracionDias.Value;
 
-                MessageBox.Show("Membresía guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            _guardando = true;
+            bool guardado = await FormHelper.EjecutarAsync(
+                () => _controller.GuardarMembresiaAsync(_membresiaId, nombre, precio, duracionDias),
+                "No se pudo guardar la membresía.",
+                btnGuardar, btnCancelar);
+            _guardando = false;
+
+            if (guardado && !IsDisposed)
+                DialogResult = DialogResult.OK; // cierra el diálogo; el grid se recarga solo
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
+        // No permitir cerrar la ventana mientras se está guardando.
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            if (_guardando)
+                e.Cancel = true;
+
+            base.OnFormClosing(e);
         }
     }
 }

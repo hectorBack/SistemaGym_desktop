@@ -17,53 +17,48 @@ namespace Presentacion.Forms.Categorias
     {
         private readonly CategoriaController _controller;
         private readonly int? _categoriaId;
+        private bool _guardando;
 
         public FrmCategoriaModal(CategoriaController controller, int? categoriaId = null, string nombreActual = "")
         {
-            InitializeComponent();
-            _controller = controller;
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             _categoriaId = categoriaId;
 
-            if (_categoriaId.HasValue)
-            {
-                lblTitulo.Text = "Editar Categoría";
-                txtNombre.Text = nombreActual;
-            }
-            else
-            {
-                lblTitulo.Text = "Nueva Categoría";
-            }
+            InitializeComponent();
+
+            lblTitulo.Text = _categoriaId.HasValue ? "Editar Categoría" : "Nueva Categoría";
+            txtNombre.Text = nombreActual;
         }
 
-        private async void btnGuardar_Click(object sender, EventArgs e)
+        private async void btnGuardar_Click(object? sender, EventArgs e)
         {
             if (ValidationHelper.EsTextoVacio(txtNombre.Text))
             {
-                MessageBox.Show("Debe ingresar un nombre para la categoría.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar un nombre para la categoría.", "Validación");
+                txtNombre.Focus();
                 return;
             }
 
-            try
-            {
-                await _controller.GuardarCategoriaAsync(_categoriaId, txtNombre.Text.Trim());
-                MessageBox.Show("Categoría guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            string nombre = txtNombre.Text.Trim();
+
+            _guardando = true;
+            bool guardado = await FormHelper.EjecutarAsync(
+                () => _controller.GuardarCategoriaAsync(_categoriaId, nombre),
+                "No se pudo guardar la categoría.",
+                btnGuardar, btnCancelar);
+            _guardando = false;
+
+            if (guardado && !IsDisposed)
+                DialogResult = DialogResult.OK; // cierra el diálogo; el grid se recarga solo
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
+        // No permitir cerrar la ventana mientras se está guardando.
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            if (_guardando)
+                e.Cancel = true;
+
+            base.OnFormClosing(e);
         }
     }
 }

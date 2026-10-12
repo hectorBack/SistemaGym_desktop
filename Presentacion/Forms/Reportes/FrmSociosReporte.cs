@@ -1,4 +1,6 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Corte;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -14,165 +16,145 @@ namespace Presentacion.Forms.Reportes
 {
     public partial class FrmSociosReporte : Form
     {
+        private const string Todos = "Todos";
+
+        /// <summary>Una fila del reporte.</summary>
+        private sealed record FilaSocio(
+            int Id,
+            string Clave,
+            string NombreSocio,
+            string FechaVencimiento,
+            string Estatus);
+
         private readonly ReporteController _reporteController;
+
+        // Lista completa traída del servidor; el filtro por estatus se hace en memoria sobre ella.
         private List<ReporteSocioViewModel> _listaSocios = new();
 
         public FrmSociosReporte(ReporteController reporteController)
         {
+            _reporteController = reporteController ?? throw new ArgumentNullException(nameof(reporteController));
+
             InitializeComponent();
-            _reporteController = reporteController;
+            ConfigurarColumnas();
         }
 
-        private async void FrmSociosReporte_Load(object sender, EventArgs e)
+        private async void FrmSociosReporte_Load(object? sender, EventArgs e)
         {
-            // Cargar las opciones del ComboBox Estatus
             cboEstatus.Items.Clear();
-            cboEstatus.Items.AddRange(new object[] { "Todos", "Sin membresía", "Sin vencer", "Vencido" });
-            cboEstatus.SelectedIndex = 0; // Seleccionar "Todos" por defecto
+            cboEstatus.Items.AddRange(new object[] { Todos, "Sin membresía", "Sin vencer", "Vencido" });
+            cboEstatus.SelectedIndex = 0;
 
             await CargarSociosAsync();
         }
 
-        private async void btnFiltrar_Click(object sender, EventArgs e)
+        // Las columnas se definen una sola vez.
+        private void ConfigurarColumnas()
         {
-            await AplicarFiltroAsync();
+            dgvSocios.AutoGenerateColumns = false;
+
+            dgvSocios.AgregarTexto(nameof(FilaSocio.Id), "ID", 50, 55, alinearDerecha: true);
+            dgvSocios.AgregarTexto(nameof(FilaSocio.Clave), "Clave", 80, 70);
+            dgvSocios.AgregarTexto(nameof(FilaSocio.NombreSocio), "Nombre del Socio", 200, 130);
+            dgvSocios.AgregarTexto(nameof(FilaSocio.FechaVencimiento), "Fecha de Vencimiento", 110, 110);
+            dgvSocios.AgregarTexto(nameof(FilaSocio.Estatus), "Estatus", 100, 100);
         }
 
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
+        // Filtrar solo vuelve a filtrar lo que ya está en memoria (no consulta al servidor).
+        private void btnFiltrar_Click(object? sender, EventArgs e) => AplicarFiltro();
+
+        // Limpiar vuelve a "Todos" y recarga desde el servidor.
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
         {
-            cboEstatus.SelectedIndex = 0; // Restablecer a "Todos"
+            cboEstatus.SelectedIndex = 0;
             await CargarSociosAsync();
         }
 
         private async Task CargarSociosAsync()
         {
-            try
+            await FormHelper.EjecutarAsync(async () =>
             {
-                Cursor = Cursors.WaitCursor;
+                var socios = await _reporteController.ObtenerSociosAsync();
+                if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
 
-                // Obtener lista completa de socios mediante el controlador
-                var resultado = await _reporteController.ObtenerSociosAsync();
-                _listaSocios = resultado.ToList();
-
-                AplicarFiltroEnMemoria();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el reporte de socios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
+                _listaSocios = socios.ToList();
+                AplicarFiltro();
+            },
+            "No se pudo cargar el reporte de socios.",
+            panelTop, panelFiltros);
         }
 
-        private async Task AplicarFiltroAsync()
+        private void AplicarFiltro()
         {
-            try
-            {
-                Cursor = Cursors.WaitCursor;
-                AplicarFiltroEnMemoria();
-                await Task.CompletedTask;
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
-        }
+            string estatus = cboEstatus.SelectedItem?.ToString() ?? Todos;
 
-        private void AplicarFiltroEnMemoria()
-        {
-            string estatusSeleccionado = cboEstatus.SelectedItem?.ToString() ?? "Todos";
-
-            // Filtrar en memoria por el estatus elegido
-            IEnumerable<ReporteSocioViewModel> sociosFiltrados = _listaSocios;
-
-            if (estatusSeleccionado != "Todos")
+            IEnumerable<ReporteSocioViewModel> filtrados = _listaSocios;
+            if (estatus != Todos)
             {
-                sociosFiltrados = sociosFiltrados.Where(s =>
-                    string.Equals(s.Estatus, estatusSeleccionado, StringComparison.OrdinalIgnoreCase));
+                filtrados = filtrados.Where(s =>
+                    string.Equals(s.Estatus, estatus, StringComparison.OrdinalIgnoreCase));
             }
 
-            var datosMostrar = sociosFiltrados.Select(s => new
+            var filas = filtrados.Select(s => new FilaSocio(
+                s.SocioID,
+                string.IsNullOrWhiteSpace(s.Clave) ? "N/A" : s.Clave,
+                string.IsNullOrWhiteSpace(s.NombreCompleto) ? "N/A" : s.NombreCompleto,
+                s.FechaVencimientoTexto,
+                s.Estatus)).ToList();
+
+            // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+            var columnaOrden = dgvSocios.SortedColumn;
+            var sentidoOrden = dgvSocios.SortOrder;
+
+            dgvSocios.DataSource = new ListaOrdenable<FilaSocio>(filas);
+
+            if (columnaOrden != null && sentidoOrden != SortOrder.None)
             {
-                Id = s.SocioID,
-                Clave = string.IsNullOrWhiteSpace(s.Clave) ? "N/A" : s.Clave,
-                NombreSocio = string.IsNullOrWhiteSpace(s.NombreCompleto) ? "N/A" : s.NombreCompleto,
-                FechaVencimiento = s.FechaVencimientoTexto,
-                Estatus = s.Estatus
-            }).ToList();
+                dgvSocios.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                    ? System.ComponentModel.ListSortDirection.Descending
+                    : System.ComponentModel.ListSortDirection.Ascending);
+            }
 
-            dgvSocios.DataSource = null;
-            dgvSocios.DataSource = datosMostrar;
-
-            ConfigurarGrid();
-            CalcularTotales(datosMostrar.Count);
             dgvSocios.ClearSelection();
+            lblTotal.Text = $"Total de Socios: {filas.Count}";
+            btnExportarExcel.Enabled = filas.Count > 0;
         }
 
-        private void CalcularTotales(int cantidadTotal)
+        // Estatus con color del tema: sin vencer en verde, vencido en rojo, sin membresía en ámbar.
+        private void dgvSocios_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            lblTotal.Text = $"Total de Socios: {cantidadTotal}";
+            if (e.RowIndex < 0 || e.CellStyle is null) return;
+            if (dgvSocios.Columns[e.ColumnIndex].DataPropertyName != nameof(FilaSocio.Estatus)) return;
+
+            string estatus = (e.Value as string ?? string.Empty).Trim();
+
+            if (string.Equals(estatus, "Sin vencer", StringComparison.OrdinalIgnoreCase))
+                e.CellStyle.ForeColor = Tema.Exito;
+            else if (string.Equals(estatus, "Vencido", StringComparison.OrdinalIgnoreCase))
+                e.CellStyle.ForeColor = Tema.Peligro;
+            else if (string.Equals(estatus, "Sin membresía", StringComparison.OrdinalIgnoreCase))
+                e.CellStyle.ForeColor = Tema.Advertencia;
         }
 
-        private void ConfigurarGrid()
-        {
-            if (dgvSocios.Columns.Count == 0) return;
-
-            // Renombrar encabezados
-            if (dgvSocios.Columns["Id"] != null) dgvSocios.Columns["Id"].HeaderText = "ID";
-            if (dgvSocios.Columns["Clave"] != null) dgvSocios.Columns["Clave"].HeaderText = "Clave";
-            if (dgvSocios.Columns["NombreSocio"] != null) dgvSocios.Columns["NombreSocio"].HeaderText = "Nombre del Socio";
-            if (dgvSocios.Columns["FechaVencimiento"] != null) dgvSocios.Columns["FechaVencimiento"].HeaderText = "Fecha de Vencimiento";
-            if (dgvSocios.Columns["Estatus"] != null) dgvSocios.Columns["Estatus"].HeaderText = "Estatus";
-
-            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            // Evento para formatear colores según el estatus
-            dgvSocios.CellFormatting -= DgvSocios_CellFormatting;
-            dgvSocios.CellFormatting += DgvSocios_CellFormatting;
-        }
-
-        private void DgvSocios_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (dgvSocios.Columns[e.ColumnIndex].Name == "Estatus" && e.Value != null)
-            {
-                string estatus = e.Value.ToString()!;
-
-                if (string.Equals(estatus, "Sin vencer", StringComparison.OrdinalIgnoreCase))
-                {
-                    e.CellStyle.ForeColor = ColorTranslator.FromHtml("#2e7d32"); // Verde
-                    e.CellStyle.SelectionForeColor = ColorTranslator.FromHtml("#81c784");
-                }
-                else if (string.Equals(estatus, "Vencido", StringComparison.OrdinalIgnoreCase))
-                {
-                    e.CellStyle.ForeColor = ColorTranslator.FromHtml("#d32f2f"); // Rojo
-                    e.CellStyle.SelectionForeColor = ColorTranslator.FromHtml("#e57373");
-                }
-                else if (string.Equals(estatus, "Sin membresía", StringComparison.OrdinalIgnoreCase))
-                {
-                    e.CellStyle.ForeColor = ColorTranslator.FromHtml("#f57c00"); // Naranja
-                    e.CellStyle.SelectionForeColor = ColorTranslator.FromHtml("#ffb74d");
-                }
-            }
-        }
-
-        private void btnExportarExcel_Click(object sender, EventArgs e)
+        // Antes este botón mostraba "exportado con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente (con el filtro que esté aplicado).
+        private void btnExportarExcel_Click(object? sender, EventArgs e)
         {
             if (dgvSocios.Rows.Count == 0)
             {
-                MessageBox.Show("No hay datos en la tabla para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("No hay datos en la tabla para exportar.");
                 return;
             }
 
             try
             {
-                // Lógica o Helper para exportación a Excel
-                MessageBox.Show("Reporte de socios exportado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string? ruta = ExportadorCsv.Exportar(dgvSocios, "Socios");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                MessageBox.Show($"Error al exportar a Excel: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
         }
     }

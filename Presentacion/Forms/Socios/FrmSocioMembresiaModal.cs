@@ -1,6 +1,7 @@
 ﻿using Negocio.DTOs;
 using Negocio.Exceptions;
 using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using Presentacion.ViewModels.TuProyecto.Presentacion.ViewModels;
 using System;
@@ -22,7 +23,9 @@ namespace Presentacion.Forms.Socios
         private readonly PagoSocioMembresiaController _pagoController;
         private readonly SocioViewModel _socio;
         private readonly int _usuarioId;
-        private List<MembresiaViewModel> _listaMembresias = new();
+
+        // Lo que muestra el historial (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<SocioMembresiaViewModel> _vista = new();
 
         public FrmSocioMembresiaModal(
             SocioMembresiaController controller,
@@ -31,229 +34,249 @@ namespace Presentacion.Forms.Socios
             SocioViewModel socio,
             int usuarioId)
         {
-            InitializeComponent();
-            _controller = controller;
-            _membresiaController = membresiaController;
-            _pagoController = pagoController;
-            _socio = socio;
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _membresiaController = membresiaController ?? throw new ArgumentNullException(nameof(membresiaController));
+            _pagoController = pagoController ?? throw new ArgumentNullException(nameof(pagoController));
+            _socio = socio ?? throw new ArgumentNullException(nameof(socio));
             _usuarioId = usuarioId;
+
+            InitializeComponent();
+            ConfigurarColumnas();
+            CargarDatosSocio();
         }
 
-        private async void FrmSocioMembresiaModal_Load(object sender, EventArgs e)
+        private SocioMembresiaViewModel? MembresiaSeleccionada =>
+            dgvHistorial.SelectedRows.Count > 0
+                ? dgvHistorial.SelectedRows[0].DataBoundItem as SocioMembresiaViewModel
+                : null;
+
+        // ───────────── Carga ─────────────
+
+        private async void FrmSocioMembresiaModal_Load(object? sender, EventArgs e)
         {
-            CargarDatosSocio();
+            // Se fija antes de las cargas asíncronas (antes se hacía al final, ya con la pantalla visible).
+            dtpFechaInicio.Value = DateTime.Today;
+
             await CargarComboMembresiasAsync();
-            await CargarHistorialMembresiasAsync();
-            dtpFechaInicio.Value = DateTime.Now;
+            await CargarHistorialAsync();
         }
 
         private void CargarDatosSocio()
         {
             lblNombreSocio.Text = _socio.NombreCompleto;
-            lblTelefono.Text = string.IsNullOrEmpty(_socio.Telefono) ? "Sin Teléfono" : _socio.Telefono;
-            txtObservaciones.Text = string.IsNullOrEmpty(_socio.Observaciones) ? "Sin observaciones registradas." : _socio.Observaciones;
+            lblTelefono.Text = string.IsNullOrWhiteSpace(_socio.Telefono) ? "Sin teléfono" : _socio.Telefono;
+            txtObservaciones.Text = string.IsNullOrWhiteSpace(_socio.Observaciones)
+                ? "Sin observaciones registradas."
+                : _socio.Observaciones;
 
-            if (!string.IsNullOrEmpty(_socio.Foto) && File.Exists(_socio.Foto))
-            {
-                picFotoSocio.Image = Image.FromFile(_socio.Foto);
-            }
-            else
-            {
-                picFotoSocio.Image = null;
-            }
+            ImagenHelper.MostrarEn(picFotoSocio, ImagenHelper.CargarFoto(_socio.Foto));
         }
 
         private async Task CargarComboMembresiasAsync()
         {
-            try
+            await FormHelper.EjecutarAsync(async () =>
             {
-                var membresias = await _membresiaController.ObtenerMembresiasAsync(true);
-                _listaMembresias = membresias.ToList();
+                // Solo membresías activas: una membresía desactivada ya no debe poder asignarse a un socio.
+                var membresias = await _membresiaController.ObtenerMembresiasAsync(false);
+                if (IsDisposed) return;
 
-                cboMembresias.DataSource = _listaMembresias;
-                cboMembresias.DisplayMember = "Nombre";
-                cboMembresias.ValueMember = "MembresiaID";
+                cboMembresias.DataSource = membresias.ToList();
+                cboMembresias.DisplayMember = nameof(MembresiaViewModel.Nombre);
+                cboMembresias.ValueMember = nameof(MembresiaViewModel.MembresiaID);
 
                 ActualizarPrecioYMembresia();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar la lista de membresías: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            },
+            "No se pudo cargar la lista de membresías.",
+            grpAsignarMembresia);
         }
 
-        private async Task CargarHistorialMembresiasAsync()
+        // ───────────── Historial ─────────────
+
+        // Las columnas se definen una sola vez. Fechas y dinero se enlazan a sus valores reales
+        // (no a texto), así se ordenan correctamente.
+        private void ConfigurarColumnas()
         {
-            try
+            dgvHistorial.AutoGenerateColumns = false;
+
+            dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.NombreMembresia), "Membresía", 150, 110);
+            dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.FechaInicio), "Inicio", 90, 85, "dd/MM/yyyy");
+            dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.FechaFin), "Fin", 90, 85, "dd/MM/yyyy");
+            dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.Precio), "Precio", 80, 75, "C2", alinearDerecha: true);
+            dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.TotalPagado), "Pagado", 80, 75, "C2", alinearDerecha: true);
+            dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.EstadoMembresia), "Estado", 100, 85);
+        }
+
+        private async Task CargarHistorialAsync(bool seleccionarLaMasNueva = false)
+        {
+            int? idObjetivo = MembresiaSeleccionada?.SocioMembresiaID;
+
+            await FormHelper.EjecutarAsync(async () =>
             {
                 var historial = await _controller.ObtenerHistorialPorSocioIdAsync(_socio.SocioID);
-                dgvHistorial.DataSource = null;
-                dgvHistorial.DataSource = historial.ToList();
-                ConfigurarGridHistorial();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el historial: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+                if (IsDisposed) return;
+
+                // Se recuerda el orden elegido; si no hay ninguno, lo más reciente primero.
+                var columnaOrden = dgvHistorial.SortedColumn;
+                var sentidoOrden = dgvHistorial.SortOrder;
+
+                _vista = new ListaOrdenable<SocioMembresiaViewModel>(historial);
+                dgvHistorial.DataSource = _vista;
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
+                {
+                    dgvHistorial.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
+                }
+                else
+                {
+                    dgvHistorial.Sort(dgvHistorial.Columns["col" + nameof(SocioMembresiaViewModel.FechaInicio)]!,
+                        ListSortDirection.Descending);
+                }
+
+                if (seleccionarLaMasNueva && _vista.Count > 0)
+                    idObjetivo = _vista.Max(m => m.SocioMembresiaID); // la que se acaba de asignar
+
+                SeleccionarMembresia(idObjetivo);
+            },
+            "No se pudo cargar el historial de membresías.",
+            panelAccionesHistorial);
         }
 
-        private void ConfigurarGridHistorial()
+        private void SeleccionarMembresia(int? id)
         {
-            // 1. Ocultar IDs, campos nativos sin formatear y propiedades internas
-            if (dgvHistorial.Columns["SocioMembresiaID"] != null) dgvHistorial.Columns["SocioMembresiaID"].Visible = false;
-            if (dgvHistorial.Columns["SocioID"] != null) dgvHistorial.Columns["SocioID"].Visible = false;
-            if (dgvHistorial.Columns["MembresiaID"] != null) dgvHistorial.Columns["MembresiaID"].Visible = false;
-            if (dgvHistorial.Columns["FechaInicio"] != null) dgvHistorial.Columns["FechaInicio"].Visible = false;
-            if (dgvHistorial.Columns["FechaFin"] != null) dgvHistorial.Columns["FechaFin"].Visible = false;
-            if (dgvHistorial.Columns["Precio"] != null) dgvHistorial.Columns["Precio"].Visible = false;
-            if (dgvHistorial.Columns["TotalPagado"] != null) dgvHistorial.Columns["TotalPagado"].Visible = false;
-            if (dgvHistorial.Columns["CreatedAtTexto"] != null) dgvHistorial.Columns["CreatedAtTexto"].Visible = false;
-            if (dgvHistorial.Columns["UpdatedAt"] != null) dgvHistorial.Columns["UpdatedAt"].Visible = false;
-            if (dgvHistorial.Columns["UpdatedAtTexto"] != null) dgvHistorial.Columns["UpdatedAtTexto"].Visible = false;
+            dgvHistorial.ClearSelection();
 
-            // Ocultar la columna de Estado vieja ("Activa"/"Inactiva")
-            if (dgvHistorial.Columns["Estado"] != null) dgvHistorial.Columns["Estado"].Visible = false;
-
-            // 2. Configurar las columnas visibles
-            if (dgvHistorial.Columns["NombreMembresia"] != null)
-                dgvHistorial.Columns["NombreMembresia"].HeaderText = "Membresía";
-
-            if (dgvHistorial.Columns["FechaInicioTexto"] != null)
-                dgvHistorial.Columns["FechaInicioTexto"].HeaderText = "Fecha Inicio";
-
-            if (dgvHistorial.Columns["FechaFinTexto"] != null)
-                dgvHistorial.Columns["FechaFinTexto"].HeaderText = "Fecha Fin";
-
-            if (dgvHistorial.Columns["PrecioTexto"] != null)
+            if (id.HasValue)
             {
-                dgvHistorial.Columns["PrecioTexto"].Visible = true;
-                dgvHistorial.Columns["PrecioTexto"].HeaderText = "Precio";
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].SocioMembresiaID != id.Value) continue;
+
+                    dgvHistorial.Rows[i].Selected = true;
+                    dgvHistorial.CurrentCell = dgvHistorial.Rows[i].Cells[0];
+                    break;
+                }
             }
 
-            if (dgvHistorial.Columns["CreatedAt"] != null)
-            {
-                dgvHistorial.Columns["CreatedAt"].Visible = true;
-                dgvHistorial.Columns["CreatedAt"].HeaderText = "Fecha Asignación";
-                dgvHistorial.Columns["CreatedAt"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-            }
-
-            // 3. Mostrar la nueva columna calculada "EstadoMembresia"
-            if (dgvHistorial.Columns["EstadoMembresia"] != null)
-            {
-                dgvHistorial.Columns["EstadoMembresia"].Visible = true;
-                dgvHistorial.Columns["EstadoMembresia"].HeaderText = "Estado Membresía";
-            }
+            ActualizarEstadoBotones();
         }
 
-        private void cboMembresias_SelectedIndexChanged(object sender, EventArgs e)
+        // Pagos y Eliminar solo tienen sentido con una membresía seleccionada.
+        private void ActualizarEstadoBotones()
         {
-            ActualizarPrecioYMembresia();
+            bool haySeleccion = MembresiaSeleccionada != null;
+
+            btnPagarMembresia.Enabled = haySeleccion;
+            btnEliminarMembresia.Enabled = haySeleccion;
         }
+
+        private void dgvHistorial_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        private void dgvHistorial_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            AbrirPagos(_vista[e.RowIndex]);
+        }
+
+        // ───────────── Asignar ─────────────
+
+        private void cboMembresias_SelectedIndexChanged(object? sender, EventArgs e) => ActualizarPrecioYMembresia();
 
         private void ActualizarPrecioYMembresia()
         {
-            if (cboMembresias.SelectedItem is MembresiaViewModel membresiaSeleccionada)
+            if (cboMembresias.SelectedItem is MembresiaViewModel membresia)
             {
-                // Muestra el precio formateado en el Label
-                lblPrecioValor.Text = membresiaSeleccionada.Precio.ToString("C2");
+                lblPrecioValor.Text = $"{membresia.Precio:C2}  ·  {membresia.DuracionDias} días";
+                btnAgregarMembresia.Enabled = true;
             }
             else
             {
-                lblPrecioValor.Text = "$0.00";
+                lblPrecioValor.Text = "Sin membresías activas";
+                btnAgregarMembresia.Enabled = false;
             }
         }
 
-        private async void btnAgregarMembresia_Click(object sender, EventArgs e)
+        private async void btnAgregarMembresia_Click(object? sender, EventArgs e)
         {
-            if (cboMembresias.SelectedValue == null)
+            if (cboMembresias.SelectedItem is not MembresiaViewModel membresia)
             {
-                MessageBox.Show("Debe seleccionar una membresía.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe seleccionar una membresía.", "Validación");
                 return;
             }
 
-            try
+            DateTime fechaInicio = dtpFechaInicio.Value.Date;
+
+            // Asignar genera un cobro pendiente: se confirma para evitar asignaciones por error.
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Asignar la membresía '{membresia.Nombre}' ({membresia.Precio:C2}) a {_socio.NombreCompleto} a partir del {fechaInicio:dd/MM/yyyy}?",
+                    "Asignar membresía"))
+                return;
+
+            var dto = new AsignarMembresiaDto
             {
-                int membresiaId = (int)cboMembresias.SelectedValue;
+                SocioID = _socio.SocioID,
+                MembresiaID = membresia.MembresiaID,
+                FechaInicio = fechaInicio
+            };
 
-                var dto = new AsignarMembresiaDto
-                {
-                    SocioID = _socio.SocioID,
-                    MembresiaID = membresiaId,
-                    FechaInicio = dtpFechaInicio.Value
-                };
+            bool asignada = await FormHelper.EjecutarAsync(
+                () => _controller.AsignarMembresiaAsync(dto),
+                "No se pudo asignar la membresía.",
+                grpAsignarMembresia);
 
-                await _controller.AsignarMembresiaAsync(dto);
-
-                MessageBox.Show("Membresía asignada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Recargar el historial para visualización inmediata
-                await CargarHistorialMembresiasAsync();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            if (asignada)
+                await CargarHistorialAsync(seleccionarLaMasNueva: true);
         }
 
-        private async void btnPagarMembresia_Click(object sender, EventArgs e)
+        // ───────────── Pagos y eliminación ─────────────
+
+        private void btnPagarMembresia_Click(object? sender, EventArgs e)
         {
-            if (dgvHistorial.CurrentRow == null || dgvHistorial.CurrentRow.DataBoundItem is not SocioMembresiaViewModel membresiaSeleccionada)
-            {
-                MessageBox.Show("Por favor, seleccione una membresía del historial para gestionar sus pagos.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            using (var frmPago = new FrmPagoSocioMembresiaModal(_pagoController, membresiaSeleccionada, _usuarioId))
-            {
-                frmPago.ShowDialog();
-            }
-
-            // Recargar el historial tras cerrar el modal para reflejar posibles cambios de estado de pago
-            await CargarHistorialMembresiasAsync();
+            var membresia = MembresiaSeleccionada;
+            if (membresia != null)
+                AbrirPagos(membresia);
         }
 
-        private async void btnEliminarMembresia_Click(object sender, EventArgs e)
+        private async void AbrirPagos(SocioMembresiaViewModel membresia)
         {
-            // 1. Validar selección en la grilla
-            if (dgvHistorial.CurrentRow == null || dgvHistorial.CurrentRow.DataBoundItem is not SocioMembresiaViewModel membresiaSeleccionada)
+            using (var modal = new FrmPagoSocioMembresiaModal(_pagoController, membresia, _usuarioId))
             {
-                MessageBox.Show("Por favor, seleccione una membresía del historial que desee eliminar.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                modal.ShowDialog();
+            }
+
+            // Los pagos cambian el total pagado y el estado de la membresía.
+            if (!IsDisposed)
+                await CargarHistorialAsync();
+        }
+
+        private async void btnEliminarMembresia_Click(object? sender, EventArgs e)
+        {
+            var membresia = MembresiaSeleccionada;
+            if (membresia == null) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de que desea eliminar la membresía '{membresia.NombreMembresia}' asignada el {membresia.FechaInicio:dd/MM/yyyy}?\n\nEsta acción no se puede deshacer.",
+                    "Confirmar eliminación",
+                    destructiva: true))
                 return;
-            }
 
-            // 2. Confirmación previa
-            var confirmacion = MessageBox.Show(
-                $"¿Está seguro de que desea eliminar la membresía '{membresiaSeleccionada.NombreMembresia}' asignada el {membresiaSeleccionada.FechaInicioTexto}?\n\nEsta acción no se podrá deshacer.",
-                "Confirmar eliminación",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+            bool eliminada = await FormHelper.EjecutarAsync(
+                () => _controller.EliminarMembresiaAsync(membresia.SocioMembresiaID),
+                "No se pudo eliminar la membresía. Si ya tiene pagos registrados, anúlelos primero.",
+                panelAccionesHistorial);
 
-            if (confirmacion != DialogResult.Yes) return;
+            if (eliminada)
+                await CargarHistorialAsync();
+        }
 
-            try
-            {
-                // 3. Ejecutar eliminación mediante el controlador
-                // (Asegúrate de que tu controlador contenga el método de eliminación por ID)
-                await _controller.EliminarMembresiaAsync(membresiaSeleccionada.SocioMembresiaID);
+        // ───────────── Cierre ─────────────
 
-                MessageBox.Show("Membresía eliminada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // 4. Refrescar la grilla
-                await CargarHistorialMembresiasAsync();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error al intentar eliminar la membresía: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            ImagenHelper.MostrarEn(picFotoSocio, null); // libera la foto
+            base.OnFormClosed(e);
         }
     }
 }

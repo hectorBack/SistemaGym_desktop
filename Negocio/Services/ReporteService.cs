@@ -94,7 +94,12 @@ namespace Negocio.Services
                     Concepto = m.Concepto != null ? m.Concepto.Nombre : "Sin Concepto",
                     Total = m.Total,
                     FormaPago = m.FormaPago,
-                    Usuario = $"Usuario #{m.UsuarioID}",
+                    Usuario = m.Usuario != null ? m.Usuario.NombreUsuario : (m.UsuarioID.HasValue ? $"Usuario #{m.UsuarioID.Value}" : "Sistema"),
+                    Observacion = m.Observacion ?? string.Empty,
+                    // Formatea el rango del corte (Apertura - Cierre/Actual)
+                    CorteInfo = m.Corte != null
+                        ? $"{m.Corte.FechaApertura:dd/MM/yyyy HH:mm} - {(m.Corte.FechaCierre.HasValue ? m.Corte.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm") : "Abierto")}"
+                        : "N/A",
                     Fecha = m.CreatedAt
                 });
         }

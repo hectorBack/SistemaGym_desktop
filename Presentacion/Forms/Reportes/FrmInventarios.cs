@@ -1,4 +1,6 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Corte;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -12,130 +14,79 @@ using System.Windows.Forms;
 
 namespace Presentacion.Forms.Reportes
 {
-    
-        public partial class FrmInventarios : Form
+    public partial class FrmInventarios : Form
+    {
+        private readonly ReporteController _reporteController;
+
+        public FrmInventarios(ReporteController reporteController)
         {
-            private readonly ReporteController _reporteController;
-            private List<ReporteInventarioViewModel> _listaInventario = new();
+            _reporteController = reporteController ?? throw new ArgumentNullException(nameof(reporteController));
 
-            public FrmInventarios(ReporteController reporteController)
+            InitializeComponent();
+            ConfigurarColumnas();
+        }
+
+        private async void FrmInventarios_Load(object? sender, EventArgs e) => await CargarInventarioAsync();
+
+        // Las columnas se definen una sola vez. Antes se generaban todas y se ocultaban 6 por nombre
+        // (ProductoID, Codigo, Categoria, ValorTotalInventario, Activo, Estado); ahora solo existen las 4 que se muestran.
+        private void ConfigurarColumnas()
+        {
+            dgvInventario.AutoGenerateColumns = false;
+
+            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.Producto), "Nombre", 220, 150);
+            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.PrecioCompra), "Costo", 90, 80, "C2", alinearDerecha: true);
+            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.PrecioVenta), "Precio", 90, 80, "C2", alinearDerecha: true);
+            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.StockActual), "Stock", 70, 70, alinearDerecha: true);
+        }
+
+        private async Task CargarInventarioAsync()
+        {
+            await FormHelper.EjecutarAsync(async () =>
             {
-                InitializeComponent();
-                _reporteController = reporteController;
+                var inventario = await _reporteController.ObtenerInventarioAsync();
+                if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
+
+                // Se recuerda el orden elegido para reaplicarlo si se vuelve a cargar.
+                var columnaOrden = dgvInventario.SortedColumn;
+                var sentidoOrden = dgvInventario.SortOrder;
+
+                dgvInventario.DataSource = new ListaOrdenable<ReporteInventarioViewModel>(inventario);
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
+                {
+                    dgvInventario.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? System.ComponentModel.ListSortDirection.Descending
+                        : System.ComponentModel.ListSortDirection.Ascending);
+                }
+
+                dgvInventario.ClearSelection();
+                btnExportarExcel.Enabled = dgvInventario.Rows.Count > 0;
+            },
+            "No se pudo cargar el inventario.",
+            panelTop);
+        }
+
+        // Antes este botón mostraba "Exportación realizada con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente.
+        private void btnExportarExcel_Click(object? sender, EventArgs e)
+        {
+            if (dgvInventario.Rows.Count == 0)
+            {
+                FormHelper.MostrarAviso("No hay datos en la tabla para exportar.");
+                return;
             }
 
-            private async void FrmInventarios_Load(object sender, EventArgs e)
+            try
             {
-                await CargarInventarioAsync();
+                string? ruta = ExportadorCsv.Exportar(dgvInventario, "Inventario");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-
-            private async Task CargarInventarioAsync()
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                try
-                {
-                    Cursor = Cursors.WaitCursor;
-                    var resultado = await _reporteController.ObtenerInventarioAsync();
-                    _listaInventario = resultado.ToList();
-
-                    dgvInventario.DataSource = null;
-                    dgvInventario.DataSource = _listaInventario;
-
-                    ConfigurarGrid();
-                    dgvInventario.ClearSelection();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al cargar el inventario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    Cursor = Cursors.Default;
-                }
-            }
-
-            private void ConfigurarGrid()
-            {
-                // 1. Ocultar columnas técnicas o no solicitadas de ReporteInventarioViewModel
-                string[] columnasOcultas = { "ProductoID", "Codigo", "Categoria", "ValorTotalInventario", "Activo", "Estado" };
-                foreach (var col in columnasOcultas)
-                {
-                    if (dgvInventario.Columns[col] != null)
-                        dgvInventario.Columns[col].Visible = false;
-                }
-
-                // 2. Renombrar encabezados de las columnas visibles
-                if (dgvInventario.Columns["Producto"] != null) dgvInventario.Columns["Producto"].HeaderText = "Nombre";
-                if (dgvInventario.Columns["PrecioCompra"] != null) dgvInventario.Columns["PrecioCompra"].HeaderText = "Costo";
-                if (dgvInventario.Columns["PrecioVenta"] != null) dgvInventario.Columns["PrecioVenta"].HeaderText = "Precio";
-                if (dgvInventario.Columns["StockActual"] != null) dgvInventario.Columns["StockActual"].HeaderText = "Stock";
-
-                // Formato de moneda para Costo y Precio
-                if (dgvInventario.Columns["PrecioCompra"] != null) dgvInventario.Columns["PrecioCompra"].DefaultCellStyle.Format = "C2";
-                if (dgvInventario.Columns["PrecioVenta"] != null) dgvInventario.Columns["PrecioVenta"].DefaultCellStyle.Format = "C2";
-
-                // 3. Orden, pesos y alineaciones estilo estándar
-                dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-                string[] ordenColumnas =
-                {
-                "Producto",
-                "PrecioCompra",
-                "PrecioVenta",
-                "StockActual"
-            };
-
-                var pesos = new Dictionary<string, float>
-                {
-                    ["Producto"] = 220,
-                    ["PrecioCompra"] = 90,
-                    ["PrecioVenta"] = 90,
-                    ["StockActual"] = 70
-                };
-
-                for (int indice = 0; indice < ordenColumnas.Length; indice++)
-                {
-                    if (dgvInventario.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                        continue;
-
-                    columna.DisplayIndex = indice;
-                    columna.FillWeight = pesos[columna.Name];
-                    columna.MinimumWidth = columna.Name switch
-                    {
-                        "Producto" => 150,
-                        _ => 70
-                    };
-
-                    // Alineación a la derecha para montos/números e izquierda para texto
-                    if (columna.Name == "PrecioCompra" || columna.Name == "PrecioVenta" || columna.Name == "StockActual")
-                    {
-                        columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    }
-                    else
-                    {
-                        columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                        columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                    }
-                }
-            }
-
-            private void btnExportarExcel_Click(object sender, EventArgs e)
-            {
-                if (dgvInventario.Rows.Count == 0)
-                {
-                    MessageBox.Show("No hay datos en la tabla para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                try
-                {
-                    // Código/Helper para exportación a Excel
-                    MessageBox.Show("Exportación realizada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al exportar a Excel: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
         }
+    }
 }

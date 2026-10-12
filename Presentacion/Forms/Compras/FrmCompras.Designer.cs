@@ -17,275 +17,263 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
-            btnLimpiarFiltros = new Button();
-            btnFiltrarFechas = new Button();
-            btnVerDetalle = new Button();
             lblTitulo = new Label();
+            flowAcciones = new FlowLayoutPanel();
+            btnNuevo = new BotonTema();
+            btnVerDetalle = new BotonTema();
+            btnCancelarCompra = new BotonTema();
+            btnEliminarFisico = new BotonTema();
+            panelFiltros = new Panel();
+            flowFiltros = new FlowLayoutPanel();
             lblDesde = new Label();
             dtpFechaInicio = new DateTimePicker();
             lblHasta = new Label();
             dtpFechaFin = new DateTimePicker();
-            btnNuevo = new Button();
-            btnDesactivar = new Button();
-            btnEliminarFisico = new Button();
-            dgvCompras = new DataGridView();
+            btnFiltrarFechas = new BotonTema();
+            btnLimpiarFiltros = new BotonTema();
+            lblResumen = new Label();
+            dgvCompras = new GridTema();
             panelTop.SuspendLayout();
+            flowAcciones.SuspendLayout();
+            panelFiltros.SuspendLayout();
+            flowFiltros.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCompras).BeginInit();
             SuspendLayout();
             // 
             // panelTop
             // 
             panelTop.BackColor = Color.FromArgb(15, 42, 79);
-            panelTop.Controls.Add(btnLimpiarFiltros);
-            panelTop.Controls.Add(btnFiltrarFechas);
-            panelTop.Controls.Add(btnVerDetalle);
+            panelTop.Controls.Add(flowAcciones);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(lblDesde);
-            panelTop.Controls.Add(dtpFechaInicio);
-            panelTop.Controls.Add(lblHasta);
-            panelTop.Controls.Add(dtpFechaFin);
-            panelTop.Controls.Add(btnNuevo);
-            panelTop.Controls.Add(btnDesactivar);
-            panelTop.Controls.Add(btnEliminarFisico);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(1179, 110);
+            panelTop.Size = new Size(1257, 70);
             panelTop.TabIndex = 0;
-            // 
-            // btnLimpiarFiltros
-            // 
-            btnLimpiarFiltros.Anchor = AnchorStyles.Left;
-            btnLimpiarFiltros.BackColor = Color.FromArgb(11, 15, 26);
-            btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
-            btnLimpiarFiltros.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnLimpiarFiltros.ForeColor = Color.FromArgb(230, 238, 252);
-            btnLimpiarFiltros.Location = new Point(471, 58);
-            btnLimpiarFiltros.Margin = new Padding(8, 0, 0, 0);
-            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
-            btnLimpiarFiltros.Size = new Size(86, 36);
-            btnLimpiarFiltros.TabIndex = 11;
-            btnLimpiarFiltros.Text = "Limpiar";
-            btnLimpiarFiltros.UseVisualStyleBackColor = false;
-            btnLimpiarFiltros.Click += btnLimpiarFiltros_Click;
-            // 
-            // btnFiltrarFechas
-            // 
-            btnFiltrarFechas.Anchor = AnchorStyles.Left;
-            btnFiltrarFechas.BackColor = Color.FromArgb(31, 111, 235);
-            btnFiltrarFechas.FlatAppearance.BorderSize = 0;
-            btnFiltrarFechas.FlatStyle = FlatStyle.Flat;
-            btnFiltrarFechas.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnFiltrarFechas.ForeColor = Color.White;
-            btnFiltrarFechas.Location = new Point(377, 58);
-            btnFiltrarFechas.Margin = new Padding(0);
-            btnFiltrarFechas.Name = "btnFiltrarFechas";
-            btnFiltrarFechas.Size = new Size(86, 36);
-            btnFiltrarFechas.TabIndex = 10;
-            btnFiltrarFechas.Text = "Filtrar";
-            btnFiltrarFechas.UseVisualStyleBackColor = false;
-            btnFiltrarFechas.Click += btnFiltrarFechas_Click;
-            // 
-            // btnVerDetalle
-            // 
-            btnVerDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnVerDetalle.BackColor = Color.FromArgb(11, 15, 26);
-            btnVerDetalle.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnVerDetalle.FlatStyle = FlatStyle.Flat;
-            btnVerDetalle.Font = new Font("Segoe UI", 9F);
-            btnVerDetalle.ForeColor = Color.FromArgb(230, 238, 252);
-            btnVerDetalle.Location = new Point(759, 56);
-            btnVerDetalle.Margin = new Padding(3, 4, 3, 4);
-            btnVerDetalle.Name = "btnVerDetalle";
-            btnVerDetalle.Size = new Size(110, 38);
-            btnVerDetalle.TabIndex = 9;
-            btnVerDetalle.Text = "Ver Detalle";
-            btnVerDetalle.UseVisualStyleBackColor = false;
-            btnVerDetalle.Click += btnVerDetalle_Click;
             // 
             // lblTitulo
             // 
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(215, 29);
+            lblTitulo.Size = new Size(230, 32);
             lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Gestión Compras";
+            lblTitulo.Text = "Historial de Compras";
+            // 
+            // flowAcciones
+            // 
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnNuevo);
+            flowAcciones.Controls.Add(btnVerDetalle);
+            flowAcciones.Controls.Add(btnCancelarCompra);
+            flowAcciones.Controls.Add(btnEliminarFisico);
+            flowAcciones.Dock = DockStyle.Right;
+            flowAcciones.Location = new Point(500, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(0, 16, 12, 0);
+            flowAcciones.Size = new Size(757, 70);
+            flowAcciones.TabIndex = 1;
+            flowAcciones.WrapContents = false;
+            // 
+            // btnNuevo
+            // 
+            btnNuevo.Estilo = EstiloBoton.Primario;
+            btnNuevo.Margin = new Padding(0, 0, 8, 0);
+            btnNuevo.Name = "btnNuevo";
+            btnNuevo.Size = new Size(130, 38);
+            btnNuevo.TabIndex = 0;
+            btnNuevo.Text = "+ Nueva compra";
+            btnNuevo.Click += btnNuevo_Click;
+            // 
+            // btnVerDetalle
+            // 
+            btnVerDetalle.Enabled = false;
+            btnVerDetalle.Margin = new Padding(0, 0, 8, 0);
+            btnVerDetalle.Name = "btnVerDetalle";
+            btnVerDetalle.Size = new Size(110, 38);
+            btnVerDetalle.TabIndex = 1;
+            btnVerDetalle.Text = "Ver detalle";
+            btnVerDetalle.Click += btnVerDetalle_Click;
+            // 
+            // btnCancelarCompra
+            // 
+            btnCancelarCompra.Enabled = false;
+            btnCancelarCompra.Estilo = EstiloBoton.Advertencia;
+            btnCancelarCompra.Margin = new Padding(0, 0, 8, 0);
+            btnCancelarCompra.Name = "btnCancelarCompra";
+            btnCancelarCompra.Size = new Size(140, 38);
+            btnCancelarCompra.TabIndex = 2;
+            btnCancelarCompra.Text = "Cancelar compra";
+            btnCancelarCompra.Click += btnCancelarCompra_Click;
+            // 
+            // btnEliminarFisico
+            // 
+            btnEliminarFisico.Enabled = false;
+            btnEliminarFisico.Estilo = EstiloBoton.Peligro;
+            btnEliminarFisico.Margin = new Padding(0, 0, 8, 0);
+            btnEliminarFisico.Name = "btnEliminarFisico";
+            btnEliminarFisico.Size = new Size(110, 38);
+            btnEliminarFisico.TabIndex = 3;
+            btnEliminarFisico.Text = "Eliminar";
+            btnEliminarFisico.Click += btnEliminarFisico_Click;
+            // 
+            // panelFiltros
+            // 
+            panelFiltros.BackColor = Color.FromArgb(14, 20, 36);
+            panelFiltros.Controls.Add(lblResumen);
+            panelFiltros.Controls.Add(flowFiltros);
+            panelFiltros.Dock = DockStyle.Top;
+            panelFiltros.Location = new Point(0, 70);
+            panelFiltros.Name = "panelFiltros";
+            panelFiltros.Size = new Size(1257, 56);
+            panelFiltros.TabIndex = 1;
+            // 
+            // flowFiltros
+            // 
+            flowFiltros.AutoSize = true;
+            flowFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowFiltros.Controls.Add(lblDesde);
+            flowFiltros.Controls.Add(dtpFechaInicio);
+            flowFiltros.Controls.Add(lblHasta);
+            flowFiltros.Controls.Add(dtpFechaFin);
+            flowFiltros.Controls.Add(btnFiltrarFechas);
+            flowFiltros.Controls.Add(btnLimpiarFiltros);
+            flowFiltros.Dock = DockStyle.Left;
+            flowFiltros.Location = new Point(0, 0);
+            flowFiltros.Name = "flowFiltros";
+            flowFiltros.Padding = new Padding(20, 10, 0, 0);
+            flowFiltros.Size = new Size(640, 56);
+            flowFiltros.TabIndex = 0;
+            flowFiltros.WrapContents = false;
             // 
             // lblDesde
             // 
             lblDesde.AutoSize = true;
-            lblDesde.Font = new Font("Segoe UI", 9F);
+            lblDesde.Font = new Font("Segoe UI", 9.5F);
             lblDesde.ForeColor = Color.FromArgb(230, 238, 252);
-            lblDesde.Location = new Point(20, 65);
+            lblDesde.Margin = new Padding(0, 7, 6, 0);
             lblDesde.Name = "lblDesde";
-            lblDesde.Size = new Size(54, 20);
-            lblDesde.TabIndex = 1;
+            lblDesde.Size = new Size(56, 21);
+            lblDesde.TabIndex = 0;
             lblDesde.Text = "Desde:";
             // 
             // dtpFechaInicio
             // 
             dtpFechaInicio.Font = new Font("Segoe UI", 9F);
             dtpFechaInicio.Format = DateTimePickerFormat.Short;
-            dtpFechaInicio.Location = new Point(80, 61);
+            dtpFechaInicio.Margin = new Padding(0, 4, 16, 0);
             dtpFechaInicio.Name = "dtpFechaInicio";
-            dtpFechaInicio.Size = new Size(110, 27);
-            dtpFechaInicio.TabIndex = 2;
+            dtpFechaInicio.Size = new Size(125, 27);
+            dtpFechaInicio.TabIndex = 1;
             // 
             // lblHasta
             // 
             lblHasta.AutoSize = true;
-            lblHasta.Font = new Font("Segoe UI", 9F);
+            lblHasta.Font = new Font("Segoe UI", 9.5F);
             lblHasta.ForeColor = Color.FromArgb(230, 238, 252);
-            lblHasta.Location = new Point(200, 65);
+            lblHasta.Margin = new Padding(0, 7, 6, 0);
             lblHasta.Name = "lblHasta";
-            lblHasta.Size = new Size(50, 20);
-            lblHasta.TabIndex = 3;
+            lblHasta.Size = new Size(52, 21);
+            lblHasta.TabIndex = 2;
             lblHasta.Text = "Hasta:";
             // 
             // dtpFechaFin
             // 
             dtpFechaFin.Font = new Font("Segoe UI", 9F);
             dtpFechaFin.Format = DateTimePickerFormat.Short;
-            dtpFechaFin.Location = new Point(255, 61);
+            dtpFechaFin.Margin = new Padding(0, 4, 16, 0);
             dtpFechaFin.Name = "dtpFechaFin";
-            dtpFechaFin.Size = new Size(110, 27);
-            dtpFechaFin.TabIndex = 4;
+            dtpFechaFin.Size = new Size(125, 27);
+            dtpFechaFin.TabIndex = 3;
             // 
-            // btnNuevo
+            // btnFiltrarFechas
             // 
-            btnNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnNuevo.BackColor = Color.FromArgb(31, 111, 235);
-            btnNuevo.FlatAppearance.BorderSize = 0;
-            btnNuevo.FlatStyle = FlatStyle.Flat;
-            btnNuevo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnNuevo.ForeColor = Color.White;
-            btnNuevo.Location = new Point(633, 56);
-            btnNuevo.Margin = new Padding(3, 4, 3, 4);
-            btnNuevo.Name = "btnNuevo";
-            btnNuevo.Size = new Size(120, 38);
-            btnNuevo.TabIndex = 6;
-            btnNuevo.Text = "+ Nueva Compra";
-            btnNuevo.UseVisualStyleBackColor = false;
-            btnNuevo.Click += btnNuevo_Click;
+            btnFiltrarFechas.Estilo = EstiloBoton.Primario;
+            btnFiltrarFechas.Margin = new Padding(0, 1, 8, 0);
+            btnFiltrarFechas.Name = "btnFiltrarFechas";
+            btnFiltrarFechas.Size = new Size(86, 32);
+            btnFiltrarFechas.TabIndex = 4;
+            btnFiltrarFechas.Text = "Filtrar";
+            btnFiltrarFechas.Click += btnFiltrarFechas_Click;
             // 
-            // btnDesactivar
+            // btnLimpiarFiltros
             // 
-            btnDesactivar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnDesactivar.BackColor = Color.FromArgb(11, 15, 26);
-            btnDesactivar.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnDesactivar.FlatStyle = FlatStyle.Flat;
-            btnDesactivar.Font = new Font("Segoe UI", 9F);
-            btnDesactivar.ForeColor = Color.FromArgb(230, 238, 252);
-            btnDesactivar.Location = new Point(875, 56);
-            btnDesactivar.Margin = new Padding(3, 4, 3, 4);
-            btnDesactivar.Name = "btnDesactivar";
-            btnDesactivar.Size = new Size(130, 38);
-            btnDesactivar.TabIndex = 7;
-            btnDesactivar.Text = "Cancelar Compra";
-            btnDesactivar.UseVisualStyleBackColor = false;
-            btnDesactivar.Click += btnCancelarCompra_Click;
+            btnLimpiarFiltros.Margin = new Padding(0, 1, 0, 0);
+            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+            btnLimpiarFiltros.Size = new Size(86, 32);
+            btnLimpiarFiltros.TabIndex = 5;
+            btnLimpiarFiltros.Text = "Hoy";
+            btnLimpiarFiltros.Click += btnLimpiarFiltros_Click;
             // 
-            // btnEliminarFisico
+            // lblResumen
             // 
-            btnEliminarFisico.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnEliminarFisico.BackColor = Color.FromArgb(11, 15, 26);
-            btnEliminarFisico.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnEliminarFisico.FlatStyle = FlatStyle.Flat;
-            btnEliminarFisico.Font = new Font("Segoe UI", 9F);
-            btnEliminarFisico.ForeColor = Color.FromArgb(230, 238, 252);
-            btnEliminarFisico.Location = new Point(1015, 56);
-            btnEliminarFisico.Margin = new Padding(3, 4, 3, 4);
-            btnEliminarFisico.Name = "btnEliminarFisico";
-            btnEliminarFisico.Size = new Size(110, 38);
-            btnEliminarFisico.TabIndex = 8;
-            btnEliminarFisico.Text = "Eliminar";
-            btnEliminarFisico.UseVisualStyleBackColor = false;
-            btnEliminarFisico.Click += btnEliminarFisico_Click;
+            lblResumen.Dock = DockStyle.Right;
+            lblResumen.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            lblResumen.ForeColor = Color.FromArgb(45, 212, 255);
+            lblResumen.Location = new Point(757, 0);
+            lblResumen.Name = "lblResumen";
+            lblResumen.Padding = new Padding(0, 0, 20, 0);
+            lblResumen.Size = new Size(500, 56);
+            lblResumen.TabIndex = 1;
+            lblResumen.TextAlign = ContentAlignment.MiddleRight;
             // 
             // dgvCompras
             // 
-            dgvCompras.AllowUserToAddRows = false;
-            dgvCompras.AllowUserToDeleteRows = false;
-            dgvCompras.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvCompras.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvCompras.BorderStyle = BorderStyle.None;
-            dgvCompras.EnableHeadersVisualStyles = false;
-
-            // Encabezados
-            dgvCompras.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvCompras.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvCompras.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dgvCompras.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            // Relleno de celdas estandarizado (8px a la izquierda)
-            Padding margenCeldaCompras = new Padding(8, 0, 0, 0);
-            dgvCompras.ColumnHeadersDefaultCellStyle.Padding = margenCeldaCompras;
-            dgvCompras.DefaultCellStyle.Padding = margenCeldaCompras;
-
-            // Celdas estándar y selección
-            dgvCompras.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvCompras.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvCompras.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvCompras.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvCompras.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvCompras.ScrollBars = ScrollBars.Both;
-
-            dgvCompras.GridColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvCompras.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCompras.Dock = DockStyle.Fill;
-            dgvCompras.Location = new Point(0, 110);
-            dgvCompras.Margin = new Padding(3, 4, 3, 4);
-            dgvCompras.MultiSelect = false;
+            dgvCompras.Location = new Point(0, 126);
             dgvCompras.Name = "dgvCompras";
-            dgvCompras.ReadOnly = true;
-            dgvCompras.RowHeadersVisible = false;
-            dgvCompras.RowHeadersWidth = 51;
-            dgvCompras.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvCompras.Size = new Size(1179, 690);
-            dgvCompras.TabIndex = 1;
+            dgvCompras.Size = new Size(1257, 941);
+            dgvCompras.TabIndex = 2;
+            dgvCompras.CellDoubleClick += dgvCompras_CellDoubleClick;
+            dgvCompras.CellFormatting += dgvCompras_CellFormatting;
+            dgvCompras.SelectionChanged += dgvCompras_SelectionChanged;
             // 
             // FrmCompras
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
-            ClientSize = new Size(1179, 800);
+            ClientSize = new Size(1257, 1067);
             Controls.Add(dgvCompras);
+            Controls.Add(panelFiltros);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmCompras";
             Text = "Compras";
             Load += FrmCompras_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            flowAcciones.ResumeLayout(false);
+            panelFiltros.ResumeLayout(false);
+            panelFiltros.PerformLayout();
+            flowFiltros.ResumeLayout(false);
+            flowFiltros.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvCompras).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
+        private Panel panelTop;
         private Label lblTitulo;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnNuevo;
+        private BotonTema btnVerDetalle;
+        private BotonTema btnCancelarCompra;
+        private BotonTema btnEliminarFisico;
+        private Panel panelFiltros;
+        private FlowLayoutPanel flowFiltros;
         private Label lblDesde;
         private DateTimePicker dtpFechaInicio;
         private Label lblHasta;
         private DateTimePicker dtpFechaFin;
-        private Panel panelTop;
-
-        private Button btnNuevo;
-        private Button btnDesactivar;
-        private Button btnEliminarFisico;
-        private DataGridView dgvCompras;
-        private Button btnVerDetalle;
-        private Button btnFiltrarFechas;
-        private Button btnLimpiarFiltros;
+        private BotonTema btnFiltrarFechas;
+        private BotonTema btnLimpiarFiltros;
+        private Label lblResumen;
+        private GridTema dgvCompras;
     }
 }

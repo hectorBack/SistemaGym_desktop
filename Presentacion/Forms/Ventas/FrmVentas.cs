@@ -17,233 +17,276 @@ namespace Presentacion.Forms.Ventas
     {
         private readonly VentaController _ventaController;
         private readonly ProductoController _productoController;
-        private List<VentaViewModel> _listaVentas = new();
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<VentaViewModel> _vista = new();
 
         public FrmVentas(VentaController ventaController, ProductoController productoController)
         {
-            InitializeComponent();
-            _ventaController = ventaController;
-            _productoController = productoController;
+            _ventaController = ventaController ?? throw new ArgumentNullException(nameof(ventaController));
+            _productoController = productoController ?? throw new ArgumentNullException(nameof(productoController));
 
-            dgvVentas.SelectionChanged += dgvVentas_SelectionChanged;
+            InitializeComponent();
+            ConfigurarColumnas();
         }
 
-        private async void FrmVentas_Load(object sender, EventArgs e)
+        /// <summary>Venta de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private VentaViewModel? VentaSeleccionada =>
+            dgvVentas.SelectedRows.Count > 0
+                ? dgvVentas.SelectedRows[0].DataBoundItem as VentaViewModel
+                : null;
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmVentas_Load(object? sender, EventArgs e)
         {
+            // El permiso se revisa una sola vez al abrir, no en cada recarga.
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
+
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
-            await BuscarPorFechasAsync();
+            await CargarVentasAsync();
         }
 
-        private async Task CargarVentasAsync()
+        // Las columnas se definen una sola vez (no en cada recarga).
+        // Si no quieres alguna (por ejemplo "Atendió" o "Artículos"), borra su línea.
+        private void ConfigurarColumnas()
         {
-            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
-            await BuscarPorFechasAsync();
+            dgvVentas.AutoGenerateColumns = false;
+
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.VentaID), "N°", 50, 50);
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.FechaVenta), "Fecha", 130, 130, "dd/MM/yyyy HH:mm");
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.UsuarioNombre), "Atendió", 110, 90);
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.CantidadProductos), "Artículos", 70, 70, alinearDerecha: true);
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.Total), "Total", 90, 80, "C2", alinearDerecha: true);
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.Estado), "Estado", 80, 80);
         }
 
-        private async Task BuscarPorFechasAsync()
+        private async Task CargarVentasAsync(int? idASeleccionar = null)
         {
-            try
+            // Mismo criterio de antes: el rango cubre todo el día "Hasta".
+            DateTime inicio = dtpFechaInicio.Value.Date;
+            DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+
+            if (inicio > fin)
             {
-                // Ajustar horas para cubrir todo el rango del día seleccionado
-                DateTime inicio = dtpFechaInicio.Value.Date;
-                DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
-
-                var resultado = await _ventaController.ObtenerPorRangoFechasAsync(inicio, fin);
-                _listaVentas = resultado.ToList();
-                dgvVentas.DataSource = null;
-                dgvVentas.DataSource = _listaVentas;
-
-                ConfigurarGrid();
-                dgvVentas.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar ventas: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async void btnFiltrarFechas_Click(object sender, EventArgs e)
-        {
-            await BuscarPorFechasAsync();
-        }
-
-
-        private void ConfigurarGrid()
-        {
-            // 1. Ocultar todas las columnas que NO quieres mostrar
-            if (dgvVentas.Columns["VentaID"] != null) dgvVentas.Columns["VentaID"].Visible = false;
-            if (dgvVentas.Columns["UsuarioID"] != null) dgvVentas.Columns["UsuarioID"].Visible = false;
-            if (dgvVentas.Columns["UsuarioNombre"] != null) dgvVentas.Columns["UsuarioNombre"].Visible = false;
-            if (dgvVentas.Columns["SocioID"] != null) dgvVentas.Columns["SocioID"].Visible = false;
-            if (dgvVentas.Columns["SocioNombre"] != null) dgvVentas.Columns["SocioNombre"].Visible = false;
-            if (dgvVentas.Columns["CantidadProductos"] != null) dgvVentas.Columns["CantidadProductos"].Visible = false;
-            if (dgvVentas.Columns["Activo"] != null) dgvVentas.Columns["Activo"].Visible = false;
-            if (dgvVentas.Columns["CreatedAt"] != null) dgvVentas.Columns["CreatedAt"].Visible = false;
-
-            // 2. Configurar los encabezados y formatos de las 3 columnas visibles
-            if (dgvVentas.Columns["Total"] != null)
-            {
-                dgvVentas.Columns["Total"].HeaderText = "Total ($)";
-                dgvVentas.Columns["Total"].DefaultCellStyle.Format = "C2";
-            }
-
-            if (dgvVentas.Columns["FechaVenta"] != null)
-            {
-                dgvVentas.Columns["FechaVenta"].HeaderText = "Fecha de Registro";
-                dgvVentas.Columns["FechaVenta"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-            }
-
-            if (dgvVentas.Columns["Estado"] != null)
-            {
-                dgvVentas.Columns["Estado"].HeaderText = "Estado";
-            }
-
-            // 3. Definir orden y distribución de espacio
-            dgvVentas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            string[] ordenColumnas =
-            {
-        "Total",
-        "FechaVenta",
-        "Estado"
-            };
-
-            var pesos = new Dictionary<string, float>
-            {
-                ["Total"] = 100,
-                ["FechaVenta"] = 150,
-                ["Estado"] = 100
-            };
-
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                if (dgvVentas.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                    continue;
-
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = 80;
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            }
-        }
-
-        private async void btnNuevaVenta_Click(object sender, EventArgs e)
-        {
-            // Abre la pantalla/modal de caja para registrar productos
-            using var modal = new FrmVentaModal(_ventaController, _productoController);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarVentasAsync();
-            }
-        }
-
-        private async void btnVerDetalle_Click(object sender, EventArgs e)
-        {
-            if (dgvVentas.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una venta de la lista para consultar su detalle.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAdvertencia("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.", "Rango de fechas");
                 return;
             }
 
-            var item = (VentaViewModel)dgvVentas.CurrentRow.DataBoundItem;
-            var ventaDto = await _ventaController.ObtenerPorIdAsync(item.VentaID);
+            // Si no se pide otra, se conserva la selección actual.
+            int? idObjetivo = idASeleccionar ?? VentaSeleccionada?.VentaID;
 
-            if (ventaDto != null)
+            await FormHelper.EjecutarAsync(async () =>
             {
-                using var modal = new FrmVentaDetalleModal(ventaDto);
-                modal.ShowDialog();
-            }
-        }
+                var ventas = await _ventaController.ObtenerPorRangoFechasAsync(inicio, fin);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
 
-        private async void btnAnular_Click(object sender, EventArgs e)
-        {
-            if (dgvVentas.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una venta de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvVentas.SortedColumn;
+                var sentidoOrden = dgvVentas.SortOrder;
 
-            var item = (VentaViewModel)dgvVentas.CurrentRow.DataBoundItem;
+                _vista = new ListaOrdenable<VentaViewModel>(ventas);
+                dgvVentas.DataSource = _vista;
 
-            if (!item.Activo)
-            {
-                MessageBox.Show("Esta venta ya se encuentra anulada.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de anular la venta N° '{item.VentaID}' por un total de ${item.Total:N2}?\nSe reajustará el stock de los productos vendidos.", "Confirmar Anulación"))
-            {
-                try
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    // Se obtiene el ID del usuario logueado en la sesión activa
-                    int usuarioId = SesionUsuario.UsuarioID;
-                    string motivo = "Anulación de venta desde el módulo de ventas";
-
-                    await _ventaController.AnularVentaAsync(item.VentaID, usuarioId, motivo);
-                    await CargarVentasAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvVentas.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una venta de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (VentaViewModel)dgvVentas.CurrentRow.DataBoundItem;
-
-            if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE el registro de la venta N° '{item.VentaID}' de la base de datos?", "Eliminación Definitiva"))
-            {
-                try
-                {
-                    await _ventaController.EliminarFisicoAsync(item.VentaID);
-                    await CargarVentasAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void dgvVentas_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvVentas.CurrentRow != null && dgvVentas.CurrentRow.DataBoundItem is VentaViewModel item)
-            {
-                if (item.Activo)
-                {
-                    btnAnular.Enabled = true;
-                    btnAnular.Text = "Anular Venta";
-                    btnAnular.BackColor = Color.IndianRed;
+                    dgvVentas.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
                 }
                 else
                 {
-                    btnAnular.Enabled = false;
-                    btnAnular.Text = "Anulada";
-                    btnAnular.BackColor = Color.Gray;
+                    // Primera carga: las ventas más recientes arriba.
+                    dgvVentas.Sort(dgvVentas.Columns["col" + nameof(VentaViewModel.FechaVenta)]!,
+                        ListSortDirection.Descending);
                 }
-            }
+
+                SeleccionarVenta(idObjetivo);
+                ActualizarResumen();
+            },
+            "No se pudieron cargar las ventas.",
+            panelTop, panelFiltros);
         }
 
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
+        // Resumen del periodo mostrado. Las ventas anuladas no suman al total.
+        private void ActualizarResumen()
         {
+            var vigentes = _vista.Where(v => v.Activo).ToList();
+            int anuladas = _vista.Count - vigentes.Count;
 
-            // Restablecer el rango de fechas al día de hoy
+            string texto = $"{vigentes.Count} venta(s)  ·  Total {vigentes.Sum(v => v.Total):C2}";
+            if (anuladas > 0)
+                texto += $"  ·  {anuladas} anulada(s)";
+
+            lblResumen.Text = texto;
+        }
+
+        // ───────────── Filtros ─────────────
+
+        private async void btnFiltrarFechas_Click(object? sender, EventArgs e) => await CargarVentasAsync();
+
+        // "Hoy": vuelve al día actual.
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
+        {
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
-            // Volver a consultar las ventas del día actual
-            await BuscarPorFechasAsync();
+            await CargarVentasAsync();
+        }
+
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarVenta(int? id)
+        {
+            dgvVentas.ClearSelection();
+
+            if (id.HasValue)
+            {
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].VentaID != id.Value) continue;
+
+                    dgvVentas.Rows[i].Selected = true;
+                    dgvVentas.CurrentCell = dgvVentas.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
+            }
+
+            ActualizarEstadoBotones();
+        }
+
+        // Cada botón solo se habilita cuando la acción tiene sentido.
+        private void ActualizarEstadoBotones()
+        {
+            var venta = VentaSeleccionada;
+
+            btnVerDetalle.Enabled = venta != null;
+            btnEliminarFisico.Enabled = venta != null;
+
+            bool anulada = venta is { Activo: false };
+            btnAnular.Enabled = venta is { Activo: true };
+            btnAnular.Text = anulada ? "Anulada" : "Anular";
+        }
+
+        private void dgvVentas_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Ventas anuladas en gris (con el estado en rojo); estado de las vigentes en verde.
+        private void dgvVentas_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
+
+            bool esEstado = dgvVentas.Columns[e.ColumnIndex].DataPropertyName == nameof(VentaViewModel.Estado);
+
+            if (!_vista[e.RowIndex].Activo)
+                e.CellStyle.ForeColor = esEstado ? Tema.Peligro : Tema.TextoAtenuado;
+            else if (esEstado)
+                e.CellStyle.ForeColor = Tema.Exito;
+        }
+
+        private async void dgvVentas_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            await MostrarDetalleAsync(_vista[e.RowIndex].VentaID);
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevaVenta_Click(object? sender, EventArgs e)
+        {
+            using var modal = new FrmVentaModal(_ventaController, _productoController);
+
+            if (modal.ShowDialog() == DialogResult.OK)
+                await CargarVentasAsync();
+        }
+
+        private async void btnVerDetalle_Click(object? sender, EventArgs e)
+        {
+            var venta = VentaSeleccionada;
+            if (venta == null) return; // el botón ya está deshabilitado sin selección; esto es solo defensivo
+
+            await MostrarDetalleAsync(venta.VentaID);
+        }
+
+        private async Task MostrarDetalleAsync(int ventaId)
+        {
+            // La consulta se hace con el manejo de errores estándar; el modal se abre DESPUÉS,
+            // para que no quede abierto con los controles deshabilitados y el cursor de espera.
+            Action? abrirDetalle = null;
+
+            bool consultada = await FormHelper.EjecutarAsync(async () =>
+            {
+                var ventaDto = await _ventaController.ObtenerPorIdAsync(ventaId);
+                if (ventaDto == null) return;
+
+                abrirDetalle = () =>
+                {
+                    using var modal = new FrmVentaDetalleModal(ventaDto);
+                    modal.ShowDialog();
+                };
+            },
+            "No se pudo consultar el detalle de la venta.",
+            panelTop, panelFiltros);
+
+            if (IsDisposed || !consultada) return;
+
+            if (abrirDetalle == null)
+                FormHelper.MostrarAviso("No se encontró la venta. Es posible que ya haya sido eliminada.");
+            else
+                abrirDetalle();
+        }
+
+        private async void btnAnular_Click(object? sender, EventArgs e)
+        {
+            var venta = VentaSeleccionada;
+            if (venta == null) return;
+
+            if (!venta.Activo)
+            {
+                FormHelper.MostrarAviso("Esta venta ya se encuentra anulada.");
+                return;
+            }
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de anular la venta N° {venta.VentaID} por un total de {venta.Total:C2}?\n\nSe reajustará el stock de los productos vendidos.",
+                    "Confirmar anulación",
+                    destructiva: true))
+                return;
+
+            // El usuario se toma de la sesión activa.
+            int usuarioId = SesionUsuario.UsuarioID;
+            const string motivo = "Anulación de venta desde el módulo de ventas";
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _ventaController.AnularVentaAsync(venta.VentaID, usuarioId, motivo),
+                "No se pudo anular la venta.",
+                panelTop, panelFiltros);
+
+            if (correcto)
+                await CargarVentasAsync(venta.VentaID);
+        }
+
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var venta = VentaSeleccionada;
+            if (venta == null) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar PERMANENTEMENTE la venta N° {venta.VentaID} de la base de datos?\n\n" +
+                    "Esta acción no se puede deshacer. Para corregir una venta normalmente conviene usar 'Anular', que sí reajusta el stock.",
+                    "Eliminación definitiva",
+                    destructiva: true))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _ventaController.EliminarFisicoAsync(venta.VentaID),
+                "No se pudo eliminar la venta.",
+                panelTop, panelFiltros);
+
+            if (correcto)
+                await CargarVentasAsync();
         }
     }
 }

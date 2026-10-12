@@ -1,4 +1,6 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Corte;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -14,107 +16,98 @@ namespace Presentacion.Forms.Reportes
 {
     public partial class FrmRegistrosReporte : Form
     {
+        /// <summary>Una fila del reporte.</summary>
+        private sealed record FilaRegistro(string NombreSocio, string FechaRegistro);
+
         private readonly ReporteController _reporteController;
-        private List<ReporteRegistroViewModel> _listaRegistros = new();
 
         public FrmRegistrosReporte(ReporteController reporteController)
         {
+            _reporteController = reporteController ?? throw new ArgumentNullException(nameof(reporteController));
+
             InitializeComponent();
-            _reporteController = reporteController;
+            ConfigurarColumnas();
         }
 
-        private async void FrmRegistrosReporte_Load(object sender, EventArgs e)
+        private async void FrmRegistrosReporte_Load(object? sender, EventArgs e)
         {
-            // Inicializar el selector con la fecha de hoy
             dtpFecha.Value = DateTime.Today;
-
             await BuscarPorFechaAsync();
         }
 
-        private async void btnFiltrar_Click(object sender, EventArgs e)
+        // Las columnas se definen una sola vez.
+        private void ConfigurarColumnas()
         {
-            await BuscarPorFechaAsync();
+            dgvRegistros.AutoGenerateColumns = false;
+
+            dgvRegistros.AgregarTexto(nameof(FilaRegistro.NombreSocio), "Nombre del socio", 200, 130);
+            dgvRegistros.AgregarTexto(nameof(FilaRegistro.FechaRegistro), "Fecha de registro", 120, 120);
         }
 
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
-        {
-            // Restablecer el selector a la fecha actual
-            dtpFecha.Value = DateTime.Today;
+        private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechaAsync();
 
+        // "Hoy": vuelve al día actual.
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
+        {
+            dtpFecha.Value = DateTime.Today;
             await BuscarPorFechaAsync();
         }
 
         private async Task BuscarPorFechaAsync()
         {
-            try
+            // El rango cubre todo el día seleccionado (00:00:00 a 23:59:59).
+            DateTime inicio = dtpFecha.Value.Date;
+            DateTime fin = dtpFecha.Value.Date.AddDays(1).AddTicks(-1);
+
+            await FormHelper.EjecutarAsync(async () =>
             {
-                Cursor = Cursors.WaitCursor;
+                var registros = await _reporteController.ObtenerRegistrosAsync(inicio, fin);
+                if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
 
-                // Definir rango para cubrir todo el día seleccionado (00:00:00 a 23:59:59)
-                DateTime inicio = dtpFecha.Value.Date;
-                DateTime fin = dtpFecha.Value.Date.AddDays(1).AddTicks(-1);
+                var filas = registros.Select(r => new FilaRegistro(
+                    string.IsNullOrWhiteSpace(r.NombreCompleto) ? "N/A" : r.NombreCompleto,
+                    r.FechaRegistroTexto)).ToList();
 
-                // Obtener datos mediante el controlador
-                var resultado = await _reporteController.ObtenerRegistrosAsync(inicio, fin);
-                _listaRegistros = resultado.ToList();
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvRegistros.SortedColumn;
+                var sentidoOrden = dgvRegistros.SortOrder;
 
-                // Proyectar solo las columnas requeridas
-                var datosMostrar = _listaRegistros.Select(r => new
+                dgvRegistros.DataSource = new ListaOrdenable<FilaRegistro>(filas);
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    NombreSocio = string.IsNullOrWhiteSpace(r.NombreCompleto) ? "N/A" : r.NombreCompleto,
-                    FechaRegistro = r.FechaRegistroTexto
-                }).ToList();
+                    dgvRegistros.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? System.ComponentModel.ListSortDirection.Descending
+                        : System.ComponentModel.ListSortDirection.Ascending);
+                }
 
-                dgvRegistros.DataSource = null;
-                dgvRegistros.DataSource = datosMostrar;
-
-                ConfigurarGrid();
-                CalcularTotales(datosMostrar.Count);
                 dgvRegistros.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el reporte de visitas/registros: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
+                lblTotal.Text = $"Total Visitas: {filas.Count}";
+                btnExportarExcel.Enabled = filas.Count > 0;
+            },
+            "No se pudo cargar el reporte de registro de visitas.",
+            panelTop, panelFiltros);
         }
 
-        private void CalcularTotales(int cantidadTotal)
-        {
-            lblTotal.Text = $"Total Visitas: {cantidadTotal}";
-        }
-
-        private void ConfigurarGrid()
-        {
-            if (dgvRegistros.Columns.Count == 0) return;
-
-            if (dgvRegistros.Columns["NombreSocio"] != null)
-                dgvRegistros.Columns["NombreSocio"].HeaderText = "Nombre del socio";
-
-            if (dgvRegistros.Columns["FechaRegistro"] != null)
-                dgvRegistros.Columns["FechaRegistro"].HeaderText = "Fecha de registro";
-
-            dgvRegistros.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        }
-
-        private void btnExportarExcel_Click(object sender, EventArgs e)
+        // Antes este botón mostraba "exportado con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente.
+        private void btnExportarExcel_Click(object? sender, EventArgs e)
         {
             if (dgvRegistros.Rows.Count == 0)
             {
-                MessageBox.Show("No hay datos en la tabla para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("No hay datos en la tabla para exportar.");
                 return;
             }
 
             try
             {
-                MessageBox.Show("Reporte de visitas/registros exportado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string? ruta = ExportadorCsv.Exportar(dgvRegistros, "Registro_de_visitas");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                MessageBox.Show($"Error al exportar a Excel: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
         }
     }

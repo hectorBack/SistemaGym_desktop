@@ -16,213 +16,213 @@ namespace Presentacion.Forms.Usuarios
     public partial class FrmUsuarios : Form
     {
         private readonly UsuarioController _controller;
-        private readonly RolController _rolController; 
-        private List<UsuarioViewModel> _listaUsuarios = new();
+        private readonly RolController _rolController;
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<UsuarioViewModel> _vista = new();
 
         public FrmUsuarios(UsuarioController controller, RolController rolController)
         {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _rolController = rolController ?? throw new ArgumentNullException(nameof(rolController));
+
             InitializeComponent();
-            _controller = controller;
-            _rolController = rolController;
-            dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
+            ConfigurarColumnas();
         }
 
-        private async void FrmUsuarios_Load(object sender, EventArgs e)
-        {
+        /// <summary>Usuario de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private UsuarioViewModel? UsuarioSeleccionado =>
+            dgvUsuarios.SelectedRows.Count > 0
+                ? dgvUsuarios.SelectedRows[0].DataBoundItem as UsuarioViewModel
+                : null;
 
-            //btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
+        private static bool EsUsuarioActual(UsuarioViewModel usuario) => usuario.UsuarioID == SesionUsuario.UsuarioID;
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmUsuarios_Load(object? sender, EventArgs e)
+        {
+            // Estaba comentada; con ella, Eliminar queda oculto para quien no tenga el permiso, igual que en los demás módulos.
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarUsuariosAsync();
-            
         }
 
-        private async Task CargarUsuariosAsync()
+        // Las columnas se definen una sola vez. Activo y RolID ya no se ocultan: no se definen.
+        private void ConfigurarColumnas()
         {
-            try
-            {
-                var resultado = await _controller.ObtenerUsuariosAsync(true);
-                _listaUsuarios = resultado.ToList();
-                dgvUsuarios.DataSource = null;
-                dgvUsuarios.DataSource = _listaUsuarios;
+            dgvUsuarios.AutoGenerateColumns = false;
 
-                ConfigurarGrid();
-                dgvUsuarios.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar usuarios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.UsuarioID), "ID", 40, 60);
+            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreUsuario), "Usuario", 110, 90);
+            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreCompleto), "Nombre", 180, 130);
+            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.RolNombre), "Rol", 110, 90);
+            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.Estado), "Estado", 80, 70);
+            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
         }
 
-        private void ConfigurarGrid()
+        private async Task CargarUsuariosAsync(int? idASeleccionar = null)
         {
-            // 1. Ocultar columnas técnicas o no requeridas explícitamente en la grilla
-            if (dgvUsuarios.Columns["Activo"] != null) dgvUsuarios.Columns["Activo"].Visible = false;
-            if (dgvUsuarios.Columns["RolID"] != null) dgvUsuarios.Columns["RolID"].Visible = false;
+            // Si no se pide otro, se conserva la selección actual.
+            int? idObjetivo = idASeleccionar ?? UsuarioSeleccionado?.UsuarioID;
 
-            // 2. Configurar encabezados
-            if (dgvUsuarios.Columns["UsuarioID"] != null) dgvUsuarios.Columns["UsuarioID"].HeaderText = "ID";
-            if (dgvUsuarios.Columns["NombreUsuario"] != null) dgvUsuarios.Columns["NombreUsuario"].HeaderText = "Usuario";
-            if (dgvUsuarios.Columns["NombreCompleto"] != null) dgvUsuarios.Columns["NombreCompleto"].HeaderText = "Nombre";
-            if (dgvUsuarios.Columns["RolNombre"] != null) dgvUsuarios.Columns["RolNombre"].HeaderText = "Rol";
-            if (dgvUsuarios.Columns["Estado"] != null) dgvUsuarios.Columns["Estado"].HeaderText = "Estado";
-            if (dgvUsuarios.Columns["CreatedAt"] != null) dgvUsuarios.Columns["CreatedAt"].HeaderText = "Fecha de registro";
-
-            // 3. Estructura de ordenamiento y pesos estilo estándar
-            dgvUsuarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            string[] ordenColumnas =
+            await FormHelper.EjecutarAsync(async () =>
             {
-                "UsuarioID",
-                "NombreUsuario",
-                "NombreCompleto",
-                "RolNombre",
-                "Estado",
-                "CreatedAt"
-            };
+                var usuarios = await _controller.ObtenerUsuariosAsync(true);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
 
-            var pesos = new Dictionary<string, float>
-            {
-                ["UsuarioID"] = 40,
-                ["NombreUsuario"] = 110,
-                ["NombreCompleto"] = 180,
-                ["RolNombre"] = 110,
-                ["Estado"] = 80,
-                ["CreatedAt"] = 120
-            };
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvUsuarios.SortedColumn;
+                var sentidoOrden = dgvUsuarios.SortOrder;
 
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                if (dgvUsuarios.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                    continue;
+                _vista = new ListaOrdenable<UsuarioViewModel>(usuarios);
+                dgvUsuarios.DataSource = _vista;
 
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    "NombreCompleto" => 130,
-                    "NombreUsuario" => 90,
-                    "CreatedAt" => 100,
-                    _ => 60
-                };
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    dgvUsuarios.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
+                }
+
+                SeleccionarUsuario(idObjetivo);
+            },
+            "No se pudieron cargar los usuarios.",
+            panelTop);
+        }
+
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarUsuario(int? id)
+        {
+            dgvUsuarios.ClearSelection();
+
+            if (id.HasValue)
+            {
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].UsuarioID != id.Value) continue;
+
+                    dgvUsuarios.Rows[i].Selected = true;
+                    dgvUsuarios.CurrentCell = dgvUsuarios.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
+            }
+
+            ActualizarEstadoBotones();
+        }
+
+        // Reglas de protección:
+        //  - Un usuario con rol de Administrador no se edita, desactiva ni elimina (regla original).
+        //  - Nadie puede desactivarse ni eliminarse a sí mismo (nueva): evita quedarse fuera del sistema.
+        private void ActualizarEstadoBotones()
+        {
+            var usuario = UsuarioSeleccionado;
+            bool haySeleccion = usuario != null;
+            bool esAdmin = usuario != null && RolesSistema.EsAdministrador(usuario.RolNombre);
+            bool esYo = usuario != null && EsUsuarioActual(usuario);
+
+            btnEditar.Enabled = haySeleccion && !esAdmin;
+            btnDesactivar.Enabled = haySeleccion && !esAdmin && !esYo;
+            btnEliminarFisico.Enabled = haySeleccion && !esAdmin && !esYo;
+
+            bool inactivo = usuario is { Activo: false };
+            btnDesactivar.Text = inactivo ? "Activar" : "Desactivar";
+            btnDesactivar.Estilo = inactivo ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+
+            if (esAdmin)
+                lblNotaProteccion.Text = "Usuario con rol de Administrador: no se puede editar, desactivar ni eliminar.";
+            else if (esYo)
+                lblNotaProteccion.Text = "Es tu propio usuario: no puedes desactivarlo ni eliminarlo.";
+
+            lblNotaProteccion.Visible = esAdmin || esYo;
+        }
+
+        private void dgvUsuarios_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Usuarios inactivos en gris, y "Activo" en verde.
+        private void dgvUsuarios_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
+
+            if (!_vista[e.RowIndex].Activo)
+            {
+                e.CellStyle.ForeColor = Tema.TextoAtenuado;
+            }
+            else if (dgvUsuarios.Columns[e.ColumnIndex].DataPropertyName == nameof(UsuarioViewModel.Estado))
+            {
+                e.CellStyle.ForeColor = Tema.Exito;
             }
         }
 
-        private async void btnNuevo_Click(object sender, EventArgs e)
+        private async void dgvUsuarios_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            using var modal = new FrmUsuarioModal(_controller, _rolController);
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            var usuario = _vista[e.RowIndex];
+            if (RolesSistema.EsAdministrador(usuario.RolNombre)) return; // la nota inferior ya explica por qué
+
+            await AbrirModalAsync(usuario.UsuarioID);
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevo_Click(object? sender, EventArgs e) => await AbrirModalAsync(null);
+
+        private async void btnEditar_Click(object? sender, EventArgs e)
+        {
+            var usuario = UsuarioSeleccionado;
+            if (usuario == null || RolesSistema.EsAdministrador(usuario.RolNombre)) return; // defensivo
+
+            await AbrirModalAsync(usuario.UsuarioID);
+        }
+
+        private async Task AbrirModalAsync(int? usuarioId)
+        {
+            using var modal = new FrmUsuarioModal(_controller, _rolController, usuarioId);
+
             if (modal.ShowDialog() == DialogResult.OK)
-            {
+                await CargarUsuariosAsync(usuarioId); // para uno nuevo (null) se conserva la selección actual
+        }
+
+        private async void btnDesactivar_Click(object? sender, EventArgs e)
+        {
+            var usuario = UsuarioSeleccionado;
+            if (usuario == null || RolesSistema.EsAdministrador(usuario.RolNombre) || EsUsuarioActual(usuario)) return;
+
+            string accion = usuario.Activo ? "desactivar" : "activar";
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de {accion} al usuario '{usuario.NombreUsuario}'?",
+                    $"Confirmar {accion.ToUpper()}"))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.CambiarEstadoLogicoAsync(usuario.UsuarioID),
+                "No se pudo cambiar el estado del usuario.",
+                panelTop);
+
+            if (correcto)
+                await CargarUsuariosAsync(usuario.UsuarioID);
+        }
+
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var usuario = UsuarioSeleccionado;
+            if (usuario == null || RolesSistema.EsAdministrador(usuario.RolNombre) || EsUsuarioActual(usuario)) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar PERMANENTEMENTE al usuario '{usuario.NombreUsuario}' de la base de datos?\n\nEsta acción no se puede deshacer.",
+                    "Eliminación definitiva",
+                    destructiva: true))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.EliminarFisicoAsync(usuario.UsuarioID),
+                "No se pudo eliminar el usuario. Si ya tiene ventas o movimientos registrados, desactívalo en su lugar.",
+                panelTop);
+
+            if (correcto)
                 await CargarUsuariosAsync();
-            }
-        }
-
-        private async void btnEditar_Click(object sender, EventArgs e)
-        {
-            if (dgvUsuarios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un usuario de la lista para editar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (UsuarioViewModel)dgvUsuarios.CurrentRow.DataBoundItem;
-
-            if (item.RolNombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                item.RolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-            {
-                MessageBox.Show("No se permite editar a un usuario con el rol de Administrador.",
-                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            using var modal = new FrmUsuarioModal(_controller, _rolController, item.UsuarioID);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarUsuariosAsync();
-            }
-        }
-
-        private async void btnDesactivar_Click(object sender, EventArgs e)
-        {
-            if (dgvUsuarios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un usuario de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (UsuarioViewModel)dgvUsuarios.CurrentRow.DataBoundItem;
-            if (item.RolNombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                 item.RolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-            {
-                MessageBox.Show("No se permite desactivar a un usuario con el rol de Administrador.",
-                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string accion = item.Activo ? "desactivar" : "activar";
-
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} al usuario '{item.NombreUsuario}'?", $"Confirmar {accion.ToUpper()}"))
-            {
-                try
-                {
-                    await _controller.CambiarEstadoLogicoAsync(item.UsuarioID);
-                    await CargarUsuariosAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvUsuarios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un usuario de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (UsuarioViewModel)dgvUsuarios.CurrentRow.DataBoundItem;
-
-            if (item.RolNombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-             item.RolNombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-            {
-                MessageBox.Show("No se permite eliminar a un usuario con el rol de Administrador.",
-                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE al usuario '{item.NombreUsuario}' de la base de datos?", "Eliminación Definitiva"))
-            {
-                try
-                {
-                    await _controller.EliminarFisicoAsync(item.UsuarioID);
-                    await CargarUsuariosAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvUsuarios.CurrentRow != null && dgvUsuarios.CurrentRow.DataBoundItem is UsuarioViewModel item)
-            {
-                if (item.Activo)
-                {
-                    btnDesactivar.Text = "Desactivar";
-                    btnDesactivar.BackColor = Color.IndianRed;
-                }
-                else
-                {
-                    btnDesactivar.Text = "Activar";
-                    btnDesactivar.BackColor = Color.ForestGreen;
-                }
-            }
         }
     }
 }

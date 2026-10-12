@@ -1,5 +1,7 @@
-﻿using Presentacion.Controller;
+﻿using Negocio.Exceptions;
+using Presentacion.Controller;
 using Presentacion.Forms.Socios;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -15,285 +17,317 @@ namespace Presentacion.Forms.Visitas
 {
     public partial class FrmRegistroVisita : Form
     {
+        // Orden de las columnas de la semana (la semana empieza en lunes).
+        private static readonly (DayOfWeek Dia, string Nombre)[] DiasSemana =
+        {
+        (DayOfWeek.Monday, "Lunes"),
+        (DayOfWeek.Tuesday, "Martes"),
+        (DayOfWeek.Wednesday, "Miércoles"),
+        (DayOfWeek.Thursday, "Jueves"),
+        (DayOfWeek.Friday, "Viernes"),
+        (DayOfWeek.Saturday, "Sábado"),
+        (DayOfWeek.Sunday, "Domingo"),
+    };
+
         private readonly VisitaController _visitaController;
         private readonly SocioController _socioController;
         private readonly SocioMembresiaController _socioMembresiaController;
         private readonly MembresiaController _membresiaController;
         private readonly PagoSocioMembresiaController _pagoSocioMembresiaController;
 
-        private readonly int _usuarioIdSesion;
         private int? _socioIdActual;
         private int? _ultimaVisitaId;
+        private bool _procesando;
 
-        public FrmRegistroVisita(VisitaController visitaController,
+        // El usuario sale de la sesión: antes llegaba como parámetro con valor por defecto 1,
+        // y si el llamador lo olvidaba, las visitas quedaban registradas a nombre del usuario 1.
+        private static int UsuarioId => SesionUsuario.UsuarioID;
+
+        public FrmRegistroVisita(
+            VisitaController visitaController,
             SocioController socioController,
             SocioMembresiaController socioMembresiaController,
             MembresiaController membresiaController,
-            PagoSocioMembresiaController pagoSocioMembresiaController,
-            int usuarioIdSesion = 1)
+            PagoSocioMembresiaController pagoSocioMembresiaController)
         {
+            _visitaController = visitaController ?? throw new ArgumentNullException(nameof(visitaController));
+            _socioController = socioController ?? throw new ArgumentNullException(nameof(socioController));
+            _socioMembresiaController = socioMembresiaController ?? throw new ArgumentNullException(nameof(socioMembresiaController));
+            _membresiaController = membresiaController ?? throw new ArgumentNullException(nameof(membresiaController));
+            _pagoSocioMembresiaController = pagoSocioMembresiaController ?? throw new ArgumentNullException(nameof(pagoSocioMembresiaController));
+
             InitializeComponent();
-            _visitaController = visitaController;
-            _socioController = socioController;
-            _socioMembresiaController = socioMembresiaController;
-            _membresiaController = membresiaController;
-            _pagoSocioMembresiaController = pagoSocioMembresiaController;
-            _usuarioIdSesion = usuarioIdSesion;
+            ConfigurarAsistencias();
         }
 
-        private void FrmRegistroVisita_Load(object sender, EventArgs e)
+        private void FrmRegistroVisita_Load(object? sender, EventArgs e)
         {
-            InicializarTablaAsistencias();
-            btnInformacion.Enabled = false; // Deshabilitado por defecto hasta que exista un socio válido
-            btnCancelarVisita.Enabled = false;
-            btnMembresias.Enabled = false;
-
-            lblDeuda.ForeColor = Color.White; // O el color visible deseado en reposo
-            lblDeuda.BringToFront();
-            txtClave.Focus();
+            RestablecerPantalla("--- ESPERANDO LECTURA ---", "ESCANEE CLAVE", Tema.Primario);
+            ActiveControl = txtClave;
         }
 
-        private void InicializarTablaAsistencias()
+        // En recepción el cursor siempre debe estar en la clave:
+        // también al volver a esta pantalla desde otro módulo del menú.
+        private void FrmRegistroVisita_VisibleChanged(object? sender, EventArgs e)
         {
-            dgvAsistenciasSemana.Columns.Clear();
-            dgvAsistenciasSemana.Rows.Clear();
-
-            dgvAsistenciasSemana.Columns.Add("colLunes", "Lunes");
-            dgvAsistenciasSemana.Columns.Add("colMartes", "Martes");
-            dgvAsistenciasSemana.Columns.Add("colMiercoles", "Miércoles");
-            dgvAsistenciasSemana.Columns.Add("colJueves", "Jueves");
-            dgvAsistenciasSemana.Columns.Add("colViernes", "Viernes");
-            dgvAsistenciasSemana.Columns.Add("colSabado", "Sábado");
-            dgvAsistenciasSemana.Columns.Add("colDomingo", "Domingo");
-
-            dgvAsistenciasSemana.Rows.Add("", "", "", "", "", "", "");
+            if (Visible && !IsDisposed)
+                txtClave.Focus();
         }
 
-        private async void txtClave_KeyDown(object sender, KeyEventArgs e)
+        // ───────────── Asistencia de la semana ─────────────
+
+        // La tabla se define una sola vez (antes se recreaba en cada carga).
+        private void ConfigurarAsistencias()
         {
-            if (e.KeyCode == Keys.Enter)
+            dgvAsistenciasSemana.AutoGenerateColumns = false;
+
+            foreach (var (dia, nombre) in DiasSemana)
             {
-                e.SuppressKeyPress = true;
-                await ProcesarIngresoAsync();
+                var columna = dgvAsistenciasSemana.AgregarTexto(dia.ToString(), nombre, 100, 70);
+                columna.SortMode = DataGridViewColumnSortMode.NotSortable;
+                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            }
+
+            int fila = dgvAsistenciasSemana.Rows.Add();
+            dgvAsistenciasSemana.Rows[fila].Height = 50;
+        }
+
+        private DataGridViewCell CeldaDe(DayOfWeek dia) =>
+            dgvAsistenciasSemana.Rows[0].Cells["col" + dia];
+
+        private void PintarAsistenciasSemana(Dictionary<DayOfWeek, string>? asistencias)
+        {
+            foreach (var (dia, _) in DiasSemana)
+            {
+                var celda = CeldaDe(dia);
+
+                if (asistencias != null && asistencias.TryGetValue(dia, out var texto) && !string.IsNullOrWhiteSpace(texto))
+                {
+                    celda.Value = texto;
+                    celda.Style.ForeColor = Tema.Exito;
+                }
+                else
+                {
+                    celda.Value = string.Empty;
+                    celda.Style.ForeColor = Tema.Texto;
+                }
             }
         }
 
-        private async void btnRegistrar_Click(object sender, EventArgs e)
+        // La tabla es solo informativa: no debe quedar nada seleccionado.
+        private void dgvAsistenciasSemana_SelectionChanged(object? sender, EventArgs e) =>
+            dgvAsistenciasSemana.ClearSelection();
+
+        // ───────────── Registro de acceso ─────────────
+
+        private async void txtClave_KeyDown(object? sender, KeyEventArgs e)
         {
+            if (e.KeyCode != Keys.Enter) return;
+
+            e.SuppressKeyPress = true;
             await ProcesarIngresoAsync();
         }
 
+        private async void btnRegistrar_Click(object? sender, EventArgs e) => await ProcesarIngresoAsync();
+
         private async Task ProcesarIngresoAsync()
         {
+            // El lector de códigos puede enviar el Enter dos veces o escanear de nuevo antes de
+            // terminar: sin este candado se registraban visitas duplicadas.
+            if (_procesando) return;
+
             string clave = txtClave.Text.Trim();
-            if (string.IsNullOrEmpty(clave)) return;
+            if (clave.Length == 0) return;
 
-            var resultado = await _visitaController.ProcesarAccesoRapidoAsync(clave, _usuarioIdSesion);
+            _procesando = true;
+            AccesoResultadoViewModel? resultado = null;
 
-            if (!resultado.Exitoso)
+            try
             {
-                MostrarEstadoError(resultado.MensajeError);
+                bool consultado = await FormHelper.EjecutarAsync(
+                    async () => resultado = await _visitaController.ProcesarAccesoRapidoAsync(clave, UsuarioId),
+                    "No se pudo registrar el acceso. Intente de nuevo.",
+                    panelTop);
+
+                if (IsDisposed) return;
+
+                if (!consultado || resultado == null)
+                    RestablecerPantalla("—", "ERROR AL REGISTRAR", Tema.Peligro);
+                else if (!resultado.Exitoso)
+                    RestablecerPantalla("—", (resultado.MensajeError ?? "ACCESO DENEGADO").ToUpper(), Tema.Peligro);
+                else
+                    MostrarAcceso(resultado);
             }
-            else
+            finally
             {
-                MostrarEstadoExito(resultado);
+                _procesando = false;
             }
 
             PrepararSiguienteLectura();
         }
 
-        private void MostrarEstadoError(string mensajeError)
+        private void MostrarAcceso(AccesoResultadoViewModel resultado)
         {
-            _socioIdActual = null; // Limpiar ID de socio
-            _ultimaVisitaId = null;
-            btnInformacion.Enabled = false; // Deshabilitar el botón de información
-            btnCancelarVisita.Enabled = false;
-            btnMembresias.Enabled = false;
-
-            lblEstadoAcceso.Text = mensajeError.ToUpper();
-            lblEstadoAcceso.ForeColor = Color.OrangeRed;
-            lblNombreSocio.Text = "SOCIO NO ENCONTRADO";
-            lblMembresia.Text = "N/A";
-            lblVencimiento.Text = "N/A";
-            lblDeuda.Text = "Deuda: $0.00";
-            lblDeuda.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            picFoto.Image = null;
-            LimpiarAsistenciasSemana();
-        }
-
-        private void MostrarEstadoExito(AccesoResultadoViewModel resultado)
-        {
-            _socioIdActual = resultado.SocioID; // Se guarda el SocioID retornado por la consulta
+            _socioIdActual = resultado.SocioID;
             _ultimaVisitaId = resultado.VisitaID;
-
-            btnInformacion.Enabled = (_socioIdActual.HasValue && _socioIdActual.Value > 0); // Habilitar el botón
-            btnMembresias.Enabled = (_socioIdActual.HasValue && _socioIdActual.Value > 0);
-            btnCancelarVisita.Enabled = (_ultimaVisitaId.HasValue && _ultimaVisitaId.Value > 0); // Habilitar cancelación
+            ActualizarEstadoBotones();
 
             lblNombreSocio.Text = resultado.NombreCompleto;
             lblMembresia.Text = resultado.NombreMembresia;
             lblVencimiento.Text = resultado.FechaVencimientoTexto;
-            picFoto.Image = resultado.ObtenerImagenFoto();
+            PonerFoto(resultado.ObtenerImagenFoto());
 
             lblDeuda.Text = $"Deuda: {resultado.Deuda:C2}";
-            lblDeuda.ForeColor = resultado.Deuda > 0 ? Color.Red : Color.DarkGreen;
+            lblDeuda.ForeColor = resultado.Deuda > 0 ? Tema.Peligro : Tema.Exito;
 
-            if (resultado.MembresiaVigente || resultado.EsVisitaCasual)
-            {
-                lblEstadoAcceso.Text = "ACCESO PERMITIDO";
-                lblEstadoAcceso.ForeColor = Color.LightGreen;
-            }
-            else
-            {
-                lblEstadoAcceso.Text = "MEMBRESÍA VENCIDA";
-                lblEstadoAcceso.ForeColor = Color.OrangeRed;
-            }
+            bool permitido = resultado.MembresiaVigente || resultado.EsVisitaCasual;
+            lblEstadoAcceso.Text = permitido ? "ACCESO PERMITIDO" : "MEMBRESÍA VENCIDA";
+            lblEstadoAcceso.ForeColor = permitido ? Tema.Exito : Tema.Advertencia;
 
             PintarAsistenciasSemana(resultado.AsistenciasSemana);
         }
 
+        // Deja la pantalla sin socio: lecturas fallidas, errores y visitas canceladas.
+        private void RestablecerPantalla(string nombre, string estado, Color colorEstado)
+        {
+            _socioIdActual = null;
+            _ultimaVisitaId = null;
+            ActualizarEstadoBotones();
+
+            lblNombreSocio.Text = nombre;
+            lblMembresia.Text = "N/A";
+            lblVencimiento.Text = "N/A";
+            lblDeuda.Text = "Deuda: $0.00";
+            lblDeuda.ForeColor = Tema.Texto;
+            lblEstadoAcceso.Text = estado;
+            lblEstadoAcceso.ForeColor = colorEstado;
+
+            PonerFoto(null);
+            PintarAsistenciasSemana(null);
+        }
+
         private void PrepararSiguienteLectura()
         {
+            if (IsDisposed) return;
+
             txtClave.Clear();
             txtClave.Focus();
         }
 
-        // Evento del Botón Información
-        private void btnInformacion_Click(object sender, EventArgs e)
+        // Los botones solo se habilitan cuando hay un socio / una visita a la cual aplicarlos
+        // (por eso ya no hacen falta los mensajes de "primero consulta un socio").
+        private void ActualizarEstadoBotones()
         {
-            if (!_socioIdActual.HasValue || _socioIdActual.Value <= 0)
-            {
-                MessageBox.Show(
-                    "Primero debes consultar un socio válido para ver su información.",
-                    "Aviso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
-                return;
-            }
+            bool haySocio = _socioIdActual is > 0;
+
+            btnInformacion.Enabled = haySocio;
+            btnMembresias.Enabled = haySocio;
+            btnCancelarVisita.Enabled = _ultimaVisitaId is > 0;
+        }
+
+        // Libera la foto anterior (antes cada lectura dejaba una imagen sin liberar).
+        private void PonerFoto(Image? nueva)
+        {
+            var anterior = picFoto.Image;
+            picFoto.Image = nueva;
+            anterior?.Dispose();
+        }
+
+        // ───────────── Información y membresías ─────────────
+
+        private void btnInformacion_Click(object? sender, EventArgs e)
+        {
+            if (_socioIdActual is not > 0) return;
 
             using (var modal = new FrmSocioInfoModal(_socioController, _visitaController, _socioIdActual.Value))
             {
                 modal.ShowDialog(this);
             }
+
+            txtClave.Focus();
         }
 
-        private void PintarAsistenciasSemana(Dictionary<DayOfWeek, string> asistencias)
+        private async void btnMembresias_Click(object? sender, EventArgs e)
         {
-            LimpiarAsistenciasSemana();
+            if (_socioIdActual is not > 0) return;
 
-            if (asistencias == null || asistencias.Count == 0) return;
+            int socioId = _socioIdActual.Value;
+            SocioViewModel? socio = null;
 
-            var fila = dgvAsistenciasSemana.Rows[0];
-
-            if (asistencias.ContainsKey(DayOfWeek.Monday)) fila.Cells["colLunes"].Value = asistencias[DayOfWeek.Monday];
-            if (asistencias.ContainsKey(DayOfWeek.Tuesday)) fila.Cells["colMartes"].Value = asistencias[DayOfWeek.Tuesday];
-            if (asistencias.ContainsKey(DayOfWeek.Wednesday)) fila.Cells["colMiercoles"].Value = asistencias[DayOfWeek.Wednesday];
-            if (asistencias.ContainsKey(DayOfWeek.Thursday)) fila.Cells["colJueves"].Value = asistencias[DayOfWeek.Thursday];
-            if (asistencias.ContainsKey(DayOfWeek.Friday)) fila.Cells["colViernes"].Value = asistencias[DayOfWeek.Friday];
-            if (asistencias.ContainsKey(DayOfWeek.Saturday)) fila.Cells["colSabado"].Value = asistencias[DayOfWeek.Saturday];
-            if (asistencias.ContainsKey(DayOfWeek.Sunday)) fila.Cells["colDomingo"].Value = asistencias[DayOfWeek.Sunday];
-        }
-
-        private void LimpiarAsistenciasSemana()
-        {
-            if (dgvAsistenciasSemana.Rows.Count > 0)
+            bool cargado = await FormHelper.EjecutarAsync(async () =>
             {
-                for (int i = 0; i < dgvAsistenciasSemana.Columns.Count; i++)
+                var dto = await _socioController.ObtenerPorIdAsync(socioId)
+                          ?? throw new BusinessException("No se encontró la información detallada del socio.");
+
+                socio = new SocioViewModel
                 {
-                    dgvAsistenciasSemana.Rows[0].Cells[i].Value = "";
-                }
-            }
-        }
-
-        private async void btnCancelarVisita_Click(object sender, EventArgs e)
-        {
-            if (!_ultimaVisitaId.HasValue || _ultimaVisitaId.Value <= 0)
-            {
-                MessageBox.Show("No hay ningún registro de visita reciente para cancelar.",
-                                "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var confirmacion = MessageBox.Show(
-                "¿Está seguro de que desea cancelar esta visita recién registrada?",
-                "Confirmar Cancelación",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning
-            );
-
-            if (confirmacion == DialogResult.Yes)
-            {
-                try
-                {
-                    await _visitaController.CancelarVisitaAsync(_ultimaVisitaId.Value, _usuarioIdSesion, "Cancelación desde pantalla de acceso");
-
-                    MessageBox.Show("La visita se ha cancelado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // Opcional: Limpiar la pantalla tras cancelar
-                    MostrarEstadoError("VISITA CANCELADA");
-                    lblEstadoAcceso.ForeColor = Color.Orange;
-                    PrepararSiguienteLectura();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error al cancelar", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnMembresias_Click(object sender, EventArgs e)
-        {
-            if (!_socioIdActual.HasValue || _socioIdActual.Value <= 0)
-            {
-                MessageBox.Show(
-                    "Primero debes consultar un socio válido para gestionar sus membresías.",
-                    "Aviso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
-                return;
-            }
-
-            try
-            {
-                // 1. Obtener la información completa del socio (SocioViewModel)
-                var socioDto = await _socioController.ObtenerPorIdAsync(_socioIdActual.Value);
-
-                if (socioDto == null)
-                {
-                    MessageBox.Show("No se encontró la información detallada del socio.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                // Si ObtenerPorIdAsync retorna SocioDto, mapealo a SocioViewModel (o usa el ViewModel si tu controller ya lo devuelve)
-                var socioViewModel = new SocioViewModel
-                {
-                    SocioID = socioDto.SocioID,
-                    Clave = socioDto.Clave,
-                    Nombre = socioDto.Nombre,
-                    Apellido = socioDto.Apellido,
-                    Telefono = socioDto.Telefono,
-                    Email = socioDto.Email,
-                    Foto = socioDto.Foto,
-                    Activo = socioDto.Activo
+                    SocioID = dto.SocioID,
+                    Clave = dto.Clave,
+                    Nombre = dto.Nombre,
+                    Apellido = dto.Apellido,
+                    Telefono = dto.Telefono,
+                    Email = dto.Email,
+                    Foto = dto.Foto,
+                    Activo = dto.Activo,
+                    Observaciones = dto.Observaciones // antes no se copiaba y el modal mostraba siempre "Sin observaciones"
                 };
+            },
+            "No se pudo abrir el módulo de membresías.",
+            btnMembresias);
 
-                // 2. Abrir el modal pasando todos los argumentos requeridos
-                using (var modal = new FrmSocioMembresiaModal(
-                    _socioMembresiaController,
-                    _membresiaController,
-                    _pagoSocioMembresiaController,
-                    socioViewModel,
-                    _usuarioIdSesion))
-                {
-                    modal.ShowDialog(this);
-                }
-            }
-            catch (Exception ex)
+            if (!cargado || socio == null || IsDisposed) return;
+
+            using (var modal = new FrmSocioMembresiaModal(
+                _socioMembresiaController,
+                _membresiaController,
+                _pagoSocioMembresiaController,
+                socio,
+                UsuarioId))
             {
-                MessageBox.Show($"Ocurrió un error al abrir el módulo de membresías: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                modal.ShowDialog(this);
             }
+
+            txtClave.Focus();
+        }
+
+        // ───────────── Cancelar visita ─────────────
+
+        private async void btnCancelarVisita_Click(object? sender, EventArgs e)
+        {
+            if (_ultimaVisitaId is not > 0) return;
+
+            int visitaId = _ultimaVisitaId.Value;
+            string socio = string.IsNullOrWhiteSpace(lblNombreSocio.Text) ? "este socio" : lblNombreSocio.Text;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea cancelar la entrada recién registrada de {socio}?",
+                    "Cancelar entrada",
+                    destructiva: true))
+            {
+                txtClave.Focus();
+                return;
+            }
+
+            bool cancelada = await FormHelper.EjecutarAsync(
+                () => _visitaController.CancelarVisitaAsync(visitaId, UsuarioId, "Cancelación desde pantalla de acceso"),
+                "No se pudo cancelar la visita.",
+                btnCancelarVisita);
+
+            if (IsDisposed) return;
+
+            // Sin mensaje de éxito: el cambio de estado en pantalla ya lo confirma.
+            if (cancelada)
+                RestablecerPantalla("—", "VISITA CANCELADA", Tema.Advertencia);
+
+            PrepararSiguienteLectura();
+        }
+
+        // ───────────── Cierre ─────────────
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            PonerFoto(null); // libera la foto
+            base.OnFormClosed(e);
         }
     }
 }

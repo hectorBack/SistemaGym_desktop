@@ -17,98 +17,71 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
             lblTitulo = new Label();
-            btnExportarExcel = new Button();
-            dgvInventario = new DataGridView();
+            flowAcciones = new FlowLayoutPanel();
+            btnExportarExcel = new BotonTema();
+            dgvInventario = new GridTema();
             panelTop.SuspendLayout();
+            flowAcciones.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvInventario).BeginInit();
             SuspendLayout();
-            // 
+            //
             // panelTop
-            // 
+            //
             panelTop.BackColor = Color.FromArgb(15, 42, 79);
+            panelTop.Controls.Add(flowAcciones);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(btnExportarExcel);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 110);
+            panelTop.Size = new Size(914, 70);
             panelTop.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(520, 29);
+            lblTitulo.Size = new Size(430, 32);
             lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Reporte que muestra el inventario existente";
-            // 
+            lblTitulo.Text = "Reporte del inventario existente";
+            //
+            // flowAcciones
+            //
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnExportarExcel);
+            flowAcciones.Dock = DockStyle.Right;
+            flowAcciones.Location = new Point(750, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(0, 16, 12, 0);
+            flowAcciones.Size = new Size(164, 70);
+            flowAcciones.TabIndex = 1;
+            flowAcciones.WrapContents = false;
+            //
             // btnExportarExcel
-            // 
-            btnExportarExcel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnExportarExcel.BackColor = Color.FromArgb(31, 111, 235);
-            btnExportarExcel.FlatAppearance.BorderSize = 0;
-            btnExportarExcel.FlatStyle = FlatStyle.Flat;
-            btnExportarExcel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnExportarExcel.ForeColor = Color.White;
-            btnExportarExcel.Location = new Point(709, 64);
-            btnExportarExcel.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnExportarExcel.Enabled = false;
+            btnExportarExcel.Margin = new Padding(0);
             btnExportarExcel.Name = "btnExportarExcel";
-            btnExportarExcel.Size = new Size(150, 38);
-            btnExportarExcel.TabIndex = 1;
-            btnExportarExcel.Text = "Exportar a Excel";
-            btnExportarExcel.UseVisualStyleBackColor = false;
+            btnExportarExcel.Size = new Size(140, 38);
+            btnExportarExcel.TabIndex = 0;
+            btnExportarExcel.Text = "Exportar CSV";
             btnExportarExcel.Click += btnExportarExcel_Click;
-            // 
+            //
             // dgvInventario
-            // 
-            dgvInventario.AllowUserToAddRows = false;
-            dgvInventario.AllowUserToDeleteRows = false;
-            dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvInventario.BackgroundColor = Color.FromArgb(11, 15, 26);
-            dgvInventario.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(15, 42, 79);
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
-            dataGridViewCellStyle1.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvInventario.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvInventario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(11, 15, 26);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
-            dataGridViewCellStyle2.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvInventario.DefaultCellStyle = dataGridViewCellStyle2;
+            //
             dgvInventario.Dock = DockStyle.Fill;
-            dgvInventario.EnableHeadersVisualStyles = false;
-            dgvInventario.GridColor = Color.FromArgb(15, 42, 79);
-            dgvInventario.Location = new Point(0, 110);
-            dgvInventario.Margin = new Padding(3, 4, 3, 4);
-            dgvInventario.MultiSelect = false;
+            dgvInventario.Location = new Point(0, 70);
             dgvInventario.Name = "dgvInventario";
-            dgvInventario.ReadOnly = true;
-            dgvInventario.RowHeadersVisible = false;
-            dgvInventario.RowHeadersWidth = 51;
-            dgvInventario.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvInventario.Size = new Size(914, 690);
+            dgvInventario.Size = new Size(914, 730);
             dgvInventario.TabIndex = 1;
-            // 
+            //
             // FrmInventarios
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
@@ -116,21 +89,22 @@
             Controls.Add(dgvInventario);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmInventarios";
             Text = "Inventario";
             Load += FrmInventarios_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            flowAcciones.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvInventario).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Label lblTitulo;
         private Panel panelTop;
-        private Button btnExportarExcel;
-        private DataGridView dgvInventario;
+        private Label lblTitulo;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnExportarExcel;
+        private GridTema dgvInventario;
     }
 }

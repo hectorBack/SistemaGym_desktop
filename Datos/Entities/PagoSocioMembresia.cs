@@ -14,7 +14,7 @@ namespace Datos.Entities
 
         // Clave foránea
         public int SocioMembresiaID { get; set; }
-        public int UsuarioID { get; set; }
+        public int? UsuarioID { get; set; }
 
         public decimal Monto { get; set; }
         public string? Folio { get; set; }

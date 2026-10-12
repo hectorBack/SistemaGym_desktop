@@ -17,215 +17,202 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
-            btnLimpiarFiltros = new Button();
-            dtpFechaFin = new DateTimePicker();
-            dtpFechaInicio = new DateTimePicker();
             lblTitulo = new Label();
-            lblFechaInicio = new Label();
-            lblFechaFin = new Label();
-            btnFiltrar = new Button();
-            btnExportarExcel = new Button();
-            dgvPagosMembresias = new DataGridView();
+            flowAcciones = new FlowLayoutPanel();
+            btnExportarExcel = new BotonTema();
+            panelFiltros = new Panel();
+            flowFiltros = new FlowLayoutPanel();
+            lblDesde = new Label();
+            dtpFechaInicio = new DateTimePicker();
+            lblHasta = new Label();
+            dtpFechaFin = new DateTimePicker();
+            btnFiltrar = new BotonTema();
+            btnLimpiarFiltros = new BotonTema();
             lblTotal = new Label();
+            dgvPagosMembresias = new GridTema();
             panelTop.SuspendLayout();
+            flowAcciones.SuspendLayout();
+            panelFiltros.SuspendLayout();
+            flowFiltros.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPagosMembresias).BeginInit();
             SuspendLayout();
-            // 
+            //
             // panelTop
-            // 
+            //
             panelTop.BackColor = Color.FromArgb(15, 42, 79);
-            panelTop.Controls.Add(lblTotal);
-            panelTop.Controls.Add(btnLimpiarFiltros);
-            panelTop.Controls.Add(dtpFechaFin);
-            panelTop.Controls.Add(dtpFechaInicio);
+            panelTop.Controls.Add(flowAcciones);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(lblFechaInicio);
-            panelTop.Controls.Add(lblFechaFin);
-            panelTop.Controls.Add(btnFiltrar);
-            panelTop.Controls.Add(btnExportarExcel);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 155);
+            panelTop.Size = new Size(914, 70);
             panelTop.TabIndex = 0;
-            // 
-            // btnLimpiarFiltros
-            // 
-            btnLimpiarFiltros.Anchor = AnchorStyles.Left;
-            btnLimpiarFiltros.BackColor = Color.FromArgb(11, 15, 26);
-            btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
-            btnLimpiarFiltros.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnLimpiarFiltros.ForeColor = Color.FromArgb(230, 238, 252);
-            btnLimpiarFiltros.Location = new Point(501, 61);
-            btnLimpiarFiltros.Margin = new Padding(8, 0, 0, 0);
-            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
-            btnLimpiarFiltros.Size = new Size(90, 38);
-            btnLimpiarFiltros.TabIndex = 10;
-            btnLimpiarFiltros.Text = "Limpiar";
-            btnLimpiarFiltros.UseVisualStyleBackColor = false;
-            btnLimpiarFiltros.Click += btnLimpiarFiltros_Click;
-            // 
-            // dtpFechaFin
-            // 
-            dtpFechaFin.Anchor = AnchorStyles.Left;
-            dtpFechaFin.Font = new Font("Segoe UI", 9F);
-            dtpFechaFin.Format = DateTimePickerFormat.Short;
-            dtpFechaFin.Location = new Point(265, 65);
-            dtpFechaFin.Margin = new Padding(0, 0, 17, 0);
-            dtpFechaFin.Name = "dtpFechaFin";
-            dtpFechaFin.Size = new Size(125, 27);
-            dtpFechaFin.TabIndex = 9;
-            // 
-            // dtpFechaInicio
-            // 
-            dtpFechaInicio.Anchor = AnchorStyles.Left;
-            dtpFechaInicio.Font = new Font("Segoe UI", 9F);
-            dtpFechaInicio.Format = DateTimePickerFormat.Short;
-            dtpFechaInicio.Location = new Point(77, 65);
-            dtpFechaInicio.Margin = new Padding(0, 0, 17, 0);
-            dtpFechaInicio.Name = "dtpFechaInicio";
-            dtpFechaInicio.Size = new Size(125, 27);
-            dtpFechaInicio.TabIndex = 8;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(675, 29);
+            lblTitulo.Size = new Size(671, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Reporte de pagos de membresías en un rango de fechas";
-            // 
-            // lblFechaInicio
-            // 
-            lblFechaInicio.AutoSize = true;
-            lblFechaInicio.Font = new Font("Segoe UI", 9F);
-            lblFechaInicio.ForeColor = Color.FromArgb(230, 238, 252);
-            lblFechaInicio.Location = new Point(20, 68);
-            lblFechaInicio.Name = "lblFechaInicio";
-            lblFechaInicio.Size = new Size(54, 20);
-            lblFechaInicio.TabIndex = 1;
-            lblFechaInicio.Text = "Desde:";
-            // 
-            // lblFechaFin
-            // 
-            lblFechaFin.AutoSize = true;
-            lblFechaFin.Font = new Font("Segoe UI", 9F);
-            lblFechaFin.ForeColor = Color.FromArgb(230, 238, 252);
-            lblFechaFin.Location = new Point(215, 68);
-            lblFechaFin.Name = "lblFechaFin";
-            lblFechaFin.Size = new Size(50, 20);
-            lblFechaFin.TabIndex = 3;
-            lblFechaFin.Text = "Hasta:";
-            // 
-            // btnFiltrar
-            // 
-            btnFiltrar.BackColor = Color.FromArgb(31, 111, 235);
-            btnFiltrar.FlatAppearance.BorderSize = 0;
-            btnFiltrar.FlatStyle = FlatStyle.Flat;
-            btnFiltrar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnFiltrar.ForeColor = Color.White;
-            btnFiltrar.Location = new Point(400, 60);
-            btnFiltrar.Margin = new Padding(3, 4, 3, 4);
-            btnFiltrar.Name = "btnFiltrar";
-            btnFiltrar.Size = new Size(90, 38);
-            btnFiltrar.TabIndex = 5;
-            btnFiltrar.Text = "Filtrar";
-            btnFiltrar.UseVisualStyleBackColor = false;
-            btnFiltrar.Click += btnFiltrar_Click;
-            // 
+            //
+            // flowAcciones
+            //
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnExportarExcel);
+            flowAcciones.Dock = DockStyle.Right;
+            flowAcciones.Location = new Point(750, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(0, 16, 12, 0);
+            flowAcciones.Size = new Size(164, 70);
+            flowAcciones.TabIndex = 1;
+            flowAcciones.WrapContents = false;
+            //
             // btnExportarExcel
-            // 
-            btnExportarExcel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnExportarExcel.BackColor = Color.FromArgb(31, 111, 235);
-            btnExportarExcel.FlatAppearance.BorderSize = 0;
-            btnExportarExcel.FlatStyle = FlatStyle.Flat;
-            btnExportarExcel.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnExportarExcel.ForeColor = Color.White;
-            btnExportarExcel.Location = new Point(718, 61);
-            btnExportarExcel.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnExportarExcel.Enabled = false;
+            btnExportarExcel.Margin = new Padding(0, 0, 8, 0);
             btnExportarExcel.Name = "btnExportarExcel";
-            btnExportarExcel.Size = new Size(150, 38);
-            btnExportarExcel.TabIndex = 7;
-            btnExportarExcel.Text = "Exportar a Excel";
-            btnExportarExcel.UseVisualStyleBackColor = false;
+            btnExportarExcel.Size = new Size(140, 38);
+            btnExportarExcel.TabIndex = 0;
+            btnExportarExcel.Text = "Exportar CSV";
             btnExportarExcel.Click += btnExportarExcel_Click;
-            // 
-            // dgvPagosMembresias
-            // 
-            dgvPagosMembresias.AllowUserToAddRows = false;
-            dgvPagosMembresias.AllowUserToDeleteRows = false;
-            dgvPagosMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvPagosMembresias.BackgroundColor = Color.FromArgb(11, 15, 26);
-            dgvPagosMembresias.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(15, 42, 79);
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
-            dataGridViewCellStyle1.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvPagosMembresias.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvPagosMembresias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(11, 15, 26);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
-            dataGridViewCellStyle2.Padding = new Padding(8, 0, 0, 0);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvPagosMembresias.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvPagosMembresias.Dock = DockStyle.Fill;
-            dgvPagosMembresias.EnableHeadersVisualStyles = false;
-            dgvPagosMembresias.GridColor = Color.FromArgb(15, 42, 79);
-            dgvPagosMembresias.Location = new Point(0, 110);
-            dgvPagosMembresias.Margin = new Padding(3, 4, 3, 4);
-            dgvPagosMembresias.MultiSelect = false;
-            dgvPagosMembresias.Name = "dgvPagosMembresias";
-            dgvPagosMembresias.ReadOnly = true;
-            dgvPagosMembresias.RowHeadersVisible = false;
-            dgvPagosMembresias.RowHeadersWidth = 51;
-            dgvPagosMembresias.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvPagosMembresias.Size = new Size(914, 690);
-            dgvPagosMembresias.TabIndex = 1;
-            // 
+            //
+            // panelFiltros
+            //
+            panelFiltros.BackColor = Color.FromArgb(14, 20, 36);
+            panelFiltros.Controls.Add(lblTotal);
+            panelFiltros.Controls.Add(flowFiltros);
+            panelFiltros.Dock = DockStyle.Top;
+            panelFiltros.Location = new Point(0, 70);
+            panelFiltros.Name = "panelFiltros";
+            panelFiltros.Size = new Size(914, 56);
+            panelFiltros.TabIndex = 1;
+            //
+            // flowFiltros
+            //
+            flowFiltros.AutoSize = true;
+            flowFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowFiltros.Controls.Add(lblDesde);
+            flowFiltros.Controls.Add(dtpFechaInicio);
+            flowFiltros.Controls.Add(lblHasta);
+            flowFiltros.Controls.Add(dtpFechaFin);
+            flowFiltros.Controls.Add(btnFiltrar);
+            flowFiltros.Controls.Add(btnLimpiarFiltros);
+            flowFiltros.Dock = DockStyle.Left;
+            flowFiltros.Location = new Point(0, 0);
+            flowFiltros.Name = "flowFiltros";
+            flowFiltros.Padding = new Padding(20, 10, 0, 0);
+            flowFiltros.Size = new Size(640, 56);
+            flowFiltros.TabIndex = 0;
+            flowFiltros.WrapContents = false;
+            //
+            // lblDesde
+            //
+            lblDesde.AutoSize = true;
+            lblDesde.Font = new Font("Segoe UI", 9.5F);
+            lblDesde.ForeColor = Color.FromArgb(230, 238, 252);
+            lblDesde.Margin = new Padding(0, 7, 6, 0);
+            lblDesde.Name = "lblDesde";
+            lblDesde.Size = new Size(56, 21);
+            lblDesde.TabIndex = 0;
+            lblDesde.Text = "Desde:";
+            //
+            // dtpFechaInicio
+            //
+            dtpFechaInicio.Font = new Font("Segoe UI", 9F);
+            dtpFechaInicio.Format = DateTimePickerFormat.Short;
+            dtpFechaInicio.Margin = new Padding(0, 4, 16, 0);
+            dtpFechaInicio.Name = "dtpFechaInicio";
+            dtpFechaInicio.Size = new Size(125, 27);
+            dtpFechaInicio.TabIndex = 1;
+            //
+            // lblHasta
+            //
+            lblHasta.AutoSize = true;
+            lblHasta.Font = new Font("Segoe UI", 9.5F);
+            lblHasta.ForeColor = Color.FromArgb(230, 238, 252);
+            lblHasta.Margin = new Padding(0, 7, 6, 0);
+            lblHasta.Name = "lblHasta";
+            lblHasta.Size = new Size(52, 21);
+            lblHasta.TabIndex = 2;
+            lblHasta.Text = "Hasta:";
+            //
+            // dtpFechaFin
+            //
+            dtpFechaFin.Font = new Font("Segoe UI", 9F);
+            dtpFechaFin.Format = DateTimePickerFormat.Short;
+            dtpFechaFin.Margin = new Padding(0, 4, 16, 0);
+            dtpFechaFin.Name = "dtpFechaFin";
+            dtpFechaFin.Size = new Size(125, 27);
+            dtpFechaFin.TabIndex = 3;
+            //
+            // btnFiltrar
+            //
+            btnFiltrar.Estilo = EstiloBoton.Primario;
+            btnFiltrar.Margin = new Padding(0, 1, 8, 0);
+            btnFiltrar.Name = "btnFiltrar";
+            btnFiltrar.Size = new Size(86, 32);
+            btnFiltrar.TabIndex = 4;
+            btnFiltrar.Text = "Filtrar";
+            btnFiltrar.Click += btnFiltrar_Click;
+            //
+            // btnLimpiarFiltros
+            //
+            btnLimpiarFiltros.Margin = new Padding(0, 1, 0, 0);
+            btnLimpiarFiltros.Name = "btnLimpiarFiltros";
+            btnLimpiarFiltros.Size = new Size(86, 32);
+            btnLimpiarFiltros.TabIndex = 5;
+            btnLimpiarFiltros.Text = "Hoy";
+            btnLimpiarFiltros.Click += btnLimpiarFiltros_Click;
+            //
             // lblTotal
-            // 
-            lblTotal.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            lblTotal.AutoEllipsis = true;
-            lblTotal.AutoSize = false;
-            lblTotal.Font = new Font("Microsoft Sans Serif", 10F, FontStyle.Bold);
+            //
+            lblTotal.Dock = DockStyle.Right;
+            lblTotal.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             lblTotal.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTotal.Location = new Point(77, 108);
+            lblTotal.Location = new Point(414, 0);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(400, 25);
-            lblTotal.TabIndex = 11;
-            lblTotal.Text = "Total: $0.00";
-            lblTotal.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            lblTotal.Padding = new Padding(0, 0, 20, 0);
+            lblTotal.Size = new Size(500, 56);
+            lblTotal.TabIndex = 1;
+            lblTotal.TextAlign = ContentAlignment.MiddleRight;
+            //
+            // dgvPagosMembresias
+            //
+            dgvPagosMembresias.Dock = DockStyle.Fill;
+            dgvPagosMembresias.Location = new Point(0, 126);
+            dgvPagosMembresias.Name = "dgvPagosMembresias";
+            dgvPagosMembresias.Size = new Size(914, 674);
+            dgvPagosMembresias.TabIndex = 2;
+            dgvPagosMembresias.CellFormatting += dgvPagosMembresias_CellFormatting;
+
+            //
             // FrmPagosMembresias
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(914, 800);
             Controls.Add(dgvPagosMembresias);
+            Controls.Add(panelFiltros);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmPagosMembresias";
             Text = "Pagos de Membresías";
+            Load += FrmPagosMembresias_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            flowAcciones.ResumeLayout(false);
+            panelFiltros.ResumeLayout(false);
+            panelFiltros.PerformLayout();
+            flowFiltros.ResumeLayout(false);
+            flowFiltros.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPagosMembresias).EndInit();
             ResumeLayout(false);
         }
@@ -234,14 +221,17 @@
 
         private Panel panelTop;
         private Label lblTitulo;
-        private Label lblFechaInicio;
-        private Label lblFechaFin;
-        private Button btnFiltrar;
-        private Button btnExportarExcel;
-        private DataGridView dgvPagosMembresias;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnExportarExcel;
+        private Panel panelFiltros;
+        private FlowLayoutPanel flowFiltros;
+        private Label lblDesde;
         private DateTimePicker dtpFechaInicio;
+        private Label lblHasta;
         private DateTimePicker dtpFechaFin;
-        private Button btnLimpiarFiltros;
+        private BotonTema btnFiltrar;
+        private BotonTema btnLimpiarFiltros;
         private Label lblTotal;
+        private GridTema dgvPagosMembresias;
     }
 }

@@ -115,12 +115,14 @@ namespace Presentacion.ViewModels
     public class ReporteMovimientoViewModel
     {
         public int MovimientoID { get; set; }
-        public string Tipo { get; set; } = string.Empty;
+        public string Tipo { get; set; } = string.Empty;       // Ingreso / Egreso
         public string Concepto { get; set; } = string.Empty;
         public decimal Total { get; set; }
         public string FormaPago { get; set; } = string.Empty;
         public string Usuario { get; set; } = string.Empty;
+        public string Observacion { get; set; } = string.Empty;
+        public string CorteInfo { get; set; } = string.Empty;    // Rango de fechas/horas del corte
+    public DateTime Fecha { get; set; }
         public string FechaTexto => Fecha.ToString("dd/MM/yyyy HH:mm");
-        public DateTime Fecha { get; set; }
     }
 }

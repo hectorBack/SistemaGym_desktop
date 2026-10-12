@@ -143,6 +143,8 @@ namespace Presentacion.Controller
                 Total = r.Total,
                 FormaPago = r.FormaPago,
                 Usuario = r.Usuario,
+                Observacion = r.Observacion,
+                CorteInfo = r.CorteInfo,
                 Fecha = r.Fecha
             });
         }

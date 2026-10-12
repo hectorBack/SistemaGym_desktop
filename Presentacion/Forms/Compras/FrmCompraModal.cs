@@ -17,333 +17,386 @@ namespace Presentacion.Forms.Compras
 {
     public partial class FrmCompraModal : Form
     {
+        /// <summary>Una línea de la compra. Es lo que muestra el grid; al guardar se convierte a DetalleCompraCreateDto.</summary>
+        public sealed class LineaCompra
+        {
+            public int ProductoID { get; init; }
+            public string Producto { get; init; } = string.Empty;
+            public decimal CostoUnitario { get; init; }
+            public int Cantidad { get; set; }
+            public decimal Subtotal => Cantidad * CostoUnitario;
+        }
+
+        private static readonly string[] FormasPago = { "Efectivo", "Tarjeta", "Transferencia" };
+
         private readonly CompraController _compraController;
         private readonly ProductoController _productoController;
-        private readonly List<DetalleCompraViewModel> _listaDetalles = new();
-        private readonly BindingSource _detallesBindingSource = new();
 
-        private List<ProductoViewModel> _productosDisponibles = new();
+        private readonly BindingList<LineaCompra> _lineas = new();
+        private List<ProductoViewModel> _productos = new();
 
-        private decimal _totalAcumulado = 0;
-        private ProductoViewModel? _productoEncontrado = null; 
+        // Índices para encontrar un producto al escanear sin recorrer toda la lista.
+        private readonly Dictionary<string, ProductoViewModel> _porCodigoBarras = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<int, ProductoViewModel> _porId = new();
 
-        public FrmCompraModal(
-            CompraController compraController,
-            ProductoController productoController)
+        private bool _guardando;
+
+        public FrmCompraModal(CompraController compraController, ProductoController productoController)
         {
+            _compraController = compraController ?? throw new ArgumentNullException(nameof(compraController));
+            _productoController = productoController ?? throw new ArgumentNullException(nameof(productoController));
+
             InitializeComponent();
-            _compraController = compraController;
-            _productoController = productoController;
+            ConfigurarColumnas();
+
+            cmbFormaPago.Items.AddRange(FormasPago);
+            cmbFormaPago.SelectedIndex = 0; // Efectivo por defecto
+
+            dgvDetalles.DataSource = _lineas;
+            _lineas.ListChanged += (_, _) => ActualizarResumen();
+            ActualizarResumen();
         }
 
-        private async void FrmCompraModal_Load(object sender, EventArgs e)
+        private LineaCompra? LineaSeleccionada =>
+            dgvDetalles.SelectedRows.Count > 0
+                ? dgvDetalles.SelectedRows[0].DataBoundItem as LineaCompra
+                : null;
+
+        // ───────────── Carga ─────────────
+
+        private async void FrmCompraModal_Load(object? sender, EventArgs e)
         {
-            lblTitulo.Text = "Registrar Nueva Compra";
-            cmbFormaPago.SelectedIndex = 0; // "Efectivo" por defecto
-
-            // Prevenir que la grilla genere columnas automáticas adicionales
-            dgvDetalles.AutoGenerateColumns = false;
-
-            ConfigurarGridDetalles();
-            _detallesBindingSource.DataSource = _listaDetalles;
-            dgvDetalles.DataSource = _detallesBindingSource;
-
-            InicializarLabelsInformativos();
-            ActualizarGridYTotal();
-            await CargarProductosAsync();
-        }
-
-        private void btnAgregarProducto_Click(object sender, EventArgs e)
-        {
-            string codigoOBusqueda = txtBuscarProducto.Text.Trim();
-
-            // Si el usuario seleccionó un producto del combo pero no hay texto en el buscador
-            if (_productoEncontrado == null && cmbProductos.SelectedItem is ProductoViewModel prodCombo)
-            {
-                _productoEncontrado = prodCombo;
-            }
-
-            if (_productoEncontrado == null && string.IsNullOrWhiteSpace(codigoOBusqueda))
-            {
-                MessageBox.Show("Seleccione un producto o ingrese un código de barras.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (numCantidad.Value <= 0)
-            {
-                MessageBox.Show("La cantidad (stock) debe ser mayor a cero.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                // 1. Si se escribió/escaneó un código manual distinto al del objeto guardado
-                if (_productoEncontrado == null ||
-                    (_productoEncontrado.CodigoBarras != codigoOBusqueda && _productoEncontrado.ProductoID.ToString() != codigoOBusqueda))
-                {
-                    _productoEncontrado = _productosDisponibles.FirstOrDefault(p =>
-                        (p.CodigoBarras != null && p.CodigoBarras.Equals(codigoOBusqueda, StringComparison.OrdinalIgnoreCase)) ||
-                        p.ProductoID.ToString() == codigoOBusqueda);
-                }
-
-                if (_productoEncontrado == null)
-                {
-                    MessageBox.Show("Producto no encontrado o inactivo.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                // 2. Mostrar la información en los Labels
-                lblCostoValor.Text = _productoEncontrado.Costo.ToString("C2");
-                lblPrecioValor.Text = _productoEncontrado.Precio.ToString("C2");
-
-                // 3. Agregar o actualizar en la lista del detalle
-                var existente = _listaDetalles.FirstOrDefault(d => d.ProductoID == _productoEncontrado.ProductoID);
-                if (existente != null)
-                {
-                    existente.Cantidad += (int)numCantidad.Value;
-                }
-                else
-                {
-                    _listaDetalles.Add(new DetalleCompraViewModel
-                    {
-                        ProductoID = _productoEncontrado.ProductoID,
-                        ProductoNombre = _productoEncontrado.Nombre,
-                        CodigoBarras = _productoEncontrado.CodigoBarras ?? string.Empty,
-                        Cantidad = (int)numCantidad.Value,
-                        CostoUnitario = _productoEncontrado.Costo
-                    });
-                }
-
-                // 4. Limpiar selección rápida
-                txtBuscarProducto.Clear();
-
-                cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
-                cmbProductos.SelectedIndex = -1;
-                cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
-
-                numCantidad.Value = 1;
-                _productoEncontrado = null;
-                InicializarLabelsInformativos();
-                txtBuscarProducto.Focus();
-
-                ActualizarGridYTotal();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al agregar producto: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // Evento opcional para que al escribir/esccanear el código se muestren inmediatamente costo y precio
-        private void txtBuscarProducto_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.SuppressKeyPress = true;
-                string codigo = txtBuscarProducto.Text.Trim();
-
-                if (!string.IsNullOrWhiteSpace(codigo))
-                {
-                    var prod = _productosDisponibles.FirstOrDefault(p =>
-                        (p.CodigoBarras != null && p.CodigoBarras.Equals(codigo, StringComparison.OrdinalIgnoreCase)) ||
-                        p.ProductoID.ToString() == codigo);
-
-                    if (prod != null)
-                    {
-                        _productoEncontrado = prod;
-
-                        // Sincronizar ComboBox
-                        cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
-                        cmbProductos.SelectedValue = prod.ProductoID;
-                        cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
-
-                        lblCostoValor.Text = prod.Costo.ToString("C2");
-                        lblPrecioValor.Text = prod.Precio.ToString("C2");
-                    }
-                    else
-                    {
-                        _productoEncontrado = null;
-                        InicializarLabelsInformativos();
-                        MessageBox.Show("Producto no encontrado.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-        }
-
-        private void btnQuitarProducto_Click(object sender, EventArgs e)
-        {
-            if (dgvDetalles.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un producto de la lista para quitar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (DetalleCompraViewModel)dgvDetalles.CurrentRow.DataBoundItem;
-            _listaDetalles.Remove(item);
-
-            ActualizarGridYTotal();
-        }
-
-        private async void btnGuardar_Click(object sender, EventArgs e)
-        {
-            if (!_listaDetalles.Any())
-            {
-                MessageBox.Show("Debe agregar al menos un producto a la compra.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                string codigoGenerado = await _compraController.ObtenerSiguienteCodigoAsync();
-
-                var createDto = new CompraCreateDto
-                {
-                    Codigo = codigoGenerado,
-                    Observacion = string.Empty,
-                    FormaPago = cmbFormaPago.SelectedItem?.ToString() ?? "Efectivo",
-                    UsuarioID = SesionUsuario.UsuarioID,
-                    Detalles = _listaDetalles.Select(d => new DetalleCompraCreateDto
-                    {
-                        ProductoID = d.ProductoID,
-                        Cantidad = d.Cantidad,
-                        CostoUnitario = d.CostoUnitario
-                    }).ToList()
-                };
-
-                await _compraController.CrearCompraAsync(createDto);
-                MessageBox.Show("Compra registrada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error inesperado al procesar la compra: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void btnCancelar_Click(object sender, EventArgs e)
-        {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
-
-        private async Task CargarProductosAsync()
-        {
-            try
+            bool cargado = await FormHelper.EjecutarAsync(async () =>
             {
                 var productos = await _productoController.ObtenerProductosAsync(incluirInactivos: false);
-                _productosDisponibles = productos.ToList();
+                if (IsDisposed) return;
 
-                CargarComboBoxProductos();
-            }
-            catch (Exception ex)
+                _productos = productos.ToList();
+
+                _porCodigoBarras.Clear();
+                _porId.Clear();
+                foreach (var p in _productos)
+                {
+                    _porId[p.ProductoID] = p;
+                    if (!string.IsNullOrWhiteSpace(p.CodigoBarras))
+                        _porCodigoBarras.TryAdd(p.CodigoBarras.Trim(), p);
+                }
+
+                cmbProductos.DataSource = _productos;
+                cmbProductos.DisplayMember = nameof(ProductoViewModel.Nombre);
+                cmbProductos.ValueMember = nameof(ProductoViewModel.ProductoID);
+                cmbProductos.SelectedIndex = -1;
+            },
+            "No se pudieron cargar los productos.",
+            panelEntrada);
+
+            // Sin productos no se puede comprar: se cierra en lugar de dejar una pantalla inútil.
+            if (!cargado && !IsDisposed)
             {
-                MessageBox.Show($"Error al cargar lista de productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void CargarComboBoxProductos()
-        {
-            // Se desvincula temporalmente el evento para evitar disparos en cascada al llenar los datos
-            cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
-
-            cmbProductos.DataSource = null;
-            cmbProductos.DataSource = _productosDisponibles;
-            cmbProductos.DisplayMember = "Nombre";
-            cmbProductos.ValueMember = "ProductoID";
-            cmbProductos.SelectedIndex = -1; // Inicia deseleccionado
-
-            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
-        }
-
-        // Evento al seleccionar una opción dentro del ComboBox de productos
-        private void cmbProductos_SelectedIndexChanged(object sender, EventArgs? e)
-        {
-            // 1. Validar que la selección no sea -1 o nula
-            if (cmbProductos.SelectedIndex < 0 || cmbProductos.SelectedItem == null)
-            {
+                DialogResult = DialogResult.Cancel;
                 return;
             }
 
-            if (cmbProductos.SelectedItem is ProductoViewModel prodCombo)
+            txtCodigoBarras.Focus();
+        }
+
+        private void ConfigurarColumnas()
+        {
+            dgvDetalles.AutoGenerateColumns = false;
+
+            dgvDetalles.AgregarTexto(nameof(LineaCompra.Producto), "Producto", 220, 120).SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgvDetalles.AgregarTexto(nameof(LineaCompra.Cantidad), "Cant.", 55, 55, alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgvDetalles.AgregarTexto(nameof(LineaCompra.CostoUnitario), "Costo", 80, 75, "C2", alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgvDetalles.AgregarTexto(nameof(LineaCompra.Subtotal), "Subtotal", 85, 80, "C2", alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
+        }
+
+        // ───────────── Agregar productos ─────────────
+
+        private void btnAgregar_Click(object? sender, EventArgs e) => ProcesarAgregarProducto();
+
+        // Enter en el código de barras, en el combo o en la cantidad agrega el producto
+        // (el lector de códigos de barras envía Enter al terminar de escanear).
+        private void EntradaProducto_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter || e.Control) return;
+
+            e.SuppressKeyPress = true; // evita el "beep" de Windows
+            ProcesarAgregarProducto();
+        }
+
+        // Al elegir un producto en el combo se muestran su costo y precio de venta registrados.
+        private void cmbProductos_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            lblInfoProducto.Text = cmbProductos.SelectedItem is ProductoViewModel p
+                ? $"Costo registrado: {p.Costo:C2}   ·   Precio de venta: {p.Precio:C2}"
+                : string.Empty;
+        }
+
+        private ProductoViewModel? BuscarPorCodigo(string codigo)
+        {
+            // Primero el código de barras; solo si no existe se intenta como ID interno.
+            if (_porCodigoBarras.TryGetValue(codigo, out var porCodigo))
+                return porCodigo;
+
+            return int.TryParse(codigo, out int id) && _porId.TryGetValue(id, out var porId)
+                ? porId
+                : null;
+        }
+
+        // Lee la cantidad desde el texto del control: dentro de un KeyDown (Enter) el .Value
+        // todavía puede traer el número anterior si el usuario aún no ha salido del campo.
+        private int CantidadIngresada()
+        {
+            if (int.TryParse(numCantidad.Text.Trim(), out int cantidad))
+                return Math.Clamp(cantidad, (int)numCantidad.Minimum, (int)numCantidad.Maximum);
+
+            return (int)numCantidad.Value;
+        }
+
+        private void ReiniciarCantidad()
+        {
+            numCantidad.Value = 1;
+            numCantidad.Text = "1"; // por si el texto tecleado no había llegado a Value
+        }
+
+        private void ProcesarAgregarProducto()
+        {
+            lblAviso.Text = string.Empty;
+
+            ProductoViewModel? producto;
+            string codigo = txtCodigoBarras.Text.Trim();
+
+            if (codigo.Length > 0)
             {
-                _productoEncontrado = prodCombo;
-
-                // 2. Asignar el valor asegurando que no haya conflictos de selección en el TextBox
-                string codigo = !string.IsNullOrEmpty(prodCombo.CodigoBarras)
-                    ? prodCombo.CodigoBarras
-                    : prodCombo.ProductoID.ToString();
-
-                if (txtBuscarProducto.Text != codigo)
+                producto = BuscarPorCodigo(codigo);
+                if (producto == null)
                 {
-                    txtBuscarProducto.Text = codigo;
-                    txtBuscarProducto.SelectionStart = txtBuscarProducto.Text.Length; // Mover cursor al final sin seleccionar -1
+                    Avisar($"No se encontró ningún producto con el código '{codigo}'.");
+                    txtCodigoBarras.SelectAll(); // el siguiente escaneo reemplaza el texto
+                    txtCodigoBarras.Focus();
+                    return;
                 }
-
-                lblCostoValor.Text = prodCombo.Costo.ToString("C2");
-                lblPrecioValor.Text = prodCombo.Precio.ToString("C2");
             }
+            else
+            {
+                producto = cmbProductos.SelectedItem as ProductoViewModel;
+                if (producto == null)
+                {
+                    Avisar("Escanee un código o seleccione un producto.");
+                    txtCodigoBarras.Focus();
+                    return;
+                }
+            }
+
+            // La compra usa el costo registrado del producto; sin costo el total saldría mal.
+            if (producto.Costo <= 0)
+            {
+                Avisar($"'{producto.Nombre}' no tiene costo registrado. Capture su costo en el módulo de Productos.");
+                return;
+            }
+
+            int cantidad = CantidadIngresada();
+            var linea = _lineas.FirstOrDefault(l => l.ProductoID == producto.ProductoID);
+
+            if (linea != null)
+            {
+                linea.Cantidad += cantidad;
+                _lineas.ResetItem(_lineas.IndexOf(linea));
+            }
+            else
+            {
+                linea = new LineaCompra
+                {
+                    ProductoID = producto.ProductoID,
+                    Producto = producto.Nombre,
+                    CostoUnitario = producto.Costo,
+                    Cantidad = cantidad
+                };
+                _lineas.Add(linea);
+            }
+
+            SeleccionarLinea(linea); // la última línea tocada queda lista para + / -
+
+            // Listo para el siguiente producto.
+            txtCodigoBarras.Clear();
+            cmbProductos.SelectedIndex = -1;
+            ReiniciarCantidad();
+            lblInfoProducto.Text = $"Agregado: {producto.Nombre} × {cantidad}";
+            txtCodigoBarras.Focus();
         }
 
-        #region Métodos Privados
-        private void InicializarLabelsInformativos()
+        private void Avisar(string mensaje)
         {
-            lblCostoValor.Text = "$0.00";
-            lblPrecioValor.Text = "$0.00";
+            lblAviso.Text = mensaje;
+            System.Media.SystemSounds.Beep.Play();
         }
 
-        private void ActualizarGridYTotal()
+        // ───────────── Detalle de la compra ─────────────
+
+        private void SeleccionarLinea(LineaCompra linea)
         {
-            _detallesBindingSource.ResetBindings(false);
+            int indice = _lineas.IndexOf(linea);
+            if (indice < 0) return;
 
-            _totalAcumulado = _listaDetalles.Sum(d => d.Cantidad * d.CostoUnitario);
-            lblTotalCalculado.Text = _totalAcumulado.ToString("C2");
+            dgvDetalles.ClearSelection();
+            dgvDetalles.Rows[indice].Selected = true;
+            dgvDetalles.CurrentCell = dgvDetalles.Rows[indice].Cells[0];
         }
 
-        private void ConfigurarGridDetalles()
+        private void ModificarCantidadSeleccionada(int cambio)
         {
-            dgvDetalles.Columns.Clear();
+            var linea = LineaSeleccionada;
+            if (linea == null) return;
 
-            // 1. Columna: Stock (Cantidad comprada)
-            dgvDetalles.Columns.Add(new DataGridViewTextBoxColumn
+            int nueva = linea.Cantidad + cambio;
+            if (nueva > (int)numCantidad.Maximum)
             {
-                DataPropertyName = "Cantidad",
-                HeaderText = "Stock",
-                Name = "Cantidad"
-            });
+                Avisar($"La cantidad máxima por producto es {(int)numCantidad.Maximum}.");
+                return;
+            }
 
-            // 2. Columna: Nombre
-            dgvDetalles.Columns.Add(new DataGridViewTextBoxColumn
+            lblAviso.Text = string.Empty;
+
+            if (nueva <= 0)
             {
-                DataPropertyName = "ProductoNombre",
-                HeaderText = "Nombre",
-                Name = "ProductoNombre"
-            });
+                QuitarLinea(linea);
+                return;
+            }
 
-            // 3. Columna: Costo
-            dgvDetalles.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "CostoUnitario",
-                HeaderText = "Costo",
-                Name = "CostoUnitario",
-                DefaultCellStyle = { Format = "C2" }
-            });
-
-            // 4. Columna: Total
-            dgvDetalles.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                DataPropertyName = "Subtotal",
-                HeaderText = "Total",
-                Name = "Subtotal",
-                DefaultCellStyle = { Format = "C2" }
-            });
-
-            dgvDetalles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            linea.Cantidad = nueva;
+            _lineas.ResetItem(_lineas.IndexOf(linea));
         }
-        #endregion
+
+        private void QuitarLinea(LineaCompra linea)
+        {
+            int indice = _lineas.IndexOf(linea);
+            if (indice < 0) return;
+
+            _lineas.RemoveAt(indice);
+
+            if (_lineas.Count > 0)
+                SeleccionarLinea(_lineas[Math.Min(indice, _lineas.Count - 1)]);
+        }
+
+        private void btnQuitar_Click(object? sender, EventArgs e)
+        {
+            var linea = LineaSeleccionada;
+            if (linea != null)
+                QuitarLinea(linea);
+        }
+
+        private void dgvDetalles_SelectionChanged(object? sender, EventArgs e) => ActualizarResumen();
+
+        // Total, y botones que solo tienen sentido con algo en la lista / seleccionado.
+        private void ActualizarResumen()
+        {
+            lblTotalCalculado.Text = _lineas.Sum(l => l.Subtotal).ToString("C2");
+            btnQuitar.Enabled = LineaSeleccionada != null;
+            btnGuardar.Enabled = _lineas.Count > 0;
+        }
+
+        // Atajos: + / - cambian la cantidad de la línea seleccionada, Supr la quita,
+        // Ctrl+Enter registra la compra. Los signos solo actúan con el grid enfocado o con el
+        // campo de código vacío, para no interferir cuando se está escribiendo.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.Enter))
+            {
+                btnGuardar.PerformClick();
+                return true;
+            }
+
+            bool enLista = ActiveControl == dgvDetalles
+                           || (ActiveControl == txtCodigoBarras && txtCodigoBarras.TextLength == 0);
+
+            if (enLista)
+            {
+                switch (keyData)
+                {
+                    case Keys.Add:
+                    case Keys.Oemplus:
+                    case Keys.Oemplus | Keys.Shift:
+                        ModificarCantidadSeleccionada(1);
+                        return true;
+
+                    case Keys.Subtract:
+                    case Keys.OemMinus:
+                        ModificarCantidadSeleccionada(-1);
+                        return true;
+
+                    case Keys.Delete when ActiveControl == dgvDetalles:
+                        btnQuitar.PerformClick();
+                        return true;
+                }
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // ───────────── Guardar / cerrar ─────────────
+
+        private async void btnGuardar_Click(object? sender, EventArgs e)
+        {
+            if (_guardando) return;
+
+            if (_lineas.Count == 0)
+            {
+                FormHelper.MostrarAdvertencia("Debe agregar al menos un producto a la compra.", "Validación");
+                return;
+            }
+
+            var detalles = _lineas.Select(l => new DetalleCompraCreateDto
+            {
+                ProductoID = l.ProductoID,
+                Cantidad = l.Cantidad,
+                CostoUnitario = l.CostoUnitario
+            }).ToList();
+
+            string formaPago = cmbFormaPago.SelectedItem?.ToString() ?? "Efectivo";
+            int usuarioId = SesionUsuario.UsuarioID;
+
+            _guardando = true;
+            bool registrada = await FormHelper.EjecutarAsync(async () =>
+            {
+                // El folio se pide justo antes de guardar para que sea lo más actual posible.
+                string codigo = await _compraController.ObtenerSiguienteCodigoAsync();
+
+                await _compraController.CrearCompraAsync(new CompraCreateDto
+                {
+                    Codigo = codigo,
+                    Observacion = string.Empty,
+                    FormaPago = formaPago,
+                    UsuarioID = usuarioId,
+                    Detalles = detalles
+                });
+            },
+            "No se pudo registrar la compra.",
+            btnGuardar, btnCancelar, btnAgregar, btnQuitar, dgvDetalles, cmbFormaPago);
+            _guardando = false;
+
+            if (registrada && !IsDisposed)
+                DialogResult = DialogResult.OK; // cierra el diálogo; el historial se recarga solo
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // No cerrar mientras se está registrando la compra.
+            if (_guardando)
+            {
+                e.Cancel = true;
+            }
+            // Evita perder una compra armada por un Esc o un clic accidental.
+            else if (DialogResult != DialogResult.OK
+                     && _lineas.Count > 0
+                     && !FormHelper.ConfirmarAccion(
+                            "Hay productos en la compra. ¿Desea descartarla?",
+                            "Cancelar compra",
+                            destructiva: true))
+            {
+                e.Cancel = true;
+            }
+
+            base.OnFormClosing(e);
+        }
     }
 }

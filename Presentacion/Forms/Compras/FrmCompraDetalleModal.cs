@@ -13,70 +13,53 @@ namespace Presentacion.Forms.Compras
 {
     public partial class FrmCompraDetalleModal : Form
     {
-        private readonly CompraDto _compra;
+        /// <summary>Una fila del detalle. Mantiene los números como decimal (no como texto) para que se alineen y ordenen bien.</summary>
+        private sealed record FilaDetalle(string Producto, int Cantidad, decimal CostoUnitario, decimal Subtotal);
 
-        public FrmCompraDetalleModal(CompraDto compra)
+        private readonly CompraDto _compra;
+        private readonly string? _folio;
+
+        // El folio es opcional: si se pasa, aparece en el título.
+        public FrmCompraDetalleModal(CompraDto compra, string? folio = null)
         {
-            InitializeComponent();
             _compra = compra ?? throw new ArgumentNullException(nameof(compra));
+            _folio = folio;
+
+            InitializeComponent();
+            ConfigurarColumnas();
+            CargarDatosCompra();
         }
 
-        private void FrmCompraDetalleModal_Load(object sender, EventArgs e)
+        // Las columnas se definen una sola vez.
+        private void ConfigurarColumnas()
         {
-            CargarDatosCompra();
+            dgvDetalles.AutoGenerateColumns = false;
+
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.Producto), "Producto", 220, 120);
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.Cantidad), "Cantidad", 70, 70, alinearDerecha: true);
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.CostoUnitario), "Costo unitario", 90, 90, "C2", alinearDerecha: true);
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.Subtotal), "Subtotal", 90, 90, "C2", alinearDerecha: true);
         }
 
         private void CargarDatosCompra()
         {
-            // 1. Cargar fecha desde CreatedAt (con respaldo si viniera nula)
-            DateTime fechaRegistro = _compra.CreatedAt ?? DateTime.Now;
-            lblFechaValor.Text = fechaRegistro.ToString("dd/MM/yyyy HH:mm");
+            var filas = _compra.Detalles
+                .Select(d => new FilaDetalle(d.ProductoNombre, d.Cantidad, d.CostoUnitario, d.Subtotal))
+                .ToList();
 
-            // 2. Cargar total de la compra
+            if (!string.IsNullOrWhiteSpace(_folio))
+                lblTitulo.Text = $"Detalle de Compra · {_folio}";
+
+            // Cabecera
+            lblFechaValor.Text = (_compra.CreatedAt ?? DateTime.Now).ToString("dd/MM/yyyy HH:mm");
             lblTotalCalculado.Text = _compra.Total.ToString("C2");
 
-            // 3. Cargar desglose de ítems en el DataGridView
-            dgvDetalles.DataSource = _compra.Detalles.Select(d => new
-            {
-                Stock = d.Cantidad,
-                Nombre = d.ProductoNombre,
-                CostoUnitario = d.CostoUnitario.ToString("C2"),
-                Total = d.Subtotal.ToString("C2")
-            }).ToList();
+            int articulos = filas.Sum(f => f.Cantidad);
+            lblArticulos.Text = $"{articulos} artículo(s) en {filas.Count} producto(s)";
 
-            ConfigurarGrid();
-        }
-
-        private void ConfigurarGrid()
-        {
-            if (dgvDetalles.Columns["Stock"] != null)
-            {
-                dgvDetalles.Columns["Stock"].HeaderText = "Stock";
-                dgvDetalles.Columns["Stock"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
-
-            if (dgvDetalles.Columns["Nombre"] != null)
-            {
-                dgvDetalles.Columns["Nombre"].HeaderText = "Nombre";
-                dgvDetalles.Columns["Nombre"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            }
-
-            if (dgvDetalles.Columns["CostoUnitario"] != null)
-            {
-                dgvDetalles.Columns["CostoUnitario"].HeaderText = "Costo Unitario";
-                dgvDetalles.Columns["CostoUnitario"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvDetalles.Columns["Total"] != null)
-            {
-                dgvDetalles.Columns["Total"].HeaderText = "Total";
-                dgvDetalles.Columns["Total"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-        }
-
-        private void btnCerrar_Click(object sender, EventArgs e)
-        {
-            this.Close();
+            // Desglose (ordenable al hacer clic en los encabezados)
+            dgvDetalles.DataSource = new ListaOrdenable<FilaDetalle>(filas);
+            dgvDetalles.ClearSelection();
         }
     }
 }

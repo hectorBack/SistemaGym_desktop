@@ -84,6 +84,17 @@ namespace Negocio.Services
                 throw new BusinessException(errorMsg);
             }
 
+            int usuarioId = dto.UsuarioID ?? 0;
+
+            // Validar que el DTO ya traiga el UsuarioID enviado desde la presentación
+            if (usuarioId <= 0)
+            {
+                throw new BusinessException("No se encontró una sesión de usuario válida.");
+            }
+
+            // Obtener o abrir automáticamente el corte de caja para este usuario
+            var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioId);
+
             var nuevoMovimiento = new Movimiento
             {
                 Tipo = dto.Tipo.Trim(),
@@ -91,8 +102,8 @@ namespace Negocio.Services
                 FormaPago = dto.FormaPago.Trim(),
                 Total = dto.Total,
                 Observacion = dto.Observacion?.Trim(),
-                CorteID = dto.CorteID,
-                UsuarioID = dto.UsuarioID,
+                CorteID = corteAbierto.CorteID,
+                UsuarioID = usuarioId, // Utiliza el ID que viene del DTO
                 Activo = true
             };
 
@@ -189,5 +200,42 @@ namespace Negocio.Services
                 UpdatedAt = m.UpdatedAt
             });
         }
+
+        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
+        {
+            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+
+            if (corteAbierto == null)
+            {
+                // 1. Consultar la configuración del Efectivo Inicial predeterminado
+                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
+                decimal efectivoInicial = 0.00m;
+
+                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
+                {
+                    efectivoInicial = monto;
+                }
+
+                // 2. Crear automáticamente la caja para el usuario actual
+                corteAbierto = new Corte
+                {
+                    UsuarioID = usuarioId,
+                    FechaApertura = DateTime.Now,
+                    MontoInicial = efectivoInicial,
+                    TotalIngresos = 0m,
+                    TotalEgresos = 0m,
+                    MontoFinal = efectivoInicial,
+                    Observaciones = "Apertura automática iniciada por venta de productos",
+                    Estado = "Abierto",
+                    Activo = true
+                };
+
+                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return corteAbierto;
+        }
+
     }
 }

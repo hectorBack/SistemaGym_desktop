@@ -16,207 +16,202 @@ namespace Presentacion.Forms.Roles
     public partial class FrmRoles : Form
     {
         private readonly RolController _controller;
-        private List<RolViewModel> _listaRoles = new();
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<RolViewModel> _vista = new();
 
         public FrmRoles(RolController controller)
         {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+
             InitializeComponent();
-            _controller = controller;
-            dgvRoles.SelectionChanged += dgvRoles_SelectionChanged;
+            ConfigurarColumnas();
         }
 
-        private async void FrmRoles_Load(object sender, EventArgs e)
+        /// <summary>Rol de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private RolViewModel? RolSeleccionado =>
+            dgvRoles.SelectedRows.Count > 0
+                ? dgvRoles.SelectedRows[0].DataBoundItem as RolViewModel
+                : null;
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmRoles_Load(object? sender, EventArgs e)
         {
             btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarRolesAsync();
         }
 
-        private async Task CargarRolesAsync()
+        // Las columnas se definen una sola vez. Activo y ModulosPermitidos ya no se ocultan: no se definen.
+        private void ConfigurarColumnas()
         {
-            try
-            {
-                var resultado = await _controller.ObtenerRolesAsync(true);
-                _listaRoles = resultado.ToList();
-                dgvRoles.DataSource = null;
-                dgvRoles.DataSource = _listaRoles;
-                ConfigurarGrid();
-                dgvRoles.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar roles: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            dgvRoles.AutoGenerateColumns = false;
+
+            dgvRoles.AgregarTexto(nameof(RolViewModel.RolID), "ID", 40);
+            dgvRoles.AgregarTexto(nameof(RolViewModel.Nombre), "Rol", 100, 100);
+            dgvRoles.AgregarTexto(nameof(RolViewModel.Descripcion), "Descripción", 150, 100);
+            dgvRoles.AgregarTexto(nameof(RolViewModel.ModulosTexto), "Módulos permitidos", 200, 150);
+            dgvRoles.AgregarTexto(nameof(RolViewModel.Estado), "Estado", 70, 65);
+            dgvRoles.AgregarTexto(nameof(RolViewModel.CreatedAt), "Fecha de registro", 100, 95, "dd/MM/yyyy");
         }
 
-        private void ConfigurarGrid()
+        private async Task CargarRolesAsync(int? idASeleccionar = null)
         {
-            // 1. Ocultar columnas técnicas y complejas
-            if (dgvRoles.Columns["Activo"] != null) dgvRoles.Columns["Activo"].Visible = false;
-            if (dgvRoles.Columns["ModulosPermitidos"] != null) dgvRoles.Columns["ModulosPermitidos"].Visible = false;
+            // Si no se pide otro, se conserva la selección actual.
+            int? idObjetivo = idASeleccionar ?? RolSeleccionado?.RolID;
 
-            // 2. Configurar encabezados
-            if (dgvRoles.Columns["RolID"] != null) dgvRoles.Columns["RolID"].HeaderText = "ID";
-            if (dgvRoles.Columns["Nombre"] != null) dgvRoles.Columns["Nombre"].HeaderText = "Rol";
-            if (dgvRoles.Columns["Descripcion"] != null) dgvRoles.Columns["Descripcion"].HeaderText = "Descripción";
-            if (dgvRoles.Columns["ModulosTexto"] != null) dgvRoles.Columns["ModulosTexto"].HeaderText = "Módulos Permitidos";
-            if (dgvRoles.Columns["Estado"] != null) dgvRoles.Columns["Estado"].HeaderText = "Estado";
-            if (dgvRoles.Columns["CreatedAt"] != null) dgvRoles.Columns["CreatedAt"].HeaderText = "Fecha Registro";
-
-            // 3. Estructura de ordenamiento y pesos estilo estándar
-            dgvRoles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            string[] ordenColumnas =
+            await FormHelper.EjecutarAsync(async () =>
             {
-                "RolID",
-                "Nombre",
-                "Descripcion",
-                "ModulosTexto",
-                "Estado",
-                "CreatedAt"
-            };
+                var roles = await _controller.ObtenerRolesAsync(true);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
 
-            var pesos = new Dictionary<string, float>
-            {
-                ["RolID"] = 40,
-                ["Nombre"] = 100,
-                ["Descripcion"] = 150,
-                ["ModulosTexto"] = 200,
-                ["Estado"] = 70,
-                ["CreatedAt"] = 100
-            };
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvRoles.SortedColumn;
+                var sentidoOrden = dgvRoles.SortOrder;
 
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                if (dgvRoles.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                    continue;
+                _vista = new ListaOrdenable<RolViewModel>(roles);
+                dgvRoles.DataSource = _vista;
 
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    "Nombre" => 100,
-                    "ModulosTexto" => 150,
-                    "CreatedAt" => 95,
-                    _ => 55
-                };
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    dgvRoles.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
+                }
+
+                SeleccionarRol(idObjetivo);
+            },
+            "No se pudieron cargar los roles.",
+            panelTop);
+        }
+
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarRol(int? id)
+        {
+            dgvRoles.ClearSelection();
+
+            if (id.HasValue)
+            {
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].RolID != id.Value) continue;
+
+                    dgvRoles.Rows[i].Selected = true;
+                    dgvRoles.CurrentCell = dgvRoles.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
+            }
+
+            ActualizarEstadoBotones();
+        }
+
+        // El rol de Administrador está protegido: sus botones quedan deshabilitados
+        // y una nota explica por qué (antes había que hacer clic para ver el aviso).
+        private void ActualizarEstadoBotones()
+        {
+            var rol = RolSeleccionado;
+            bool haySeleccion = rol != null;
+            bool protegido = rol != null && RolesSistema.EsAdministrador(rol.Nombre);
+            bool modificable = haySeleccion && !protegido;
+
+            btnEditar.Enabled = modificable;
+            btnDesactivar.Enabled = modificable;
+            btnEliminarFisico.Enabled = modificable;
+
+            bool inactivo = rol is { Activo: false };
+            btnDesactivar.Text = inactivo ? "Activar" : "Desactivar";
+            btnDesactivar.Estilo = inactivo ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+
+            lblNotaProteccion.Visible = protegido;
+        }
+
+        private void dgvRoles_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Roles inactivos en gris, y "Activo" en verde.
+        private void dgvRoles_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
+
+            if (!_vista[e.RowIndex].Activo)
+            {
+                e.CellStyle.ForeColor = Tema.TextoAtenuado;
+            }
+            else if (dgvRoles.Columns[e.ColumnIndex].DataPropertyName == nameof(RolViewModel.Estado))
+            {
+                e.CellStyle.ForeColor = Tema.Exito;
             }
         }
 
-        private async void btnNuevo_Click(object sender, EventArgs e)
+        private async void dgvRoles_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            using var modal = new FrmRolModal(_controller);
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            var rol = _vista[e.RowIndex];
+            if (RolesSistema.EsAdministrador(rol.Nombre)) return; // la nota inferior ya explica por qué
+
+            await AbrirModalAsync(rol.RolID);
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevo_Click(object? sender, EventArgs e) => await AbrirModalAsync(null);
+
+        private async void btnEditar_Click(object? sender, EventArgs e)
+        {
+            var rol = RolSeleccionado;
+            if (rol == null || RolesSistema.EsAdministrador(rol.Nombre)) return; // defensivo: el botón ya está deshabilitado
+
+            await AbrirModalAsync(rol.RolID);
+        }
+
+        private async Task AbrirModalAsync(int? rolId)
+        {
+            using var modal = new FrmRolModal(_controller, rolId);
+
             if (modal.ShowDialog() == DialogResult.OK)
-            {
+                await CargarRolesAsync(rolId); // para uno nuevo (null) se conserva la selección actual
+        }
+
+        private async void btnDesactivar_Click(object? sender, EventArgs e)
+        {
+            var rol = RolSeleccionado;
+            if (rol == null || RolesSistema.EsAdministrador(rol.Nombre)) return;
+
+            string accion = rol.Activo ? "desactivar" : "activar";
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de {accion} el rol '{rol.Nombre}'?",
+                    $"Confirmar {accion.ToUpper()}"))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.CambiarEstadoLogicoAsync(rol.RolID),
+                "No se pudo cambiar el estado del rol.",
+                panelTop);
+
+            if (correcto)
+                await CargarRolesAsync(rol.RolID);
+        }
+
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var rol = RolSeleccionado;
+            if (rol == null || RolesSistema.EsAdministrador(rol.Nombre)) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar PERMANENTEMENTE el rol '{rol.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
+                    "Eliminación definitiva",
+                    destructiva: true))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.EliminarFisicoAsync(rol.RolID),
+                "No se pudo eliminar el rol. Si ya tiene usuarios asignados, reasígnelos o desactive el rol en su lugar.",
+                panelTop);
+
+            if (correcto)
                 await CargarRolesAsync();
-            }
-        }
-
-        private async void btnEditar_Click(object sender, EventArgs e)
-        {
-            if (dgvRoles.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un rol de la lista para editar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (RolViewModel)dgvRoles.CurrentRow.DataBoundItem;
-            if (item.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                item.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-            {
-                MessageBox.Show("No se permite editar el rol de Administrador.",
-                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            using var modal = new FrmRolModal(_controller, item.RolID);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarRolesAsync();
-            }
-        }
-
-        private async void btnDesactivar_Click(object sender, EventArgs e)
-        {
-            if (dgvRoles.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un rol de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (RolViewModel)dgvRoles.CurrentRow.DataBoundItem;
-            if (item.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                item.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-            {
-                MessageBox.Show("No se permite desactivar el rol de Administrador.",
-                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string accion = item.Activo ? "desactivar" : "activar";
-
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} el rol '{item.Nombre}'?", $"Confirmar {accion.ToUpper()}"))
-            {
-                try
-                {
-                    await _controller.CambiarEstadoLogicoAsync(item.RolID);
-                    await CargarRolesAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvRoles.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un rol de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (RolViewModel)dgvRoles.CurrentRow.DataBoundItem;
-
-            if (item.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
-                item.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-            {
-                MessageBox.Show("No se permite eliminar el rol de Administrador.",
-                                "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE el rol '{item.Nombre}' de la base de datos?", "Eliminación Definitiva"))
-            {
-                try
-                {
-                    await _controller.EliminarFisicoAsync(item.RolID);
-                    await CargarRolesAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void dgvRoles_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvRoles.CurrentRow != null && dgvRoles.CurrentRow.DataBoundItem is RolViewModel item)
-            {
-                if (item.Activo)
-                {
-                    btnDesactivar.Text = "Desactivar";
-                    btnDesactivar.BackColor = System.Drawing.Color.IndianRed;
-                }
-                else
-                {
-                    btnDesactivar.Text = "Activar";
-                    btnDesactivar.BackColor = System.Drawing.Color.ForestGreen;
-                }
-            }
         }
     }
 }

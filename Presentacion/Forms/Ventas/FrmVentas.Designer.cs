@@ -17,277 +17,241 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelTop = new Panel();
             lblTitulo = new Label();
-            flpFechas = new FlowLayoutPanel();
+            flowAcciones = new FlowLayoutPanel();
+            btnNuevaVenta = new BotonTema();
+            btnVerDetalle = new BotonTema();
+            btnAnular = new BotonTema();
+            btnEliminarFisico = new BotonTema();
+            panelFiltros = new Panel();
+            flowFiltros = new FlowLayoutPanel();
             lblDesde = new Label();
             dtpFechaInicio = new DateTimePicker();
             lblHasta = new Label();
             dtpFechaFin = new DateTimePicker();
-            btnFiltrarFechas = new Button();
-            btnNuevaVenta = new Button();
-            btnLimpiarFiltros = new Button();
-            btnVerDetalle = new Button();
-            btnAnular = new Button();
-            btnEliminarFisico = new Button();
-            dgvVentas = new DataGridView();
+            btnFiltrarFechas = new BotonTema();
+            btnLimpiarFiltros = new BotonTema();
+            lblResumen = new Label();
+            dgvVentas = new GridTema();
             panelTop.SuspendLayout();
-            flpFechas.SuspendLayout();
+            flowAcciones.SuspendLayout();
+            panelFiltros.SuspendLayout();
+            flowFiltros.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvVentas).BeginInit();
             SuspendLayout();
-            // 
+            //
             // panelTop
-            // 
+            //
             panelTop.BackColor = Color.FromArgb(15, 42, 79);
+            panelTop.Controls.Add(flowAcciones);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(flpFechas);
-            panelTop.Controls.Add(btnNuevaVenta);
-            panelTop.Controls.Add(btnVerDetalle);
-            panelTop.Controls.Add(btnAnular);
-            panelTop.Controls.Add(btnEliminarFisico);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
-            panelTop.Margin = new Padding(3, 4, 3, 4);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(1257, 160);
+            panelTop.Size = new Size(1257, 70);
             panelTop.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Microsoft Sans Serif", 15F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(23, 20);
+            lblTitulo.Location = new Point(20, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(245, 29);
+            lblTitulo.Size = new Size(213, 32);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Historial de Ventas";
-            // 
-            // flpFechas
-            // 
-            flpFechas.AutoSize = true;
-            flpFechas.Controls.Add(lblDesde);
-            flpFechas.Controls.Add(dtpFechaInicio);
-            flpFechas.Controls.Add(lblHasta);
-            flpFechas.Controls.Add(dtpFechaFin);
-            flpFechas.Controls.Add(btnFiltrarFechas);
-            flpFechas.Controls.Add(btnLimpiarFiltros);
-            flpFechas.Location = new Point(23, 109);
-            flpFechas.Margin = new Padding(3, 4, 3, 4);
-            flpFechas.Name = "flpFechas";
-            flpFechas.Size = new Size(600, 47);
-            flpFechas.TabIndex = 1;
-            flpFechas.WrapContents = false;
-            // 
+            //
+            // flowAcciones
+            //
+            flowAcciones.AutoSize = true;
+            flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowAcciones.Controls.Add(btnNuevaVenta);
+            flowAcciones.Controls.Add(btnVerDetalle);
+            flowAcciones.Controls.Add(btnAnular);
+            flowAcciones.Controls.Add(btnEliminarFisico);
+            flowAcciones.Dock = DockStyle.Right;
+            flowAcciones.Location = new Point(500, 0);
+            flowAcciones.Name = "flowAcciones";
+            flowAcciones.Padding = new Padding(0, 16, 12, 0);
+            flowAcciones.Size = new Size(757, 70);
+            flowAcciones.TabIndex = 1;
+            flowAcciones.WrapContents = false;
+            //
+            // btnNuevaVenta
+            //
+            btnNuevaVenta.Estilo = EstiloBoton.Primario;
+            btnNuevaVenta.Margin = new Padding(0, 0, 8, 0);
+            btnNuevaVenta.Name = "btnNuevaVenta";
+            btnNuevaVenta.Size = new Size(130, 38);
+            btnNuevaVenta.TabIndex = 0;
+            btnNuevaVenta.Text = "+ Nueva venta";
+            btnNuevaVenta.Click += btnNuevaVenta_Click;
+            //
+            // btnVerDetalle
+            //
+            btnVerDetalle.Enabled = false;
+            btnVerDetalle.Margin = new Padding(0, 0, 8, 0);
+            btnVerDetalle.Name = "btnVerDetalle";
+            btnVerDetalle.Size = new Size(110, 38);
+            btnVerDetalle.TabIndex = 1;
+            btnVerDetalle.Text = "Ver detalle";
+            btnVerDetalle.Click += btnVerDetalle_Click;
+            //
+            // btnAnular
+            //
+            btnAnular.Enabled = false;
+            btnAnular.Estilo = EstiloBoton.Advertencia;
+            btnAnular.Margin = new Padding(0, 0, 8, 0);
+            btnAnular.Name = "btnAnular";
+            btnAnular.Size = new Size(110, 38);
+            btnAnular.TabIndex = 2;
+            btnAnular.Text = "Anular";
+            btnAnular.Click += btnAnular_Click;
+            //
+            // btnEliminarFisico
+            //
+            btnEliminarFisico.Enabled = false;
+            btnEliminarFisico.Estilo = EstiloBoton.Peligro;
+            btnEliminarFisico.Margin = new Padding(0, 0, 8, 0);
+            btnEliminarFisico.Name = "btnEliminarFisico";
+            btnEliminarFisico.Size = new Size(110, 38);
+            btnEliminarFisico.TabIndex = 3;
+            btnEliminarFisico.Text = "Eliminar";
+            btnEliminarFisico.Click += btnEliminarFisico_Click;
+            //
+            // panelFiltros
+            //
+            panelFiltros.BackColor = Color.FromArgb(14, 20, 36);
+            panelFiltros.Controls.Add(lblResumen);
+            panelFiltros.Controls.Add(flowFiltros);
+            panelFiltros.Dock = DockStyle.Top;
+            panelFiltros.Location = new Point(0, 70);
+            panelFiltros.Name = "panelFiltros";
+            panelFiltros.Size = new Size(1257, 56);
+            panelFiltros.TabIndex = 1;
+            //
+            // flowFiltros
+            //
+            flowFiltros.AutoSize = true;
+            flowFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flowFiltros.Controls.Add(lblDesde);
+            flowFiltros.Controls.Add(dtpFechaInicio);
+            flowFiltros.Controls.Add(lblHasta);
+            flowFiltros.Controls.Add(dtpFechaFin);
+            flowFiltros.Controls.Add(btnFiltrarFechas);
+            flowFiltros.Controls.Add(btnLimpiarFiltros);
+            flowFiltros.Dock = DockStyle.Left;
+            flowFiltros.Location = new Point(0, 0);
+            flowFiltros.Name = "flowFiltros";
+            flowFiltros.Padding = new Padding(20, 10, 0, 0);
+            flowFiltros.Size = new Size(640, 56);
+            flowFiltros.TabIndex = 0;
+            flowFiltros.WrapContents = false;
+            //
             // lblDesde
-            // 
-            lblDesde.Anchor = AnchorStyles.Left;
+            //
             lblDesde.AutoSize = true;
             lblDesde.Font = new Font("Segoe UI", 9.5F);
             lblDesde.ForeColor = Color.FromArgb(230, 238, 252);
-            lblDesde.Location = new Point(0, 7);
-            lblDesde.Margin = new Padding(0, 0, 6, 0);
+            lblDesde.Margin = new Padding(0, 7, 6, 0);
             lblDesde.Name = "lblDesde";
             lblDesde.Size = new Size(56, 21);
             lblDesde.TabIndex = 0;
             lblDesde.Text = "Desde:";
-            // 
+            //
             // dtpFechaInicio
-            // 
-            dtpFechaInicio.Anchor = AnchorStyles.Left;
+            //
             dtpFechaInicio.Font = new Font("Segoe UI", 9F);
             dtpFechaInicio.Format = DateTimePickerFormat.Short;
-            dtpFechaInicio.Location = new Point(62, 4);
-            dtpFechaInicio.Margin = new Padding(0, 0, 17, 0);
+            dtpFechaInicio.Margin = new Padding(0, 4, 16, 0);
             dtpFechaInicio.Name = "dtpFechaInicio";
             dtpFechaInicio.Size = new Size(125, 27);
             dtpFechaInicio.TabIndex = 1;
-            // 
+            //
             // lblHasta
-            // 
-            lblHasta.Anchor = AnchorStyles.Left;
+            //
             lblHasta.AutoSize = true;
             lblHasta.Font = new Font("Segoe UI", 9.5F);
             lblHasta.ForeColor = Color.FromArgb(230, 238, 252);
-            lblHasta.Location = new Point(204, 7);
-            lblHasta.Margin = new Padding(0, 0, 6, 0);
+            lblHasta.Margin = new Padding(0, 7, 6, 0);
             lblHasta.Name = "lblHasta";
             lblHasta.Size = new Size(52, 21);
             lblHasta.TabIndex = 2;
             lblHasta.Text = "Hasta:";
-            // 
+            //
             // dtpFechaFin
-            // 
-            dtpFechaFin.Anchor = AnchorStyles.Left;
+            //
             dtpFechaFin.Font = new Font("Segoe UI", 9F);
             dtpFechaFin.Format = DateTimePickerFormat.Short;
-            dtpFechaFin.Location = new Point(262, 4);
-            dtpFechaFin.Margin = new Padding(0, 0, 17, 0);
+            dtpFechaFin.Margin = new Padding(0, 4, 16, 0);
             dtpFechaFin.Name = "dtpFechaFin";
             dtpFechaFin.Size = new Size(125, 27);
             dtpFechaFin.TabIndex = 3;
-            // 
+            //
             // btnFiltrarFechas
-            // 
-            btnFiltrarFechas.Anchor = AnchorStyles.Left;
-            btnFiltrarFechas.BackColor = Color.FromArgb(31, 111, 235);
-            btnFiltrarFechas.FlatAppearance.BorderSize = 0;
-            btnFiltrarFechas.FlatStyle = FlatStyle.Flat;
-            btnFiltrarFechas.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnFiltrarFechas.ForeColor = Color.White;
-            btnFiltrarFechas.Location = new Point(404, 0);
-            btnFiltrarFechas.Margin = new Padding(0);
+            //
+            btnFiltrarFechas.Estilo = EstiloBoton.Primario;
+            btnFiltrarFechas.Margin = new Padding(0, 1, 8, 0);
             btnFiltrarFechas.Name = "btnFiltrarFechas";
-            btnFiltrarFechas.Size = new Size(86, 36);
+            btnFiltrarFechas.Size = new Size(86, 32);
             btnFiltrarFechas.TabIndex = 4;
             btnFiltrarFechas.Text = "Filtrar";
-            btnFiltrarFechas.UseVisualStyleBackColor = false;
             btnFiltrarFechas.Click += btnFiltrarFechas_Click;
-            // 
-            // btnNuevaVenta
-            // 
-            btnNuevaVenta.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnNuevaVenta.BackColor = Color.FromArgb(31, 111, 235);
-            btnNuevaVenta.FlatAppearance.BorderSize = 0;
-            btnNuevaVenta.FlatStyle = FlatStyle.Flat;
-            btnNuevaVenta.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnNuevaVenta.ForeColor = Color.White;
-            btnNuevaVenta.Location = new Point(686, 108);
-            btnNuevaVenta.Margin = new Padding(3, 4, 3, 4);
-            btnNuevaVenta.Name = "btnNuevaVenta";
-            btnNuevaVenta.Size = new Size(110, 38);
-            btnNuevaVenta.TabIndex = 4;
-            btnNuevaVenta.Text = "+ Nueva Venta";
-            btnNuevaVenta.UseVisualStyleBackColor = false;
-            btnNuevaVenta.Click += btnNuevaVenta_Click;
-            // 
+            //
             // btnLimpiarFiltros
-            // 
-            btnLimpiarFiltros.Anchor = AnchorStyles.Left;
-            btnLimpiarFiltros.BackColor = Color.FromArgb(11, 15, 26);
-            btnLimpiarFiltros.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnLimpiarFiltros.FlatStyle = FlatStyle.Flat;
-            btnLimpiarFiltros.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnLimpiarFiltros.ForeColor = Color.FromArgb(230, 238, 252);
-            btnLimpiarFiltros.Location = new Point(533, 109);
-            btnLimpiarFiltros.Margin = new Padding(8, 0, 0, 0);
+            //
+            btnLimpiarFiltros.Margin = new Padding(0, 1, 0, 0);
             btnLimpiarFiltros.Name = "btnLimpiarFiltros";
-            btnLimpiarFiltros.Size = new Size(86, 36);
+            btnLimpiarFiltros.Size = new Size(86, 32);
             btnLimpiarFiltros.TabIndex = 5;
-            btnLimpiarFiltros.Text = "Limpiar";
-            btnLimpiarFiltros.UseVisualStyleBackColor = false;
+            btnLimpiarFiltros.Text = "Hoy";
             btnLimpiarFiltros.Click += btnLimpiarFiltros_Click;
-            // 
-            // btnVerDetalle
-            // 
-            btnVerDetalle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnVerDetalle.BackColor = Color.FromArgb(11, 15, 26);
-            btnVerDetalle.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnVerDetalle.FlatStyle = FlatStyle.Flat;
-            btnVerDetalle.Font = new Font("Segoe UI", 9F);
-            btnVerDetalle.ForeColor = Color.FromArgb(230, 238, 252);
-            btnVerDetalle.Location = new Point(823, 108);
-            btnVerDetalle.Margin = new Padding(3, 4, 3, 4);
-            btnVerDetalle.Name = "btnVerDetalle";
-            btnVerDetalle.Size = new Size(110, 38);
-            btnVerDetalle.TabIndex = 5;
-            btnVerDetalle.Text = "Ver Detalle";
-            btnVerDetalle.UseVisualStyleBackColor = false;
-            btnVerDetalle.Click += btnVerDetalle_Click;
-            // 
-            // btnAnular
-            // 
-            btnAnular.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnAnular.BackColor = Color.FromArgb(11, 15, 26);
-            btnAnular.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnAnular.FlatStyle = FlatStyle.Flat;
-            btnAnular.Font = new Font("Segoe UI", 9F);
-            btnAnular.ForeColor = Color.FromArgb(230, 238, 252);
-            btnAnular.Location = new Point(949, 108);
-            btnAnular.Margin = new Padding(3, 4, 3, 4);
-            btnAnular.Name = "btnAnular";
-            btnAnular.Size = new Size(110, 38);
-            btnAnular.TabIndex = 6;
-            btnAnular.Text = "Anular Venta";
-            btnAnular.UseVisualStyleBackColor = false;
-            btnAnular.Click += btnAnular_Click;
-            // 
-            // btnEliminarFisico
-            // 
-            btnEliminarFisico.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnEliminarFisico.BackColor = Color.FromArgb(11, 15, 26);
-            btnEliminarFisico.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
-            btnEliminarFisico.FlatStyle = FlatStyle.Flat;
-            btnEliminarFisico.Font = new Font("Segoe UI", 9F);
-            btnEliminarFisico.ForeColor = Color.FromArgb(230, 238, 252);
-            btnEliminarFisico.Location = new Point(1086, 108);
-            btnEliminarFisico.Margin = new Padding(3, 4, 3, 4);
-            btnEliminarFisico.Name = "btnEliminarFisico";
-            btnEliminarFisico.Size = new Size(110, 38);
-            btnEliminarFisico.TabIndex = 7;
-            btnEliminarFisico.Text = "Eliminar";
-            btnEliminarFisico.UseVisualStyleBackColor = false;
-            btnEliminarFisico.Click += btnEliminarFisico_Click;
-            // Configuración estilo oscuro en dgvVentas
-            dgvVentas.AllowUserToAddRows = false;
-            dgvVentas.AllowUserToDeleteRows = false;
-            dgvVentas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvVentas.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvVentas.BorderStyle = BorderStyle.None;
-            dgvVentas.EnableHeadersVisualStyles = false;
-
-            // Encabezados
-            dgvVentas.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvVentas.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvVentas.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            dgvVentas.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            // Relleno de celdas estandarizado (8px a la izquierda)
-            Padding margenCelda = new Padding(8, 0, 0, 0);
-            dgvVentas.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
-            dgvVentas.DefaultCellStyle.Padding = margenCelda;
-
-            // Celdas estándar y selección
-            dgvVentas.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvVentas.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvVentas.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvVentas.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvVentas.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvVentas.ScrollBars = ScrollBars.Both;
-
-            dgvVentas.GridColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvVentas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            //
+            // lblResumen
+            //
+            lblResumen.Dock = DockStyle.Right;
+            lblResumen.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            lblResumen.ForeColor = Color.FromArgb(45, 212, 255);
+            lblResumen.Location = new Point(757, 0);
+            lblResumen.Name = "lblResumen";
+            lblResumen.Padding = new Padding(0, 0, 20, 0);
+            lblResumen.Size = new Size(500, 56);
+            lblResumen.TabIndex = 1;
+            lblResumen.TextAlign = ContentAlignment.MiddleRight;
+            //
+            // dgvVentas
+            //
             dgvVentas.Dock = DockStyle.Fill;
-            dgvVentas.Location = new Point(0, 160);
-            dgvVentas.Margin = new Padding(3, 4, 3, 4);
-            dgvVentas.MultiSelect = false;
+            dgvVentas.Location = new Point(0, 126);
             dgvVentas.Name = "dgvVentas";
-            dgvVentas.ReadOnly = true;
-            dgvVentas.RowHeadersVisible = false;
-            dgvVentas.RowHeadersWidth = 51;
-            dgvVentas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvVentas.Size = new Size(1257, 907);
-            dgvVentas.TabIndex = 1;
-            // 
+            dgvVentas.Size = new Size(1257, 941);
+            dgvVentas.TabIndex = 2;
+            dgvVentas.CellDoubleClick += dgvVentas_CellDoubleClick;
+            dgvVentas.CellFormatting += dgvVentas_CellFormatting;
+            dgvVentas.SelectionChanged += dgvVentas_SelectionChanged;
+            //
             // FrmVentas
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             ClientSize = new Size(1257, 1067);
             Controls.Add(dgvVentas);
+            Controls.Add(panelFiltros);
             Controls.Add(panelTop);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "FrmVentas";
             Text = "Ventas";
             Load += FrmVentas_Load;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
-            flpFechas.ResumeLayout(false);
-            flpFechas.PerformLayout();
+            flowAcciones.ResumeLayout(false);
+            panelFiltros.ResumeLayout(false);
+            panelFiltros.PerformLayout();
+            flowFiltros.ResumeLayout(false);
+            flowFiltros.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvVentas).EndInit();
             ResumeLayout(false);
         }
@@ -296,17 +260,20 @@
 
         private Panel panelTop;
         private Label lblTitulo;
-        private FlowLayoutPanel flpFechas;
+        private FlowLayoutPanel flowAcciones;
+        private BotonTema btnNuevaVenta;
+        private BotonTema btnVerDetalle;
+        private BotonTema btnAnular;
+        private BotonTema btnEliminarFisico;
+        private Panel panelFiltros;
+        private FlowLayoutPanel flowFiltros;
         private Label lblDesde;
         private DateTimePicker dtpFechaInicio;
         private Label lblHasta;
         private DateTimePicker dtpFechaFin;
-        private Button btnFiltrarFechas;
-        private Button btnNuevaVenta;
-        private Button btnVerDetalle;
-        private Button btnAnular;
-        private Button btnEliminarFisico;
-        private DataGridView dgvVentas;
-        private Button btnLimpiarFiltros;
+        private BotonTema btnFiltrarFechas;
+        private BotonTema btnLimpiarFiltros;
+        private Label lblResumen;
+        private GridTema dgvVentas;
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Corte;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,149 +17,160 @@ namespace Presentacion.Forms.Reportes
 {
     public partial class FrmVentasProductos : Form
     {
+        /// <summary>Una fila del reporte. Los importes se guardan como decimal (no como texto) para que ordenen y sumen bien.</summary>
+        private sealed record FilaVentaProducto(
+            string FechaRegistro,
+            string Producto,
+            decimal CostoUnitario,
+            decimal PrecioUnitario,
+            decimal Ganancia);
+
         private readonly ReporteController _reporteController;
-        private List<ReporteVentaProductoViewModel> _listaVentasProductos = new();
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<FilaVentaProducto> _vista = new();
 
         public FrmVentasProductos(ReporteController reporteController)
         {
+            _reporteController = reporteController ?? throw new ArgumentNullException(nameof(reporteController));
+
             InitializeComponent();
-            _reporteController = reporteController;
+            ConfigurarColumnas();
         }
 
-        private async void FrmVentasProductos_Load(object sender, EventArgs e)
+        private async void FrmVentasProductos_Load(object? sender, EventArgs e)
         {
-            // Inicializar los DateTimePicker marcando el día de hoy
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
             await BuscarPorFechasAsync();
         }
 
-        private async void btnFiltrar_Click(object sender, EventArgs e)
+        // Las columnas se definen una sola vez, con su formato real.
+        private void ConfigurarColumnas()
         {
+            dgvVentasProductos.AutoGenerateColumns = false;
+
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 120, 120);
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Producto), "Nombre del producto", 200, 140);
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.CostoUnitario), "Costo Unitario", 90, 90, "C2", alinearDerecha: true);
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.PrecioUnitario), "Precio Unitario", 90, 90, "C2", alinearDerecha: true);
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Ganancia), "Ganancia", 90, 90, "C2", alinearDerecha: true);
+
+            // La fecha llega como texto del reporte: ordenarla alfabéticamente daría un orden engañoso.
+            foreach (DataGridViewColumn c in dgvVentasProductos.Columns)
+                if (c.DataPropertyName == nameof(FilaVentaProducto.FechaRegistro))
+                    c.SortMode = DataGridViewColumnSortMode.NotSortable;
+        }
+
+        private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechasAsync();
+
+        // "Hoy": vuelve al día actual.
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
+        {
+            dtpFechaInicio.Value = DateTime.Today;
+            dtpFechaFin.Value = DateTime.Today;
+
             await BuscarPorFechasAsync();
         }
 
         private async Task BuscarPorFechasAsync()
         {
-            try
+            // El rango cubre todo el día "Hasta".
+            DateTime inicio = dtpFechaInicio.Value.Date;
+            DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+
+            if (inicio > fin)
             {
-                Cursor = Cursors.WaitCursor;
+                FormHelper.MostrarAdvertencia("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.", "Rango de fechas");
+                return;
+            }
 
-                // Ajustar horas para cubrir todo el rango del día seleccionado
-                DateTime inicio = dtpFechaInicio.Value.Date;
-                DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+            await FormHelper.EjecutarAsync(async () =>
+            {
+                var ventas = await _reporteController.ObtenerVentaProductosAsync(inicio, fin);
+                if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
 
-                // Consumimos el controlador pasando el rango de fechas
-                var resultado = await _reporteController.ObtenerVentaProductosAsync(inicio, fin);
-                _listaVentasProductos = resultado.ToList();
+                var filas = ventas.Select(v => new FilaVentaProducto(
+                    string.IsNullOrWhiteSpace(v.FechaRegistro) ? "N/A" : v.FechaRegistro,
+                    string.IsNullOrWhiteSpace(v.Producto) ? "N/A" : v.Producto,
+                    ADecimal(v.CostoUnitario),
+                    ADecimal(v.PrecioUnitario),
+                    ADecimal(v.Ganancia)));
 
-                // Proyectamos asegurando que si algún texto viene nulo/vacío, muestre "N/A"
-                var datosMostrar = _listaVentasProductos.Select(v => new
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvVentasProductos.SortedColumn;
+                var sentidoOrden = dgvVentasProductos.SortOrder;
+
+                _vista = new ListaOrdenable<FilaVentaProducto>(filas);
+                dgvVentasProductos.DataSource = _vista;
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    FechaRegistro = string.IsNullOrWhiteSpace(v.FechaRegistro) ? "N/A" : v.FechaRegistro,
-                    Producto = string.IsNullOrWhiteSpace(v.Producto) ? "N/A" : v.Producto,
-                    CostoUnitario = v.CostoUnitario,
-                    PrecioUnitario = v.PrecioUnitario,
-                    Ganancia = v.Ganancia
-                }).ToList();
-
-                dgvVentasProductos.DataSource = null;
-                dgvVentasProductos.DataSource = datosMostrar;
-
-                ConfigurarGrid();
-                CalcularTotalGanancia();
-                dgvVentasProductos.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el reporte de ventas de productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
-        }
-
-        private void CalcularTotalGanancia()
-        {
-            // Sumamos la ganancia parsing el valor numérico de la lista de ViewModels de forma segura
-            decimal totalGanancia = 0m;
-
-            foreach (var item in _listaVentasProductos)
-            {
-                // Limpiamos el formato de moneda para convertir a decimal si viene como string formateado
-                string gananciaLimpia = item.Ganancia.Replace("$", "").Replace(" ", "").Trim();
-                if (decimal.TryParse(gananciaLimpia, out decimal gananciaValor))
-                {
-                    totalGanancia += gananciaValor;
+                    dgvVentasProductos.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
                 }
-            }
 
-            lblTotal.Text = $"Total Ganancia: {totalGanancia:C2}";
+                dgvVentasProductos.ClearSelection();
+                ActualizarResumen();
+            },
+            "No se pudo cargar el reporte de ventas de productos.",
+            panelTop, panelFiltros);
         }
 
-        private void ConfigurarGrid()
+        // Acepta decimal o texto con formato de moneda ("$1,250.00"), sea cual sea el tipo del ViewModel.
+        private static decimal ADecimal(object? valor) => valor switch
         {
-            if (dgvVentasProductos.Columns.Count == 0) return;
+            null => 0m,
+            decimal d => d,
+            string s when decimal.TryParse(s, NumberStyles.Currency, CultureInfo.CurrentCulture, out var r) => r,
+            IConvertible c => TryConvertir(c),
+            _ => 0m
+        };
 
-            // Renombrar encabezados de columnas
-            if (dgvVentasProductos.Columns["FechaRegistro"] != null)
-                dgvVentasProductos.Columns["FechaRegistro"].HeaderText = "Fecha de Registro";
-
-            if (dgvVentasProductos.Columns["Producto"] != null)
-                dgvVentasProductos.Columns["Producto"].HeaderText = "Nombre del producto";
-
-            if (dgvVentasProductos.Columns["CostoUnitario"] != null)
-            {
-                dgvVentasProductos.Columns["CostoUnitario"].HeaderText = "Costo Unitario";
-                dgvVentasProductos.Columns["CostoUnitario"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                dgvVentasProductos.Columns["CostoUnitario"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvVentasProductos.Columns["PrecioUnitario"] != null)
-            {
-                dgvVentasProductos.Columns["PrecioUnitario"].HeaderText = "Precio Unitario";
-                dgvVentasProductos.Columns["PrecioUnitario"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                dgvVentasProductos.Columns["PrecioUnitario"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvVentasProductos.Columns["Ganancia"] != null)
-            {
-                dgvVentasProductos.Columns["Ganancia"].HeaderText = "Ganancia";
-                dgvVentasProductos.Columns["Ganancia"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                dgvVentasProductos.Columns["Ganancia"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            dgvVentasProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        private static decimal TryConvertir(IConvertible c)
+        {
+            try { return c.ToDecimal(CultureInfo.CurrentCulture); }
+            catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException) { return 0m; }
         }
 
-        private void btnExportarExcel_Click(object sender, EventArgs e)
+        private void ActualizarResumen()
         {
-            if (dgvVentasProductos.Rows.Count == 0)
+            lblTotal.Text = $"{_vista.Count} registro(s)  ·  Total Ganancia {_vista.Sum(f => f.Ganancia):C2}";
+            btnExportarExcel.Enabled = _vista.Count > 0;
+        }
+
+        // Ganancia en verde; si hubo pérdida (negativa), en rojo.
+        private void dgvVentasProductos_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.CellStyle is null) return;
+            if (dgvVentasProductos.Columns[e.ColumnIndex].DataPropertyName != nameof(FilaVentaProducto.Ganancia)) return;
+
+            if (e.Value is decimal g)
+                e.CellStyle.ForeColor = g < 0 ? Tema.Peligro : Tema.Exito;
+        }
+
+        // Antes este botón mostraba "exportado con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente.
+        private void btnExportarExcel_Click(object? sender, EventArgs e)
+        {
+            if (_vista.Count == 0)
             {
-                MessageBox.Show("No hay datos en la tabla para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("No hay datos en la tabla para exportar.");
                 return;
             }
 
             try
             {
-                // Lógica o Helper para exportación a Excel
-                MessageBox.Show("Reporte de ventas de productos exportado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string? ruta = ExportadorCsv.Exportar(dgvVentasProductos, "Ventas_de_productos");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                MessageBox.Show($"Error al exportar a Excel: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
-        }
-
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
-        {
-            // Restablecer el rango de fechas al día de hoy
-            dtpFechaInicio.Value = DateTime.Today;
-            dtpFechaFin.Value = DateTime.Today;
-
-            await BuscarPorFechasAsync();
         }
     }
 }

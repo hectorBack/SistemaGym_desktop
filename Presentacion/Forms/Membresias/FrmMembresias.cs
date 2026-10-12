@@ -16,183 +16,198 @@ namespace Presentacion.Forms.Membresias
     public partial class FrmMembresias : Form
     {
         private readonly MembresiaController _controller;
-        private List<MembresiaViewModel> _listaMembresias = new();
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<MembresiaViewModel> _vista = new();
 
         public FrmMembresias(MembresiaController controller)
         {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+
             InitializeComponent();
-            _controller = controller;
-            dgvMembresias.SelectionChanged += dgvMembresias_SelectionChanged;
+            ConfigurarColumnas();
         }
 
-        private async void FrmMembresias_Load(object sender, EventArgs e)
+        /// <summary>Membresía de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private MembresiaViewModel? MembresiaSeleccionada =>
+            dgvMembresias.SelectedRows.Count > 0
+                ? dgvMembresias.SelectedRows[0].DataBoundItem as MembresiaViewModel
+                : null;
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmMembresias_Load(object? sender, EventArgs e)
         {
             btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
             await CargarMembresiasAsync();
         }
 
-        private async Task CargarMembresiasAsync()
+        // Las columnas se definen una sola vez (no en cada recarga).
+        // Precio y duración se enlazan a los valores numéricos (no a texto ya formateado),
+        // así ordenan correctamente: 7 días antes que 30, $99 antes que $1,200.
+        private void ConfigurarColumnas()
         {
-            try
-            {
-                var resultado = await _controller.ObtenerMembresiasAsync(true);
-                _listaMembresias = resultado.ToList();
-                dgvMembresias.DataSource = null;
-                dgvMembresias.DataSource = _listaMembresias;
-                ConfigurarGrid();
-                dgvMembresias.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar membresías: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            dgvMembresias.AutoGenerateColumns = false;
+
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.MembresiaID), "ID", 45);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Nombre), "Membresía", 180, 110);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Precio), "Precio", 90, 80, "C2", alinearDerecha: true);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.DuracionDias), "Duración", 100, 90, "0\" días\"", alinearDerecha: true);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Estado), "Estado", 80, 70);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
         }
 
-        private void ConfigurarGrid()
+        private async Task CargarMembresiasAsync(int? idASeleccionar = null)
         {
-            // 1. Ocultar columnas que no deben verse
-            if (dgvMembresias.Columns["Precio"] != null) dgvMembresias.Columns["Precio"].Visible = false;
-            if (dgvMembresias.Columns["DuracionDias"] != null) dgvMembresias.Columns["DuracionDias"].Visible = false;
-            if (dgvMembresias.Columns["Activo"] != null) dgvMembresias.Columns["Activo"].Visible = false;
+            // Si no se pide otra, se conserva la selección actual.
+            int? idObjetivo = idASeleccionar ?? MembresiaSeleccionada?.MembresiaID;
 
-            // 2. Configurar encabezados
-            if (dgvMembresias.Columns["MembresiaID"] != null) dgvMembresias.Columns["MembresiaID"].HeaderText = "ID";
-            if (dgvMembresias.Columns["Nombre"] != null) dgvMembresias.Columns["Nombre"].HeaderText = "Membresía";
-            if (dgvMembresias.Columns["PrecioFormateado"] != null) dgvMembresias.Columns["PrecioFormateado"].HeaderText = "Precio";
-            if (dgvMembresias.Columns["DuracionTexto"] != null) dgvMembresias.Columns["DuracionTexto"].HeaderText = "Duración";
-            if (dgvMembresias.Columns["Estado"] != null) dgvMembresias.Columns["Estado"].HeaderText = "Estado";
-            if (dgvMembresias.Columns["CreatedAt"] != null) dgvMembresias.Columns["CreatedAt"].HeaderText = "Fecha Registro";
-
-            // 3. Mismo esquema de ordenamiento y pesos estilo dgvVisitas / dgvSocios
-            dgvMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            string[] ordenColumnas =
+            await FormHelper.EjecutarAsync(async () =>
             {
-        "MembresiaID",
-        "Nombre",
-        "PrecioFormateado",
-        "DuracionTexto",
-        "Estado",
-        "CreatedAt"
-    };
+                var membresias = await _controller.ObtenerMembresiasAsync(true);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
 
-            var pesos = new Dictionary<string, float>
-            {
-                ["MembresiaID"] = 45,
-                ["Nombre"] = 180,
-                ["PrecioFormateado"] = 90,
-                ["DuracionTexto"] = 110,
-                ["Estado"] = 80,
-                ["CreatedAt"] = 120
-            };
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvMembresias.SortedColumn;
+                var sentidoOrden = dgvMembresias.SortOrder;
 
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                if (dgvMembresias.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                    continue;
+                _vista = new ListaOrdenable<MembresiaViewModel>(membresias);
+                dgvMembresias.DataSource = _vista;
 
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    "Nombre" or "DuracionTexto" => 110,
-                    "CreatedAt" => 95,
-                    _ => 55
-                };
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    dgvMembresias.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
+                }
+
+                SeleccionarMembresia(idObjetivo);
+            },
+            "No se pudieron cargar las membresías.",
+            panelTop);
+        }
+
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarMembresia(int? id)
+        {
+            dgvMembresias.ClearSelection();
+
+            if (id.HasValue)
+            {
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].MembresiaID != id.Value) continue;
+
+                    dgvMembresias.Rows[i].Selected = true;
+                    dgvMembresias.CurrentCell = dgvMembresias.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
+            }
+
+            ActualizarEstadoBotones();
+        }
+
+        // Editar, Activar/Desactivar y Eliminar solo tienen sentido con una fila seleccionada.
+        private void ActualizarEstadoBotones()
+        {
+            var membresia = MembresiaSeleccionada;
+            bool haySeleccion = membresia != null;
+
+            btnEditar.Enabled = haySeleccion;
+            btnDesactivar.Enabled = haySeleccion;
+            btnEliminarFisico.Enabled = haySeleccion;
+
+            bool inactiva = membresia is { Activo: false };
+            btnDesactivar.Text = inactiva ? "Activar" : "Desactivar";
+            btnDesactivar.Estilo = inactiva ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+        }
+
+        private void dgvMembresias_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Membresías inactivas en gris, y "Activo" en verde.
+        private void dgvMembresias_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
+
+            if (!_vista[e.RowIndex].Activo)
+            {
+                e.CellStyle.ForeColor = Tema.TextoAtenuado;
+            }
+            else if (dgvMembresias.Columns[e.ColumnIndex].DataPropertyName == nameof(MembresiaViewModel.Estado))
+            {
+                e.CellStyle.ForeColor = Tema.Exito;
             }
         }
 
-        private async void btnNuevo_Click(object sender, EventArgs e)
+        private async void dgvMembresias_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            using var modal = new FrmMembresiaModal(_controller);
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            await AbrirModalAsync(_vista[e.RowIndex]);
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevo_Click(object? sender, EventArgs e) => await AbrirModalAsync(null);
+
+        private async void btnEditar_Click(object? sender, EventArgs e)
+        {
+            var membresia = MembresiaSeleccionada;
+            if (membresia == null) return; // el botón ya está deshabilitado sin selección; esto es solo defensivo
+
+            await AbrirModalAsync(membresia);
+        }
+
+        private async Task AbrirModalAsync(MembresiaViewModel? membresia)
+        {
+            using var modal = membresia == null
+                ? new FrmMembresiaModal(_controller)
+                : new FrmMembresiaModal(_controller, membresia.MembresiaID, membresia.Nombre, membresia.Precio, membresia.DuracionDias);
+
             if (modal.ShowDialog() == DialogResult.OK)
-            {
+                await CargarMembresiasAsync(membresia?.MembresiaID); // para una nueva (null) se conserva la selección actual
+        }
+
+        private async void btnDesactivar_Click(object? sender, EventArgs e)
+        {
+            var membresia = MembresiaSeleccionada;
+            if (membresia == null) return;
+
+            string accion = membresia.Activo ? "desactivar" : "activar";
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de {accion} la membresía '{membresia.Nombre}'?",
+                    $"Confirmar {accion.ToUpper()}"))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.CambiarEstadoLogicoAsync(membresia.MembresiaID),
+                "No se pudo cambiar el estado de la membresía.",
+                panelTop);
+
+            if (correcto)
+                await CargarMembresiasAsync(membresia.MembresiaID);
+        }
+
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var membresia = MembresiaSeleccionada;
+            if (membresia == null) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar PERMANENTEMENTE la membresía '{membresia.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
+                    "Eliminación definitiva",
+                    destructiva: true))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.EliminarFisicoAsync(membresia.MembresiaID),
+                "No se pudo eliminar la membresía. Si ya tiene socios asociados, desactívala en su lugar.",
+                panelTop);
+
+            if (correcto)
                 await CargarMembresiasAsync();
-            }
-        }
-
-        private async void btnEditar_Click(object sender, EventArgs e)
-        {
-            if (dgvMembresias.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una membresía de la lista para editar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (MembresiaViewModel)dgvMembresias.CurrentRow.DataBoundItem;
-            using var modal = new FrmMembresiaModal(_controller, item.MembresiaID, item.Nombre, item.Precio, item.DuracionDias);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarMembresiasAsync();
-            }
-        }
-
-        private async void btnDesactivar_Click(object sender, EventArgs e)
-        {
-            if (dgvMembresias.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una membresía de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (MembresiaViewModel)dgvMembresias.CurrentRow.DataBoundItem;
-            string accion = item.Activo ? "desactivar" : "activar";
-
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} la membresía '{item.Nombre}'?", $"Confirmar {accion.ToUpper()}"))
-            {
-                try
-                {
-                    await _controller.CambiarEstadoLogicoAsync(item.MembresiaID);
-                    await CargarMembresiasAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvMembresias.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una membresía de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (MembresiaViewModel)dgvMembresias.CurrentRow.DataBoundItem;
-
-            if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE la membresía '{item.Nombre}' de la base de datos?", "Eliminación Definitiva"))
-            {
-                try
-                {
-                    await _controller.EliminarFisicoAsync(item.MembresiaID);
-                    await CargarMembresiasAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void dgvMembresias_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvMembresias.CurrentRow != null && dgvMembresias.CurrentRow.DataBoundItem is MembresiaViewModel item)
-            {
-                if (item.Activo)
-                {
-                    btnDesactivar.Text = "Desactivar";
-                    btnDesactivar.BackColor = Color.IndianRed;
-                }
-                else
-                {
-                    btnDesactivar.Text = "Activar";
-                    btnDesactivar.BackColor = Color.ForestGreen;
-                }
-            }
         }
     }
 }

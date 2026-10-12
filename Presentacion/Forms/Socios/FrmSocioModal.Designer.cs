@@ -19,6 +19,7 @@
         {
             panelHeader = new Panel();
             lblTitulo = new Label();
+            panelCampos = new Panel();
             lblClave = new Label();
             txtClave = new TextBox();
             lblNombre = new Label();
@@ -29,311 +30,318 @@
             txtTelefono = new TextBox();
             lblEmail = new Label();
             txtEmail = new TextBox();
+            chkActivo = new CheckBox();
             picFoto = new PictureBox();
-            btnTomarFoto = new Button();
-            btnCargarFoto = new Button();
+            btnTomarFoto = new BotonTema();
+            btnCargarFoto = new BotonTema();
+            btnQuitarFoto = new BotonTema();
             lblObservaciones = new Label();
             txtObservaciones = new TextBox();
-            chkActivo = new CheckBox();
-            btnGuardar = new Button();
-            btnCancelar = new Button();
+            panelPie = new Panel();
+            btnGuardar = new BotonTema();
+            btnCancelar = new BotonTema();
             panelHeader.SuspendLayout();
+            panelCampos.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picFoto).BeginInit();
+            panelPie.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelHeader
-            // 
-            panelHeader.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
-            panelHeader.Margin = new Padding(3, 4, 3, 4);
             panelHeader.Name = "panelHeader";
-            panelHeader.Size = new Size(434, 67);
+            panelHeader.Size = new Size(760, 67);
             panelHeader.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(23, 19);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(128, 28);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Nuevo Socio";
-            // 
+            //
+            // panelCampos  (todo lo editable: se deshabilita junto mientras se guarda)
+            //
+            panelCampos.Controls.Add(lblClave);
+            panelCampos.Controls.Add(txtClave);
+            panelCampos.Controls.Add(lblNombre);
+            panelCampos.Controls.Add(txtNombre);
+            panelCampos.Controls.Add(lblApellido);
+            panelCampos.Controls.Add(txtApellido);
+            panelCampos.Controls.Add(lblTelefono);
+            panelCampos.Controls.Add(txtTelefono);
+            panelCampos.Controls.Add(lblEmail);
+            panelCampos.Controls.Add(txtEmail);
+            panelCampos.Controls.Add(chkActivo);
+            panelCampos.Controls.Add(picFoto);
+            panelCampos.Controls.Add(btnTomarFoto);
+            panelCampos.Controls.Add(btnCargarFoto);
+            panelCampos.Controls.Add(btnQuitarFoto);
+            panelCampos.Controls.Add(lblObservaciones);
+            panelCampos.Controls.Add(txtObservaciones);
+            panelCampos.Dock = DockStyle.Fill;
+            panelCampos.Location = new Point(0, 67);
+            panelCampos.Name = "panelCampos";
+            panelCampos.Size = new Size(760, 385);
+            panelCampos.TabIndex = 1;
+            //
             // lblClave
-            // 
+            //
             lblClave.AutoSize = true;
             lblClave.Font = new Font("Segoe UI", 9.5F);
-            lblClave.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblClave.Location = new Point(29, 85);
+            lblClave.ForeColor = Color.FromArgb(230, 238, 252);
+            lblClave.Location = new Point(29, 18);
             lblClave.Name = "lblClave";
             lblClave.Size = new Size(51, 21);
-            lblClave.TabIndex = 1;
+            lblClave.TabIndex = 0;
             lblClave.Text = "Clave:";
-            // 
+            //
             // txtClave
-            // 
-            txtClave.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtClave.BackColor = Color.FromArgb(15, 42, 79);
             txtClave.BorderStyle = BorderStyle.FixedSingle;
             txtClave.Font = new Font("Segoe UI", 10F);
-            txtClave.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtClave.Location = new Point(29, 108);
-            txtClave.Margin = new Padding(3, 4, 3, 4);
+            txtClave.ForeColor = Color.FromArgb(230, 238, 252);
+            txtClave.Location = new Point(29, 41);
             txtClave.Name = "txtClave";
-            txtClave.Size = new Size(377, 30);
-            txtClave.TabIndex = 2;
-            // 
+            txtClave.Size = new Size(340, 30);
+            txtClave.TabIndex = 1;
+            //
             // lblNombre
-            // 
+            //
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9.5F);
-            lblNombre.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblNombre.Location = new Point(29, 148);
+            lblNombre.ForeColor = Color.FromArgb(230, 238, 252);
+            lblNombre.Location = new Point(29, 81);
             lblNombre.Name = "lblNombre";
             lblNombre.Size = new Size(71, 21);
-            lblNombre.TabIndex = 3;
+            lblNombre.TabIndex = 2;
             lblNombre.Text = "Nombre:";
-            // 
+            //
             // txtNombre
-            // 
-            txtNombre.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtNombre.BackColor = Color.FromArgb(15, 42, 79);
             txtNombre.BorderStyle = BorderStyle.FixedSingle;
             txtNombre.Font = new Font("Segoe UI", 10F);
-            txtNombre.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtNombre.Location = new Point(29, 171);
-            txtNombre.Margin = new Padding(3, 4, 3, 4);
+            txtNombre.ForeColor = Color.FromArgb(230, 238, 252);
+            txtNombre.Location = new Point(29, 104);
             txtNombre.Name = "txtNombre";
-            txtNombre.Size = new Size(377, 30);
-            txtNombre.TabIndex = 4;
-            // 
+            txtNombre.Size = new Size(340, 30);
+            txtNombre.TabIndex = 2;
+            //
             // lblApellido
-            // 
+            //
             lblApellido.AutoSize = true;
             lblApellido.Font = new Font("Segoe UI", 9.5F);
-            lblApellido.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblApellido.Location = new Point(29, 211);
+            lblApellido.ForeColor = Color.FromArgb(230, 238, 252);
+            lblApellido.Location = new Point(29, 144);
             lblApellido.Name = "lblApellido";
             lblApellido.Size = new Size(70, 21);
-            lblApellido.TabIndex = 5;
+            lblApellido.TabIndex = 4;
             lblApellido.Text = "Apellido:";
-            // 
+            //
             // txtApellido
-            // 
-            txtApellido.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtApellido.BackColor = Color.FromArgb(15, 42, 79);
             txtApellido.BorderStyle = BorderStyle.FixedSingle;
             txtApellido.Font = new Font("Segoe UI", 10F);
-            txtApellido.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtApellido.Location = new Point(29, 234);
-            txtApellido.Margin = new Padding(3, 4, 3, 4);
+            txtApellido.ForeColor = Color.FromArgb(230, 238, 252);
+            txtApellido.Location = new Point(29, 167);
             txtApellido.Name = "txtApellido";
-            txtApellido.Size = new Size(377, 30);
-            txtApellido.TabIndex = 6;
-            // 
+            txtApellido.Size = new Size(340, 30);
+            txtApellido.TabIndex = 3;
+            //
             // lblTelefono
-            // 
+            //
             lblTelefono.AutoSize = true;
             lblTelefono.Font = new Font("Segoe UI", 9.5F);
-            lblTelefono.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblTelefono.Location = new Point(29, 274);
+            lblTelefono.ForeColor = Color.FromArgb(230, 238, 252);
+            lblTelefono.Location = new Point(29, 207);
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(71, 21);
-            lblTelefono.TabIndex = 7;
+            lblTelefono.TabIndex = 6;
             lblTelefono.Text = "Teléfono:";
-            // 
+            //
             // txtTelefono
-            // 
-            txtTelefono.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtTelefono.BackColor = Color.FromArgb(15, 42, 79);
             txtTelefono.BorderStyle = BorderStyle.FixedSingle;
             txtTelefono.Font = new Font("Segoe UI", 10F);
-            txtTelefono.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtTelefono.Location = new Point(29, 297);
-            txtTelefono.Margin = new Padding(3, 4, 3, 4);
+            txtTelefono.ForeColor = Color.FromArgb(230, 238, 252);
+            txtTelefono.Location = new Point(29, 230);
             txtTelefono.Name = "txtTelefono";
-            txtTelefono.Size = new Size(377, 30);
-            txtTelefono.TabIndex = 8;
-            // 
+            txtTelefono.Size = new Size(340, 30);
+            txtTelefono.TabIndex = 4;
+            //
             // lblEmail
-            // 
+            //
             lblEmail.AutoSize = true;
             lblEmail.Font = new Font("Segoe UI", 9.5F);
-            lblEmail.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblEmail.Location = new Point(29, 337);
+            lblEmail.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEmail.Location = new Point(29, 270);
             lblEmail.Name = "lblEmail";
             lblEmail.Size = new Size(141, 21);
-            lblEmail.TabIndex = 9;
-            lblEmail.Text = "Correo Electrónico:";
-            // 
+            lblEmail.TabIndex = 8;
+            lblEmail.Text = "Correo electrónico:";
+            //
             // txtEmail
-            // 
-            txtEmail.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtEmail.BackColor = Color.FromArgb(15, 42, 79);
             txtEmail.BorderStyle = BorderStyle.FixedSingle;
             txtEmail.Font = new Font("Segoe UI", 10F);
-            txtEmail.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtEmail.Location = new Point(29, 360);
-            txtEmail.Margin = new Padding(3, 4, 3, 4);
+            txtEmail.ForeColor = Color.FromArgb(230, 238, 252);
+            txtEmail.Location = new Point(29, 293);
             txtEmail.Name = "txtEmail";
-            txtEmail.Size = new Size(377, 30);
-            txtEmail.TabIndex = 10;
-            // 
-            // picFoto
-            // 
-            picFoto.BorderStyle = BorderStyle.FixedSingle;
-            picFoto.Location = new Point(29, 405);
-            picFoto.Name = "picFoto";
-            picFoto.Size = new Size(130, 130);
-            picFoto.SizeMode = PictureBoxSizeMode.Zoom;
-            picFoto.TabIndex = 11;
-            picFoto.TabStop = false;
-            // 
-            // btnTomarFoto
-            // 
-            btnTomarFoto.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            btnTomarFoto.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnTomarFoto.FlatStyle = FlatStyle.Flat;
-            btnTomarFoto.Font = new Font("Segoe UI", 9F);
-            btnTomarFoto.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnTomarFoto.Location = new Point(175, 420);
-            btnTomarFoto.Name = "btnTomarFoto";
-            btnTomarFoto.Size = new Size(231, 38);
-            btnTomarFoto.TabIndex = 12;
-            btnTomarFoto.Text = "📷 Tomar Foto";
-            btnTomarFoto.UseVisualStyleBackColor = false;
-            btnTomarFoto.Click += btnTomarFoto_Click;
-            // 
-            // btnCargarFoto
-            // 
-            btnCargarFoto.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            btnCargarFoto.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnCargarFoto.FlatStyle = FlatStyle.Flat;
-            btnCargarFoto.Font = new Font("Segoe UI", 9F);
-            btnCargarFoto.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnCargarFoto.Location = new Point(175, 475);
-            btnCargarFoto.Name = "btnCargarFoto";
-            btnCargarFoto.Size = new Size(231, 38);
-            btnCargarFoto.TabIndex = 13;
-            btnCargarFoto.Text = "📁 Cargar Foto";
-            btnCargarFoto.UseVisualStyleBackColor = false;
-            btnCargarFoto.Click += btnCargarFoto_Click;
-            // 
-            // lblObservaciones
-            // 
-            lblObservaciones.AutoSize = true;
-            lblObservaciones.Font = new Font("Segoe UI", 9.5F);
-            lblObservaciones.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblObservaciones.Location = new Point(29, 550);
-            lblObservaciones.Name = "lblObservaciones";
-            lblObservaciones.Size = new Size(115, 21);
-            lblObservaciones.TabIndex = 14;
-            lblObservaciones.Text = "Observaciones:";
-            // 
-            // txtObservaciones
-            // 
-            txtObservaciones.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            txtObservaciones.BorderStyle = BorderStyle.FixedSingle;
-            txtObservaciones.Font = new Font("Segoe UI", 10F);
-            txtObservaciones.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtObservaciones.Location = new Point(29, 573);
-            txtObservaciones.Margin = new Padding(3, 4, 3, 4);
-            txtObservaciones.Multiline = true;
-            txtObservaciones.Name = "txtObservaciones";
-            txtObservaciones.Size = new Size(377, 60);
-            txtObservaciones.TabIndex = 15;
-            // 
+            txtEmail.Size = new Size(340, 30);
+            txtEmail.TabIndex = 5;
+            //
             // chkActivo
-            // 
+            //
             chkActivo.AutoSize = true;
             chkActivo.Checked = true;
             chkActivo.CheckState = CheckState.Checked;
             chkActivo.Font = new Font("Segoe UI", 9.5F);
-            chkActivo.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            chkActivo.Location = new Point(29, 645);
-            chkActivo.Margin = new Padding(3, 4, 3, 4);
+            chkActivo.ForeColor = Color.FromArgb(230, 238, 252);
+            chkActivo.Location = new Point(29, 345);
             chkActivo.Name = "chkActivo";
             chkActivo.Size = new Size(75, 25);
-            chkActivo.TabIndex = 16;
+            chkActivo.TabIndex = 7;
             chkActivo.Text = "Activo";
             chkActivo.UseVisualStyleBackColor = true;
-            // 
+            //
+            // picFoto
+            //
+            picFoto.BackColor = Color.FromArgb(15, 42, 79);
+            picFoto.BorderStyle = BorderStyle.FixedSingle;
+            picFoto.Location = new Point(400, 21);
+            picFoto.Name = "picFoto";
+            picFoto.Size = new Size(150, 150);
+            picFoto.SizeMode = PictureBoxSizeMode.Zoom;
+            picFoto.TabIndex = 20;
+            picFoto.TabStop = false;
+            //
+            // btnTomarFoto
+            //
+            btnTomarFoto.Location = new Point(565, 21);
+            btnTomarFoto.Name = "btnTomarFoto";
+            btnTomarFoto.Size = new Size(165, 38);
+            btnTomarFoto.TabIndex = 8;
+            btnTomarFoto.Text = "📷 Tomar foto";
+            btnTomarFoto.Click += btnTomarFoto_Click;
+            //
+            // btnCargarFoto
+            //
+            btnCargarFoto.Location = new Point(565, 67);
+            btnCargarFoto.Name = "btnCargarFoto";
+            btnCargarFoto.Size = new Size(165, 38);
+            btnCargarFoto.TabIndex = 9;
+            btnCargarFoto.Text = "📁 Cargar foto";
+            btnCargarFoto.Click += btnCargarFoto_Click;
+            //
+            // btnQuitarFoto
+            //
+            btnQuitarFoto.Location = new Point(565, 113);
+            btnQuitarFoto.Name = "btnQuitarFoto";
+            btnQuitarFoto.Size = new Size(165, 38);
+            btnQuitarFoto.TabIndex = 10;
+            btnQuitarFoto.Text = "Quitar foto";
+            btnQuitarFoto.Click += btnQuitarFoto_Click;
+            //
+            // lblObservaciones
+            //
+            lblObservaciones.AutoSize = true;
+            lblObservaciones.Font = new Font("Segoe UI", 9.5F);
+            lblObservaciones.ForeColor = Color.FromArgb(230, 238, 252);
+            lblObservaciones.Location = new Point(400, 190);
+            lblObservaciones.Name = "lblObservaciones";
+            lblObservaciones.Size = new Size(115, 21);
+            lblObservaciones.TabIndex = 21;
+            lblObservaciones.Text = "Observaciones:";
+            //
+            // txtObservaciones
+            //
+            txtObservaciones.AcceptsReturn = true; // Enter escribe un salto de línea y no activa "Guardar"
+            txtObservaciones.BackColor = Color.FromArgb(15, 42, 79);
+            txtObservaciones.BorderStyle = BorderStyle.FixedSingle;
+            txtObservaciones.Font = new Font("Segoe UI", 10F);
+            txtObservaciones.ForeColor = Color.FromArgb(230, 238, 252);
+            txtObservaciones.Location = new Point(400, 213);
+            txtObservaciones.Multiline = true;
+            txtObservaciones.Name = "txtObservaciones";
+            txtObservaciones.ScrollBars = ScrollBars.Vertical;
+            txtObservaciones.Size = new Size(330, 110);
+            txtObservaciones.TabIndex = 6;
+            //
+            // panelPie
+            //
+            panelPie.BackColor = Color.FromArgb(14, 20, 36);
+            panelPie.Controls.Add(btnGuardar);
+            panelPie.Controls.Add(btnCancelar);
+            panelPie.Dock = DockStyle.Bottom;
+            panelPie.Location = new Point(0, 452);
+            panelPie.Name = "panelPie";
+            panelPie.Size = new Size(760, 70);
+            panelPie.TabIndex = 2;
+            //
             // btnGuardar
-            // 
-            btnGuardar.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnGuardar.FlatAppearance.BorderSize = 0;
-            btnGuardar.FlatStyle = FlatStyle.Flat;
-            btnGuardar.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            btnGuardar.ForeColor = Color.White;
-            btnGuardar.Location = new Point(189, 680);
-            btnGuardar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnGuardar.Estilo = EstiloBoton.Primario;
+            btnGuardar.Location = new Point(509, 14);
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Size = new Size(103, 43);
-            btnGuardar.TabIndex = 17;
+            btnGuardar.TabIndex = 0;
             btnGuardar.Text = "Guardar";
-            btnGuardar.UseVisualStyleBackColor = false;
             btnGuardar.Click += btnGuardar_Click;
-            // 
+            //
             // btnCancelar
-            // 
-            btnCancelar.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            btnCancelar.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnCancelar.FlatStyle = FlatStyle.Flat;
-            btnCancelar.Font = new Font("Segoe UI", 9.5F);
-            btnCancelar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnCancelar.Location = new Point(303, 680);
-            btnCancelar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnCancelar.DialogResult = DialogResult.Cancel;
+            btnCancelar.Location = new Point(627, 14);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(103, 43);
-            btnCancelar.TabIndex = 18;
+            btnCancelar.TabIndex = 1;
             btnCancelar.Text = "Cancelar";
-            btnCancelar.UseVisualStyleBackColor = false;
-            btnCancelar.Click += btnCancelar_Click;
-            // 
+            //
             // FrmSocioModal
-            // 
+            //
+            AcceptButton = btnGuardar;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            ClientSize = new Size(434, 745);
-            Controls.Add(btnCancelar);
-            Controls.Add(btnGuardar);
-            Controls.Add(chkActivo);
-            Controls.Add(txtObservaciones);
-            Controls.Add(lblObservaciones);
-            Controls.Add(btnCargarFoto);
-            Controls.Add(btnTomarFoto);
-            Controls.Add(picFoto);
-            Controls.Add(txtEmail);
-            Controls.Add(lblEmail);
-            Controls.Add(txtTelefono);
-            Controls.Add(lblTelefono);
-            Controls.Add(txtApellido);
-            Controls.Add(lblApellido);
-            Controls.Add(txtNombre);
-            Controls.Add(lblNombre);
-            Controls.Add(txtClave);
-            Controls.Add(lblClave);
+            BackColor = Color.FromArgb(11, 15, 26);
+            CancelButton = btnCancelar;
+            ClientSize = new Size(760, 522);
+            Controls.Add(panelCampos);
+            Controls.Add(panelPie);
             Controls.Add(panelHeader);
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Margin = new Padding(3, 4, 3, 4);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "FrmSocioModal";
+            ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Socio";
-            FormClosing += FrmSocioModal_FormClosing;
             Load += FrmSocioModal_Load;
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
+            panelCampos.ResumeLayout(false);
+            panelCampos.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picFoto).EndInit();
+            panelPie.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
         private Panel panelHeader;
         private Label lblTitulo;
+        private Panel panelCampos;
         private Label lblClave;
         private TextBox txtClave;
         private Label lblNombre;
@@ -344,13 +352,15 @@
         private TextBox txtTelefono;
         private Label lblEmail;
         private TextBox txtEmail;
+        private CheckBox chkActivo;
         private PictureBox picFoto;
-        private Button btnTomarFoto;
-        private Button btnCargarFoto;
+        private BotonTema btnTomarFoto;
+        private BotonTema btnCargarFoto;
+        private BotonTema btnQuitarFoto;
         private Label lblObservaciones;
         private TextBox txtObservaciones;
-        private CheckBox chkActivo;
-        private Button btnGuardar;
-        private Button btnCancelar;
+        private Panel panelPie;
+        private BotonTema btnGuardar;
+        private BotonTema btnCancelar;
     }
 }

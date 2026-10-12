@@ -1,6 +1,7 @@
 ﻿using Negocio.DTOs;
 using Negocio.Exceptions;
 using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -16,269 +17,352 @@ namespace Presentacion.Forms.Ventas
 {
     public partial class FrmVentaModal : Form
     {
+        /// <summary>Una línea del carrito. Es lo que muestra el grid; al guardar se convierte a DetalleVentaCreateDto.</summary>
+        public sealed class LineaCarrito
+        {
+            public int ProductoID { get; init; }
+            public string Producto { get; init; } = string.Empty;
+            public decimal PrecioUnitario { get; init; }
+            public int Stock { get; init; }
+            public int Cantidad { get; set; }
+            public decimal Subtotal => Cantidad * PrecioUnitario;
+        }
+
         private readonly VentaController _ventaController;
         private readonly ProductoController _productoController;
 
-        private readonly List<DetalleVentaCreateDto> _carrito = new();
-        private List<ProductoViewModel> _productosDisponibles = new();
+        private readonly BindingList<LineaCarrito> _carrito = new();
+        private List<ProductoViewModel> _productos = new();
 
-        private readonly int _usuarioIdActual = 1;
+        // Índices para encontrar un producto al escanear sin recorrer toda la lista.
+        private readonly Dictionary<string, ProductoViewModel> _porCodigoBarras = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<int, ProductoViewModel> _porId = new();
+
+        private bool _guardando;
 
         public FrmVentaModal(VentaController ventaController, ProductoController productoController)
         {
+            _ventaController = ventaController ?? throw new ArgumentNullException(nameof(ventaController));
+            _productoController = productoController ?? throw new ArgumentNullException(nameof(productoController));
+
             InitializeComponent();
-            _ventaController = ventaController;
-            _productoController = productoController;
+            ConfigurarColumnas();
 
-            lblTitulo.Text = "Nueva Venta / Punto de Venta";
+            dgvCarrito.DataSource = _carrito;
+            _carrito.ListChanged += (_, _) => ActualizarResumen();
+            ActualizarResumen();
         }
 
-        private async void FrmVentaModal_Load(object sender, EventArgs e)
-        {
-            await CargarProductosAsync();
-        }
+        private LineaCarrito? LineaSeleccionada =>
+            dgvCarrito.SelectedRows.Count > 0
+                ? dgvCarrito.SelectedRows[0].DataBoundItem as LineaCarrito
+                : null;
 
-        private async Task CargarProductosAsync()
+        // ───────────── Carga ─────────────
+
+        private async void FrmVentaModal_Load(object? sender, EventArgs e)
         {
-            try
+            bool cargado = await FormHelper.EjecutarAsync(async () =>
             {
                 var productos = await _productoController.ObtenerProductosAsync(incluirInactivos: false);
-                _productosDisponibles = productos.ToList();
+                if (IsDisposed) return;
 
-                // 🟢 Llenar el ComboBox de productos al cargar
-                CargarComboBoxProductos();
-            }
-            catch (Exception ex)
+                _productos = productos.ToList();
+
+                _porCodigoBarras.Clear();
+                _porId.Clear();
+                foreach (var p in _productos)
+                {
+                    _porId[p.ProductoID] = p;
+                    if (!string.IsNullOrWhiteSpace(p.CodigoBarras))
+                        _porCodigoBarras.TryAdd(p.CodigoBarras.Trim(), p);
+                }
+
+                cmbProductos.DataSource = _productos;
+                cmbProductos.DisplayMember = nameof(ProductoViewModel.Nombre);
+                cmbProductos.ValueMember = nameof(ProductoViewModel.ProductoID);
+                cmbProductos.SelectedIndex = -1;
+            },
+            "No se pudieron cargar los productos.",
+            panelEntrada);
+
+            // Sin productos no se puede vender: se cierra en lugar de dejar una caja inútil.
+            if (!cargado && !IsDisposed)
             {
-                MessageBox.Show($"Error al cargar productos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = DialogResult.Cancel;
+                return;
             }
+
+            txtCodigoBarras.Focus();
         }
 
-        private void CargarComboBoxProductos()
+        private void ConfigurarColumnas()
         {
-            // Se suscribe temporalmente al evento para evitar disparos durante el llenado de datos
-            cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
+            dgvCarrito.AutoGenerateColumns = false;
 
-            cmbProductos.DataSource = null;
-            cmbProductos.DataSource = _productosDisponibles;
-            cmbProductos.DisplayMember = "Nombre"; // Propiedad a mostrar en la lista
-            cmbProductos.ValueMember = "ProductoID"; // Propiedad que representa el ID
-            cmbProductos.SelectedIndex = -1; // Dejar sin selección inicial
-
-            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
+            dgvCarrito.AgregarTexto(nameof(LineaCarrito.Producto), "Producto", 220, 120).SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgvCarrito.AgregarTexto(nameof(LineaCarrito.Cantidad), "Cant.", 55, 55, alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgvCarrito.AgregarTexto(nameof(LineaCarrito.PrecioUnitario), "Precio", 80, 75, "C2", alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgvCarrito.AgregarTexto(nameof(LineaCarrito.Subtotal), "Subtotal", 85, 80, "C2", alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
         }
 
-        // 🟢 Evento al seleccionar un producto del desplegable ComboBox
-        private void cmbProductos_SelectedIndexChanged(object sender, EventArgs? e)
-        {
-            if (cmbProductos.SelectedItem is ProductoViewModel productoSeleccionado)
-            {
-                // Sincroniza el código de barras del producto seleccionado en el TextBox
-                txtCodigoBarras.Text = !string.IsNullOrEmpty(productoSeleccionado.CodigoBarras)
-                    ? productoSeleccionado.CodigoBarras
-                    : productoSeleccionado.ProductoID.ToString();
-            }
-        }
+        // ───────────── Agregar productos ─────────────
 
-        private void btnAgregar_Click(object sender, EventArgs e)
+        private void btnAgregar_Click(object? sender, EventArgs e) => ProcesarAgregarProducto();
+
+        // Enter en el código de barras, en el combo o en la cantidad agrega el producto
+        // (el lector de códigos de barras envía Enter al terminar de escanear).
+        private void EntradaProducto_KeyDown(object? sender, KeyEventArgs e)
         {
+            if (e.KeyCode != Keys.Enter || e.Control) return;
+
+            e.SuppressKeyPress = true; // evita el "beep" de Windows
             ProcesarAgregarProducto();
         }
 
-        private void txtCodigoBarras_KeyDown(object sender, KeyEventArgs e)
+        private ProductoViewModel? BuscarPorCodigo(string codigo)
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.SuppressKeyPress = true; // Evita el 'beep' de Windows
-                ProcesarAgregarProducto();
-            }
+            // Primero el código de barras; solo si no existe se intenta como ID interno.
+            if (_porCodigoBarras.TryGetValue(codigo, out var porCodigo))
+                return porCodigo;
+
+            return int.TryParse(codigo, out int id) && _porId.TryGetValue(id, out var porId)
+                ? porId
+                : null;
         }
 
         private void ProcesarAgregarProducto()
         {
+            lblAviso.Text = string.Empty;
+
+            ProductoViewModel? producto;
             string codigo = txtCodigoBarras.Text.Trim();
-            ProductoViewModel? prodSeleccionado = null;
 
-            // 1. Si hay texto en el código de barras, buscar coincidencia por código o ID
-            if (!string.IsNullOrWhiteSpace(codigo))
+            if (codigo.Length > 0)
             {
-                prodSeleccionado = _productosDisponibles.FirstOrDefault(p =>
-                    (p.CodigoBarras != null && p.CodigoBarras.Equals(codigo, StringComparison.OrdinalIgnoreCase)) ||
-                    p.ProductoID.ToString() == codigo);
-            }
-            // 2. Si el código de barras está vacío, tomar la opción seleccionada en el ComboBox
-            else if (cmbProductos.SelectedItem is ProductoViewModel prodCombo)
-            {
-                prodSeleccionado = prodCombo;
-            }
-
-            if (prodSeleccionado == null)
-            {
-                MessageBox.Show("Seleccione o ingrese un producto válido.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtCodigoBarras.Focus();
-                return;
-            }
-
-            int cantidad = (int)numCantidad.Value;
-            if (cantidad <= 0)
-            {
-                MessageBox.Show("La cantidad debe ser mayor a 0.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // Verificar si el producto ya está en el carrito
-            var itemExistente = _carrito.FirstOrDefault(d => d.ProductoID == prodSeleccionado.ProductoID);
-            if (itemExistente != null)
-            {
-                itemExistente.Cantidad += cantidad;
+                producto = BuscarPorCodigo(codigo);
+                if (producto == null)
+                {
+                    Avisar($"No se encontró ningún producto con el código '{codigo}'.");
+                    txtCodigoBarras.SelectAll(); // el siguiente escaneo reemplaza el texto
+                    txtCodigoBarras.Focus();
+                    return;
+                }
             }
             else
             {
-                _carrito.Add(new DetalleVentaCreateDto
+                producto = cmbProductos.SelectedItem as ProductoViewModel;
+                if (producto == null)
                 {
-                    ProductoID = prodSeleccionado.ProductoID,
-                    Cantidad = cantidad,
-                    PrecioUnitario = prodSeleccionado.Precio
-                });
+                    Avisar("Escanee un código o seleccione un producto.");
+                    txtCodigoBarras.Focus();
+                    return;
+                }
             }
 
-            ActualizarGridCarrito();
+            int cantidad = (int)numCantidad.Value;
+            var linea = _carrito.FirstOrDefault(l => l.ProductoID == producto.ProductoID);
+            int yaEnCarrito = linea?.Cantidad ?? 0;
+            int stock = Convert.ToInt32(producto.Stock);
 
-            // Restablecer campos para el siguiente producto
+            // Aviso rápido en pantalla; la validación definitiva la hace el servidor al registrar la venta.
+            if (yaEnCarrito + cantidad > stock)
+            {
+                Avisar(stock <= 0
+                    ? $"'{producto.Nombre}' no tiene existencias."
+                    : $"Solo hay {stock} en existencia de '{producto.Nombre}' (ya en el carrito: {yaEnCarrito}).");
+                return;
+            }
+
+            if (linea != null)
+            {
+                linea.Cantidad += cantidad;
+                _carrito.ResetItem(_carrito.IndexOf(linea));
+            }
+            else
+            {
+                linea = new LineaCarrito
+                {
+                    ProductoID = producto.ProductoID,
+                    Producto = producto.Nombre,
+                    PrecioUnitario = producto.Precio,
+                    Stock = stock,
+                    Cantidad = cantidad
+                };
+                _carrito.Add(linea);
+            }
+
+            SeleccionarLinea(linea); // la última línea tocada queda lista para + / -
+
+            // Listo para el siguiente producto.
             txtCodigoBarras.Clear();
-            cmbProductos.SelectedIndexChanged -= cmbProductos_SelectedIndexChanged;
             cmbProductos.SelectedIndex = -1;
-            cmbProductos.SelectedIndexChanged += cmbProductos_SelectedIndexChanged;
-
             numCantidad.Value = 1;
             txtCodigoBarras.Focus();
         }
 
-        #region Control de Teclado (+ / -)
-
-        private void dgvCarrito_KeyDown(object sender, KeyEventArgs e)
+        private void Avisar(string mensaje)
         {
-            if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
-            {
-                e.SuppressKeyPress = true;
-                ModificarCantidadSeleccionada(1);
-            }
-            else if (e.KeyCode == Keys.Subtract || e.KeyCode == Keys.OemMinus)
-            {
-                e.SuppressKeyPress = true;
-                ModificarCantidadSeleccionada(-1);
-            }
+            lblAviso.Text = mensaje;
+            System.Media.SystemSounds.Beep.Play();
         }
 
-        private void FrmVentaModal_KeyDown(object sender, KeyEventArgs e)
+        // ───────────── Carrito ─────────────
+
+        private void SeleccionarLinea(LineaCarrito linea)
         {
-            if (!txtCodigoBarras.Focused || string.IsNullOrEmpty(txtCodigoBarras.Text))
-            {
-                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
-                {
-                    e.SuppressKeyPress = true;
-                    ModificarCantidadSeleccionada(1);
-                }
-                else if (e.KeyCode == Keys.Subtract || e.KeyCode == Keys.OemMinus)
-                {
-                    e.SuppressKeyPress = true;
-                    ModificarCantidadSeleccionada(-1);
-                }
-            }
+            int indice = _carrito.IndexOf(linea);
+            if (indice < 0) return;
+
+            dgvCarrito.ClearSelection();
+            dgvCarrito.Rows[indice].Selected = true;
+            dgvCarrito.CurrentCell = dgvCarrito.Rows[indice].Cells[0];
         }
 
         private void ModificarCantidadSeleccionada(int cambio)
         {
-            if (dgvCarrito.CurrentRow == null) return;
+            var linea = LineaSeleccionada;
+            if (linea == null) return;
 
-            int index = dgvCarrito.CurrentRow.Index;
-            if (index >= 0 && index < _carrito.Count)
+            int nueva = linea.Cantidad + cambio;
+
+            if (nueva > linea.Stock)
             {
-                var item = _carrito[index];
-                item.Cantidad += cambio;
-
-                if (item.Cantidad <= 0)
-                {
-                    _carrito.RemoveAt(index);
-                }
-
-                ActualizarGridCarrito();
-
-                if (_carrito.Count > 0)
-                {
-                    int nuevoIndex = Math.Min(index, _carrito.Count - 1);
-                    dgvCarrito.Rows[nuevoIndex].Selected = true;
-                    dgvCarrito.CurrentCell = dgvCarrito.Rows[nuevoIndex].Cells[0];
-                }
-            }
-        }
-
-        #endregion
-
-        private void btnQuitar_Click(object sender, EventArgs e)
-        {
-            if (dgvCarrito.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un producto del carrito para quitar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Avisar($"Solo hay {linea.Stock} en existencia de '{linea.Producto}'.");
                 return;
             }
 
-            int index = dgvCarrito.CurrentRow.Index;
-            if (index >= 0 && index < _carrito.Count)
+            lblAviso.Text = string.Empty;
+
+            if (nueva <= 0)
             {
-                _carrito.RemoveAt(index);
-                ActualizarGridCarrito();
+                QuitarLinea(linea);
+                return;
             }
+
+            linea.Cantidad = nueva;
+            _carrito.ResetItem(_carrito.IndexOf(linea));
         }
 
-        private void ActualizarGridCarrito()
+        private void QuitarLinea(LineaCarrito linea)
         {
-            dgvCarrito.DataSource = null;
-            dgvCarrito.DataSource = _carrito.Select(c => new
+            int indice = _carrito.IndexOf(linea);
+            if (indice < 0) return;
+
+            _carrito.RemoveAt(indice);
+
+            if (_carrito.Count > 0)
+                SeleccionarLinea(_carrito[Math.Min(indice, _carrito.Count - 1)]);
+        }
+
+        private void btnQuitar_Click(object? sender, EventArgs e)
+        {
+            var linea = LineaSeleccionada;
+            if (linea != null)
+                QuitarLinea(linea);
+        }
+
+        private void dgvCarrito_SelectionChanged(object? sender, EventArgs e) => ActualizarResumen();
+
+        // Total, y botones que solo tienen sentido con algo en el carrito / seleccionado.
+        private void ActualizarResumen()
+        {
+            lblTotalCalculado.Text = _carrito.Sum(l => l.Subtotal).ToString("C2");
+            btnQuitar.Enabled = LineaSeleccionada != null;
+            btnGuardar.Enabled = _carrito.Count > 0;
+        }
+
+        // Atajos: + / - cambian la cantidad de la línea seleccionada, Supr la quita,
+        // Ctrl+Enter completa la venta. Los signos solo actúan con el grid enfocado o con el
+        // campo de código vacío, para no interferir cuando se está escribiendo.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.Enter))
             {
-                Producto = _productosDisponibles.FirstOrDefault(p => p.ProductoID == c.ProductoID)?.Nombre ?? "N/A",
-                c.Cantidad,
-                PrecioUnitario = c.PrecioUnitario.ToString("C2"),
-                Subtotal = (c.Cantidad * c.PrecioUnitario).ToString("C2")
+                btnGuardar.PerformClick();
+                return true;
+            }
+
+            bool enCarrito = ActiveControl == dgvCarrito
+                             || (ActiveControl == txtCodigoBarras && txtCodigoBarras.TextLength == 0);
+
+            if (enCarrito)
+            {
+                switch (keyData)
+                {
+                    case Keys.Add:
+                    case Keys.Oemplus:
+                    case Keys.Oemplus | Keys.Shift:
+                        ModificarCantidadSeleccionada(1);
+                        return true;
+
+                    case Keys.Subtract:
+                    case Keys.OemMinus:
+                        ModificarCantidadSeleccionada(-1);
+                        return true;
+
+                    case Keys.Delete when ActiveControl == dgvCarrito:
+                        btnQuitar.PerformClick();
+                        return true;
+                }
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // ───────────── Guardar / cerrar ─────────────
+
+        private async void btnGuardar_Click(object? sender, EventArgs e)
+        {
+            if (_guardando) return;
+
+            if (_carrito.Count == 0)
+            {
+                FormHelper.MostrarAdvertencia("Debe agregar al menos un producto al carrito.", "Validación");
+                return;
+            }
+
+            var detalles = _carrito.Select(l => new DetalleVentaCreateDto
+            {
+                ProductoID = l.ProductoID,
+                Cantidad = l.Cantidad,
+                PrecioUnitario = l.PrecioUnitario
             }).ToList();
 
-            decimal total = _carrito.Sum(c => c.Cantidad * c.PrecioUnitario);
-            lblTotalCalculado.Text = total.ToString("C2");
-        }
-
-        private async void btnGuardar_Click(object sender, EventArgs e)
-        {
-            if (!_carrito.Any())
-            {
-                MessageBox.Show("Debe agregar al menos un producto al carrito de compras.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
+            decimal total = _carrito.Sum(l => l.Subtotal);
+            int usuarioId = SesionUsuario.UsuarioID; // el cajero real, ya no un 1 fijo
             int? socioId = null;
-            decimal totalVenta = _carrito.Sum(c => c.Cantidad * c.PrecioUnitario);
 
-            try
-            {
-                await _ventaController.RegistrarVentaAsync(_usuarioIdActual, socioId, totalVenta, _carrito);
+            _guardando = true;
+            bool registrada = await FormHelper.EjecutarAsync(
+                () => _ventaController.RegistrarVentaAsync(usuarioId, socioId, total, detalles),
+                "No se pudo registrar la venta.",
+                btnGuardar, btnCancelar, btnAgregar, btnQuitar, dgvCarrito);
+            _guardando = false;
 
-                MessageBox.Show("Venta registrada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error inesperado al procesar la venta: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            if (registrada && !IsDisposed)
+                DialogResult = DialogResult.OK; // cierra el diálogo; el historial se recarga solo
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            // No cerrar mientras se está registrando la venta.
+            if (_guardando)
+            {
+                e.Cancel = true;
+            }
+            // Evita perder un carrito armado por un Esc o un clic accidental.
+            else if (DialogResult != DialogResult.OK
+                     && _carrito.Count > 0
+                     && !FormHelper.ConfirmarAccion(
+                            "Hay productos en el carrito. ¿Desea descartar esta venta?",
+                            "Cancelar venta",
+                            destructiva: true))
+            {
+                e.Cancel = true;
+            }
+
+            base.OnFormClosing(e);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Corte;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -14,130 +16,151 @@ namespace Presentacion.Forms.Reportes
 {
     public partial class FrmMembresiasReporte : Form
     {
+        /// <summary>Una fila del reporte. Fechas e importe se conservan como DateTime/decimal (no como texto) para que ordenen bien.</summary>
+        private sealed record FilaMembresia(
+            string Membresia,
+            string Socio,
+            DateTime FechaRegistro,
+            DateTime FechaInicio,
+            DateTime Vencimiento,
+            string EstadoMembresia,
+            decimal Precio);
+
         private readonly ReporteController _reporteController;
-        private List<ReporteMembresiaViewModel> _listaMembresias = new();
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<FilaMembresia> _vista = new();
 
         public FrmMembresiasReporte(ReporteController reporteController)
         {
+            _reporteController = reporteController ?? throw new ArgumentNullException(nameof(reporteController));
+
             InitializeComponent();
-            _reporteController = reporteController;
+            ConfigurarColumnas();
         }
 
-        private async void FrmMembresiasReporte_Load(object sender, EventArgs e)
+        private async void FrmMembresiasReporte_Load(object? sender, EventArgs e)
         {
-            // Inicializar los DateTimePicker marcando el día de hoy
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
             await BuscarPorFechasAsync();
         }
 
-        private async void btnFiltrar_Click(object sender, EventArgs e)
+        // Las columnas se definen una sola vez, con su formato real.
+        private void ConfigurarColumnas()
         {
+            dgvMembresias.AutoGenerateColumns = false;
+
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.Membresia), "Membresía", 120, 100);
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.Socio), "Nombre del Socio", 160, 120);
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy HH:mm");
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.FechaInicio), "Fecha de Inicio", 100, 100, "dd/MM/yyyy");
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.Vencimiento), "Vencimiento", 100, 100, "dd/MM/yyyy");
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.EstadoMembresia), "Estado Membresía", 100, 100);
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.Precio), "Precio", 90, 85, "C2", alinearDerecha: true);
+        }
+
+        private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechasAsync();
+
+        // "Hoy": vuelve al día actual.
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
+        {
+            dtpFechaInicio.Value = DateTime.Today;
+            dtpFechaFin.Value = DateTime.Today;
+
             await BuscarPorFechasAsync();
         }
 
         private async Task BuscarPorFechasAsync()
         {
-            try
+            // El rango cubre todo el día "Hasta".
+            DateTime inicio = dtpFechaInicio.Value.Date;
+            DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+
+            if (inicio > fin)
             {
-                Cursor = Cursors.WaitCursor;
+                FormHelper.MostrarAdvertencia("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.", "Rango de fechas");
+                return;
+            }
 
-                // Ajustar horas para cubrir todo el rango del día seleccionado
-                DateTime inicio = dtpFechaInicio.Value.Date;
-                DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+            await FormHelper.EjecutarAsync(async () =>
+            {
+                var membresias = await _reporteController.ObtenerMembresiasAsync(inicio, fin);
+                if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
 
-                // 2. Consumimos el método adecuado pasando el rango de fechas
-                var resultado = await _reporteController.ObtenerMembresiasAsync(inicio, fin);
-                _listaMembresias = resultado.ToList();
+                var filas = membresias.Select(m => new FilaMembresia(
+                    string.IsNullOrWhiteSpace(m.Membresia) ? "N/A" : m.Membresia,
+                    string.IsNullOrWhiteSpace(m.Socio) ? "N/A" : m.Socio,
+                    m.FechaRegistro,
+                    m.FechaInicio,
+                    m.Vencimiento,
+                    m.EstadoMembresia, // "Pagada", "Parcial" o "Sin Pagar"
+                    m.Precio));        // valor total contratado
 
-                // 3. Proyectamos usando los datos reales devueltos por el ViewModel
-                var datosMostrar = _listaMembresias.Select(m => new
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvMembresias.SortedColumn;
+                var sentidoOrden = dgvMembresias.SortOrder;
+
+                _vista = new ListaOrdenable<FilaMembresia>(filas);
+                dgvMembresias.DataSource = _vista;
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    Membresia = string.IsNullOrWhiteSpace(m.Membresia) ? "N/A" : m.Membresia,
-                    Socio = string.IsNullOrWhiteSpace(m.Socio) ? "N/A" : m.Socio,
-                    FechaRegistro = m.FechaRegistro.ToString("dd/MM/yyyy HH:mm"),
-                    FechaInicio = m.FechaInicio.ToString("dd/MM/yyyy"),
-                    Vencimiento = m.Vencimiento.ToString("dd/MM/yyyy"),
-                    EstadoMembresia = m.EstadoMembresia, // "Pagada", "Parcial" o "Sin Pagar"
-                    Precio = m.Precio                     // Valor total contratado
-                }).ToList();
+                    dgvMembresias.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? System.ComponentModel.ListSortDirection.Descending
+                        : System.ComponentModel.ListSortDirection.Ascending);
+                }
 
-                dgvMembresias.DataSource = null;
-                dgvMembresias.DataSource = datosMostrar;
-
-                ConfigurarGrid();
-                CalcularTotal();
                 dgvMembresias.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el reporte de membresías: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
+                ActualizarResumen();
+            },
+            "No se pudo cargar el reporte de membresías.",
+            panelTop, panelFiltros);
         }
 
-        private void CalcularTotal()
+        // Suma el valor total contratado de las membresías vendidas en el periodo.
+        private void ActualizarResumen()
         {
-            // 4. Sumamos el valor total contratado de las membresías vendidas
-            decimal totalContratado = _listaMembresias.Sum(m => m.Precio);
-            int cantidadVendida = _listaMembresias.Count;
-
-            lblTotal.Text = $"Total: {totalContratado:C2}";
+            lblTotal.Text = $"{_vista.Count} membresía(s)  ·  Total {_vista.Sum(f => f.Precio):C2}";
+            btnExportarExcel.Enabled = _vista.Count > 0;
         }
 
-        private void ConfigurarGrid()
+        // Estado de pago con color: pagada en verde, parcial en ámbar, sin pagar en rojo.
+        private void dgvMembresias_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvMembresias.Columns.Count == 0) return;
+            if (e.RowIndex < 0 || e.CellStyle is null) return;
+            if (dgvMembresias.Columns[e.ColumnIndex].DataPropertyName != nameof(FilaMembresia.EstadoMembresia)) return;
 
-            // Renombrar encabezados de columnas
-            if (dgvMembresias.Columns["Membresia"] != null) dgvMembresias.Columns["Membresia"].HeaderText = "Membresía";
-            if (dgvMembresias.Columns["Socio"] != null) dgvMembresias.Columns["Socio"].HeaderText = "Nombre del Socio";
-            if (dgvMembresias.Columns["FechaRegistro"] != null) dgvMembresias.Columns["FechaRegistro"].HeaderText = "Fecha de Registro";
-            if (dgvMembresias.Columns["FechaInicio"] != null) dgvMembresias.Columns["FechaInicio"].HeaderText = "Fecha de Inicio";
-            if (dgvMembresias.Columns["Vencimiento"] != null) dgvMembresias.Columns["Vencimiento"].HeaderText = "Vencimiento";
-            if (dgvMembresias.Columns["EstadoMembresia"] != null) dgvMembresias.Columns["EstadoMembresia"].HeaderText = "Estado Membresía";
-
-            if (dgvMembresias.Columns["Precio"] != null)
+            e.CellStyle.ForeColor = (e.Value as string)?.Trim().ToLowerInvariant() switch
             {
-                dgvMembresias.Columns["Precio"].HeaderText = "Precio";
-                dgvMembresias.Columns["Precio"].DefaultCellStyle.Format = "C2";
-                dgvMembresias.Columns["Precio"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                dgvMembresias.Columns["Precio"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            dgvMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                "pagada" => Tema.Exito,
+                "parcial" => Tema.Advertencia,
+                "sin pagar" => Tema.Peligro,
+                _ => e.CellStyle.ForeColor
+            };
         }
 
-        private void btnExportarExcel_Click(object sender, EventArgs e)
+        // Antes este botón mostraba "exportado con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente.
+        private void btnExportarExcel_Click(object? sender, EventArgs e)
         {
             if (dgvMembresias.Rows.Count == 0)
             {
-                MessageBox.Show("No hay datos en la tabla para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("No hay datos en la tabla para exportar.");
                 return;
             }
 
             try
             {
-                // Lógica o Helper para exportación a Excel
-                MessageBox.Show("Reporte de membresías exportado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string? ruta = ExportadorCsv.Exportar(dgvMembresias, "Membresias_vendidas");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                MessageBox.Show($"Error al exportar a Excel: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
-        }
-
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
-        {
-            // Restablecer el rango de fechas al día de hoy
-            dtpFechaInicio.Value = DateTime.Today;
-            dtpFechaFin.Value = DateTime.Today;
-
-            await BuscarPorFechasAsync();
         }
     }
 }

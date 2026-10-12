@@ -19,166 +19,190 @@
         {
             panelHeader = new Panel();
             lblTitulo = new Label();
-            grpDetallesMembresia = new GroupBox();
-            lblFechaInicioHeader = new Label();
-            lblFechaInicio = new Label();
-            lblPrecioHeader = new Label();
-            lblPrecioMembresia = new Label();
-            lblTotalPagadoHeader = new Label();
-            lblTotalPagado = new Label();
-            lblEstadoHeader = new Label();
-            lblEstadoPago = new Label();
+            panelContenido = new Panel();
+            dgvPagos = new GridTema();
+            panelPagosBarra = new Panel();
+            lblPagos = new Label();
+            panelAccionesPagos = new FlowLayoutPanel();
+            btnAnularPago = new BotonTema();
             grpRegistrarPago = new GroupBox();
-            lblImporte = new Label();
-            txtImporte = new TextBox();
+            lblMonto = new Label();
+            nudMonto = new NumericUpDown();
             lblTipoPago = new Label();
             cmbTipoPago = new ComboBox();
             lblFolio = new Label();
             txtFolio = new TextBox();
             lblObservacion = new Label();
             txtObservacion = new TextBox();
-            btnAgregarPago = new Button();
-            btnEliminarPago = new Button();
-            dgvPagos = new DataGridView();
-
+            btnAgregarPago = new BotonTema();
+            grpDetallesMembresia = new GroupBox();
+            lblInicioHeader = new Label();
+            lblFechaInicio = new Label();
+            lblPrecioHeader = new Label();
+            lblPrecioMembresia = new Label();
+            lblPagadoHeader = new Label();
+            lblTotalPagado = new Label();
+            lblEstadoHeader = new Label();
+            lblEstadoPago = new Label();
+            panelPie = new Panel();
+            btnCerrar = new BotonTema();
             panelHeader.SuspendLayout();
-            grpDetallesMembresia.SuspendLayout();
-            grpRegistrarPago.SuspendLayout();
+            panelContenido.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPagos).BeginInit();
+            panelPagosBarra.SuspendLayout();
+            panelAccionesPagos.SuspendLayout();
+            grpRegistrarPago.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudMonto).BeginInit();
+            grpDetallesMembresia.SuspendLayout();
+            panelPie.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelHeader
-            // 
-            panelHeader.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
-            panelHeader.Size = new Size(800, 50);
+            panelHeader.Size = new Size(800, 67);
             panelHeader.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI Bold", 14F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblTitulo.Location = new Point(20, 12);
+            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTitulo.Location = new Point(23, 16);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(220, 25);
+            lblTitulo.Size = new Size(260, 32);
             lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Gestión de Pagos de Membresía";
-            // 
+            lblTitulo.Text = "Pagos de la Membresía";
+            //
+            // panelContenido
+            //
+            panelContenido.Controls.Add(dgvPagos);
+            panelContenido.Controls.Add(panelPagosBarra);
+            panelContenido.Controls.Add(grpRegistrarPago);
+            panelContenido.Controls.Add(grpDetallesMembresia);
+            panelContenido.Dock = DockStyle.Fill;
+            panelContenido.Location = new Point(0, 67);
+            panelContenido.Name = "panelContenido";
+            panelContenido.Padding = new Padding(20, 10, 20, 10);
+            panelContenido.Size = new Size(800, 513);
+            panelContenido.TabIndex = 1;
+            //
             // grpDetallesMembresia
-            // 
-            grpDetallesMembresia.Controls.Add(lblFechaInicioHeader);
+            //
+            grpDetallesMembresia.Controls.Add(lblInicioHeader);
             grpDetallesMembresia.Controls.Add(lblFechaInicio);
             grpDetallesMembresia.Controls.Add(lblPrecioHeader);
             grpDetallesMembresia.Controls.Add(lblPrecioMembresia);
-            grpDetallesMembresia.Controls.Add(lblTotalPagadoHeader);
+            grpDetallesMembresia.Controls.Add(lblPagadoHeader);
             grpDetallesMembresia.Controls.Add(lblTotalPagado);
             grpDetallesMembresia.Controls.Add(lblEstadoHeader);
             grpDetallesMembresia.Controls.Add(lblEstadoPago);
+            grpDetallesMembresia.Dock = DockStyle.Top;
             grpDetallesMembresia.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            grpDetallesMembresia.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            grpDetallesMembresia.Location = new Point(20, 60);
+            grpDetallesMembresia.ForeColor = Color.FromArgb(45, 212, 255);
+            grpDetallesMembresia.Location = new Point(20, 10);
             grpDetallesMembresia.Name = "grpDetallesMembresia";
-            grpDetallesMembresia.Size = new Size(760, 80);
-            grpDetallesMembresia.TabIndex = 1;
+            grpDetallesMembresia.Size = new Size(760, 95);
+            grpDetallesMembresia.TabIndex = 0;
             grpDetallesMembresia.TabStop = false;
-            grpDetallesMembresia.Text = "Información de la Membresía";
-            // 
-            // lblFechaInicioHeader
-            // 
-            lblFechaInicioHeader.AutoSize = true;
-            lblFechaInicioHeader.Font = new Font("Segoe UI", 8.5F);
-            lblFechaInicioHeader.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblFechaInicioHeader.Location = new Point(20, 25);
-            lblFechaInicioHeader.Name = "lblFechaInicioHeader";
-            lblFechaInicioHeader.Size = new Size(73, 15);
-            lblFechaInicioHeader.TabIndex = 0;
-            lblFechaInicioHeader.Text = "Fecha Inicio:";
-            // 
+            grpDetallesMembresia.Text = "Detalles de la membresía";
+            //
+            // lblInicioHeader
+            //
+            lblInicioHeader.AutoSize = true;
+            lblInicioHeader.Font = new Font("Segoe UI", 9F);
+            lblInicioHeader.ForeColor = Color.FromArgb(124, 138, 165);
+            lblInicioHeader.Location = new Point(17, 30);
+            lblInicioHeader.Name = "lblInicioHeader";
+            lblInicioHeader.Size = new Size(95, 20);
+            lblInicioHeader.TabIndex = 0;
+            lblInicioHeader.Text = "Fecha de inicio";
+            //
             // lblFechaInicio
-            // 
+            //
             lblFechaInicio.AutoSize = true;
-            lblFechaInicio.Font = new Font("Segoe UI Bold", 10F);
-            lblFechaInicio.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblFechaInicio.Location = new Point(20, 45);
+            lblFechaInicio.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+            lblFechaInicio.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFechaInicio.Location = new Point(17, 54);
             lblFechaInicio.Name = "lblFechaInicio";
-            lblFechaInicio.Size = new Size(85, 19);
+            lblFechaInicio.Size = new Size(80, 25);
             lblFechaInicio.TabIndex = 1;
             lblFechaInicio.Text = "--/--/----";
-            // 
+            //
             // lblPrecioHeader
-            // 
+            //
             lblPrecioHeader.AutoSize = true;
-            lblPrecioHeader.Font = new Font("Segoe UI", 8.5F);
-            lblPrecioHeader.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblPrecioHeader.Location = new Point(210, 25);
+            lblPrecioHeader.Font = new Font("Segoe UI", 9F);
+            lblPrecioHeader.ForeColor = Color.FromArgb(124, 138, 165);
+            lblPrecioHeader.Location = new Point(190, 30);
             lblPrecioHeader.Name = "lblPrecioHeader";
-            lblPrecioHeader.Size = new Size(73, 15);
+            lblPrecioHeader.Size = new Size(46, 20);
             lblPrecioHeader.TabIndex = 2;
-            lblPrecioHeader.Text = "Precio Total:";
-            // 
+            lblPrecioHeader.Text = "Precio";
+            //
             // lblPrecioMembresia
-            // 
+            //
             lblPrecioMembresia.AutoSize = true;
-            lblPrecioMembresia.Font = new Font("Segoe UI Bold", 11F);
-            lblPrecioMembresia.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblPrecioMembresia.Location = new Point(210, 44);
+            lblPrecioMembresia.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+            lblPrecioMembresia.ForeColor = Color.FromArgb(230, 238, 252);
+            lblPrecioMembresia.Location = new Point(190, 54);
             lblPrecioMembresia.Name = "lblPrecioMembresia";
-            lblPrecioMembresia.Size = new Size(47, 20);
+            lblPrecioMembresia.Size = new Size(58, 25);
             lblPrecioMembresia.TabIndex = 3;
             lblPrecioMembresia.Text = "$0.00";
-            // 
-            // lblTotalPagadoHeader
-            // 
-            lblTotalPagadoHeader.AutoSize = true;
-            lblTotalPagadoHeader.Font = new Font("Segoe UI", 8.5F);
-            lblTotalPagadoHeader.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblTotalPagadoHeader.Location = new Point(400, 25);
-            lblTotalPagadoHeader.Name = "lblTotalPagadoHeader";
-            lblTotalPagadoHeader.Size = new Size(78, 15);
-            lblTotalPagadoHeader.TabIndex = 4;
-            lblTotalPagadoHeader.Text = "Total Pagado:";
-            // 
+            //
+            // lblPagadoHeader
+            //
+            lblPagadoHeader.AutoSize = true;
+            lblPagadoHeader.Font = new Font("Segoe UI", 9F);
+            lblPagadoHeader.ForeColor = Color.FromArgb(124, 138, 165);
+            lblPagadoHeader.Location = new Point(330, 30);
+            lblPagadoHeader.Name = "lblPagadoHeader";
+            lblPagadoHeader.Size = new Size(88, 20);
+            lblPagadoHeader.TabIndex = 4;
+            lblPagadoHeader.Text = "Total pagado";
+            //
             // lblTotalPagado
-            // 
+            //
             lblTotalPagado.AutoSize = true;
-            lblTotalPagado.Font = new Font("Segoe UI Bold", 11F);
-            lblTotalPagado.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblTotalPagado.Location = new Point(400, 44);
+            lblTotalPagado.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+            lblTotalPagado.ForeColor = Color.FromArgb(230, 238, 252);
+            lblTotalPagado.Location = new Point(330, 54);
             lblTotalPagado.Name = "lblTotalPagado";
-            lblTotalPagado.Size = new Size(47, 20);
+            lblTotalPagado.Size = new Size(58, 25);
             lblTotalPagado.TabIndex = 5;
             lblTotalPagado.Text = "$0.00";
-            // 
+            //
             // lblEstadoHeader
-            // 
+            //
             lblEstadoHeader.AutoSize = true;
-            lblEstadoHeader.Font = new Font("Segoe UI", 8.5F);
-            lblEstadoHeader.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblEstadoHeader.Location = new Point(600, 25);
+            lblEstadoHeader.Font = new Font("Segoe UI", 9F);
+            lblEstadoHeader.ForeColor = Color.FromArgb(124, 138, 165);
+            lblEstadoHeader.Location = new Point(490, 30);
             lblEstadoHeader.Name = "lblEstadoHeader";
-            lblEstadoHeader.Size = new Size(45, 15);
+            lblEstadoHeader.Size = new Size(88, 20);
             lblEstadoHeader.TabIndex = 6;
-            lblEstadoHeader.Text = "Estado:";
-            // 
+            lblEstadoHeader.Text = "Estado del pago";
+            //
             // lblEstadoPago
-            // 
+            //
             lblEstadoPago.AutoSize = true;
-            lblEstadoPago.Font = new Font("Segoe UI Bold", 11F);
-            lblEstadoPago.ForeColor = Color.ForestGreen;
-            lblEstadoPago.Location = new Point(600, 44);
+            lblEstadoPago.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
+            lblEstadoPago.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEstadoPago.Location = new Point(490, 54);
             lblEstadoPago.Name = "lblEstadoPago";
-            lblEstadoPago.Size = new Size(62, 20);
+            lblEstadoPago.Size = new Size(90, 25);
             lblEstadoPago.TabIndex = 7;
-            lblEstadoPago.Text = "Pendiente";
-            // 
+            lblEstadoPago.Text = "PENDIENTE";
+            //
             // grpRegistrarPago
-            // 
-            grpRegistrarPago.Controls.Add(lblImporte);
-            grpRegistrarPago.Controls.Add(txtImporte);
+            //
+            grpRegistrarPago.Controls.Add(lblMonto);
+            grpRegistrarPago.Controls.Add(nudMonto);
             grpRegistrarPago.Controls.Add(lblTipoPago);
             grpRegistrarPago.Controls.Add(cmbTipoPago);
             grpRegistrarPago.Controls.Add(lblFolio);
@@ -186,185 +210,233 @@
             grpRegistrarPago.Controls.Add(lblObservacion);
             grpRegistrarPago.Controls.Add(txtObservacion);
             grpRegistrarPago.Controls.Add(btnAgregarPago);
-            grpRegistrarPago.Controls.Add(btnEliminarPago);
+            grpRegistrarPago.Dock = DockStyle.Top;
             grpRegistrarPago.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            grpRegistrarPago.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            grpRegistrarPago.Location = new Point(20, 150);
+            grpRegistrarPago.ForeColor = Color.FromArgb(45, 212, 255);
+            grpRegistrarPago.Location = new Point(20, 105);
             grpRegistrarPago.Name = "grpRegistrarPago";
-            grpRegistrarPago.Size = new Size(760, 130);
-            grpRegistrarPago.TabIndex = 2;
+            grpRegistrarPago.Size = new Size(760, 145);
+            grpRegistrarPago.TabIndex = 1;
             grpRegistrarPago.TabStop = false;
-            grpRegistrarPago.Text = "Registrar Nuevo Abono / Pago";
-            // 
-            // lblImporte
-            // 
-            lblImporte.AutoSize = true;
-            lblImporte.Font = new Font("Segoe UI", 8.5F);
-            lblImporte.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblImporte.Location = new Point(15, 25);
-            lblImporte.Name = "lblImporte";
-            lblImporte.Size = new Size(52, 15);
-            lblImporte.TabIndex = 0;
-            lblImporte.Text = "Monto ($):";
-            // 
-            // txtImporte
-            // 
-            txtImporte.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            txtImporte.BorderStyle = BorderStyle.FixedSingle;
-            txtImporte.Font = new Font("Segoe UI", 9F);
-            txtImporte.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtImporte.Location = new Point(15, 45);
-            txtImporte.Name = "txtImporte";
-            txtImporte.Size = new Size(110, 23);
-            txtImporte.TabIndex = 1;
-            // 
+            grpRegistrarPago.Text = "Registrar nuevo pago";
+            //
+            // lblMonto
+            //
+            lblMonto.AutoSize = true;
+            lblMonto.Font = new Font("Segoe UI", 8.5F);
+            lblMonto.ForeColor = Color.FromArgb(230, 238, 252);
+            lblMonto.Location = new Point(17, 28);
+            lblMonto.Name = "lblMonto";
+            lblMonto.Size = new Size(52, 20);
+            lblMonto.TabIndex = 0;
+            lblMonto.Text = "Monto:";
+            //
+            // nudMonto
+            //
+            nudMonto.BackColor = Color.FromArgb(15, 42, 79);
+            nudMonto.DecimalPlaces = 2;
+            nudMonto.Font = new Font("Segoe UI", 9F);
+            nudMonto.ForeColor = Color.FromArgb(230, 238, 252);
+            nudMonto.Location = new Point(17, 52);
+            nudMonto.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            nudMonto.Minimum = new decimal(new int[] { 1, 0, 0, 131072 });
+            nudMonto.Name = "nudMonto";
+            nudMonto.Size = new Size(140, 27);
+            nudMonto.TabIndex = 0;
+            nudMonto.TextAlign = HorizontalAlignment.Right;
+            nudMonto.ThousandsSeparator = true;
+            nudMonto.Value = new decimal(new int[] { 1, 0, 0, 131072 });
+            //
             // lblTipoPago
-            // 
+            //
             lblTipoPago.AutoSize = true;
             lblTipoPago.Font = new Font("Segoe UI", 8.5F);
-            lblTipoPago.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblTipoPago.Location = new Point(140, 25);
+            lblTipoPago.ForeColor = Color.FromArgb(230, 238, 252);
+            lblTipoPago.Location = new Point(177, 28);
             lblTipoPago.Name = "lblTipoPago";
-            lblTipoPago.Size = new Size(89, 15);
-            lblTipoPago.TabIndex = 2;
-            lblTipoPago.Text = "Forma de Pago:";
-            // 
+            lblTipoPago.Size = new Size(98, 20);
+            lblTipoPago.TabIndex = 1;
+            lblTipoPago.Text = "Forma de pago:";
+            //
             // cmbTipoPago
-            // 
-            cmbTipoPago.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            cmbTipoPago.BackColor = Color.FromArgb(15, 42, 79);
             cmbTipoPago.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbTipoPago.FlatStyle = FlatStyle.Flat;
             cmbTipoPago.Font = new Font("Segoe UI", 9F);
-            cmbTipoPago.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            cmbTipoPago.ForeColor = Color.FromArgb(230, 238, 252);
             cmbTipoPago.FormattingEnabled = true;
-            cmbTipoPago.Location = new Point(140, 45);
+            cmbTipoPago.Items.AddRange(new object[] { "Efectivo", "Tarjeta", "Transferencia" });
+            cmbTipoPago.Location = new Point(177, 52);
             cmbTipoPago.Name = "cmbTipoPago";
-            cmbTipoPago.Size = new Size(140, 23);
-            cmbTipoPago.TabIndex = 3;
-            // 
+            cmbTipoPago.Size = new Size(160, 28);
+            cmbTipoPago.TabIndex = 1;
+            //
             // lblFolio
-            // 
+            //
             lblFolio.AutoSize = true;
             lblFolio.Font = new Font("Segoe UI", 8.5F);
-            lblFolio.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblFolio.Location = new Point(295, 25);
+            lblFolio.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFolio.Location = new Point(357, 28);
             lblFolio.Name = "lblFolio";
-            lblFolio.Size = new Size(36, 15);
-            lblFolio.TabIndex = 4;
+            lblFolio.Size = new Size(46, 20);
+            lblFolio.TabIndex = 2;
             lblFolio.Text = "Folio:";
-            // 
+            //
             // txtFolio
-            // 
-            txtFolio.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtFolio.BackColor = Color.FromArgb(15, 42, 79);
             txtFolio.BorderStyle = BorderStyle.FixedSingle;
             txtFolio.Font = new Font("Segoe UI", 9F);
-            txtFolio.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtFolio.Location = new Point(295, 45);
+            txtFolio.ForeColor = Color.FromArgb(230, 238, 252);
+            txtFolio.Location = new Point(357, 52);
+            txtFolio.MaxLength = 50;
             txtFolio.Name = "txtFolio";
-            txtFolio.Size = new Size(130, 23);
-            txtFolio.TabIndex = 5;
-            // 
+            txtFolio.Size = new Size(160, 27);
+            txtFolio.TabIndex = 2;
+            //
             // lblObservacion
-            // 
+            //
             lblObservacion.AutoSize = true;
             lblObservacion.Font = new Font("Segoe UI", 8.5F);
-            lblObservacion.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblObservacion.Location = new Point(15, 78);
+            lblObservacion.ForeColor = Color.FromArgb(230, 238, 252);
+            lblObservacion.Location = new Point(17, 88);
             lblObservacion.Name = "lblObservacion";
-            lblObservacion.Size = new Size(75, 15);
-            lblObservacion.TabIndex = 6;
+            lblObservacion.Size = new Size(88, 20);
+            lblObservacion.TabIndex = 3;
             lblObservacion.Text = "Observación:";
-            // 
+            //
             // txtObservacion
-            // 
-            txtObservacion.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            txtObservacion.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtObservacion.BackColor = Color.FromArgb(15, 42, 79);
             txtObservacion.BorderStyle = BorderStyle.FixedSingle;
             txtObservacion.Font = new Font("Segoe UI", 9F);
-            txtObservacion.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            txtObservacion.Location = new Point(95, 76);
+            txtObservacion.ForeColor = Color.FromArgb(230, 238, 252);
+            txtObservacion.Location = new Point(17, 110);
+            txtObservacion.MaxLength = 200;
             txtObservacion.Name = "txtObservacion";
-            txtObservacion.Size = new Size(330, 23);
-            txtObservacion.TabIndex = 7;
-            // 
+            txtObservacion.Size = new Size(500, 27);
+            txtObservacion.TabIndex = 3;
+            //
             // btnAgregarPago
-            // 
-            btnAgregarPago.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnAgregarPago.FlatAppearance.BorderSize = 0;
-            btnAgregarPago.FlatStyle = FlatStyle.Flat;
-            btnAgregarPago.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnAgregarPago.ForeColor = Color.White;
-            btnAgregarPago.Location = new Point(450, 42);
+            //
+            btnAgregarPago.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnAgregarPago.Estilo = EstiloBoton.Primario;
+            btnAgregarPago.Location = new Point(545, 98);
             btnAgregarPago.Name = "btnAgregarPago";
-            btnAgregarPago.Size = new Size(140, 58);
-            btnAgregarPago.TabIndex = 8;
-            btnAgregarPago.Text = "+ Registrar\r\nPago";
-            btnAgregarPago.UseVisualStyleBackColor = false;
+            btnAgregarPago.Size = new Size(200, 40);
+            btnAgregarPago.TabIndex = 4;
+            btnAgregarPago.Text = "+ Registrar pago";
             btnAgregarPago.Click += btnAgregarPago_Click;
-            // 
-            // btnEliminarPago
-            // 
-            btnEliminarPago.BackColor = ColorTranslator.FromHtml("#d32f2f");
-            btnEliminarPago.FlatAppearance.BorderSize = 0;
-            btnEliminarPago.FlatStyle = FlatStyle.Flat;
-            btnEliminarPago.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            btnEliminarPago.ForeColor = Color.White;
-            btnEliminarPago.Location = new Point(600, 42);
-            btnEliminarPago.Name = "btnEliminarPago";
-            btnEliminarPago.Size = new Size(140, 58);
-            btnEliminarPago.TabIndex = 9;
-            btnEliminarPago.Text = "Cancelar\r\nPago Sel.";
-            btnEliminarPago.UseVisualStyleBackColor = false;
-            btnEliminarPago.Click += btnEliminarPago_Click;
-            // 
+            //
+            // panelPagosBarra
+            //
+            panelPagosBarra.Controls.Add(panelAccionesPagos);
+            panelPagosBarra.Controls.Add(lblPagos);
+            panelPagosBarra.Dock = DockStyle.Top;
+            panelPagosBarra.Location = new Point(20, 250);
+            panelPagosBarra.Name = "panelPagosBarra";
+            panelPagosBarra.Size = new Size(760, 52);
+            panelPagosBarra.TabIndex = 2;
+            //
+            // lblPagos
+            //
+            lblPagos.AutoSize = true;
+            lblPagos.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            lblPagos.ForeColor = Color.FromArgb(45, 212, 255);
+            lblPagos.Location = new Point(0, 17);
+            lblPagos.Name = "lblPagos";
+            lblPagos.Size = new Size(125, 21);
+            lblPagos.TabIndex = 0;
+            lblPagos.Text = "Pagos registrados";
+            //
+            // panelAccionesPagos
+            //
+            panelAccionesPagos.AutoSize = true;
+            panelAccionesPagos.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            panelAccionesPagos.Controls.Add(btnAnularPago);
+            panelAccionesPagos.Dock = DockStyle.Right;
+            panelAccionesPagos.Location = new Point(640, 0);
+            panelAccionesPagos.Name = "panelAccionesPagos";
+            panelAccionesPagos.Padding = new Padding(0, 8, 0, 0);
+            panelAccionesPagos.Size = new Size(120, 52);
+            panelAccionesPagos.TabIndex = 1;
+            panelAccionesPagos.WrapContents = false;
+            //
+            // btnAnularPago
+            //
+            btnAnularPago.Enabled = false;
+            btnAnularPago.Estilo = EstiloBoton.Peligro;
+            btnAnularPago.Margin = new Padding(0);
+            btnAnularPago.Name = "btnAnularPago";
+            btnAnularPago.Size = new Size(120, 36);
+            btnAnularPago.TabIndex = 0;
+            btnAnularPago.Text = "Anular pago";
+            btnAnularPago.Click += btnAnularPago_Click;
+            //
             // dgvPagos
-            // 
-            dgvPagos.AllowUserToAddRows = false;
-            dgvPagos.AllowUserToDeleteRows = false;
-            dgvPagos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvPagos.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvPagos.BorderStyle = BorderStyle.None;
-            dgvPagos.EnableHeadersVisualStyles = false;
-            dgvPagos.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvPagos.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvPagos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dgvPagos.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvPagos.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvPagos.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvPagos.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvPagos.GridColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvPagos.Location = new Point(20, 295);
-            dgvPagos.MultiSelect = false;
+            //
+            dgvPagos.Dock = DockStyle.Fill;
+            dgvPagos.Location = new Point(20, 302);
             dgvPagos.Name = "dgvPagos";
-            dgvPagos.ReadOnly = true;
-            dgvPagos.RowHeadersVisible = false;
-            dgvPagos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvPagos.Size = new Size(760, 270);
+            dgvPagos.Size = new Size(760, 201);
             dgvPagos.TabIndex = 3;
-            // 
+            dgvPagos.CellFormatting += dgvPagos_CellFormatting;
+            dgvPagos.SelectionChanged += dgvPagos_SelectionChanged;
+            //
+            // panelPie
+            //
+            panelPie.BackColor = Color.FromArgb(14, 20, 36);
+            panelPie.Controls.Add(btnCerrar);
+            panelPie.Dock = DockStyle.Bottom;
+            panelPie.Location = new Point(0, 580);
+            panelPie.Name = "panelPie";
+            panelPie.Size = new Size(800, 60);
+            panelPie.TabIndex = 2;
+            //
+            // btnCerrar
+            //
+            btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCerrar.DialogResult = DialogResult.Cancel;
+            btnCerrar.Location = new Point(680, 10);
+            btnCerrar.Name = "btnCerrar";
+            btnCerrar.Size = new Size(100, 40);
+            btnCerrar.TabIndex = 0;
+            btnCerrar.Text = "Cerrar";
+            //
             // FrmPagoSocioMembresiaModal
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            //
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            ClientSize = new Size(800, 580);
-            Controls.Add(dgvPagos);
-            Controls.Add(grpRegistrarPago);
-            Controls.Add(grpDetallesMembresia);
+            BackColor = Color.FromArgb(11, 15, 26);
+            CancelButton = btnCerrar;
+            ClientSize = new Size(800, 640);
+            Controls.Add(panelContenido);
+            Controls.Add(panelPie);
             Controls.Add(panelHeader);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            MaximizeBox = true;
             MinimizeBox = false;
+            MinimumSize = new Size(760, 600);
             Name = "FrmPagoSocioMembresiaModal";
+            ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Historial y Registro de Pagos";
+            Text = "Pagos de Membresía";
             Load += FrmPagoSocioMembresiaModal_Load;
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
-            grpDetallesMembresia.ResumeLayout(false);
-            grpDetallesMembresia.PerformLayout();
+            panelContenido.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvPagos).EndInit();
+            panelPagosBarra.ResumeLayout(false);
+            panelPagosBarra.PerformLayout();
+            panelAccionesPagos.ResumeLayout(false);
             grpRegistrarPago.ResumeLayout(false);
             grpRegistrarPago.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvPagos).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudMonto).EndInit();
+            grpDetallesMembresia.ResumeLayout(false);
+            grpDetallesMembresia.PerformLayout();
+            panelPie.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -372,26 +444,32 @@
 
         private Panel panelHeader;
         private Label lblTitulo;
-        private GroupBox grpDetallesMembresia;
-        private Label lblFechaInicioHeader;
-        private Label lblFechaInicio;
-        private Label lblPrecioHeader;
-        private Label lblPrecioMembresia;
-        private Label lblTotalPagadoHeader;
-        private Label lblTotalPagado;
-        private Label lblEstadoHeader;
-        private Label lblEstadoPago;
+        private Panel panelContenido;
+        private GridTema dgvPagos;
+        private Panel panelPagosBarra;
+        private Label lblPagos;
+        private FlowLayoutPanel panelAccionesPagos;
+        private BotonTema btnAnularPago;
         private GroupBox grpRegistrarPago;
-        private Label lblImporte;
-        private TextBox txtImporte;
+        private Label lblMonto;
+        private NumericUpDown nudMonto;
         private Label lblTipoPago;
         private ComboBox cmbTipoPago;
         private Label lblFolio;
         private TextBox txtFolio;
         private Label lblObservacion;
         private TextBox txtObservacion;
-        private Button btnAgregarPago;
-        private Button btnEliminarPago;
-        private DataGridView dgvPagos;
+        private BotonTema btnAgregarPago;
+        private GroupBox grpDetallesMembresia;
+        private Label lblInicioHeader;
+        private Label lblFechaInicio;
+        private Label lblPrecioHeader;
+        private Label lblPrecioMembresia;
+        private Label lblPagadoHeader;
+        private Label lblTotalPagado;
+        private Label lblEstadoHeader;
+        private Label lblEstadoPago;
+        private Panel panelPie;
+        private BotonTema btnCerrar;
     }
 }

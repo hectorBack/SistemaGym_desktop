@@ -17,27 +17,30 @@
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panelHeader = new Panel();
             lblTitulo = new Label();
+            panelInfo = new Panel();
             lblFechaEtiqueta = new Label();
             lblFechaValor = new Label();
-            dgvDetalles = new DataGridView();
+            lblArticulos = new Label();
             lblTotalEtiqueta = new Label();
             lblTotalCalculado = new Label();
+            dgvDetalles = new GridTema();
+            panelPie = new Panel();
             btnCerrar = new Button();
+
             panelHeader.SuspendLayout();
+            panelInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDetalles).BeginInit();
+            panelPie.SuspendLayout();
             SuspendLayout();
             // 
             // panelHeader
             // 
-            panelHeader.BackColor = Color.FromArgb(15, 42, 79);
+            panelHeader.BackColor = ColorTranslator.FromHtml("#0f2a4f");
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
-            panelHeader.Margin = new Padding(3, 4, 3, 4);
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(663, 67);
             panelHeader.TabIndex = 0;
@@ -46,146 +49,158 @@
             // 
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
-            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
             lblTitulo.Location = new Point(23, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(187, 28);
+            lblTitulo.Size = new Size(180, 28);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Detalle de la Compra";
+            // 
+            // panelInfo
+            // 
+            panelInfo.BackColor = ColorTranslator.FromHtml("#0e1424");
+            panelInfo.Controls.Add(lblFechaEtiqueta);
+            panelInfo.Controls.Add(lblFechaValor);
+            panelInfo.Controls.Add(lblArticulos);
+            panelInfo.Controls.Add(lblTotalEtiqueta);
+            panelInfo.Controls.Add(lblTotalCalculado);
+            panelInfo.Dock = DockStyle.Top;
+            panelInfo.Location = new Point(0, 67);
+            panelInfo.Name = "panelInfo";
+            panelInfo.Size = new Size(663, 75);
+            panelInfo.TabIndex = 1;
             // 
             // lblFechaEtiqueta
             // 
             lblFechaEtiqueta.AutoSize = true;
-            lblFechaEtiqueta.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            lblFechaEtiqueta.ForeColor = Color.FromArgb(45, 212, 255);
-            lblFechaEtiqueta.Location = new Point(41, 118);
+            lblFechaEtiqueta.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
+            lblFechaEtiqueta.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            lblFechaEtiqueta.Location = new Point(25, 12);
             lblFechaEtiqueta.Name = "lblFechaEtiqueta";
             lblFechaEtiqueta.Size = new Size(58, 21);
-            lblFechaEtiqueta.TabIndex = 3;
+            lblFechaEtiqueta.TabIndex = 0;
             lblFechaEtiqueta.Text = "Fecha:";
             // 
             // lblFechaValor
+            // 
             lblFechaValor.AutoSize = true;
             lblFechaValor.Font = new Font("Segoe UI", 9.5F);
-            lblFechaValor.ForeColor = Color.FromArgb(230, 238, 252);
-            lblFechaValor.Location = new Point(100, 118);
+            lblFechaValor.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            lblFechaValor.Location = new Point(85, 12);
             lblFechaValor.Name = "lblFechaValor";
-            lblFechaValor.Size = new Size(140, 21);
-            lblFechaValor.TabIndex = 4;
-            lblFechaValor.Text = "dd/MM/yyyy HH:mm";
+            lblFechaValor.Size = new Size(120, 21);
+            lblFechaValor.TabIndex = 1;
+            lblFechaValor.Text = "--/--/---- --:--";
             // 
-            // dgvDetalles
+            // lblArticulos
             // 
-            dgvDetalles.AllowUserToAddRows = false;
-            dgvDetalles.AllowUserToDeleteRows = false;
-            dgvDetalles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvDetalles.BackgroundColor = Color.FromArgb(15, 42, 79);
-            dgvDetalles.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(11, 15, 26);
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.FromArgb(45, 212, 255);
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvDetalles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dgvDetalles.ColumnHeadersHeight = 29;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(15, 42, 79);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(230, 238, 252);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 111, 235);
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvDetalles.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvDetalles.EnableHeadersVisualStyles = false;
-            dgvDetalles.GridColor = Color.FromArgb(11, 15, 26);
-            dgvDetalles.Location = new Point(29, 213);
-            dgvDetalles.Margin = new Padding(3, 4, 3, 4);
-            dgvDetalles.MultiSelect = false;
-            dgvDetalles.Name = "dgvDetalles";
-            dgvDetalles.ReadOnly = true;
-            dgvDetalles.RowHeadersVisible = false;
-            dgvDetalles.RowHeadersWidth = 51;
-            dgvDetalles.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvDetalles.Size = new Size(606, 293);
-            dgvDetalles.TabIndex = 11;
+            lblArticulos.AutoSize = true;
+            lblArticulos.Font = new Font("Segoe UI", 9F);
+            lblArticulos.ForeColor = ColorTranslator.FromHtml("#7c8aa5");
+            lblArticulos.Location = new Point(25, 42);
+            lblArticulos.Name = "lblArticulos";
+            lblArticulos.Size = new Size(120, 20);
+            lblArticulos.TabIndex = 2;
+            lblArticulos.Text = "0 artículo(s)";
             // 
             // lblTotalEtiqueta
             // 
-            lblTotalEtiqueta.AutoSize = true;
-            lblTotalEtiqueta.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold);
-            lblTotalEtiqueta.ForeColor = Color.FromArgb(230, 238, 252);
-            lblTotalEtiqueta.Location = new Point(403, 116);
+            lblTotalEtiqueta.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblTotalEtiqueta.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            lblTotalEtiqueta.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            lblTotalEtiqueta.Location = new Point(390, 18);
             lblTotalEtiqueta.Name = "lblTotalEtiqueta";
-            lblTotalEtiqueta.Size = new Size(91, 25);
-            lblTotalEtiqueta.TabIndex = 12;
+            lblTotalEtiqueta.Size = new Size(80, 35);
+            lblTotalEtiqueta.TabIndex = 3;
             lblTotalEtiqueta.Text = "TOTAL:";
+            lblTotalEtiqueta.TextAlign = ContentAlignment.MiddleRight;
             // 
             // lblTotalCalculado
             // 
-            lblTotalCalculado.AutoSize = true;
-            lblTotalCalculado.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold);
-            lblTotalCalculado.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTotalCalculado.Location = new Point(483, 112);
+            lblTotalCalculado.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblTotalCalculado.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTotalCalculado.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            lblTotalCalculado.Location = new Point(475, 18);
             lblTotalCalculado.Name = "lblTotalCalculado";
-            lblTotalCalculado.Size = new Size(76, 29);
-            lblTotalCalculado.TabIndex = 13;
+            lblTotalCalculado.Size = new Size(160, 35);
+            lblTotalCalculado.TabIndex = 4;
             lblTotalCalculado.Text = "$0.00";
+            lblTotalCalculado.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // dgvDetalles
+            // 
+            dgvDetalles.Dock = DockStyle.Fill;
+            dgvDetalles.Location = new Point(0, 142);
+            dgvDetalles.Name = "dgvDetalles";
+            dgvDetalles.Size = new Size(663, 336);
+            dgvDetalles.TabIndex = 2;
+            // 
+            // panelPie
+            // 
+            panelPie.BackColor = ColorTranslator.FromHtml("#0e1424");
+            panelPie.Controls.Add(btnCerrar);
+            panelPie.Dock = DockStyle.Bottom;
+            panelPie.Location = new Point(0, 478);
+            panelPie.Name = "panelPie";
+            panelPie.Size = new Size(663, 70);
+            panelPie.TabIndex = 3;
             // 
             // btnCerrar
             // 
-            btnCerrar.BackColor = Color.FromArgb(31, 111, 235);
-            btnCerrar.FlatAppearance.BorderSize = 0;
+            btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCerrar.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            btnCerrar.DialogResult = DialogResult.Cancel;
             btnCerrar.FlatStyle = FlatStyle.Flat;
-            btnCerrar.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            btnCerrar.ForeColor = Color.White;
-            btnCerrar.Location = new Point(520, 587);
-            btnCerrar.Margin = new Padding(3, 4, 3, 4);
+            btnCerrar.Font = new Font("Segoe UI", 9.5F);
+            btnCerrar.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            btnCerrar.Location = new Point(521, 14);
             btnCerrar.Name = "btnCerrar";
-            btnCerrar.Size = new Size(114, 43);
-            btnCerrar.TabIndex = 14;
+            btnCerrar.Size = new Size(114, 40);
+            btnCerrar.TabIndex = 0;
             btnCerrar.Text = "Cerrar";
             btnCerrar.UseVisualStyleBackColor = false;
-            btnCerrar.Click += btnCerrar_Click;
             // 
             // FrmCompraDetalleModal
             // 
+            AcceptButton = btnCerrar;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(11, 15, 26);
-            ClientSize = new Size(663, 653);
-            Controls.Add(btnCerrar);
-            Controls.Add(lblTotalCalculado);
-            Controls.Add(lblTotalEtiqueta);
+            BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            CancelButton = btnCerrar;
+            ClientSize = new Size(663, 548);
             Controls.Add(dgvDetalles);
-            Controls.Add(lblFechaValor);
-            Controls.Add(lblFechaEtiqueta);
+            Controls.Add(panelPie);
+            Controls.Add(panelInfo);
             Controls.Add(panelHeader);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            Margin = new Padding(3, 4, 3, 4);
+            FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = false;
             MinimizeBox = false;
+            MinimumSize = new Size(560, 420);
             Name = "FrmCompraDetalleModal";
+            ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Detalle de la Compra";
-            Load += FrmCompraDetalleModal_Load;
+            Text = "Detalle de Compra";
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
+            panelInfo.ResumeLayout(false);
+            panelInfo.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvDetalles).EndInit();
+            panelPie.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
         private Panel panelHeader;
         private Label lblTitulo;
+        private Panel panelInfo;
         private Label lblFechaEtiqueta;
         private Label lblFechaValor;
-        private DataGridView dgvDetalles;
+        private Label lblArticulos;
         private Label lblTotalEtiqueta;
         private Label lblTotalCalculado;
+        private GridTema dgvDetalles;
+        private Panel panelPie;
         private Button btnCerrar;
     }
 }

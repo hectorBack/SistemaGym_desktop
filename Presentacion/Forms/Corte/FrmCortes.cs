@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -17,283 +18,275 @@ namespace Presentacion.Forms.Corte
         private readonly CorteController _corteController;
         private readonly MovimientoController _movimientoController;
         private readonly ConfiguracionController _configuracionController;
-        private readonly int _usuarioIdSesion;
-        private List<CorteViewModel> _listaCortes = new();
+        private readonly int _usuarioId;
 
-        public FrmCortes(CorteController corteController, MovimientoController movimientoController, ConfiguracionController configuracionController, int usuarioIdSesion = 1)
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<CorteViewModel> _vista = new();
+
+        // usuarioIdSesion se conserva por compatibilidad con FrmPrincipal, pero ya no hay un "1" de respaldo:
+        // si no llega un valor válido se usa el usuario de la sesión activa.
+        public FrmCortes(
+            CorteController corteController,
+            MovimientoController movimientoController,
+            ConfiguracionController configuracionController,
+            int? usuarioIdSesion = null)
         {
+            _corteController = corteController ?? throw new ArgumentNullException(nameof(corteController));
+            _movimientoController = movimientoController ?? throw new ArgumentNullException(nameof(movimientoController));
+            _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
+            _usuarioId = usuarioIdSesion is > 0 ? usuarioIdSesion.Value : SesionUsuario.UsuarioID;
+
             InitializeComponent();
-            _corteController = corteController;
-            _movimientoController = movimientoController;
-            _configuracionController = configuracionController;
-            _usuarioIdSesion = usuarioIdSesion;
-
-
-            dgvCortes.SelectionChanged += dgvCortes_SelectionChanged;
+            ConfigurarColumnas();
         }
 
-        private async void FrmCortes_Load(object sender, EventArgs e)
+        /// <summary>Corte de la fila seleccionada, o null si no hay ninguno seleccionado.</summary>
+        private CorteViewModel? CorteSeleccionado =>
+            dgvCortes.SelectedRows.Count > 0
+                ? dgvCortes.SelectedRows[0].DataBoundItem as CorteViewModel
+                : null;
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmCortes_Load(object? sender, EventArgs e)
         {
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
-            await BuscarPorFechasAsync();
-            await ActualizarEfectivoEnCajaAsync();
+            await RecargarAsync();
         }
 
-        private async Task CargarCortesAsync()
+        // Las columnas se definen una sola vez con sus formatos reales.
+        private void ConfigurarColumnas()
         {
-            await BuscarPorFechasAsync();
-            await ActualizarEfectivoEnCajaAsync();
+            dgvCortes.AutoGenerateColumns = false;
+
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.FechaApertura), "Fecha Inicio", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.FechaCierre), "Fecha Final", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.TotalIngresos), "Ingresos", 90, 90, "C2", alinearDerecha: true);
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.TotalEgresos), "Egresos", 90, 90, "C2", alinearDerecha: true);
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.MontoInicial), "Caja Inicial", 90, 90, "C2", alinearDerecha: true);
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.MontoFinal), "Caja Final", 90, 90, "C2", alinearDerecha: true);
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.Usuario), "Usuario", 110, 120);
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.CreatedAt), "Fecha Registro", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.Observaciones), "Observación", 150, 150);
         }
 
-        private async Task BuscarPorFechasAsync()
+        // Carga el historial y el efectivo en caja (los dos van siempre juntos).
+        private async Task RecargarAsync(int? idASeleccionar = null)
         {
-            try
+            await CargarCortesAsync(idASeleccionar);
+            if (!IsDisposed)
+                await ActualizarEfectivoEnCajaAsync();
+        }
+
+        private async Task CargarCortesAsync(int? idASeleccionar = null)
+        {
+            // El rango cubre todo el día "Hasta".
+            DateTime inicio = dtpFechaInicio.Value.Date;
+            DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+
+            if (inicio > fin)
             {
-                // Ajustar horas para cubrir todo el rango del día seleccionado
-                DateTime inicio = dtpFechaInicio.Value.Date;
-                DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+                FormHelper.MostrarAdvertencia("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.", "Rango de fechas");
+                return;
+            }
 
-                var resultado = await _corteController.ObtenerPorRangoFechasAsync(inicio, fin);
-                _listaCortes = resultado.ToList();
+            // Si no se pide otro, se conserva la selección actual.
+            int? idObjetivo = idASeleccionar ?? CorteSeleccionado?.CorteID;
 
-                dgvCortes.DataSource = null;
+            await FormHelper.EjecutarAsync(async () =>
+            {
+                var cortes = await _corteController.ObtenerPorRangoFechasAsync(inicio, fin);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
 
-                // Proyección anónima para incluir todas las columnas solicitadas
-                dgvCortes.DataSource = _listaCortes.Select(c => new
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvCortes.SortedColumn;
+                var sentidoOrden = dgvCortes.SortOrder;
+
+                _vista = new ListaOrdenable<CorteViewModel>(cortes.ToList());
+                dgvCortes.DataSource = _vista;
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    FechaInicio = c.FechaApertura,
-                    FechaFinal = c.FechaCierre,
-                    Ingresos = c.TotalIngresos, // Si en tu ViewModel se llama TotalVentas, usa c.TotalVentas
-                    Egresos = c.TotalEgresos,
-                    CajaInicial = c.MontoInicial,
-                    CajaFinal = c.MontoFinal,
-                    Usuario = string.IsNullOrWhiteSpace(c.Usuario) ? "N/A" : c.Usuario,
-                    FechaRegistro = c.CreatedAt,
-                    Observacion = string.IsNullOrWhiteSpace(c.Observaciones) ? "Sin observaciones" : c.Observaciones
-                }).ToList();
+                    dgvCortes.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
+                }
+                else
+                {
+                    // Primera carga: los cortes más recientes arriba.
+                    var colFecha = dgvCortes.Columns["col" + nameof(CorteViewModel.CreatedAt)]
+                                   ?? dgvCortes.Columns["col" + nameof(CorteViewModel.FechaApertura)];
+                    if (colFecha != null)
+                        dgvCortes.Sort(colFecha, ListSortDirection.Descending);
+                }
 
-                ConfigurarGrid();
-                dgvCortes.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar los cortes de caja: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+                SeleccionarCorte(idObjetivo);
+            },
+            "No se pudieron cargar los cortes de caja.",
+            panelTop, panelFiltros);
         }
 
         private async Task ActualizarEfectivoEnCajaAsync()
         {
-            try
+            string texto = "Efectivo en Caja: no disponible";
+
+            await FormHelper.EjecutarAsync(async () =>
             {
-                // 1. Obtener el efectivo inicial guardado en la Configuración
                 var configCaja = await _configuracionController.ObtenerConfigCorteCajaAsync();
                 decimal efectivoInicialConfig = configCaja?.EfectivoInicial ?? 0m;
 
-                // 2. Obtener el flujo/acumulado de la caja desde el controller
                 decimal efectivoCalculado = await _corteController.ObtenerEfectivoEnCajaAsync();
 
-                // 3. Sumar el base configurado + el saldo dinámico
-                decimal efectivoTotal = efectivoInicialConfig + efectivoCalculado;
+                texto = $"Efectivo en Caja: {efectivoInicialConfig + efectivoCalculado:C2}";
+            },
+            "No se pudo consultar el efectivo en caja.");
 
-                lblEfectivoCaja.Text = $"Efectivo en Caja: {efectivoTotal:C2}";
-            }
-            catch (Exception ex)
-            {
-                lblEfectivoCaja.Text = "Efectivo en Caja: $0.00";
-                MessageBox.Show($"Error al consultar el efectivo en caja: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            if (!IsDisposed)
+                lblEfectivoCaja.Text = texto;
         }
 
-        private async void btnNuevo_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Cursor = Cursors.WaitCursor;
+        // ───────────── Filtros ─────────────
 
-                // 2. Obtener el valor de "Efectivo Inicial" guardado en Configuraciones
-                var configCaja = await _configuracionController.ObtenerConfigCorteCajaAsync();
-                decimal efectivoInicialPredeterminado = configCaja?.EfectivoInicial ?? 0m;
+        private async void btnFiltrar_Click(object? sender, EventArgs e) => await RecargarAsync();
 
-                int idUsuario = _usuarioIdSesion > 0 ? _usuarioIdSesion : 1;
-
-                // 3. Pasar el valor al modal FrmCorteModal (o a su constructor/propiedad)
-                using var modal = new FrmCorteModal(_corteController, _movimientoController, efectivoInicialPredeterminado, idUsuario);
-
-                Cursor = Cursors.Default;
-
-                if (modal.ShowDialog() == DialogResult.OK)
-                {
-                    await CargarCortesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al abrir el registro de corte: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
-        }
-
-        private async void btnFiltrar_Click(object sender, EventArgs e)
-        {
-            await BuscarPorFechasAsync();
-        }
-
-        private async void btnLimpiar_Click(object sender, EventArgs e)
+        // "Hoy": vuelve al día actual.
+        private async void btnLimpiar_Click(object? sender, EventArgs e)
         {
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
-            await CargarCortesAsync();
+            await RecargarAsync();
         }
 
-        private async void btnVerDetalle_Click(object sender, EventArgs e)
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarCorte(int? id)
         {
-            if (dgvCortes.CurrentRow == null)
+            dgvCortes.ClearSelection();
+
+            if (id.HasValue)
             {
-                MessageBox.Show("Seleccione un corte de la lista para consultar su detalle.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].CorteID != id.Value) continue;
+
+                    dgvCortes.Rows[i].Selected = true;
+                    dgvCortes.CurrentCell = dgvCortes.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
             }
 
-            // Obtener directamente el CorteID de la celda seleccionada
-            if (int.TryParse(dgvCortes.CurrentRow.Cells["CorteID"].Value?.ToString(), out int corteId))
-            {
-                var corteDto = await _corteController.ObtenerPorIdAsync(corteId);
+            ActualizarEstadoBotones();
+        }
 
-                if (corteDto != null)
+        private void ActualizarEstadoBotones()
+        {
+            btnVerDetalle.Enabled = CorteSeleccionado != null;
+            btnExportar.Enabled = _vista.Count > 0;
+        }
+
+        private void dgvCortes_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Un corte sin fecha de cierre sigue abierto: se muestra "En proceso" en ámbar.
+        private void dgvCortes_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.CellStyle is null) return;
+
+            if (dgvCortes.Columns[e.ColumnIndex].DataPropertyName == nameof(CorteViewModel.FechaCierre) && e.Value == null)
+            {
+                e.Value = "En proceso";
+                e.CellStyle.ForeColor = Tema.Advertencia;
+                e.FormattingApplied = true;
+            }
+        }
+
+        private async void dgvCortes_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            await MostrarDetalleAsync(_vista[e.RowIndex]);
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevo_Click(object? sender, EventArgs e)
+        {
+            decimal efectivoInicialPredeterminado = 0m;
+
+            // Antes esta consulta no estaba protegida: si fallaba, el error se perdía en un async void.
+            bool leida = await FormHelper.EjecutarAsync(async () =>
+            {
+                var configCaja = await _configuracionController.ObtenerConfigCorteCajaAsync();
+                efectivoInicialPredeterminado = configCaja?.EfectivoInicial ?? 0m;
+            },
+            "No se pudo leer la configuración de caja.",
+            panelTop, panelFiltros);
+
+            if (!leida || IsDisposed) return;
+
+            using var modal = new FrmCorteModal(_corteController, _movimientoController, efectivoInicialPredeterminado, _usuarioId);
+
+            if (modal.ShowDialog() == DialogResult.OK)
+                await RecargarAsync();
+        }
+
+        private async void btnVerDetalle_Click(object? sender, EventArgs e)
+        {
+            var corte = CorteSeleccionado;
+            if (corte == null) return;
+
+            await MostrarDetalleAsync(corte);
+        }
+
+        private async Task MostrarDetalleAsync(CorteViewModel corte)
+        {
+            // La consulta se hace con el manejo de errores estándar; el modal se abre DESPUÉS.
+            Action? abrirDetalle = null;
+
+            bool consultada = await FormHelper.EjecutarAsync(async () =>
+            {
+                var corteDto = await _corteController.ObtenerPorIdAsync(corte.CorteID);
+                if (corteDto == null) return;
+
+                abrirDetalle = () =>
                 {
                     using var modal = new FrmCorteDetalleModal(corteDto, _movimientoController);
                     modal.ShowDialog();
-                }
-            }
+                };
+            },
+            "No se pudo consultar el detalle del corte.",
+            panelTop, panelFiltros);
+
+            if (IsDisposed || !consultada) return;
+
+            if (abrirDetalle == null)
+                FormHelper.MostrarAviso("No se encontró el corte de caja seleccionado.");
+            else
+                abrirDetalle();
         }
 
-        private void btnExportarExcel_Click(object sender, EventArgs e)
+        // Antes este botón mostraba "Exportación realizada con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente.
+        private void btnExportar_Click(object? sender, EventArgs e)
         {
-            if (_listaCortes == null || !_listaCortes.Any())
+            if (_vista.Count == 0)
             {
-                MessageBox.Show("No hay datos disponibles para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("No hay datos disponibles para exportar.");
                 return;
             }
 
             try
             {
-                // Ejemplo utilizando Helper de exportación común
-                // FormHelper.ExportarDataGridViewAExcel(dgvCortes, "Reporte_Cortes_Caja");
-                MessageBox.Show("Exportación realizada con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string? ruta = ExportadorCsv.Exportar(dgvCortes, "Cortes_de_Caja");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                MessageBox.Show($"Error al exportar los datos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
-        }
-
-        private void ConfigurarGrid()
-        {
-            if (dgvCortes.Columns.Count == 0) return;
-
-            // 2. Encabezados y Formatos de Fecha
-            if (dgvCortes.Columns["FechaInicio"] != null)
-            {
-                dgvCortes.Columns["FechaInicio"].HeaderText = "Fecha Inicio";
-                dgvCortes.Columns["FechaInicio"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-            }
-
-            if (dgvCortes.Columns["FechaFinal"] != null)
-            {
-                dgvCortes.Columns["FechaFinal"].HeaderText = "Fecha Final";
-                dgvCortes.Columns["FechaFinal"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-            }
-
-            if (dgvCortes.Columns["FechaRegistro"] != null)
-            {
-                dgvCortes.Columns["FechaRegistro"].HeaderText = "Fecha Registro";
-                dgvCortes.Columns["FechaRegistro"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
-            }
-
-            // 3. Encabezados y Formatos de Moneda ($)
-            if (dgvCortes.Columns["Ingresos"] != null)
-            {
-                dgvCortes.Columns["Ingresos"].HeaderText = "Ingresos";
-                dgvCortes.Columns["Ingresos"].DefaultCellStyle.Format = "C2";
-                dgvCortes.Columns["Ingresos"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvCortes.Columns["Egresos"] != null)
-            {
-                dgvCortes.Columns["Egresos"].HeaderText = "Egresos";
-                dgvCortes.Columns["Egresos"].DefaultCellStyle.Format = "C2";
-                dgvCortes.Columns["Egresos"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvCortes.Columns["CajaInicial"] != null)
-            {
-                dgvCortes.Columns["CajaInicial"].HeaderText = "Caja Inicial";
-                dgvCortes.Columns["CajaInicial"].DefaultCellStyle.Format = "C2";
-                dgvCortes.Columns["CajaInicial"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvCortes.Columns["CajaFinal"] != null)
-            {
-                dgvCortes.Columns["CajaFinal"].HeaderText = "Caja Final";
-                dgvCortes.Columns["CajaFinal"].DefaultCellStyle.Format = "C2";
-                dgvCortes.Columns["CajaFinal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            // 4. Texto y Usuario
-            if (dgvCortes.Columns["Usuario"] != null) dgvCortes.Columns["Usuario"].HeaderText = "Usuario";
-            if (dgvCortes.Columns["Observacion"] != null) dgvCortes.Columns["Observacion"].HeaderText = "Observación";
-
-            // 5. Orden explícito y pesos de ancho de columna
-            dgvCortes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            string[] ordenColumnas =
-            {
-        "FechaInicio",
-        "FechaFinal",
-        "Ingresos",
-        "Egresos",
-        "CajaInicial",
-        "CajaFinal",
-        "Usuario",
-        "FechaRegistro",
-        "Observacion"
-    };
-
-            var pesos = new Dictionary<string, float>
-            {
-                ["FechaInicio"] = 110,
-                ["FechaFinal"] = 110,
-                ["Ingresos"] = 90,
-                ["Egresos"] = 90,
-                ["CajaInicial"] = 90,
-                ["CajaFinal"] = 90,
-                ["Usuario"] = 120,
-                ["FechaRegistro"] = 110,
-                ["Observacion"] = 150
-            };
-
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                string nombreColumna = ordenColumnas[indice];
-                if (dgvCortes.Columns[nombreColumna] is DataGridViewColumn columna)
-                {
-                    columna.DisplayIndex = indice;
-                    if (pesos.ContainsKey(nombreColumna))
-                    {
-                        columna.FillWeight = pesos[nombreColumna];
-                    }
-                }
-            }
-        }
-
-        private void dgvCortes_SelectionChanged(object sender, EventArgs e)
-        {
-            btnVerDetalle.Enabled = dgvCortes.CurrentRow != null;
         }
     }
 }

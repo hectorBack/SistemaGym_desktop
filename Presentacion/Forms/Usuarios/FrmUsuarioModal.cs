@@ -1,6 +1,7 @@
 ﻿using Negocio.Exceptions;
 using Presentacion.Controller;
 using Presentacion.Helpers;
+using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,132 +19,162 @@ namespace Presentacion.Forms.Usuarios
         private readonly UsuarioController _controller;
         private readonly RolController _rolController;
         private readonly int? _usuarioId;
+        private bool _guardando;
 
         public FrmUsuarioModal(UsuarioController controller, RolController rolController, int? usuarioId = null)
         {
-            InitializeComponent();
-            _controller = controller;
-            _rolController = rolController;
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _rolController = rolController ?? throw new ArgumentNullException(nameof(rolController));
             _usuarioId = usuarioId;
+
+            InitializeComponent();
+
+            lblTitulo.Text = _usuarioId.HasValue ? "Editar Usuario" : "Nuevo Usuario";
+            lblPasswordOpcional.Visible = _usuarioId.HasValue; // al editar la contraseña solo se cambia si se escribe una
+
+            // No se puede guardar hasta que termine de cargar: si la carga de un usuario existente falla,
+            // guardar con el formulario vacío lo sobrescribiría con datos por defecto.
+            btnGuardar.Enabled = false;
         }
 
-        private async void FrmUsuarioModal_Load(object sender, EventArgs e)
-        {
-            await CargarRolesAsync();
+        // ───────────── Carga ─────────────
 
-            if (_usuarioId.HasValue)
+        private async void FrmUsuarioModal_Load(object? sender, EventArgs e)
+        {
+            bool cargado = await FormHelper.EjecutarAsync(
+                CargarDatosAsync,
+                "No se pudieron cargar los datos del usuario.");
+
+            if (IsDisposed) return;
+
+            // Sin datos no tiene sentido dejar el formulario abierto.
+            if (!cargado)
             {
-                lblTitulo.Text = "Editar Usuario";
-                await CargarDatosUsuarioAsync(_usuarioId.Value);
+                DialogResult = DialogResult.Cancel;
+                return;
             }
-            else
-            {
-                lblTitulo.Text = "Nuevo Usuario";
-            }
+
+            btnGuardar.Enabled = true;
+            txtNombreUsuario.Focus();
         }
 
-        private async Task CargarRolesAsync()
+        private async Task CargarDatosAsync()
         {
-            try
-            {
-                var roles = await _rolController.ObtenerRolesAsync();
-                cboRol.DataSource = roles.ToList();
-                cboRol.DisplayMember = "Nombre";
-                cboRol.ValueMember = "RolID";
-                cboRol.SelectedIndex = -1;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar roles: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            var usuario = _usuarioId.HasValue
+                ? await _controller.ObtenerPorIdAsync(_usuarioId.Value)
+                : null;
+
+            if (_usuarioId.HasValue && usuario == null)
+                throw new BusinessException("No se encontró el usuario.");
+
+            // Al editar se incluyen los roles inactivos, para no perder el rol actual del usuario
+            // si fue desactivado después de asignárselo (antes el combo quedaba vacío).
+            var roles = await _rolController.ObtenerRolesAsync(true);
+            if (IsDisposed) return;
+
+            var disponibles = roles
+                .Where(r => r.Activo || (usuario != null && r.RolID == usuario.RolID))
+                .ToList();
+
+            cboRol.DataSource = disponibles;
+            cboRol.DisplayMember = nameof(RolViewModel.Nombre);
+            cboRol.ValueMember = nameof(RolViewModel.RolID);
+            cboRol.SelectedIndex = -1;
+
+            if (usuario == null) return;
+
+            string? rolActual = disponibles.FirstOrDefault(r => r.RolID == usuario.RolID)?.Nombre;
+            if (RolesSistema.EsAdministrador(rolActual))
+                throw new BusinessException("No se permite editar a un usuario con el rol de Administrador.");
+
+            txtNombreUsuario.Text = usuario.NombreUsuario;
+            txtNombreCompleto.Text = usuario.NombreCompleto;
+            cboRol.SelectedValue = usuario.RolID;
+            chkActivo.Checked = usuario.Activo;
+
+            // Nadie puede desactivarse a sí mismo: se quedaría fuera del sistema.
+            if (usuario.UsuarioID == SesionUsuario.UsuarioID)
+                chkActivo.Enabled = false;
         }
 
-        private async Task CargarDatosUsuarioAsync(int id)
-        {
-            try
-            {
-                var usuario = await _controller.ObtenerPorIdAsync(id);
-                if (usuario != null)
-                {
-                    txtNombreUsuario.Text = usuario.NombreUsuario;
-                    txtNombreCompleto.Text = usuario.NombreCompleto;
-                    cboRol.SelectedValue = usuario.RolID;
-                    chkActivo.Checked = usuario.Activo;
+        // ───────────── Contraseña ─────────────
 
-                    // Al editar, la contraseña no es obligatoria a menos que se desee cambiar
-                    lblPasswordOpcional.Visible = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al obtener datos del usuario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+        private void chkMostrarPassword_CheckedChanged(object? sender, EventArgs e)
+        {
+            bool ocultar = !chkMostrarPassword.Checked;
+            txtPassword.UseSystemPasswordChar = ocultar;
+            txtConfirmarPassword.UseSystemPasswordChar = ocultar;
         }
 
-        private async void btnGuardar_Click(object sender, EventArgs e)
+        // ───────────── Guardar ─────────────
+
+        private async void btnGuardar_Click(object? sender, EventArgs e)
         {
-            // Validaciones básicas de entrada
+            if (_guardando) return;
+
             if (ValidationHelper.EsTextoVacio(txtNombreUsuario.Text))
             {
-                MessageBox.Show("Debe ingresar un nombre de usuario.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar un nombre de usuario.", "Validación");
                 txtNombreUsuario.Focus();
                 return;
             }
 
             if (ValidationHelper.EsTextoVacio(txtNombreCompleto.Text))
             {
-                MessageBox.Show("Debe ingresar el nombre completo.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar el nombre completo.", "Validación");
                 txtNombreCompleto.Focus();
                 return;
             }
 
-            if (cboRol.SelectedValue == null)
+            if (cboRol.SelectedItem is not RolViewModel rol)
             {
-                MessageBox.Show("Debe seleccionar un rol para el usuario.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe seleccionar un rol para el usuario.", "Validación");
                 cboRol.Focus();
                 return;
             }
 
-            // Para usuarios nuevos la contraseña es requerida
-            if (!_usuarioId.HasValue && ValidationHelper.EsTextoVacio(txtPassword.Text))
+            // Se conserva el Trim original para seguir siendo coherente con lo que ya hay guardado.
+            string password = txtPassword.Text.Trim();
+
+            // Para usuarios nuevos la contraseña es requerida; al editar solo si se quiere cambiar.
+            if (!_usuarioId.HasValue && password.Length == 0)
             {
-                MessageBox.Show("Debe ingresar una contraseña para el nuevo usuario.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar una contraseña para el nuevo usuario.", "Validación");
                 txtPassword.Focus();
                 return;
             }
 
-            try
+            if (password.Length > 0 && password != txtConfirmarPassword.Text.Trim())
             {
-                int rolId = Convert.ToInt32(cboRol.SelectedValue);
-                string password = txtPassword.Text.Trim();
+                FormHelper.MostrarAdvertencia("Las contraseñas no coinciden.", "Validación");
+                txtConfirmarPassword.Focus();
+                return;
+            }
 
-                await _controller.GuardarUsuarioAsync(
-                    _usuarioId,
-                    txtNombreUsuario.Text.Trim(),
-                    txtNombreCompleto.Text.Trim(),
-                    rolId,
-                    password,
-                    chkActivo.Checked
-                );
+            string nombreUsuario = txtNombreUsuario.Text.Trim();
+            string nombreCompleto = txtNombreCompleto.Text.Trim();
+            bool activo = chkActivo.Checked;
 
-                MessageBox.Show("Usuario guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information); 
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex) 
-            {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); 
-            }
+            _guardando = true;
+            bool guardado = await FormHelper.EjecutarAsync(
+                () => _controller.GuardarUsuarioAsync(
+                    _usuarioId, nombreUsuario, nombreCompleto, rol.RolID, password, activo),
+                "No se pudo guardar el usuario.",
+                btnGuardar, btnCancelar);
+            _guardando = false;
+
+            // Sin mensaje de éxito: al cerrarse el diálogo y recargarse la lista, el resultado es evidente.
+            if (guardado && !IsDisposed)
+                DialogResult = DialogResult.OK;
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
+        // No permitir cerrar la ventana mientras se está guardando.
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel; 
-            this.Close(); 
+            if (_guardando)
+                e.Cancel = true;
+
+            base.OnFormClosing(e);
         }
     }
 }

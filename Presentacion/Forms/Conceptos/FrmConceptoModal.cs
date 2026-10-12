@@ -17,75 +17,79 @@ namespace Presentacion.Forms.Conceptos
     {
         private readonly ConceptoController _controller;
         private readonly int? _conceptoId;
+        private bool _guardando;
 
-        public FrmConceptoModal(ConceptoController controller, int? conceptoId = null, string nombreActual = "", string tipoActual = "", string observacionActual = "")
+        public FrmConceptoModal(
+            ConceptoController controller,
+            int? conceptoId = null,
+            string nombreActual = "",
+            string tipoActual = "",
+            string observacionActual = "")
         {
-            InitializeComponent();
-            _controller = controller;
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             _conceptoId = conceptoId;
 
-            // Inicializar opciones del ComboBox de Tipo
-            cmbTipo.Items.Clear();
-            cmbTipo.Items.Add("Ingreso");
-            cmbTipo.Items.Add("Egreso");
+            InitializeComponent();
+
+            cmbTipo.Items.AddRange(new object[] { "Ingreso", "Egreso" });
 
             if (_conceptoId.HasValue)
             {
                 lblTitulo.Text = "Editar Concepto";
                 txtNombre.Text = nombreActual;
-                cmbTipo.SelectedItem = tipoActual;
                 txtObservacion.Text = observacionActual;
+
+                // FindStringExact ignora mayúsculas; si el tipo guardado no coincide con ninguno,
+                // se deja sin seleccionar para obligar a elegirlo (antes quedaba vacío en silencio).
+                cmbTipo.SelectedIndex = cmbTipo.FindStringExact(tipoActual);
             }
             else
             {
                 lblTitulo.Text = "Nuevo Concepto";
-                if (cmbTipo.Items.Count > 0)
-                {
-                    cmbTipo.SelectedIndex = 0;
-                }
+                cmbTipo.SelectedIndex = 0;
             }
         }
 
-        private async void btnGuardar_Click(object sender, EventArgs e)
+        private async void btnGuardar_Click(object? sender, EventArgs e)
         {
+            if (_guardando) return;
+
             if (ValidationHelper.EsTextoVacio(txtNombre.Text))
             {
-                MessageBox.Show("Debe ingresar un nombre para el concepto.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe ingresar un nombre para el concepto.", "Validación");
+                txtNombre.Focus();
                 return;
             }
 
-            if (cmbTipo.SelectedItem == null || string.IsNullOrWhiteSpace(cmbTipo.SelectedItem.ToString()))
+            if (cmbTipo.SelectedItem is not string tipo || string.IsNullOrWhiteSpace(tipo))
             {
-                MessageBox.Show("Debe seleccionar un tipo para el concepto.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Debe seleccionar un tipo para el concepto.", "Validación");
+                cmbTipo.Focus();
                 return;
             }
 
-            try
-            {
-                string nombre = txtNombre.Text.Trim();
-                string tipo = cmbTipo.SelectedItem.ToString()!;
-                string observacion = txtObservacion.Text.Trim();
+            string nombre = txtNombre.Text.Trim();
+            string observacion = txtObservacion.Text.Trim();
 
-                await _controller.GuardarConceptoAsync(_conceptoId, nombre, tipo, observacion);
+            _guardando = true;
+            bool guardado = await FormHelper.EjecutarAsync(
+                () => _controller.GuardarConceptoAsync(_conceptoId, nombre, tipo, observacion),
+                "No se pudo guardar el concepto.",
+                btnGuardar, btnCancelar);
+            _guardando = false;
 
-                MessageBox.Show("Concepto guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            catch (BusinessException ex)
-            {
-                MessageBox.Show(ex.Message, "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            // Sin mensaje de éxito: al cerrarse el diálogo y recargarse la lista, el resultado es evidente.
+            if (guardado && !IsDisposed)
+                DialogResult = DialogResult.OK;
         }
 
-        private void btnCancelar_Click(object sender, EventArgs e)
+        // No permitir cerrar la ventana mientras se está guardando.
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            if (_guardando)
+                e.Cancel = true;
+
+            base.OnFormClosing(e);
         }
     }
 }

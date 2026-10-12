@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,266 +16,317 @@ namespace Presentacion.Forms.Socios
 {
     public partial class FrmSocios : Form
     {
-        private readonly VisitaController _visitaController;
         private readonly SocioController _controller;
         private readonly SocioMembresiaController _socioMembresiaController;
         private readonly MembresiaController _membresiaController;
         private readonly PagoSocioMembresiaController _pagoSocioMembresiaController;
-        private List<SocioViewModel> _listaSocios = new();
+        private readonly VisitaController _visitaController;
 
-        public FrmSocios(SocioController controller,
-        SocioMembresiaController socioMembresiaController,
-        MembresiaController membresiaController,
-        PagoSocioMembresiaController pagoSocioMembresiaController,
-        VisitaController visitaController)
+        private List<SocioViewModel> _todos = new();                 // todos los socios cargados
+        private ListaOrdenable<SocioViewModel> _vista = new();       // lo que muestra el grid (ya filtrado)
+
+        public FrmSocios(
+            SocioController controller,
+            SocioMembresiaController socioMembresiaController,
+            MembresiaController membresiaController,
+            PagoSocioMembresiaController pagoSocioMembresiaController,
+            VisitaController visitaController)
         {
+            _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _socioMembresiaController = socioMembresiaController ?? throw new ArgumentNullException(nameof(socioMembresiaController));
+            _membresiaController = membresiaController ?? throw new ArgumentNullException(nameof(membresiaController));
+            _pagoSocioMembresiaController = pagoSocioMembresiaController ?? throw new ArgumentNullException(nameof(pagoSocioMembresiaController));
+            _visitaController = visitaController ?? throw new ArgumentNullException(nameof(visitaController));
+
             InitializeComponent();
-            _controller = controller;
-            _socioMembresiaController = socioMembresiaController;
-            _membresiaController = membresiaController;
-            _visitaController = visitaController;
-            _pagoSocioMembresiaController = pagoSocioMembresiaController;
-            dgvSocios.SelectionChanged += dgvSocios_SelectionChanged;
+            ConfigurarColumnas();
         }
 
-        private async void FrmSocios_Load(object sender, EventArgs e)
+        /// <summary>Socio de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private SocioViewModel? SocioSeleccionado =>
+            dgvSocios.SelectedRows.Count > 0
+                ? dgvSocios.SelectedRows[0].DataBoundItem as SocioViewModel
+                : null;
+
+        // ───────────── Carga y columnas ─────────────
+
+        private async void FrmSocios_Load(object? sender, EventArgs e)
         {
             btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
+            ActiveControl = txtBuscar;
+
             await CargarSociosAsync();
         }
 
-        private async Task CargarSociosAsync()
+        // Las columnas se definen una sola vez (no en cada recarga).
+        // "Nombre" y "Apellido" por separado ya no se muestran: "Nombre completo" los contiene.
+        private void ConfigurarColumnas()
         {
-            try
+            dgvSocios.AutoGenerateColumns = false;
+
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.SocioID), "ID", 45);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.Clave), "Clave", 75, 70);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 200, 130);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.Telefono), "Teléfono", 100, 90);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.Email), "Correo", 150, 110);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.Estado), "Estado", 80, 70);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+        }
+
+        private async Task CargarSociosAsync(int? idASeleccionar = null)
+        {
+            // Si no se pide otro, se conserva el socio seleccionado.
+            int? idObjetivo = idASeleccionar ?? SocioSeleccionado?.SocioID;
+
+            await FormHelper.EjecutarAsync(async () =>
             {
-                var resultado = await _controller.ObtenerSociosAsync(true);
-                _listaSocios = resultado.ToList();
-                FiltrarBusqueda();
+                var socios = await _controller.ObtenerSociosAsync(true);
+                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
+
+                _todos = socios.ToList();
+                AplicarFiltro(idObjetivo); // vuelve a aplicar lo que haya escrito en el buscador
+            },
+            "No se pudieron cargar los socios.",
+            flowAcciones);
+        }
+
+        // ───────────── Búsqueda ─────────────
+
+        // Se espera un instante tras la última tecla para no filtrar en cada letra.
+        private void txtBuscar_TextChanged(object? sender, EventArgs e)
+        {
+            temporizadorBusqueda.Stop();
+            temporizadorBusqueda.Start();
+        }
+
+        private void temporizadorBusqueda_Tick(object? sender, EventArgs e)
+        {
+            temporizadorBusqueda.Stop();
+            AplicarFiltro();
+        }
+
+        private void txtBuscar_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape && txtBuscar.TextLength > 0)
+            {
+                e.SuppressKeyPress = true;
+                txtBuscar.Clear(); // dispara TextChanged y limpia el filtro
             }
-            catch (Exception ex)
+            else if (e.KeyCode == Keys.Enter)
             {
-                MessageBox.Show($"Error al cargar socios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.SuppressKeyPress = true;
+                temporizadorBusqueda.Stop();
+                AplicarFiltro(); // sin esperar
             }
         }
 
-        private void FiltrarBusqueda()
+        private void AplicarFiltro(int? idASeleccionar = null)
         {
-            string filtro = txtBuscar.Text.Trim().ToLower();
-            var filtradas = _listaSocios
-                .Where(s => string.IsNullOrEmpty(filtro) ||
-                            s.Clave.ToLower().Contains(filtro) ||
-                            s.Nombre.ToLower().Contains(filtro) ||
-                            s.Apellido.ToLower().Contains(filtro) ||
-                            s.NombreCompleto.ToLower().Contains(filtro))
-                .ToList();
+            int? idObjetivo = idASeleccionar ?? SocioSeleccionado?.SocioID;
 
-            dgvSocios.DataSource = null;
-            dgvSocios.DataSource = filtradas;
-            ConfigurarGrid();
+            // Cada palabra escrita debe aparecer en algún dato del socio, sin importar acentos ni mayúsculas:
+            // "juan 55" encuentra a Juan Pérez con teléfono 55...
+            var palabras = Normalizar(txtBuscar.Text)
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            var filtrados = palabras.Length == 0
+                ? _todos
+                : _todos.Where(s =>
+                {
+                    string texto = Normalizar($"{s.Clave} {s.Nombre} {s.Apellido} {s.NombreCompleto} {s.Telefono} {s.Email}");
+                    return palabras.All(texto.Contains);
+                }).ToList();
+
+            // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+            var columnaOrden = dgvSocios.SortedColumn;
+            var sentidoOrden = dgvSocios.SortOrder;
+
+            _vista = new ListaOrdenable<SocioViewModel>(filtrados);
+            dgvSocios.DataSource = _vista;
+
+            if (columnaOrden != null && sentidoOrden != SortOrder.None)
+            {
+                dgvSocios.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                    ? ListSortDirection.Descending
+                    : ListSortDirection.Ascending);
+            }
+
+            SeleccionarSocio(idObjetivo);
+            ActualizarResumen();
+        }
+
+        private static string Normalizar(string? texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return string.Empty;
+
+            string descompuesto = texto.Trim().Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(descompuesto.Length);
+
+            foreach (char c in descompuesto)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+
+            return sb.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        }
+
+        private void ActualizarResumen()
+        {
+            int activos = _todos.Count(s => s.Activo);
+
+            lblResumen.Text = _vista.Count == _todos.Count
+                ? $"{_todos.Count} socio(s)  ·  {activos} activo(s)"
+                : $"{_vista.Count} de {_todos.Count} socio(s)";
+        }
+
+        // ───────────── Selección y aspecto ─────────────
+
+        private void SeleccionarSocio(int? id)
+        {
             dgvSocios.ClearSelection();
+
+            if (id.HasValue)
+            {
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].SocioID != id.Value) continue;
+
+                    dgvSocios.Rows[i].Selected = true;
+                    dgvSocios.CurrentCell = dgvSocios.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
+            }
+
+            ActualizarEstadoBotones();
         }
 
-        private void ConfigurarGrid()
+        // Todas las acciones sobre un socio solo tienen sentido con una fila seleccionada.
+        private void ActualizarEstadoBotones()
         {
-            // Ocultar columnas que no deben verse
-            if (dgvSocios.Columns["Foto"] != null) dgvSocios.Columns["Foto"].Visible = false;
-            if (dgvSocios.Columns["Observaciones"] != null) dgvSocios.Columns["Observaciones"].Visible = false;
-            if (dgvSocios.Columns["Activo"] != null) dgvSocios.Columns["Activo"].Visible = false;
+            var socio = SocioSeleccionado;
+            bool haySeleccion = socio != null;
 
-            // Configurar encabezados
-            if (dgvSocios.Columns["SocioID"] != null) dgvSocios.Columns["SocioID"].HeaderText = "ID";
-            if (dgvSocios.Columns["Clave"] != null) dgvSocios.Columns["Clave"].HeaderText = "Clave";
-            if (dgvSocios.Columns["Nombre"] != null) dgvSocios.Columns["Nombre"].HeaderText = "Nombre";
-            if (dgvSocios.Columns["Apellido"] != null) dgvSocios.Columns["Apellido"].HeaderText = "Apellido";
-            if (dgvSocios.Columns["NombreCompleto"] != null) dgvSocios.Columns["NombreCompleto"].HeaderText = "Nombre Completo";
-            if (dgvSocios.Columns["Telefono"] != null) dgvSocios.Columns["Telefono"].HeaderText = "Teléfono";
-            if (dgvSocios.Columns["Email"] != null) dgvSocios.Columns["Email"].HeaderText = "Correo";
-            if (dgvSocios.Columns["Estado"] != null) dgvSocios.Columns["Estado"].HeaderText = "Estado";
-            if (dgvSocios.Columns["CreatedAt"] != null) dgvSocios.Columns["CreatedAt"].HeaderText = "Fecha Registro";
+            btnEditar.Enabled = haySeleccion;
+            btnInfo.Enabled = haySeleccion;
+            btnMembresia.Enabled = haySeleccion;
+            btnDesactivar.Enabled = haySeleccion;
+            btnEliminarFisico.Enabled = haySeleccion;
 
-            // Mismo esquema de ordenamiento y pesos estilo dgvVisitas
-            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            bool inactivo = socio is { Activo: false };
+            btnDesactivar.Text = inactivo ? "Activar" : "Desactivar";
+            btnDesactivar.Estilo = inactivo ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+        }
 
-            string[] ordenColumnas =
+        private void dgvSocios_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Socios inactivos en gris, y "Activo" en verde.
+        private void dgvSocios_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
+
+            if (!_vista[e.RowIndex].Activo)
             {
-        "SocioID",
-        "Clave",
-        "NombreCompleto",
-        "Nombre",
-        "Apellido",
-        "Telefono",
-        "Email",
-        "Estado",
-        "CreatedAt"
-    };
-
-            var pesos = new Dictionary<string, float>
+                e.CellStyle.ForeColor = Tema.TextoAtenuado;
+            }
+            else if (dgvSocios.Columns[e.ColumnIndex].DataPropertyName == nameof(SocioViewModel.Estado))
             {
-                ["SocioID"] = 45,
-                ["Clave"] = 75,
-                ["NombreCompleto"] = 175,
-                ["Nombre"] = 110,
-                ["Apellido"] = 110,
-                ["Telefono"] = 100,
-                ["Email"] = 140,
-                ["Estado"] = 80,
-                ["CreatedAt"] = 120
-            };
-
-            for (int indice = 0; indice < ordenColumnas.Length; indice++)
-            {
-                if (dgvSocios.Columns[ordenColumnas[indice]] is not DataGridViewColumn columna)
-                    continue;
-
-                columna.DisplayIndex = indice;
-                columna.FillWeight = pesos[columna.Name];
-                columna.MinimumWidth = columna.Name switch
-                {
-                    "NombreCompleto" or "Email" or "Nombre" or "Apellido" => 110,
-                    "CreatedAt" => 95,
-                    _ => 55
-                };
-                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                e.CellStyle.ForeColor = Tema.Exito;
             }
         }
 
-        private async void btnNuevo_Click(object sender, EventArgs e)
+        private async void dgvSocios_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            using var modal = new FrmSocioModal(_controller);
+            if (e.RowIndex < 0 || e.RowIndex >= _vista.Count) return;
+
+            await AbrirModalSocioAsync(_vista[e.RowIndex].SocioID);
+        }
+
+        // ───────────── Acciones ─────────────
+
+        private async void btnNuevo_Click(object? sender, EventArgs e) => await AbrirModalSocioAsync(null);
+
+        private async void btnEditar_Click(object? sender, EventArgs e)
+        {
+            var socio = SocioSeleccionado;
+            if (socio == null) return; // el botón ya está deshabilitado sin selección; esto es solo defensivo
+
+            await AbrirModalSocioAsync(socio.SocioID);
+        }
+
+        private async Task AbrirModalSocioAsync(int? socioId)
+        {
+            using var modal = new FrmSocioModal(_controller, socioId);
+
             if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarSociosAsync();
-            }
+                await CargarSociosAsync(socioId); // para un socio nuevo (null) se conserva la selección actual
         }
 
-        private async void btnEditar_Click(object sender, EventArgs e)
+        private void btnInfo_Click(object? sender, EventArgs e)
         {
-            if (dgvSocios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un socio de la lista para editar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            var socio = SocioSeleccionado;
+            if (socio == null) return;
 
-            var item = (SocioViewModel)dgvSocios.CurrentRow.DataBoundItem;
-            using var modal = new FrmSocioModal(_controller, item.SocioID);
-            if (modal.ShowDialog() == DialogResult.OK)
-            {
-                await CargarSociosAsync();
-            }
+            using var modal = new FrmSocioInfoModal(_controller, _visitaController, socio.SocioID);
+            modal.ShowDialog();
         }
 
-        private async void btnDesactivar_Click(object sender, EventArgs e)
+        private async void btnMembresia_Click(object? sender, EventArgs e)
         {
-            if (dgvSocios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un socio de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            var socio = SocioSeleccionado;
+            if (socio == null) return;
 
-            var item = (SocioViewModel)dgvSocios.CurrentRow.DataBoundItem;
-            string accion = item.Activo ? "desactivar" : "activar";
-
-            if (FormHelper.ConfirmarAccion($"¿Está seguro de {accion} al socio '{item.NombreCompleto}'?", $"Confirmar {accion.ToUpper()}"))
-            {
-                try
-                {
-                    await _controller.CambiarEstadoLogicoAsync(item.SocioID);
-                    await CargarSociosAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvSocios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un socio de la lista.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var item = (SocioViewModel)dgvSocios.CurrentRow.DataBoundItem;
-
-            if (FormHelper.ConfirmarAccion($"¿Desea eliminar PERMANENTEMENTE al socio '{item.NombreCompleto}' de la base de datos?", "Eliminación Definitiva"))
-            {
-                try
-                {
-                    await _controller.EliminarFisicoAsync(item.SocioID);
-                    await CargarSociosAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void txtBuscar_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarBusqueda();
-        }
-
-        private void dgvSocios_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvSocios.CurrentRow != null && dgvSocios.CurrentRow.DataBoundItem is SocioViewModel item)
-            {
-                if (item.Activo)
-                {
-                    btnDesactivar.Text = "Desactivar";
-                    btnDesactivar.BackColor = System.Drawing.Color.IndianRed;
-                }
-                else
-                {
-                    btnDesactivar.Text = "Activar";
-                    btnDesactivar.BackColor = System.Drawing.Color.ForestGreen;
-                }
-            }
-        }
-
-        private async void btnMembresia_Click(object sender, EventArgs e)
-        {
-            if (dgvSocios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un socio de la lista para gestionar su membresía.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var socioSeleccionado = (SocioViewModel)dgvSocios.CurrentRow.DataBoundItem;
-
-            int usuarioIdActivo = SesionUsuario.UsuarioID;
-
-            // Se pasa la instancia completa de socioSeleccionado (SocioViewModel)
             using var modal = new FrmSocioMembresiaModal(
                 _socioMembresiaController,
                 _membresiaController,
                 _pagoSocioMembresiaController,
-                socioSeleccionado,
-                usuarioIdActivo);
+                socio,
+                SesionUsuario.UsuarioID);
 
             if (modal.ShowDialog() == DialogResult.OK)
-            {
-                // Recargamos la lista por si el estado o la membresía afectó los datos en pantalla
-                await CargarSociosAsync();
-            }
+                await CargarSociosAsync(socio.SocioID); // por si la membresía afectó los datos en pantalla
         }
 
-        private void btnInfo_Click(object sender, EventArgs e)
+        private async void btnDesactivar_Click(object? sender, EventArgs e)
         {
-            if (dgvSocios.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione un socio de la lista para ver su información.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var socio = SocioSeleccionado;
+            if (socio == null) return;
+
+            string accion = socio.Activo ? "desactivar" : "activar";
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Está seguro de {accion} al socio '{socio.NombreCompleto}'?",
+                    $"Confirmar {accion.ToUpper()}"))
                 return;
-            }
 
-            var socioSeleccionado = (SocioViewModel)dgvSocios.CurrentRow.DataBoundItem;
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.CambiarEstadoLogicoAsync(socio.SocioID),
+                "No se pudo cambiar el estado del socio.",
+                flowAcciones);
 
-            // Se pasan los dos controladores y el ID del socio
-            using var modal = new FrmSocioInfoModal(_controller, _visitaController, socioSeleccionado.SocioID);
-            modal.ShowDialog();
+            if (correcto)
+                await CargarSociosAsync(socio.SocioID);
+        }
+
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var socio = SocioSeleccionado;
+            if (socio == null) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar PERMANENTEMENTE al socio '{socio.NombreCompleto}' de la base de datos?\n\n" +
+                    "Esta acción no se puede deshacer. Si el socio ya tiene visitas, pagos o membresías, lo normal es desactivarlo en su lugar.",
+                    "Eliminación definitiva",
+                    destructiva: true))
+                return;
+
+            bool correcto = await FormHelper.EjecutarAsync(
+                () => _controller.EliminarFisicoAsync(socio.SocioID),
+                "No se pudo eliminar al socio. Si tiene historial asociado, desactívalo en su lugar.",
+                flowAcciones);
+
+            if (correcto)
+                await CargarSociosAsync();
         }
     }
 }

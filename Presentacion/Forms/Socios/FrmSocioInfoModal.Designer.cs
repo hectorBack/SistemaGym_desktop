@@ -21,6 +21,7 @@ namespace Presentacion.Forms.Socios
         {
             panelHeader = new Panel();
             lblTitulo = new Label();
+            panelDatos = new Panel();
             picFotoSocio = new PictureBox();
             lblClaveTag = new Label();
             lblClave = new Label();
@@ -32,420 +33,402 @@ namespace Presentacion.Forms.Socios
             lblEmail = new Label();
             lblEstadoTag = new Label();
             lblEstado = new Label();
+            panelTabs = new Panel();
             tabControlDetalles = new FlatTabControl();
             tabMembresias = new TabPage();
-            dgvHistorialMembresias = new DataGridView();
+            dgvHistorialMembresias = new GridTema();
             tabVisitas = new TabPage();
+            dgvHistorialVisitas = new GridTema();
             panelFiltrosVisitas = new Panel();
             lblVisitaDesdeTag = new Label();
             dtpVisitaDesde = new DateTimePicker();
             lblVisitaHastaTag = new Label();
             dtpVisitaHasta = new DateTimePicker();
-            btnFiltrarVisitas = new Button();
-            btnEliminarVisita = new Button();
-            dgvHistorialVisitas = new DataGridView();
-            btnCerrar = new Button();
+            btnFiltrarVisitas = new BotonTema();
+            btnEliminarVisita = new BotonTema();
+            panelPie = new Panel();
+            btnCerrar = new BotonTema();
             panelHeader.SuspendLayout();
+            panelDatos.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picFotoSocio).BeginInit();
+            panelTabs.SuspendLayout();
             tabControlDetalles.SuspendLayout();
             tabMembresias.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistorialMembresias).BeginInit();
             tabVisitas.SuspendLayout();
-            panelFiltrosVisitas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistorialVisitas).BeginInit();
+            panelFiltrosVisitas.SuspendLayout();
+            panelPie.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // panelHeader
-            // 
-            panelHeader.BackColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
+            panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
-            panelHeader.Margin = new Padding(3, 4, 3, 4);
             panelHeader.Name = "panelHeader";
-            panelHeader.Size = new Size(680, 67);
+            panelHeader.Size = new Size(700, 67);
             panelHeader.TabIndex = 0;
-            // 
+            //
             // lblTitulo
-            // 
+            //
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
-            lblTitulo.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
+            lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(23, 19);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(208, 28);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Información del Socio";
-            // 
+            //
+            // panelDatos
+            //
+            panelDatos.Controls.Add(picFotoSocio);
+            panelDatos.Controls.Add(lblClaveTag);
+            panelDatos.Controls.Add(lblClave);
+            panelDatos.Controls.Add(lblNombreTag);
+            panelDatos.Controls.Add(lblNombreCompleto);
+            panelDatos.Controls.Add(lblTelefonoTag);
+            panelDatos.Controls.Add(lblTelefono);
+            panelDatos.Controls.Add(lblEmailTag);
+            panelDatos.Controls.Add(lblEmail);
+            panelDatos.Controls.Add(lblEstadoTag);
+            panelDatos.Controls.Add(lblEstado);
+            panelDatos.Dock = DockStyle.Top;
+            panelDatos.Location = new Point(0, 67);
+            panelDatos.Name = "panelDatos";
+            panelDatos.Size = new Size(700, 175);
+            panelDatos.TabIndex = 1;
+            //
             // picFotoSocio
-            // 
+            //
+            picFotoSocio.BackColor = Color.FromArgb(15, 42, 79);
             picFotoSocio.BorderStyle = BorderStyle.FixedSingle;
-            picFotoSocio.Location = new Point(23, 85);
+            picFotoSocio.Location = new Point(23, 15);
             picFotoSocio.Name = "picFotoSocio";
             picFotoSocio.Size = new Size(140, 140);
             picFotoSocio.SizeMode = PictureBoxSizeMode.Zoom;
-            picFotoSocio.TabIndex = 1;
+            picFotoSocio.TabIndex = 0;
             picFotoSocio.TabStop = false;
-            // 
+            //
             // lblClaveTag
-            // 
+            //
             lblClaveTag.AutoSize = true;
             lblClaveTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblClaveTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblClaveTag.Location = new Point(180, 85);
+            lblClaveTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblClaveTag.Location = new Point(185, 15);
             lblClaveTag.Name = "lblClaveTag";
             lblClaveTag.Size = new Size(52, 21);
-            lblClaveTag.TabIndex = 2;
+            lblClaveTag.TabIndex = 1;
             lblClaveTag.Text = "Clave:";
-            // 
+            //
             // lblClave
-            // 
+            //
             lblClave.AutoSize = true;
             lblClave.Font = new Font("Segoe UI", 10F);
-            lblClave.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblClave.Location = new Point(290, 85);
+            lblClave.ForeColor = Color.FromArgb(230, 238, 252);
+            lblClave.Location = new Point(295, 14);
             lblClave.Name = "lblClave";
             lblClave.Size = new Size(39, 23);
-            lblClave.TabIndex = 3;
+            lblClave.TabIndex = 2;
             lblClave.Text = "N/A";
-            // 
+            //
             // lblNombreTag
-            // 
+            //
             lblNombreTag.AutoSize = true;
             lblNombreTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblNombreTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblNombreTag.Location = new Point(180, 115);
+            lblNombreTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblNombreTag.Location = new Point(185, 45);
             lblNombreTag.Name = "lblNombreTag";
             lblNombreTag.Size = new Size(75, 21);
-            lblNombreTag.TabIndex = 4;
+            lblNombreTag.TabIndex = 3;
             lblNombreTag.Text = "Nombre:";
-            // 
+            //
             // lblNombreCompleto
-            // 
+            //
             lblNombreCompleto.AutoSize = true;
             lblNombreCompleto.Font = new Font("Segoe UI", 10F);
-            lblNombreCompleto.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblNombreCompleto.Location = new Point(290, 115);
+            lblNombreCompleto.ForeColor = Color.FromArgb(230, 238, 252);
+            lblNombreCompleto.Location = new Point(295, 44);
             lblNombreCompleto.Name = "lblNombreCompleto";
             lblNombreCompleto.Size = new Size(39, 23);
-            lblNombreCompleto.TabIndex = 5;
+            lblNombreCompleto.TabIndex = 4;
             lblNombreCompleto.Text = "N/A";
-            // 
+            //
             // lblTelefonoTag
-            // 
+            //
             lblTelefonoTag.AutoSize = true;
             lblTelefonoTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblTelefonoTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblTelefonoTag.Location = new Point(180, 145);
+            lblTelefonoTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblTelefonoTag.Location = new Point(185, 75);
             lblTelefonoTag.Name = "lblTelefonoTag";
             lblTelefonoTag.Size = new Size(77, 21);
-            lblTelefonoTag.TabIndex = 6;
+            lblTelefonoTag.TabIndex = 5;
             lblTelefonoTag.Text = "Teléfono:";
-            // 
+            //
             // lblTelefono
-            // 
+            //
             lblTelefono.AutoSize = true;
             lblTelefono.Font = new Font("Segoe UI", 10F);
-            lblTelefono.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblTelefono.Location = new Point(290, 145);
+            lblTelefono.ForeColor = Color.FromArgb(230, 238, 252);
+            lblTelefono.Location = new Point(295, 74);
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(39, 23);
-            lblTelefono.TabIndex = 7;
+            lblTelefono.TabIndex = 6;
             lblTelefono.Text = "N/A";
-            // 
+            //
             // lblEmailTag
-            // 
+            //
             lblEmailTag.AutoSize = true;
             lblEmailTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblEmailTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblEmailTag.Location = new Point(180, 175);
+            lblEmailTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblEmailTag.Location = new Point(185, 105);
             lblEmailTag.Name = "lblEmailTag";
             lblEmailTag.Size = new Size(52, 21);
-            lblEmailTag.TabIndex = 8;
+            lblEmailTag.TabIndex = 7;
             lblEmailTag.Text = "Email:";
-            // 
+            //
             // lblEmail
-            // 
+            //
             lblEmail.AutoSize = true;
             lblEmail.Font = new Font("Segoe UI", 10F);
-            lblEmail.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            lblEmail.Location = new Point(290, 175);
+            lblEmail.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEmail.Location = new Point(295, 104);
             lblEmail.Name = "lblEmail";
             lblEmail.Size = new Size(39, 23);
-            lblEmail.TabIndex = 9;
+            lblEmail.TabIndex = 8;
             lblEmail.Text = "N/A";
-            // 
+            //
             // lblEstadoTag
-            // 
+            //
             lblEstadoTag.AutoSize = true;
             lblEstadoTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            lblEstadoTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblEstadoTag.Location = new Point(180, 204);
+            lblEstadoTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblEstadoTag.Location = new Point(185, 135);
             lblEstadoTag.Name = "lblEstadoTag";
             lblEstadoTag.Size = new Size(63, 21);
-            lblEstadoTag.TabIndex = 10;
+            lblEstadoTag.TabIndex = 9;
             lblEstadoTag.Text = "Estado:";
-            // 
+            //
             // lblEstado
-            // 
+            //
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            lblEstado.ForeColor = Color.Green;
-            lblEstado.Location = new Point(290, 204);
+            lblEstado.ForeColor = Color.FromArgb(52, 211, 153);
+            lblEstado.Location = new Point(295, 134);
             lblEstado.Name = "lblEstado";
             lblEstado.Size = new Size(71, 23);
-            lblEstado.TabIndex = 11;
+            lblEstado.TabIndex = 10;
             lblEstado.Text = "ACTIVO";
-            // 
+            //
+            // panelTabs
+            //
+            panelTabs.Controls.Add(tabControlDetalles);
+            panelTabs.Dock = DockStyle.Fill;
+            panelTabs.Location = new Point(0, 242);
+            panelTabs.Name = "panelTabs";
+            panelTabs.Padding = new Padding(20, 0, 20, 10);
+            panelTabs.Size = new Size(700, 338);
+            panelTabs.TabIndex = 2;
+            //
             // tabControlDetalles
-            // 
+            //
+            tabControlDetalles.BackColor = Color.FromArgb(11, 15, 26);
             tabControlDetalles.Controls.Add(tabMembresias);
             tabControlDetalles.Controls.Add(tabVisitas);
-            tabControlDetalles.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            tabControlDetalles.Dock = DockStyle.Fill;
             tabControlDetalles.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControlDetalles.Font = new Font("Segoe UI", 9.5F);
             tabControlDetalles.ItemSize = new Size(190, 32);
-            tabControlDetalles.Location = new Point(23, 245);
+            tabControlDetalles.Location = new Point(20, 0);
             tabControlDetalles.Name = "tabControlDetalles";
             tabControlDetalles.SelectedIndex = 0;
+            tabControlDetalles.Size = new Size(660, 328);
             tabControlDetalles.SizeMode = TabSizeMode.Fixed;
-            tabControlDetalles.Size = new Size(634, 280);
-            tabControlDetalles.TabIndex = 12;
+            tabControlDetalles.TabIndex = 0;
             tabControlDetalles.DrawItem += tabControlDetalles_DrawItem;
-            // 
+            //
             // tabMembresias
-            // 
-            tabMembresias.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            //
+            tabMembresias.BackColor = Color.FromArgb(11, 15, 26);
             tabMembresias.Controls.Add(dgvHistorialMembresias);
-            tabMembresias.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            tabMembresias.ForeColor = Color.FromArgb(230, 238, 252);
             tabMembresias.Location = new Point(4, 36);
             tabMembresias.Name = "tabMembresias";
             tabMembresias.Padding = new Padding(3);
-            tabMembresias.Size = new Size(626, 240);
+            tabMembresias.Size = new Size(652, 288);
             tabMembresias.TabIndex = 0;
-            tabMembresias.Text = "Historial Membresías";
-            // 
+            tabMembresias.Text = "Historial de membresías";
+            //
             // dgvHistorialMembresias
-            // 
-            dgvHistorialMembresias.AllowUserToAddRows = false;
-            dgvHistorialMembresias.AllowUserToDeleteRows = false;
-            dgvHistorialMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvHistorialMembresias.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvHistorialMembresias.BorderStyle = BorderStyle.None;
-            dgvHistorialMembresias.EnableHeadersVisualStyles = false;
-            dgvHistorialMembresias.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvHistorialMembresias.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvHistorialMembresias.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dgvHistorialMembresias.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvHistorialMembresias.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
-            dgvHistorialMembresias.ColumnHeadersHeight = 34;
-            dgvHistorialMembresias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvHistorialMembresias.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvHistorialMembresias.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvHistorialMembresias.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvHistorialMembresias.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvHistorialMembresias.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvHistorialMembresias.GridColor = ColorTranslator.FromHtml("#0f2a4f");
+            //
             dgvHistorialMembresias.Dock = DockStyle.Fill;
             dgvHistorialMembresias.Location = new Point(3, 3);
-            dgvHistorialMembresias.MultiSelect = false;
             dgvHistorialMembresias.Name = "dgvHistorialMembresias";
-            dgvHistorialMembresias.ReadOnly = true;
-            dgvHistorialMembresias.RowHeadersVisible = false;
-            dgvHistorialMembresias.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvHistorialMembresias.Size = new Size(620, 234);
+            dgvHistorialMembresias.Size = new Size(646, 282);
             dgvHistorialMembresias.TabIndex = 0;
-            // 
+            //
             // tabVisitas
-            // 
-            tabVisitas.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            tabVisitas.Controls.Add(panelFiltrosVisitas);
+            //
+            tabVisitas.BackColor = Color.FromArgb(11, 15, 26);
             tabVisitas.Controls.Add(dgvHistorialVisitas);
-            tabVisitas.ForeColor = ColorTranslator.FromHtml("#e6eefc");
+            tabVisitas.Controls.Add(panelFiltrosVisitas);
+            tabVisitas.ForeColor = Color.FromArgb(230, 238, 252);
             tabVisitas.Location = new Point(4, 36);
             tabVisitas.Name = "tabVisitas";
             tabVisitas.Padding = new Padding(3);
-            tabVisitas.Size = new Size(626, 240);
+            tabVisitas.Size = new Size(652, 288);
             tabVisitas.TabIndex = 1;
-            tabVisitas.Text = "Historial Visitas";
-            // 
+            tabVisitas.Text = "Historial de visitas";
+            //
             // panelFiltrosVisitas
-            // 
+            //
+            panelFiltrosVisitas.BackColor = Color.FromArgb(11, 15, 26);
+            panelFiltrosVisitas.Controls.Add(lblVisitaDesdeTag);
+            panelFiltrosVisitas.Controls.Add(dtpVisitaDesde);
+            panelFiltrosVisitas.Controls.Add(lblVisitaHastaTag);
+            panelFiltrosVisitas.Controls.Add(dtpVisitaHasta);
             panelFiltrosVisitas.Controls.Add(btnFiltrarVisitas);
             panelFiltrosVisitas.Controls.Add(btnEliminarVisita);
-            panelFiltrosVisitas.Controls.Add(dtpVisitaHasta);
-            panelFiltrosVisitas.Controls.Add(lblVisitaHastaTag);
-            panelFiltrosVisitas.Controls.Add(dtpVisitaDesde);
-            panelFiltrosVisitas.Controls.Add(lblVisitaDesdeTag);
             panelFiltrosVisitas.Dock = DockStyle.Top;
-            panelFiltrosVisitas.BackColor = ColorTranslator.FromHtml("#0b0f1a");
             panelFiltrosVisitas.Location = new Point(3, 3);
             panelFiltrosVisitas.Name = "panelFiltrosVisitas";
-            panelFiltrosVisitas.Size = new Size(620, 42);
+            panelFiltrosVisitas.Size = new Size(646, 46);
             panelFiltrosVisitas.TabIndex = 0;
-            // 
+            //
             // lblVisitaDesdeTag
-            // 
+            //
             lblVisitaDesdeTag.AutoSize = true;
             lblVisitaDesdeTag.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblVisitaDesdeTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblVisitaDesdeTag.Location = new Point(8, 11);
+            lblVisitaDesdeTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblVisitaDesdeTag.Location = new Point(8, 13);
             lblVisitaDesdeTag.Name = "lblVisitaDesdeTag";
             lblVisitaDesdeTag.Size = new Size(54, 20);
             lblVisitaDesdeTag.TabIndex = 0;
             lblVisitaDesdeTag.Text = "Desde:";
-            // 
+            //
             // dtpVisitaDesde
-            // 
+            //
             dtpVisitaDesde.Format = DateTimePickerFormat.Short;
-            dtpVisitaDesde.Location = new Point(68, 7);
+            dtpVisitaDesde.Location = new Point(68, 9);
             dtpVisitaDesde.Name = "dtpVisitaDesde";
-            dtpVisitaDesde.Size = new Size(125, 29);
+            dtpVisitaDesde.Size = new Size(125, 27);
             dtpVisitaDesde.TabIndex = 1;
-            // 
+            //
             // lblVisitaHastaTag
-            // 
+            //
             lblVisitaHastaTag.AutoSize = true;
             lblVisitaHastaTag.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblVisitaHastaTag.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            lblVisitaHastaTag.Location = new Point(208, 11);
+            lblVisitaHastaTag.ForeColor = Color.FromArgb(45, 212, 255);
+            lblVisitaHastaTag.Location = new Point(208, 13);
             lblVisitaHastaTag.Name = "lblVisitaHastaTag";
             lblVisitaHastaTag.Size = new Size(50, 20);
             lblVisitaHastaTag.TabIndex = 2;
             lblVisitaHastaTag.Text = "Hasta:";
-            // 
+            //
             // dtpVisitaHasta
-            // 
+            //
             dtpVisitaHasta.Format = DateTimePickerFormat.Short;
-            dtpVisitaHasta.Location = new Point(264, 7);
+            dtpVisitaHasta.Location = new Point(264, 9);
             dtpVisitaHasta.Name = "dtpVisitaHasta";
-            dtpVisitaHasta.Size = new Size(125, 29);
+            dtpVisitaHasta.Size = new Size(125, 27);
             dtpVisitaHasta.TabIndex = 3;
-            // 
+            //
             // btnFiltrarVisitas
-            // 
-            btnFiltrarVisitas.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnFiltrarVisitas.FlatAppearance.BorderSize = 0;
-            btnFiltrarVisitas.FlatStyle = FlatStyle.Flat;
-            btnFiltrarVisitas.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnFiltrarVisitas.ForeColor = Color.White;
-            btnFiltrarVisitas.Location = new Point(405, 6);
+            //
+            btnFiltrarVisitas.Estilo = EstiloBoton.Primario;
+            btnFiltrarVisitas.Location = new Point(405, 7);
             btnFiltrarVisitas.Name = "btnFiltrarVisitas";
-            btnFiltrarVisitas.Size = new Size(85, 30);
+            btnFiltrarVisitas.Size = new Size(85, 32);
             btnFiltrarVisitas.TabIndex = 4;
             btnFiltrarVisitas.Text = "Buscar";
-            btnFiltrarVisitas.UseVisualStyleBackColor = false;
             btnFiltrarVisitas.Click += btnFiltrarVisitas_Click;
-            // 
+            //
             // btnEliminarVisita
-            // 
-            btnEliminarVisita.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            btnEliminarVisita.FlatAppearance.BorderColor = ColorTranslator.FromHtml("#1f6feb");
-            btnEliminarVisita.FlatStyle = FlatStyle.Flat;
-            btnEliminarVisita.Font = new Font("Segoe UI Semibold", 8.5F, FontStyle.Bold);
-            btnEliminarVisita.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            btnEliminarVisita.Location = new Point(495, 6);
+            //
+            btnEliminarVisita.Enabled = false;
+            btnEliminarVisita.Estilo = EstiloBoton.Peligro;
+            btnEliminarVisita.Location = new Point(498, 7);
             btnEliminarVisita.Name = "btnEliminarVisita";
-            btnEliminarVisita.Size = new Size(85, 30);
+            btnEliminarVisita.Size = new Size(85, 32);
             btnEliminarVisita.TabIndex = 5;
             btnEliminarVisita.Text = "Eliminar";
-            btnEliminarVisita.UseVisualStyleBackColor = false;
             btnEliminarVisita.Click += btnEliminarVisita_Click;
-            // 
+            //
             // dgvHistorialVisitas
-            // 
-            dgvHistorialVisitas.AllowUserToAddRows = false;
-            dgvHistorialVisitas.AllowUserToDeleteRows = false;
-            dgvHistorialVisitas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvHistorialVisitas.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvHistorialVisitas.BorderStyle = BorderStyle.None;
-            dgvHistorialVisitas.EnableHeadersVisualStyles = false;
-            dgvHistorialVisitas.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvHistorialVisitas.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgvHistorialVisitas.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dgvHistorialVisitas.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvHistorialVisitas.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
-            dgvHistorialVisitas.ColumnHeadersHeight = 34;
-            dgvHistorialVisitas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvHistorialVisitas.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgvHistorialVisitas.DefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#e6eefc");
-            dgvHistorialVisitas.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgvHistorialVisitas.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvHistorialVisitas.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvHistorialVisitas.GridColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgvHistorialVisitas.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            dgvHistorialVisitas.Dock = DockStyle.None;
-            dgvHistorialVisitas.Location = new Point(3, 45);
-            dgvHistorialVisitas.MultiSelect = false;
+            //
+            dgvHistorialVisitas.Dock = DockStyle.Fill;
+            dgvHistorialVisitas.Location = new Point(3, 49);
             dgvHistorialVisitas.Name = "dgvHistorialVisitas";
-            dgvHistorialVisitas.ReadOnly = true;
-            dgvHistorialVisitas.RowHeadersVisible = false;
-            dgvHistorialVisitas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvHistorialVisitas.Size = new Size(620, 192);
+            dgvHistorialVisitas.Size = new Size(646, 236);
             dgvHistorialVisitas.TabIndex = 1;
-            // 
+            dgvHistorialVisitas.SelectionChanged += dgvHistorialVisitas_SelectionChanged;
+            //
+            // panelPie
+            //
+            panelPie.BackColor = Color.FromArgb(14, 20, 36);
+            panelPie.Controls.Add(btnCerrar);
+            panelPie.Dock = DockStyle.Bottom;
+            panelPie.Location = new Point(0, 580);
+            panelPie.Name = "panelPie";
+            panelPie.Size = new Size(700, 60);
+            panelPie.TabIndex = 3;
+            //
             // btnCerrar
-            // 
-            btnCerrar.BackColor = ColorTranslator.FromHtml("#1f6feb");
-            btnCerrar.FlatAppearance.BorderSize = 0;
-            btnCerrar.FlatStyle = FlatStyle.Flat;
-            btnCerrar.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
-            btnCerrar.ForeColor = Color.White;
-            btnCerrar.Location = new Point(554, 540);
-            btnCerrar.Margin = new Padding(3, 4, 3, 4);
+            //
+            btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCerrar.DialogResult = DialogResult.Cancel;
+            btnCerrar.Estilo = EstiloBoton.Primario;
+            btnCerrar.Location = new Point(577, 10);
             btnCerrar.Name = "btnCerrar";
-            btnCerrar.Size = new Size(103, 43);
-            btnCerrar.TabIndex = 13;
+            btnCerrar.Size = new Size(103, 40);
+            btnCerrar.TabIndex = 0;
             btnCerrar.Text = "Cerrar";
-            btnCerrar.UseVisualStyleBackColor = false;
-            btnCerrar.Click += btnCerrar_Click;
-            // 
+            //
             // FrmSocioInfoModal
-            // 
+            //
+            AcceptButton = btnCerrar;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            ClientSize = new Size(680, 600);
-            Controls.Add(btnCerrar);
-            Controls.Add(tabControlDetalles);
-            Controls.Add(lblEstado);
-            Controls.Add(lblEstadoTag);
-            Controls.Add(lblEmail);
-            Controls.Add(lblEmailTag);
-            Controls.Add(lblTelefono);
-            Controls.Add(lblTelefonoTag);
-            Controls.Add(lblNombreCompleto);
-            Controls.Add(lblNombreTag);
-            Controls.Add(lblClave);
-            Controls.Add(lblClaveTag);
-            Controls.Add(picFotoSocio);
+            BackColor = Color.FromArgb(11, 15, 26);
+            CancelButton = btnCerrar;
+            ClientSize = new Size(700, 640);
+            Controls.Add(panelTabs);
+            Controls.Add(panelPie);
+            Controls.Add(panelDatos);
             Controls.Add(panelHeader);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            Margin = new Padding(3, 4, 3, 4);
+            FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = false;
             MinimizeBox = false;
+            MinimumSize = new Size(680, 560);
             Name = "FrmSocioInfoModal";
+            ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Información del Socio";
             Load += FrmSocioInfoModal_Load;
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
+            panelDatos.ResumeLayout(false);
+            panelDatos.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)picFotoSocio).EndInit();
+            panelTabs.ResumeLayout(false);
             tabControlDetalles.ResumeLayout(false);
             tabMembresias.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvHistorialMembresias).EndInit();
             tabVisitas.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvHistorialVisitas).EndInit();
             panelFiltrosVisitas.ResumeLayout(false);
             panelFiltrosVisitas.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvHistorialVisitas).EndInit();
+            panelPie.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
         private Panel panelHeader;
         private Label lblTitulo;
+        private Panel panelDatos;
         private PictureBox picFotoSocio;
         private Label lblClaveTag;
         private Label lblClave;
@@ -457,18 +440,20 @@ namespace Presentacion.Forms.Socios
         private Label lblEmail;
         private Label lblEstadoTag;
         private Label lblEstado;
+        private Panel panelTabs;
         private FlatTabControl tabControlDetalles;
         private TabPage tabMembresias;
-        private DataGridView dgvHistorialMembresias;
+        private GridTema dgvHistorialMembresias;
         private TabPage tabVisitas;
+        private GridTema dgvHistorialVisitas;
         private Panel panelFiltrosVisitas;
         private Label lblVisitaDesdeTag;
         private DateTimePicker dtpVisitaDesde;
         private Label lblVisitaHastaTag;
         private DateTimePicker dtpVisitaHasta;
-        private Button btnFiltrarVisitas;
-        private Button btnEliminarVisita;
-        private DataGridView dgvHistorialVisitas;
-        private Button btnCerrar;
+        private BotonTema btnFiltrarVisitas;
+        private BotonTema btnEliminarVisita;
+        private Panel panelPie;
+        private BotonTema btnCerrar;
     }
 }

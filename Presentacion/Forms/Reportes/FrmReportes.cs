@@ -23,6 +23,7 @@ namespace Presentacion.Forms.Reportes
         private FrmRegistrosReporte? _frmRegistrosReporte;
         private FrmVisitasReporte? _frmVisitasReporte;
         private FrmVentasProductos? _frmVentasproductos;
+        private FrmMovimientosReporte? _frmMovimientosReporte;
 
         public FrmReportes(ReporteController reporteController, VisitaController visitaController)
         {
@@ -44,72 +45,17 @@ namespace Presentacion.Forms.Reportes
             ConfigurarTabPage(tabMovimientos, "tabMovimientos", "Movimientos", dgvMovimientos);
         }
 
-        private void ConfigurarTabPage(TabPage page, string name, string text, DataGridView dgv)
+        // Solo estilo: el aspecto del grid ya viene de GridTema; aquí se nombra la pestaña y se le da el fondo del tema.
+        private void ConfigurarTabPage(TabPage page, string name, string text, GridTema dgv)
         {
             page.Name = name;
             page.Text = text;
-            page.BackColor = ColorTranslator.FromHtml("#0b0f1a");
+            page.BackColor = Tema.Fondo;
 
-            // Configuración visual del DataGridView
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToDeleteRows = false;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgv.BackgroundColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgv.BorderStyle = BorderStyle.None;
-            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgv.EnableHeadersVisualStyles = false;
-
-            // Estilo de Encabezados
-            dgv.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0f2a4f");
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor = ColorTranslator.FromHtml("#2dd4ff");
-            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Bold", 10F, FontStyle.Bold);
-            dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgv.ColumnHeadersHeight = 40;
-            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-
-            // Padding para celdas
-            Padding margenCelda = new Padding(10, 6, 10, 6);
-            dgv.ColumnHeadersDefaultCellStyle.Padding = margenCelda;
-            dgv.DefaultCellStyle.Padding = margenCelda;
-
-            // Filas de datos
-            dgv.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-            dgv.DefaultCellStyle.ForeColor = Color.White;
-            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
-            dgv.DefaultCellStyle.SelectionBackColor = ColorTranslator.FromHtml("#1f6feb");
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-
-            dgv.RowTemplate.Height = 38;
-            dgv.ScrollBars = ScrollBars.Both;
-            dgv.GridColor = ColorTranslator.FromHtml("#161b26");
             dgv.Dock = DockStyle.Fill;
-            dgv.Margin = new Padding(3, 4, 3, 4);
-            dgv.MultiSelect = false;
-            dgv.ReadOnly = true;
-            dgv.RowHeadersVisible = false;
-            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
-            // Alineación y formato automático según el nombre de la columna
-            dgv.DataBindingComplete += (sender, e) =>
-            {
-                foreach (DataGridViewColumn col in dgv.Columns)
-                {
-                    string colName = col.Name.ToLower();
-
-                    if (colName.Contains("precio") || colName.Contains("costo") || colName.Contains("total") || colName.Contains("subtotal") || colName.Contains("pago"))
-                    {
-                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        col.DefaultCellStyle.Format = "C2";
-                    }
-                    else if (colName.Contains("stock") || colName.Contains("cantidad") || colName.Contains("id"))
-                    {
-                        col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                        col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    }
-                }
-            };
+            // Alineación y formato (dinero, cantidades) según el nombre de la columna: ver GridTemaExtensiones.cs
+            dgv.FormatoAutomatico();
 
             page.Controls.Add(dgv);
         }
@@ -166,7 +112,7 @@ namespace Presentacion.Forms.Reportes
                         break;
 
                     case "tabMovimientos":
-                        dgvMovimientos.DataSource = await _reporteController.ObtenerMovimientosAsync(inicio, fin);
+                        CargarFormularioMovimientos();
                         break;
                 }
             }
@@ -200,7 +146,7 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,               // Desactiva el comportamiento de ventana independiente
                 FormBorderStyle = FormBorderStyle.None, // Quita bordes y barra de título
                 Dock = DockStyle.Fill,        // Hace que ocupe todo el espacio de la pestaña
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             // Agregar el formulario al contenedor de la pestaña y mostrarlo
@@ -221,7 +167,7 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
                 Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             tabMembresias.Controls.Add(_frmMembresias);
@@ -241,7 +187,7 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
                 Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             tabPagos.Controls.Add(_frmPagosMembresias);
@@ -261,7 +207,7 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
                 Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             tabSocios.Controls.Add(_frmSociosReporte);
@@ -281,7 +227,7 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
                 Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             tabRegistro.Controls.Add(_frmRegistrosReporte);
@@ -301,7 +247,7 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
                 Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             tabVisitas.Controls.Add(_frmVisitasReporte);
@@ -321,26 +267,31 @@ namespace Presentacion.Forms.Reportes
                 TopLevel = false,
                 FormBorderStyle = FormBorderStyle.None,
                 Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+                BackColor = Tema.Fondo
             };
 
             tabVentas.Controls.Add(_frmVentasproductos);
             _frmVentasproductos.Show();
         }
 
-        protected override void OnControlAdded(ControlEventArgs e)
+        private void CargarFormularioMovimientos()
         {
-            base.OnControlAdded(e);
-
-            // Si estás usando controles nativos, esto ayuda a forzar que los TabPages 
-            // hereden correctamente el fondo oscuro y no pinten el borde interno de Windows.
-            if (e.Control is TabControl tc)
+            if (_frmMovimientosReporte != null && !_frmMovimientosReporte.IsDisposed)
             {
-                foreach (TabPage page in tc.TabPages)
-                {
-                    page.BackColor = ColorTranslator.FromHtml("#0b0f1a");
-                }
+                return;
             }
+            tabMovimientos.Controls.Clear();
+
+            _frmMovimientosReporte = new FrmMovimientosReporte(_reporteController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = Tema.Fondo
+            };
+
+            tabMovimientos.Controls.Add(_frmMovimientosReporte);
+            _frmMovimientosReporte.Show();
         }
     }
 }

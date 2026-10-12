@@ -1,4 +1,6 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Forms.Corte;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -14,18 +16,34 @@ namespace Presentacion.Forms.Reportes
 {
     public partial class FrmVisitasReporte : Form
     {
+        /// <summary>Una fila del reporte. El ID viaja en la fila pero no se muestra en el grid.</summary>
+        private sealed record FilaVisita(int VisitaID, string Nombre, string FechaRegistro, decimal Monto);
+
         private readonly ReporteController _reporteController;
         private readonly VisitaController _visitaController;
-        private List<ReporteVisitaViewModel> _listaVisitas = new();
+
+        // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
+        private ListaOrdenable<FilaVisita> _vista = new();
 
         public FrmVisitasReporte(ReporteController reporteController, VisitaController visitaController)
         {
+            _reporteController = reporteController ?? throw new ArgumentNullException(nameof(reporteController));
+            _visitaController = visitaController ?? throw new ArgumentNullException(nameof(visitaController));
+
             InitializeComponent();
-            _reporteController = reporteController;
-            _visitaController = visitaController;
+            ConfigurarColumnas();
+
+            // Borrar físicamente es irreversible: solo quien tenga el permiso ve el botón.
+            btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
         }
 
-        private async void FrmVisitasReporte_Load(object sender, EventArgs e)
+        /// <summary>Visita de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
+        private FilaVisita? VisitaSeleccionada =>
+            dgvVisitas.SelectedRows.Count > 0
+                ? dgvVisitas.SelectedRows[0].DataBoundItem as FilaVisita
+                : null;
+
+        private async void FrmVisitasReporte_Load(object? sender, EventArgs e)
         {
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
@@ -33,144 +51,156 @@ namespace Presentacion.Forms.Reportes
             await BuscarPorFechasAsync();
         }
 
-        private async void btnFiltrar_Click(object sender, EventArgs e)
+        // Las columnas se definen una sola vez, con su formato real.
+        private void ConfigurarColumnas()
         {
+            dgvVisitas.AutoGenerateColumns = false;
+
+            dgvVisitas.AgregarTexto(nameof(FilaVisita.Nombre), "Nombre", 200, 140);
+            dgvVisitas.AgregarTexto(nameof(FilaVisita.FechaRegistro), "Fecha de Registro", 140, 120);
+            dgvVisitas.AgregarTexto(nameof(FilaVisita.Monto), "Precio Visita", 90, 90, "C2", alinearDerecha: true);
+
+            // La fecha llega como texto del reporte: ordenarla alfabéticamente daría un orden engañoso.
+            foreach (DataGridViewColumn c in dgvVisitas.Columns)
+                if (c.DataPropertyName == nameof(FilaVisita.FechaRegistro))
+                    c.SortMode = DataGridViewColumnSortMode.NotSortable;
+        }
+
+        private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechasAsync();
+
+        // "Hoy": vuelve al día actual.
+        private async void btnLimpiarFiltros_Click(object? sender, EventArgs e)
+        {
+            dtpFechaInicio.Value = DateTime.Today;
+            dtpFechaFin.Value = DateTime.Today;
+
             await BuscarPorFechasAsync();
         }
 
         private async Task BuscarPorFechasAsync()
         {
-            try
+            // El rango cubre todo el día "Hasta".
+            DateTime inicio = dtpFechaInicio.Value.Date;
+            DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+
+            if (inicio > fin)
             {
-                Cursor = Cursors.WaitCursor;
+                FormHelper.MostrarAdvertencia("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.", "Rango de fechas");
+                return;
+            }
 
-                DateTime inicio = dtpFechaInicio.Value.Date;
-                DateTime fin = dtpFechaFin.Value.Date.AddDays(1).AddTicks(-1);
+            // Se conserva la selección actual al recargar.
+            int? idObjetivo = VisitaSeleccionada?.VisitaID;
 
-                var resultado = await _reporteController.ObtenerVisitasAsync(inicio, fin);
-                _listaVisitas = resultado.ToList();
+            await FormHelper.EjecutarAsync(async () =>
+            {
+                var visitas = await _reporteController.ObtenerVisitasAsync(inicio, fin);
+                if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
 
-                var datosMostrar = _listaVisitas.Select(v => new
+                var filas = visitas.Select(v => new FilaVisita(
+                    v.VisitaID,
+                    string.IsNullOrWhiteSpace(v.Nombre) ? "N/A" : v.Nombre,
+                    v.FechaHoraTexto,
+                    v.Monto));
+
+                // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
+                var columnaOrden = dgvVisitas.SortedColumn;
+                var sentidoOrden = dgvVisitas.SortOrder;
+
+                _vista = new ListaOrdenable<FilaVisita>(filas);
+                dgvVisitas.DataSource = _vista;
+
+                if (columnaOrden != null && sentidoOrden != SortOrder.None)
                 {
-                    VisitaID = v.VisitaID,
-                    Nombre = v.Nombre,
-                    FechaRegistro = v.FechaHoraTexto,
-                    Monto = v.Monto
-                }).ToList();
+                    dgvVisitas.Sort(columnaOrden, sentidoOrden == SortOrder.Descending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending);
+                }
 
-                dgvVisitas.DataSource = null;
-                dgvVisitas.DataSource = datosMostrar;
-
-                ConfigurarGrid();
-                CalcularTotal();
-                dgvVisitas.ClearSelection();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar el reporte de visitas: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Cursor = Cursors.Default;
-            }
+                SeleccionarVisita(idObjetivo);
+                ActualizarResumen();
+            },
+            "No se pudo cargar el reporte de visitas.",
+            panelTop, panelFiltros);
         }
 
-        private void CalcularTotal()
+        private void SeleccionarVisita(int? id)
         {
-            decimal totalIngresado = _listaVisitas.Sum(v => v.Monto);
-            lblTotal.Text = $"Total: {totalIngresado:C2}";
-        }
+            dgvVisitas.ClearSelection();
 
-        private void ConfigurarGrid()
-        {
-            if (dgvVisitas.Columns.Count == 0) return;
-
-            // Ocultar ID pero mantenerlo disponible para operaciones como eliminar
-            if (dgvVisitas.Columns["VisitaID"] != null)
-                dgvVisitas.Columns["VisitaID"].Visible = false;
-
-            if (dgvVisitas.Columns["Nombre"] != null)
-                dgvVisitas.Columns["Nombre"].HeaderText = "Nombre";
-
-            if (dgvVisitas.Columns["FechaRegistro"] != null)
-                dgvVisitas.Columns["FechaRegistro"].HeaderText = "Fecha de Registro";
-
-            if (dgvVisitas.Columns["Monto"] != null)
+            if (id.HasValue)
             {
-                dgvVisitas.Columns["Monto"].HeaderText = "Precio Visita";
-                dgvVisitas.Columns["Monto"].DefaultCellStyle.Format = "C2";
-                dgvVisitas.Columns["Monto"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                dgvVisitas.Columns["Monto"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
+                for (int i = 0; i < _vista.Count; i++)
+                {
+                    if (_vista[i].VisitaID != id.Value) continue;
+
+                    dgvVisitas.Rows[i].Selected = true;
+                    dgvVisitas.CurrentCell = dgvVisitas.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    break;
+                }
             }
 
-            dgvVisitas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            ActualizarEstadoBotones();
         }
 
-        private async void btnLimpiarFiltros_Click(object sender, EventArgs e)
+        private void ActualizarResumen()
         {
-            dtpFechaInicio.Value = DateTime.Today;
-            dtpFechaFin.Value = DateTime.Today;
-
-            await BuscarPorFechasAsync();
+            lblTotal.Text = $"{_vista.Count} visita(s)  ·  Total {_vista.Sum(f => f.Monto):C2}";
+            ActualizarEstadoBotones();
         }
 
-        private void btnExportarExcel_Click(object sender, EventArgs e)
+        private void ActualizarEstadoBotones()
         {
-            if (dgvVisitas.Rows.Count == 0)
+            btnEliminarFisico.Enabled = VisitaSeleccionada != null;
+            btnExportarExcel.Enabled = _vista.Count > 0;
+        }
+
+        private void dgvVisitas_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
+
+        // Antes se eliminaba la fila "actual" aunque no se viera seleccionada; ahora solo la seleccionada.
+        private async void btnEliminarFisico_Click(object? sender, EventArgs e)
+        {
+            var visita = VisitaSeleccionada;
+            if (visita == null)
             {
-                MessageBox.Show("No hay datos en la tabla para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAdvertencia("Seleccione una visita de la lista para eliminar.", "Eliminar visita");
+                return;
+            }
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Eliminar definitivamente la visita de \"{visita.Nombre}\" del {visita.FechaRegistro}?\n\nEsta acción no se puede deshacer.",
+                    "Confirmar eliminación",
+                    destructiva: true))
+                return;
+
+            bool eliminada = await FormHelper.EjecutarAsync(
+                async () => await _visitaController.EliminarFisicoAsync(visita.VisitaID),
+                "No se pudo eliminar la visita.",
+                panelTop, panelFiltros);
+
+            if (eliminada && !IsDisposed)
+                await BuscarPorFechasAsync();
+        }
+
+        // Antes este botón mostraba "exportado con éxito" sin exportar nada.
+        // Ahora genera un .csv que Excel abre directamente.
+        private void btnExportarExcel_Click(object? sender, EventArgs e)
+        {
+            if (_vista.Count == 0)
+            {
+                FormHelper.MostrarAviso("No hay datos en la tabla para exportar.");
                 return;
             }
 
             try
             {
-                // Lógica o Helper para exportación a Excel
-                MessageBox.Show("Reporte de visitas exportado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string? ruta = ExportadorCsv.Exportar(dgvVisitas, "Visitas_casuales");
+                if (ruta != null)
+                    FormHelper.MostrarAviso($"Archivo guardado en:\n{ruta}", "Exportación completada");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                MessageBox.Show($"Error al exportar a Excel: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async void btnEliminarFisico_Click(object sender, EventArgs e)
-        {
-            if (dgvVisitas.CurrentRow == null)
-            {
-                MessageBox.Show("Seleccione una visita de la lista para eliminar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var confirmacion = MessageBox.Show(
-                "¿Está seguro de que desea eliminar este registro de visita? Esta acción no se puede deshacer.",
-                "Confirmar eliminación",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (confirmacion == DialogResult.Yes)
-            {
-                try
-                {
-                    Cursor = Cursors.WaitCursor;
-
-                    int visitaId = Convert.ToInt32(dgvVisitas.CurrentRow.Cells["VisitaID"].Value);
-
-                    // Llamada directa al método de VisitaController
-                    await _visitaController.EliminarFisicoAsync(visitaId);
-
-                    MessageBox.Show("Registro de visita eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // Recargar el reporte tras la eliminación
-                    await BuscarPorFechasAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al eliminar la visita: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    Cursor = Cursors.Default;
-                }
+                FormHelper.MostrarError("No se pudo guardar el archivo. Verifique que no esté abierto en Excel y que la carpeta permita escribir.");
             }
         }
     }

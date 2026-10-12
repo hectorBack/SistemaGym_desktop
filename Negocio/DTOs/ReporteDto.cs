@@ -104,6 +104,8 @@ namespace Negocio.DTOs
             public decimal Total { get; set; }
             public string FormaPago { get; set; } = string.Empty;
             public string Usuario { get; set; } = string.Empty;
+            public string Observacion { get; set; } = string.Empty;
+            public string CorteInfo { get; set; } = string.Empty;
             public DateTime Fecha { get; set; }
         }
     }

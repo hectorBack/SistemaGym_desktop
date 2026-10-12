@@ -13,81 +13,47 @@ namespace Presentacion.Forms.Ventas
 {
     public partial class FrmVentaDetalleModal : Form
     {
+        /// <summary>Una fila del detalle. Mantiene los números como decimal (no como texto) para que se alineen y ordenen bien.</summary>
+        private sealed record FilaDetalle(string Producto, int Cantidad, decimal PrecioUnitario, decimal Subtotal);
+
         private readonly VentaDto _venta;
 
         public FrmVentaDetalleModal(VentaDto venta)
         {
-            InitializeComponent();
             _venta = venta ?? throw new ArgumentNullException(nameof(venta));
+
+            InitializeComponent();
+            ConfigurarColumnas();
+            CargarDatosVenta();
         }
 
-        private void FrmVentaDetalleModal_Load(object sender, EventArgs e)
+        // Las columnas se definen una sola vez.
+        private void ConfigurarColumnas()
         {
-            CargarDatosVenta();
+            dgvDetalles.AutoGenerateColumns = false;
+
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.Producto), "Producto", 220, 120);
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.Cantidad), "Cantidad", 70, 70, alinearDerecha: true);
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.PrecioUnitario), "Precio unitario", 90, 90, "C2", alinearDerecha: true);
+            dgvDetalles.AgregarTexto(nameof(FilaDetalle.Subtotal), "Subtotal", 90, 90, "C2", alinearDerecha: true);
         }
 
         private void CargarDatosVenta()
         {
-            // 1. Cargar cabecera (Solo Fecha y Total)
+            var filas = _venta.Detalles
+                .Select(d => new FilaDetalle(d.ProductoNombre, d.Cantidad, d.PrecioUnitario, d.Subtotal))
+                .ToList();
+
+            // Cabecera
             lblFechaValor.Text = _venta.FechaVenta.ToString("dd/MM/yyyy HH:mm");
             lblTotalCalculado.Text = _venta.Total.ToString("C2");
 
-            // (Opcional) Si quieres ocultar etiquetas secundarias de la interfaz gráfica si aún existen en el diseñador:
-            // lblFolioValor.Visible = false;
-            // lblAtendidoValor.Visible = false;
-            // lblSocioValor.Visible = false;
-            // lblEstadoValor.Visible = false;
+            int articulos = filas.Sum(f => f.Cantidad);
+            lblArticulos.Text = $"{articulos} artículo(s) en {filas.Count} producto(s)";
 
-            // 2. Cargar desglose de la tabla solo con Producto, Cantidad, Precio Unitario y Subtotal/Total
-            dgvDetalles.DataSource = _venta.Detalles.Select(d => new
-            {
-                Producto = d.ProductoNombre,
-                d.Cantidad,
-                PrecioUnitario = d.PrecioUnitario.ToString("C2"),
-                Subtotal = d.Subtotal.ToString("C2")
-            }).ToList();
-
-            ConfigurarGrid();
-        }
-
-        private void ConfigurarGrid()
-        {
-            // Ocultar ProductoID o cualquier columna residual por si acaso
-            if (dgvDetalles.Columns["ProductoID"] != null)
-                dgvDetalles.Columns["ProductoID"].Visible = false;
-
-            // Configuración de encabezados y alineaciones
-            if (dgvDetalles.Columns["Producto"] != null)
-            {
-                dgvDetalles.Columns["Producto"].HeaderText = "Nombre";
-                dgvDetalles.Columns["Producto"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            }
-
-            if (dgvDetalles.Columns["Cantidad"] != null)
-            {
-                dgvDetalles.Columns["Cantidad"].HeaderText = "Cantidad";
-                dgvDetalles.Columns["Cantidad"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
-
-            if (dgvDetalles.Columns["PrecioUnitario"] != null)
-            {
-                dgvDetalles.Columns["PrecioUnitario"].HeaderText = "Precio Unitario";
-                dgvDetalles.Columns["PrecioUnitario"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            if (dgvDetalles.Columns["Subtotal"] != null)
-            {
-                dgvDetalles.Columns["Subtotal"].HeaderText = "Total";
-                dgvDetalles.Columns["Subtotal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            }
-
-            // Ajuste de ancho de columnas para ocupar toda la tabla
-            dgvDetalles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        }
-
-        private void btnCerrar_Click(object sender, EventArgs e)
-        {
-            this.Close();
+            // Desglose (ordenable al hacer clic en los encabezados)
+            dgvDetalles.DataSource = new ListaOrdenable<FilaDetalle>(filas);
+            dgvDetalles.ClearSelection();
         }
     }
 }
