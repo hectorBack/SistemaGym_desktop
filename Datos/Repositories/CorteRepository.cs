@@ -2,11 +2,6 @@
 using Datos.Entities;
 using Datos.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Datos.Repositories
 {
@@ -86,16 +81,25 @@ namespace Datos.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Corte>> ObtenerAbiertosAsync()
+        {
+            return await _context.Cortes
+                .Include(c => c.Usuario)
+                .Where(c => c.Estado == "Abierto" && c.FechaCierre == null && c.Activo)
+                .OrderBy(c => c.FechaApertura)
+                .ToListAsync();
+        }
+
+        // OBSOLETO: lo reemplaza CorteService.ObtenerEfectivoEnCajaAsync (fondo + movimientos reales).
+        // Tomaba el primer corte abierto de cualquier usuario y usaba sus totales, que no se actualizan hasta cerrar.
         public async Task<decimal> ObtenerEfectivoEnCajaAsync()
         {
-            // Obtiene el corte activo/abierto (donde FechaCierre es null o Estado == "Abierto")
             var corteAbierto = await _context.Cortes
                 .FirstOrDefaultAsync(c => c.FechaCierre == null && c.Activo);
 
             if (corteAbierto == null)
                 return 0m;
 
-            // Fórmula: Monto Inicial + Ingresos - Egresos
             return corteAbierto.MontoInicial + corteAbierto.TotalIngresos - corteAbierto.TotalEgresos;
         }
     }

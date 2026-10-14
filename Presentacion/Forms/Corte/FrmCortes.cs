@@ -134,12 +134,11 @@ namespace Presentacion.Forms.Corte
 
             await FormHelper.EjecutarAsync(async () =>
             {
-                var configCaja = await _configuracionController.ObtenerConfigCorteCajaAsync();
-                decimal efectivoInicialConfig = configCaja?.EfectivoInicial ?? 0m;
+                // El servicio ya devuelve el efectivo completo (fondo + movimientos del corte abierto).
+                // Antes aquí se le sumaba otra vez el efectivo inicial de la configuración.
+                decimal efectivo = await _corteController.ObtenerEfectivoEnCajaAsync();
 
-                decimal efectivoCalculado = await _corteController.ObtenerEfectivoEnCajaAsync();
-
-                texto = $"Efectivo en Caja: {efectivoInicialConfig + efectivoCalculado:C2}";
+                texto = $"Efectivo en Caja: {efectivo:C2}";
             },
             "No se pudo consultar el efectivo en caja.");
 

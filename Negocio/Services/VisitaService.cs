@@ -1,152 +1,111 @@
 ﻿using Datos.Entities;
 using Datos.Interfaces;
-using Datos.Repositories;
 using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Presentacion.Helpers;
+using System.Globalization;
 
 namespace Negocio.Services
 {
     public class VisitaService : IVisitaService
     {
+        // ───────────── Constantes (antes eran valores sueltos dentro del código) ─────────────
+        private const string CLAVE_VISITA_CASUAL = "100";
+
+        // Si en tu base de datos estos conceptos tienen otro ID, cámbialo SOLO aquí.
+        private const int CONCEPTO_VISITA = CajaConstantes.ConceptoVisita;
+        private const int CONCEPTO_CANCELACION_VISITA = CajaConstantes.ConceptoCancelacionVisita;
+
+        private const string TIPO_INGRESO = CajaConstantes.TipoIngreso;
+        private const string TIPO_EGRESO = CajaConstantes.TipoEgreso;
+
+        private const string ACCESO_VISITA_CASUAL = "Visita Casual";
+        private const string ACCESO_SOCIO = "Socio";
+
+        // Clave de la tabla Configuracion.
+        private const string CONFIG_MEMBRESIA_VISITA = "MembresiaVisitaID"; // opcional: ID de la membresía que se cobra como visita
+
+        // Evita registrar dos accesos seguidos si la credencial se escanea dos veces. 0 = desactivado.
+        private const int MINUTOS_ENTRE_ACCESOS = 2;
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<VisitaCreateDto> _createValidator;
         private readonly IValidator<VisitaUpdateDto> _updateValidator;
-        private const string CLAVE_VISITA_CASUAL = "100";
+        private readonly CajaHelper _caja;
 
         public VisitaService(
             IUnitOfWork unitOfWork,
             IValidator<VisitaCreateDto> createValidator,
-            IValidator<VisitaUpdateDto> updateValidator)
+            IValidator<VisitaUpdateDto> updateValidator,
+            CajaHelper caja)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _caja = caja;
         }
+
+        // ───────────── Consultas ─────────────
 
         public async Task<IEnumerable<VisitaDto>> ObtenerTodasAsync()
         {
             var visitas = await _unitOfWork.Visita.ObtenerTodasAsync();
-
-            return visitas.Select(v => new VisitaDto
-            {
-                VisitaID = v.VisitaID,
-                SocioID = v.SocioID,
-                MembresiaID = v.MembresiaID,
-                Clave = v.Clave,
-                Nombre = v.Nombre,
-                Apellido = v.Apellido,
-                Telefono = v.Telefono,
-                MontoPagado = v.MontoPagado,
-                TipoAcceso = v.TipoAcceso,
-                Observaciones = v.Observaciones,
-                NombreMembresia = v.Membresia?.Nombre ?? "N/A",
-                Activo = v.Activo,
-                CreatedAt = v.CreatedAt,
-                UpdatedAt = v.UpdatedAt
-            });
+            return visitas.Select(v => ADto(v)).ToList();
         }
 
         public async Task<IEnumerable<VisitaDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
         {
             var visitas = await _unitOfWork.Visita.ObtenerPorRangoFechasAsync(fechaInicio, fechaFin);
-
-            return visitas.Select(v => new VisitaDto
-            {
-                VisitaID = v.VisitaID,
-                SocioID = v.SocioID,
-                MembresiaID = v.MembresiaID,
-                Clave = v.Clave,
-                Nombre = v.Nombre,
-                Apellido = v.Apellido,
-                Telefono = v.Telefono,
-                MontoPagado = v.MontoPagado,
-                TipoAcceso = v.TipoAcceso,
-                Observaciones = v.Observaciones,
-                NombreMembresia = v.Membresia?.Nombre ?? "N/A",
-                Activo = v.Activo,
-                CreatedAt = v.CreatedAt,
-                UpdatedAt = v.UpdatedAt
-            });
+            return visitas.Select(v => ADto(v)).ToList();
         }
 
         public async Task<VisitaDto?> ObtenerPorIdAsync(int id)
         {
             var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(id);
-            if (visita == null) return null;
-
-            return new VisitaDto
-            {
-                VisitaID = visita.VisitaID,
-                SocioID = visita.SocioID,
-                MembresiaID = visita.MembresiaID,
-                Clave = visita.Clave,
-                Nombre = visita.Nombre,
-                Apellido = visita.Apellido,
-                Telefono = visita.Telefono,
-                MontoPagado = visita.MontoPagado,
-                TipoAcceso = visita.TipoAcceso,
-                Observaciones = visita.Observaciones,
-                NombreMembresia = visita.Membresia?.Nombre ?? "N/A",
-                Activo = visita.Activo,
-                CreatedAt = visita.CreatedAt,
-                UpdatedAt = visita.UpdatedAt
-            };
+            return visita == null ? null : ADto(visita);
         }
 
         public async Task<IEnumerable<VisitaDto>> ObtenerPorSocioIdAsync(int socioId)
         {
             var visitas = await _unitOfWork.Visita.ObtenerPorSocioIdAsync(socioId);
-
-            return visitas.Select(v => new VisitaDto
-            {
-                VisitaID = v.VisitaID,
-                SocioID = v.SocioID,
-                MembresiaID = v.MembresiaID,
-                Clave = v.Clave,
-                Nombre = v.Nombre,
-                Apellido = v.Apellido,
-                Telefono = v.Telefono,
-                MontoPagado = v.MontoPagado,
-                TipoAcceso = v.TipoAcceso,
-                Observaciones = v.Observaciones,
-                NombreMembresia = v.Membresia?.Nombre ?? "N/A",
-                Activo = v.Activo,
-                CreatedAt = v.CreatedAt,
-                UpdatedAt = v.UpdatedAt
-            });
+            return visitas.Select(v => ADto(v)).ToList();
         }
+
+        public async Task<IEnumerable<VisitaDto>> ObtenerPorSocioYFechasAsync(int socioId, DateTime desde, DateTime hasta)
+        {
+            var visitas = await _unitOfWork.Visita.ObtenerVisitasPorSocioYFechasAsync(socioId, desde, hasta);
+            return visitas.Select(v => ADto(v)).ToList();
+        }
+
+        // ───────────── Registro manual ─────────────
 
         public async Task<VisitaDto> RegistrarVisitaAsync(VisitaCreateDto dto, int? usuarioIdSesion = null)
         {
             var validationResult = await _createValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
-                var errorMsg = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new BusinessException(errorMsg);
-            }
+                throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
 
             string claveLimpia = dto.Clave.Trim();
             Visita nuevaVisita;
-            decimal montoCobrado = 0.00m;
+            string nombreMembresia;
+            decimal montoCobrado = 0m;
 
             // CASO 1: Visita Casual (Clave = 100)
             if (claveLimpia == CLAVE_VISITA_CASUAL)
             {
                 var membresia = await _unitOfWork.Membresia.ObtenerPorIdAsync(dto.MembresiaID!.Value);
                 if (membresia == null || !membresia.Activo)
-                {
                     throw new BusinessException("La membresía o pase de visita seleccionado no existe o está inactivo.");
-                }
 
                 montoCobrado = membresia.Precio;
 
+                // Antes, sin usuario, la visita se guardaba cobrada pero NO entraba a caja.
+                if (montoCobrado > 0 && !usuarioIdSesion.HasValue)
+                    throw new BusinessException("No se pudo identificar al usuario de la sesión para registrar el cobro en caja.");
+
+                nombreMembresia = membresia.Nombre;
                 nuevaVisita = new Visita
                 {
                     SocioID = null,
@@ -155,108 +114,52 @@ namespace Negocio.Services
                     Nombre = dto.Nombre!.Trim(),
                     Apellido = dto.Apellido?.Trim(),
                     Telefono = dto.Telefono?.Trim(),
-                    MontoPagado = membresia.Precio,
-                    TipoAcceso = "Visita Casual",
+                    MontoPagado = montoCobrado,
+                    TipoAcceso = ACCESO_VISITA_CASUAL,
                     Observaciones = dto.Observaciones?.Trim(),
                     Activo = true
                 };
             }
-            // CASO 2: Socio Registrado
+            // CASO 2: Socio registrado (mismas reglas que el acceso rápido)
             else
             {
                 var socio = await _unitOfWork.Socio.ObtenerPorClaveAsync(claveLimpia);
                 if (socio == null)
-                {
                     throw new BusinessException($"No se encontró ningún socio registrado con la clave '{claveLimpia}'.");
-                }
 
-                if (!socio.Activo)
-                {
-                    throw new BusinessException($"El socio '{socio.Nombre} {socio.Apellido}' se encuentra inactivo.");
-                }
+                var validacion = await ValidarAccesoSocioAsync(socio);
+                if (validacion.Error != null)
+                    throw new BusinessException(validacion.Error);
 
-                var membresiaActiva = await _unitOfWork.SocioMembresia.ObtenerMembresiaActivaPorSocioIdAsync(socio.SocioID);
-                if (membresiaActiva == null)
-                {
-                    throw new BusinessException($"El socio '{socio.Nombre} {socio.Apellido}' no cuenta con una membresía activa.");
-                }
-
-                nuevaVisita = new Visita
-                {
-                    SocioID = socio.SocioID,
-                    MembresiaID = membresiaActiva.MembresiaID,
-                    Clave = socio.Clave,
-                    Nombre = socio.Nombre,
-                    Apellido = socio.Apellido,
-                    Telefono = socio.Telefono,
-                    MontoPagado = 0.00m,
-                    TipoAcceso = "Socio",
-                    Observaciones = dto.Observaciones?.Trim(),
-                    Activo = true
-                };
+                nombreMembresia = validacion.Membresia!.Membresia?.Nombre ?? "N/A";
+                nuevaVisita = CrearVisitaSocio(socio, validacion.Membresia.MembresiaID, dto.Observaciones?.Trim());
             }
 
             await _unitOfWork.Visita.AgregarAsync(nuevaVisita);
-            await _unitOfWork.SaveChangesAsync();
 
-            // 🟢 REGISTRAR MOVIMIENTO SI ES VISITA CASUAL Y TIENE COSTO
-            if (montoCobrado > 0 && usuarioIdSesion.HasValue)
+            // La visita y su movimiento de caja se guardan JUNTOS: o entran los dos o ninguno.
+            if (montoCobrado > 0)
             {
-                // Obtiene el corte abierto o lo abre automáticamente si no existe
-                var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioIdSesion.Value);
-
-                var movimientoIngreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = usuarioIdSesion.Value,
-                    ConceptoID = 7, // 7: 'Visita' (Ingreso)
-                    Tipo = "Ingreso",
-                    FormaPago = "Efectivo",
-                    Total = montoCobrado,
-                    Observacion = $"Cobro Visita Casual - {nuevaVisita.Nombre} {nuevaVisita.Apellido}".Trim(),
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
-                await _unitOfWork.SaveChangesAsync();
+                var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion!.Value, "cobro de Visita");
+                await _caja.AgregarMovimientoAsync(
+                    corte, usuarioIdSesion.Value, CONCEPTO_VISITA, TIPO_INGRESO, montoCobrado,
+                    $"Cobro Visita Casual - {nuevaVisita.Nombre} {nuevaVisita.Apellido}".Trim());
             }
 
-            // Cargar datos de navegación para armar el DTO de respuesta
-            var visitaGuardada = await _unitOfWork.Visita.ObtenerPorIdAsync(nuevaVisita.VisitaID);
+            await _unitOfWork.SaveChangesAsync();
 
-            return new VisitaDto
-            {
-                VisitaID = nuevaVisita.VisitaID,
-                SocioID = nuevaVisita.SocioID,
-                MembresiaID = nuevaVisita.MembresiaID,
-                Clave = nuevaVisita.Clave,
-                Nombre = nuevaVisita.Nombre,
-                Apellido = nuevaVisita.Apellido,
-                Telefono = nuevaVisita.Telefono,
-                MontoPagado = nuevaVisita.MontoPagado,
-                TipoAcceso = nuevaVisita.TipoAcceso,
-                Observaciones = nuevaVisita.Observaciones,
-                NombreMembresia = visitaGuardada?.Membresia?.Nombre ?? "N/A",
-                Activo = nuevaVisita.Activo,
-                CreatedAt = nuevaVisita.CreatedAt,
-                UpdatedAt = nuevaVisita.UpdatedAt
-            };
+            return ADto(nuevaVisita, nombreMembresia);
         }
 
         public async Task ActualizarAsync(VisitaUpdateDto dto)
         {
             var validationResult = await _updateValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
-                var errorMsg = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new BusinessException(errorMsg);
-            }
+                throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
 
             var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(dto.VisitaID);
             if (visita == null)
-            {
                 throw new BusinessException("La visita que intenta actualizar no existe.");
-            }
 
             visita.Nombre = dto.Nombre!.Trim();
             visita.Apellido = dto.Apellido?.Trim();
@@ -272,89 +175,113 @@ namespace Negocio.Services
         {
             var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(id);
             if (visita == null)
-            {
                 throw new BusinessException("La visita a eliminar no existe.");
-            }
+
+            // Borrar una visita cobrada dejaría su ingreso en caja sin respaldo y el corte no cuadraría.
+            if (visita.MontoPagado > 0)
+                throw new BusinessException(
+                    "Esta visita tiene un cobro registrado en caja y no puede eliminarse. " +
+                    "Cancélela para generar la devolución correspondiente.");
 
             _unitOfWork.Visita.EliminarFisico(visita);
             await _unitOfWork.SaveChangesAsync();
         }
+
+        public async Task CancelarVisitaAsync(int id, int usuarioId, string? motivo = null)
+        {
+            var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(id);
+            if (visita == null)
+                throw new BusinessException("La visita a cancelar no existe.");
+
+            if (!visita.Activo)
+                throw new BusinessException("La visita ya se encuentra inactiva o cancelada.");
+
+            decimal montoDevuelto = visita.MontoPagado;
+            string motivoLimpio = motivo?.Trim() ?? string.Empty;
+
+            // Se conserva el texto original y el monto devuelto en las observaciones (rastro de auditoría).
+            // MontoPagado queda en 0 para que los reportes no cuenten una visita cancelada.
+            var partes = new List<string> { string.IsNullOrEmpty(motivoLimpio) ? "Cancelada" : $"Cancelada: {motivoLimpio}" };
+            if (montoDevuelto > 0) partes.Add($"devuelto {montoDevuelto:C2}");
+            if (!string.IsNullOrWhiteSpace(visita.Observaciones)) partes.Add($"obs. original: {visita.Observaciones.Trim()}");
+
+            visita.Observaciones = string.Join(" | ", partes);
+            visita.MontoPagado = 0m;
+            visita.Activo = false;
+            _unitOfWork.Visita.Actualizar(visita);
+
+            // Antes, sin corte abierto, la visita se cancelaba pero la devolución nunca quedaba registrada.
+            if (montoDevuelto > 0)
+            {
+                var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de Visita");
+                string obs = $"Devolución por cancelación de visita ID {visita.VisitaID}"
+                             + (string.IsNullOrEmpty(motivoLimpio) ? string.Empty : $": {motivoLimpio}");
+
+                await _caja.AgregarMovimientoAsync(corte, usuarioId, CONCEPTO_CANCELACION_VISITA, TIPO_EGRESO, montoDevuelto, obs);
+            }
+
+            // Cancelación y egreso se guardan juntos.
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        // ───────────── Acceso rápido ─────────────
 
         public async Task<AccesoResultadoDto> ProcesarAccesoRapidoAsync(string clave, int usuarioIdSesion)
         {
             string claveLimpia = clave?.Trim() ?? string.Empty;
 
             if (string.IsNullOrEmpty(claveLimpia))
-            {
                 return CrearResultadoError("Debe ingresar una clave válida.");
-            }
 
-            if (claveLimpia == CLAVE_VISITA_CASUAL)
-            {
-                return await ProcesarVisitaCasualAsync(usuarioIdSesion);
-            }
-
-            return await ProcesarAccesoSocioAsync(claveLimpia);
+            return claveLimpia == CLAVE_VISITA_CASUAL
+                ? await ProcesarVisitaCasualAsync(usuarioIdSesion)
+                : await ProcesarAccesoSocioAsync(claveLimpia);
         }
-
-        // =========================================================================
-        // MÉTODOS AUXILIARES PRIVADOS
-        // =========================================================================
 
         private async Task<AccesoResultadoDto> ProcesarVisitaCasualAsync(int usuarioIdSesion)
         {
-            var membresias = await _unitOfWork.Membresia.ObtenerTodasAsync();
-            var membresiaVisita = membresias.FirstOrDefault(m => m.Activo && m.Nombre.Contains("Visita"))
-                                   ?? membresias.FirstOrDefault(m => m.Activo);
+            var membresiaVisita = await ObtenerMembresiaDeVisitaAsync();
+            if (membresiaVisita == null)
+                return CrearResultadoError(
+                    "No hay un pase de visita configurado. Cree una membresía con la palabra \"Visita\" en el nombre " +
+                    $"o defina la clave '{CONFIG_MEMBRESIA_VISITA}' en la configuración.");
 
-            decimal monto = membresiaVisita?.Precio ?? 35.00m;
+            decimal monto = membresiaVisita.Precio;
 
-            // Obtener o crear caja automáticamente antes de procesar el acceso
-            var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioIdSesion);
-
-            var nuevaVisitaCasual = new Visita
+            var nuevaVisita = new Visita
             {
                 SocioID = null,
-                MembresiaID = membresiaVisita?.MembresiaID,
+                MembresiaID = membresiaVisita.MembresiaID,
                 Clave = CLAVE_VISITA_CASUAL,
                 Nombre = "VISITA",
                 Apellido = "CASUAL",
                 MontoPagado = monto,
-                TipoAcceso = "Visita Casual",
+                TipoAcceso = ACCESO_VISITA_CASUAL,
                 Observaciones = "Casual",
                 Activo = true
             };
 
-            await _unitOfWork.Visita.AgregarAsync(nuevaVisitaCasual);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Visita.AgregarAsync(nuevaVisita);
 
-            // Registrar el Movimiento de Ingreso con ConceptoID = 7
             if (monto > 0)
             {
-                var movimientoIngreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = usuarioIdSesion,
-                    ConceptoID = 7, // 7: 'Visita' (Ingreso)
-                    Tipo = "Ingreso",
-                    FormaPago = "Efectivo",
-                    Total = monto,
-                    Observacion = "Cobro de Visita Casual - Acceso Rápido",
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
-                await _unitOfWork.SaveChangesAsync();
+                var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion, "cobro de Visita (acceso rápido)");
+                await _caja.AgregarMovimientoAsync(
+                    corte, usuarioIdSesion, CONCEPTO_VISITA, TIPO_INGRESO, monto,
+                    "Cobro de Visita Casual - Acceso Rápido");
             }
+
+            // Visita, movimiento (y corte, si hubo que abrirlo) se guardan en un solo paso.
+            await _unitOfWork.SaveChangesAsync();
 
             return new AccesoResultadoDto
             {
-                VisitaID = nuevaVisitaCasual.VisitaID,
+                VisitaID = nuevaVisita.VisitaID,
                 Exitoso = true,
                 EsVisitaCasual = true,
                 Clave = CLAVE_VISITA_CASUAL,
                 NombreCompleto = "VISITA CASUAL",
-                NombreMembresia = membresiaVisita?.Nombre ?? "Visita",
+                NombreMembresia = membresiaVisita.Nombre,
                 MembresiaVigente = true
             };
         }
@@ -363,212 +290,160 @@ namespace Negocio.Services
         {
             var socio = await _unitOfWork.Socio.ObtenerPorClaveAsync(clave);
             if (socio == null)
-            {
                 return CrearResultadoError($"No existe ningún socio registrado con la clave '{clave}'.");
-            }
 
-            if (!socio.Activo)
-            {
-                return CrearResultadoError($"El socio '{socio.Nombre} {socio.Apellido}' está INACTIVO.");
-            }
+            var validacion = await ValidarAccesoSocioAsync(socio);
+            if (validacion.Error != null)
+                return CrearResultadoError(validacion.Error);
 
-            // 1. Obtener la membresía activa fresca directamente desde el repositorio
-            var membresiaActiva = await _unitOfWork.SocioMembresia.ObtenerMembresiaActivaPorSocioIdAsync
-                (socio.SocioID);
+            var membresiaActiva = validacion.Membresia!;
 
-            // 2. Calcular los valores usando la membresía activa real obtenida
-            decimal precio = membresiaActiva?.Membresia?.Precio ?? 0m;
+            if (await YaRegistroAccesoRecienteAsync(socio.SocioID))
+                return CrearResultadoError($"El socio '{socio.Nombre} {socio.Apellido}' ya registró su acceso hace unos momentos.");
 
-            // Validamos que los Pagos existan y no sean nulos
-            decimal totalPagado = membresiaActiva?.Pagos != null && membresiaActiva.Pagos.Any()
-                ? membresiaActiva.Pagos.Sum(p => p.Monto)
-                : 0m;
+            var visita = CrearVisitaSocio(socio, membresiaActiva.MembresiaID, "Acceso Rápido");
+            await _unitOfWork.Visita.AgregarAsync(visita);
+            await _unitOfWork.SaveChangesAsync();
 
-            var visitaRegistrada = await RegistrarVisitaSocioAsync(socio, membresiaActiva?.MembresiaID);
             var asistenciasSemana = await CalcularAsistenciasSemanaAsync(socio.SocioID);
 
             return new AccesoResultadoDto
             {
-                VisitaID = visitaRegistrada.VisitaID,
+                VisitaID = visita.VisitaID,
                 Exitoso = true,
                 EsVisitaCasual = false,
                 SocioID = socio.SocioID,
                 Clave = socio.Clave,
                 NombreCompleto = $"{socio.Nombre} {socio.Apellido}".Trim(),
                 Foto = socio.Foto,
-                NombreMembresia = membresiaActiva?.Membresia?.Nombre ?? "Sin Membresía",
-                FechaVencimiento = membresiaActiva?.FechaFin,
-                MembresiaVigente = membresiaActiva != null && membresiaActiva.FechaFin >= DateTime.Today,
-                PrecioMembresia = precio,
-                TotalPagado = totalPagado,
+                NombreMembresia = membresiaActiva.Membresia?.Nombre ?? "Sin Membresía",
+                FechaVencimiento = membresiaActiva.FechaFin,
+                MembresiaVigente = true, // si estuviera vencida, ValidarAccesoSocioAsync ya la habría rechazado
+                PrecioMembresia = validacion.Precio,
+                TotalPagado = validacion.TotalPagado,
                 AsistenciasSemana = asistenciasSemana
             };
         }
 
-        private async Task<Visita> RegistrarVisitaSocioAsync(Socio socio, int? membresiaId)
+        // ───────────── Reglas compartidas ─────────────
+
+        /// <summary>Resultado de validar si un socio puede entrar. Si Error != null, el acceso se niega.</summary>
+        private sealed record ValidacionAcceso(string? Error, SocioMembresia? Membresia, decimal Precio, decimal TotalPagado);
+
+        // Mismas reglas para el registro manual y para el acceso rápido.
+        private async Task<ValidacionAcceso> ValidarAccesoSocioAsync(Socio socio)
         {
-            var nuevaVisita = new Visita
+            string nombre = $"{socio.Nombre} {socio.Apellido}".Trim();
+
+            if (!socio.Activo)
+                return new ValidacionAcceso($"El socio '{nombre}' está INACTIVO.", null, 0m, 0m);
+
+            var membresiaActiva = await _unitOfWork.SocioMembresia.ObtenerMembresiaActivaPorSocioIdAsync(socio.SocioID);
+            if (membresiaActiva == null)
+                return new ValidacionAcceso($"El socio '{nombre}' no cuenta con una membresía activa.", null, 0m, 0m);
+
+            decimal precio = membresiaActiva.Membresia?.Precio ?? 0m;
+            decimal totalPagado = membresiaActiva.Pagos?.Sum(p => p.Monto) ?? 0m;
+
+            if (membresiaActiva.FechaFin < DateTime.Today)
+                return new ValidacionAcceso(
+                    $"Acceso denegado: La membresía del socio venció el {membresiaActiva.FechaFin:dd/MM/yyyy}.",
+                    membresiaActiva, precio, totalPagado);
+
+            return new ValidacionAcceso(null, membresiaActiva, precio, totalPagado);
+        }
+
+        // Membresía que se cobra como visita: primero la configurada; si no, una activa cuyo nombre contenga "Visita".
+        // Ya NO se cae a "cualquier membresía activa" ni a un precio fijo.
+        private async Task<Membresia?> ObtenerMembresiaDeVisitaAsync()
+        {
+            var config = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CONFIG_MEMBRESIA_VISITA);
+            if (config != null && int.TryParse(config.Valor, NumberStyles.Integer, CultureInfo.InvariantCulture, out int id))
             {
-                SocioID = socio.SocioID,
-                MembresiaID = membresiaId,
-                Clave = socio.Clave,
-                Nombre = socio.Nombre,
-                Apellido = socio.Apellido,
-                Telefono = socio.Telefono,
-                MontoPagado = 0.00m,
-                TipoAcceso = "Socio",
-                Observaciones = "Acceso Rápido",
-                Activo = true
-            };
+                var configurada = await _unitOfWork.Membresia.ObtenerPorIdAsync(id);
+                if (configurada != null && configurada.Activo)
+                    return configurada;
+            }
 
-            await _unitOfWork.Visita.AgregarAsync(nuevaVisita);
-            await _unitOfWork.SaveChangesAsync();
+            var membresias = await _unitOfWork.Membresia.ObtenerTodasAsync();
+            return membresias.FirstOrDefault(m => m.Activo &&
+                m.Nombre.Contains("Visita", StringComparison.OrdinalIgnoreCase));
+        }
 
-            return nuevaVisita;
+        private async Task<bool> YaRegistroAccesoRecienteAsync(int socioId)
+        {
+            if (MINUTOS_ENTRE_ACCESOS <= 0) return false;
+
+            DateTime ahora = DateTime.Now;
+            var recientes = await _unitOfWork.Visita.ObtenerVisitasPorSocioYFechasAsync(
+                socioId, ahora.AddMinutes(-MINUTOS_ENTRE_ACCESOS), ahora);
+
+            return recientes.Any(v => v.Activo);
         }
 
         private async Task<Dictionary<DayOfWeek, string>> CalcularAsistenciasSemanaAsync(int socioId)
         {
             var asistencias = new Dictionary<DayOfWeek, string>();
+
             DateTime hoy = DateTime.Today;
-            int offsetLunes = (int)hoy.DayOfWeek - (int)DayOfWeek.Monday;
-            if (offsetLunes < 0) offsetLunes += 7;
-
+            int offsetLunes = ((int)hoy.DayOfWeek + 6) % 7; // lunes = 0 ... domingo = 6
             DateTime inicioSemana = hoy.AddDays(-offsetLunes);
-            DateTime finSemana = inicioSemana.AddDays(7).AddSeconds(-1);
+            DateTime finSemana = inicioSemana.AddDays(7).AddTicks(-1);
 
-            var accesos = await _unitOfWork.Visita.ObtenerPorRangoFechasAsync(inicioSemana, finSemana);
-            var accesosSocio = accesos.Where(v => v.SocioID == socioId).OrderBy(v => v.CreatedAt);
+            // Antes se traían las visitas de TODOS los socios de la semana y se filtraba en memoria.
+            var accesos = await _unitOfWork.Visita.ObtenerVisitasPorSocioYFechasAsync(socioId, inicioSemana, finSemana);
 
-            foreach (var acceso in accesosSocio)
+            // Las visitas canceladas no cuentan como asistencia.
+            foreach (var acceso in accesos.Where(v => v.Activo).OrderBy(v => v.CreatedAt))
             {
                 DayOfWeek dia = acceso.CreatedAt.DayOfWeek;
                 if (!asistencias.ContainsKey(dia))
-                {
                     asistencias.Add(dia, acceso.CreatedAt.ToString("HH:mm"));
-                }
             }
 
             return asistencias;
         }
 
-        private static AccesoResultadoDto CrearResultadoError(string mensaje)
+        // ───────────── Utilidades ─────────────
+
+        private static Visita CrearVisitaSocio(Socio socio, int? membresiaId, string? observaciones) => new()
         {
-            return new AccesoResultadoDto
-            {
-                Exitoso = false,
-                MensajeError = mensaje
-            };
-        }
+            SocioID = socio.SocioID,
+            MembresiaID = membresiaId,
+            Clave = socio.Clave,
+            Nombre = socio.Nombre,
+            Apellido = socio.Apellido,
+            Telefono = socio.Telefono,
+            MontoPagado = 0m,
+            TipoAcceso = ACCESO_SOCIO,
+            Observaciones = observaciones,
+            Activo = true
+        };
 
-        public async Task<IEnumerable<VisitaDto>> ObtenerPorSocioYFechasAsync(int socioId, DateTime desde, DateTime hasta)
+        // Único lugar donde se arma el DTO (antes estaba copiado seis veces).
+        private static VisitaDto ADto(Visita v, string? nombreMembresia = null) => new()
         {
-            // Usar la propiedad de repositorio del Unit of Work
-            var visitas = await _unitOfWork.Visita.ObtenerVisitasPorSocioYFechasAsync(socioId, desde, hasta);
+            VisitaID = v.VisitaID,
+            SocioID = v.SocioID,
+            MembresiaID = v.MembresiaID,
+            Clave = v.Clave,
+            Nombre = v.Nombre,
+            Apellido = v.Apellido,
+            Telefono = v.Telefono,
+            MontoPagado = v.MontoPagado,
+            TipoAcceso = v.TipoAcceso,
+            Observaciones = v.Observaciones,
+            NombreMembresia = nombreMembresia ?? v.Membresia?.Nombre ?? "N/A",
+            Activo = v.Activo,
+            CreatedAt = v.CreatedAt,
+            UpdatedAt = v.UpdatedAt
+        };
 
-            // Mapeo adaptado a las propiedades reales de tu VisitaDto
-            return visitas.Select(v => new VisitaDto
-            {
-                VisitaID = v.VisitaID,
-                SocioID = v.SocioID,
-                MembresiaID = v.MembresiaID,
-                Clave = v.Clave,
-                Nombre = v.Nombre,
-                Apellido = v.Apellido,
-                Telefono = v.Telefono,
-                MontoPagado = v.MontoPagado,
-                TipoAcceso = v.TipoAcceso,
-                Observaciones = v.Observaciones,
-                NombreMembresia = v.Membresia?.Nombre ?? "N/A",
-                Activo = v.Activo,
-                CreatedAt = v.CreatedAt,
-                UpdatedAt = v.UpdatedAt
-            });
-        }
-
-        public async Task CancelarVisitaAsync(int id, int usuarioId, string? motivo = null)
+        private static AccesoResultadoDto CrearResultadoError(string mensaje) => new()
         {
-            var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(id);
-            if (visita == null)
-            {
-                throw new BusinessException("La visita a cancelar no existe.");
-            }
-
-            if (!visita.Activo)
-            {
-                throw new BusinessException("La visita ya se encuentra inactiva o cancelada.");
-            }
-
-            decimal montoDevuelto = visita.MontoPagado;
-
-            visita.MontoPagado = 0.00m;
-            visita.Activo = false;
-
-            visita.Observaciones = string.IsNullOrWhiteSpace(motivo)
-                 ? "Cancelada"
-                 : $"Cancelada: {motivo.Trim()}";
-
-            _unitOfWork.Visita.Actualizar(visita);
-
-            // Si la visita tuvo un cobro previo, registramos el egreso por cancelación (Concepto 8)
-            if (montoDevuelto > 0)
-            {
-                var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-                if (corteAbierto != null)
-                {
-                    var movimientoEgreso = new Movimiento
-                    {
-                        CorteID = corteAbierto.CorteID,
-                        UsuarioID = usuarioId,
-                        ConceptoID = 8, // 8: 'Cancelacion Visita' (Egreso)
-                        Tipo = "Egreso",
-                        FormaPago = "Efectivo",
-                        Total = montoDevuelto,
-                        Observacion = $"Devolución por cancelación de visita ID {visita.VisitaID}: {motivo?.Trim()}".Trim(),
-                        Activo = true
-                    };
-
-                    await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
-                }
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
-        {
-            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-
-            if (corteAbierto == null)
-            {
-                // 1. Consultar la configuración del Efectivo Inicial predeterminado
-                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
-                decimal efectivoInicial = 0.00m;
-
-                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
-                {
-                    efectivoInicial = monto;
-                }
-
-                // 2. Crear automáticamente la caja para el usuario actual
-                corteAbierto = new Corte
-                {
-                    UsuarioID = usuarioId,
-                    FechaApertura = DateTime.Now,
-                    MontoInicial = efectivoInicial,
-                    TotalIngresos = 0m,
-                    TotalEgresos = 0m,
-                    MontoFinal = efectivoInicial,
-                    Observaciones = "Apertura automática iniciada por cobro de Visita Casual",
-                    Estado = "Abierto",
-                    Activo = true
-                };
-
-                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            return corteAbierto;
-        }
+            Exitoso = false,
+            MensajeError = mensaje
+        };
     }
+
 }

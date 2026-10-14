@@ -133,14 +133,17 @@ namespace Presentacion.Forms.Corte
             {
                 var movimientos = await _movimientoController.ObtenerPorRangoFechasAsync(inicio, fin);
 
-                // Si se recibió un efectivo inicial de la configuración se usa; si no, el que hay actualmente en caja.
-                decimal efectivoInicial = _efectivoInicialPredeterminado > 0
-                    ? _efectivoInicialPredeterminado
-                    : await _corteController.ObtenerEfectivoEnCajaAsync();
+                // El fondo es el del corte abierto del usuario; si no tiene uno, el predeterminado de la configuración.
+                // (Antes se usaba el "efectivo en caja", que ahora ya incluye los movimientos y los contaría dos veces.)
+                var corteAbierto = await _corteController.ObtenerCorteAbiertoPorUsuarioAsync(_usuarioIdActual);
+                decimal efectivoInicial = corteAbierto?.MontoInicial ?? _efectivoInicialPredeterminado;
 
                 if (IsDisposed) return;
 
-                _movimientos = movimientos.Where(m => m.Activo).ToList();
+                // El corte de caja cuenta SOLO efectivo: tarjeta, transferencia, etc. no entran a la caja.
+                _movimientos = movimientos
+                    .Where(m => m.Activo && string.Equals(m.FormaPago?.Trim(), "Efectivo", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
                 _efectivoInicial = efectivoInicial;
 
                 MostrarMovimientos();
@@ -218,6 +221,7 @@ namespace Presentacion.Forms.Corte
             decimal ingresos = _totalIngresos;
             decimal egresos = _totalEgresos;
             decimal montoFinal = _montoFinal;
+            DateTime periodoInicio = dtpFechaInicio.Value; // el periodo que el usuario vio y confirmó
             string observaciones = txtObservaciones.Text.Trim();
 
             _guardando = true;
@@ -235,7 +239,8 @@ namespace Presentacion.Forms.Corte
                     totalIngresos: ingresos,
                     totalEgresos: egresos,
                     montoFinal: montoFinal,
-                    observaciones: observaciones);
+                    observaciones: observaciones,
+                    periodoInicio: periodoInicio);
             },
             "No se pudo realizar el corte de caja.",
             btnRealizarCorte, btnCancelar, panelFiltros, txtObservaciones);

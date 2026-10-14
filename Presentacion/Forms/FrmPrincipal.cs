@@ -4,13 +4,6 @@ using Presentacion.Forms.Productos;
 using Presentacion.Forms.Ventas;
 using Presentacion.Forms.Membresias;
 using FontAwesome.Sharp;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Presentacion.Forms.Socios;
 using Presentacion.Forms.Visitas;
 using Presentacion.Forms.Conceptos;
@@ -57,6 +50,10 @@ namespace Presentacion.Forms
         private Form _formularioActivo;
         private IconButton _botonActivo;
 
+        // Cada módulo abierto trabaja con su propio scope (y por tanto su propio DbContext).
+        // Se libera al cerrar el módulo, así no se arrastran datos viejos entre pantallas.
+        private IServiceScope? _scopeActivo;
+
         /// <summary>
         /// Es true cuando el usuario eligió "Cerrar sesión". Program.cs lo revisa para volver
         /// a mostrar el login; si es false (se cerró la ventana con la X), la aplicación termina.
@@ -87,20 +84,20 @@ namespace Presentacion.Forms
             // Para agregar un módulo nuevo: botón en el Designer + una línea aquí.
             _modulos.AddRange(new ModuloMenu[]
             {
-            new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
-            new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
-            new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
-            new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
-            new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
-            new(btnRegistrarVisita, Permiso.Registro,      typeof(FrmRegistroVisita)),
-            new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
-            new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
-            new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
-            new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
-            new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
-            new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
-            new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
-            new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
+         new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
+         new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
+         new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
+         new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
+         new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
+         new(btnRegistrarVisita, Permiso.Registro,      typeof(FrmRegistroVisita)),
+         new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
+         new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
+         new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
+         new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
+         new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
+         new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
+         new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
+         new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
             });
 
             // Búsqueda rápida y sin distinguir mayúsculas de minúsculas.
@@ -152,7 +149,25 @@ namespace Presentacion.Forms
                 if (!_formularioActivo.IsDisposed) return;
             }
 
-            var formulario = (Form)ActivatorUtilities.CreateInstance(_serviceProvider, tipoFormulario);
+            var scope = _serviceProvider.CreateScope();
+            Form formulario;
+            try
+            {
+                formulario = (Form)ActivatorUtilities.CreateInstance(scope.ServiceProvider, tipoFormulario);
+            }
+            catch
+            {
+                scope.Dispose();
+                throw;
+            }
+
+            formulario.FormClosed += (_, _) =>
+            {
+                scope.Dispose();
+                if (ReferenceEquals(_scopeActivo, scope)) _scopeActivo = null;
+            };
+            _scopeActivo = scope;
+
             formulario.TopLevel = false;
             formulario.FormBorderStyle = FormBorderStyle.None;
             formulario.Dock = DockStyle.Fill;
@@ -186,6 +201,14 @@ namespace Presentacion.Forms
             // Program.cs vuelve a mostrar el login al ver CerrarSesionSolicitado = true.
             CerrarSesionSolicitado = true;
             Close();
+        }
+
+        // Si se cierra la ventana con un módulo abierto, también se libera su scope.
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            _scopeActivo?.Dispose();
+            _scopeActivo = null;
+            base.OnFormClosed(e);
         }
     }
 }

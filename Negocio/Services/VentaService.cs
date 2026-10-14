@@ -4,6 +4,7 @@ using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,16 @@ namespace Negocio.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<VentaCreateDto> _createValidator;
+        private readonly CajaHelper _caja;
 
         public VentaService(
             IUnitOfWork unitOfWork,
-            IValidator<VentaCreateDto> createValidator)
+            IValidator<VentaCreateDto> createValidator,
+            CajaHelper caja)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
+            _caja = caja;
         }
 
         public async Task<IEnumerable<VentaDto>> ObtenerTodasAsync(bool incluirInactivas = false)
@@ -100,29 +104,21 @@ namespace Negocio.Services
             }
 
             await _unitOfWork.Venta.AgregarAsync(nuevaVenta);
-            await _unitOfWork.SaveChangesAsync();
 
-            // REGISTRAR INGRESO EN CAJA - ConceptoID 1 ('Venta Producto')
+            // REGISTRAR INGRESO EN CAJA - 'Venta Producto'.
+            // Venta, stock, movimiento (y el corte, si hubo que abrirlo) se guardan en UN solo paso:
+            // antes eran tres guardados y un fallo en medio dejaba la venta sin su ingreso en caja.
             if (nuevaVenta.Total > 0)
             {
-                // Obtiene el corte abierto o lo abre automáticamente si no existe
-                var corteAbierto = await ObtenerOAbrirCorteAsync(dto.UsuarioID);
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "venta de productos");
 
-                var movimientoIngreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = dto.UsuarioID,
-                    ConceptoID = 1, // 1: 'Venta Producto' (Ingreso)
-                    Tipo = "Ingreso",
-                    FormaPago = "Efectivo",
-                    Total = nuevaVenta.Total,
-                    Observacion = $"Cobro por venta de productos - Venta ID #{nuevaVenta.VentaID}",
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
-                await _unitOfWork.SaveChangesAsync();
+                // El ID de la venta no existe hasta guardar, por eso la observación lleva la fecha y hora.
+                await _caja.AgregarMovimientoAsync(
+                    corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoVenta, CajaConstantes.TipoIngreso,
+                    nuevaVenta.Total, $"Cobro por venta de productos - {nuevaVenta.FechaVenta:dd/MM/yyyy HH:mm}");
             }
+
+            await _unitOfWork.SaveChangesAsync();
 
             return MapToDto(nuevaVenta);
         }
@@ -155,26 +151,15 @@ namespace Negocio.Services
 
             _unitOfWork.Venta.EliminarLogico(venta);
 
-            // REGISTRAR EGRESO EN CAJA - ConceptoID 5 ('Cancelacion Venta Producto')
+            // REGISTRAR EGRESO EN CAJA - 'Cancelacion Venta Producto'
+            // Antes, si el usuario no tenía corte abierto, la venta se anulaba pero la devolución no quedaba registrada.
             if (montoDevuelto > 0)
             {
-                var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-                if (corteAbierto != null)
-                {
-                    var movimientoEgreso = new Movimiento
-                    {
-                        CorteID = corteAbierto.CorteID,
-                        UsuarioID = usuarioId,
-                        ConceptoID = 5, // 5: 'Cancelacion Venta Producto' (Egreso)
-                        Tipo = "Egreso",
-                        FormaPago = "Efectivo",
-                        Total = montoDevuelto,
-                        Observacion = $"Devolución por cancelación de venta ID #{venta.VentaID}. {motivo?.Trim()}".Trim(),
-                        Activo = true
-                    };
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de venta");
 
-                    await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
-                }
+                await _caja.AgregarMovimientoAsync(
+                    corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionVenta, CajaConstantes.TipoEgreso,
+                    montoDevuelto, $"Devolución por cancelación de venta ID #{venta.VentaID}. {motivo?.Trim()}".Trim());
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -227,42 +212,6 @@ namespace Negocio.Services
                     PrecioUnitario = d.PrecioUnitario
                 }).ToList() ?? new List<DetalleVentaDto>()
             };
-        }
-
-        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
-        {
-            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-
-            if (corteAbierto == null)
-            {
-                // 1. Consultar la configuración del Efectivo Inicial predeterminado
-                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
-                decimal efectivoInicial = 0.00m;
-
-                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
-                {
-                    efectivoInicial = monto;
-                }
-
-                // 2. Crear automáticamente la caja para el usuario actual
-                corteAbierto = new Corte
-                {
-                    UsuarioID = usuarioId,
-                    FechaApertura = DateTime.Now,
-                    MontoInicial = efectivoInicial,
-                    TotalIngresos = 0m,
-                    TotalEgresos = 0m,
-                    MontoFinal = efectivoInicial,
-                    Observaciones = "Apertura automática iniciada por venta de productos",
-                    Estado = "Abierto",
-                    Activo = true
-                };
-
-                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            return corteAbierto;
         }
     }
 }

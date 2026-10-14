@@ -4,11 +4,7 @@ using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Presentacion.Helpers;
 
 namespace Negocio.Services
 {
@@ -16,13 +12,16 @@ namespace Negocio.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<CompraCreateDto> _createValidator;
+        private readonly CajaHelper _caja;
 
         public CompraService(
             IUnitOfWork unitOfWork,
-            IValidator<CompraCreateDto> createValidator)
+            IValidator<CompraCreateDto> createValidator,
+            CajaHelper caja)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
+            _caja = caja;
         }
 
         public async Task<IEnumerable<CompraDto>> ObtenerTodasAsync(bool incluirInactivas = false)
@@ -122,25 +121,15 @@ namespace Negocio.Services
             // 4. Guardar Compra
             await _unitOfWork.Compra.AgregarAsync(nuevaCompra);
 
-            // 5. REGISTRAR EGRESO EN CAJA - ConceptoID 2 ('Compra Producto')
+            // 5. REGISTRAR EGRESO EN CAJA - 'Compra Producto'
             if (totalCompra > 0)
             {
-                // Obtiene el corte abierto o lo abre automáticamente si no existe
-                var corteAbierto = await ObtenerOAbrirCorteAsync(dto.UsuarioID);
+                // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con la compra).
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "movimiento de Compra");
 
-                var movimientoEgreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = dto.UsuarioID,
-                    ConceptoID = 2, // 2: 'Compra Producto' (Egreso)
-                    Tipo = "Egreso",
-                    FormaPago = string.IsNullOrWhiteSpace(dto.FormaPago) ? "Efectivo" : dto.FormaPago,
-                    Total = totalCompra,
-                    Observacion = $"Compra Folio: {nuevaCompra.Codigo}",
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
+                await _caja.AgregarMovimientoAsync(
+                    corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
+                    totalCompra, $"Compra Folio: {nuevaCompra.Codigo}", dto.FormaPago);
             }
 
             // 6. Confirmar la transacción en la BD
@@ -190,25 +179,14 @@ namespace Negocio.Services
 
             _unitOfWork.Compra.Actualizar(compra);
 
-            // 3. REGISTRAR INGRESO EN CAJA - ConceptoID 6 ('Cancelacion Compra Producto')
+            // 3. REGISTRAR INGRESO EN CAJA - 'Cancelacion Compra Producto'
             if (compra.Total > 0)
             {
-                // Obtiene el corte abierto o lo abre automáticamente si no existe
-                var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioId);
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de Compra");
 
-                var movimientoIngreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = usuarioId,
-                    ConceptoID = 6, // 6: 'Cancelacion Compra Producto' (Ingreso)
-                    Tipo = "Ingreso",
-                    FormaPago = "Efectivo",
-                    Total = compra.Total,
-                    Observacion = $"Cancelación de Compra Folio: {compra.Codigo}. {observacion?.Trim()}".Trim(),
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+                await _caja.AgregarMovimientoAsync(
+                    corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionCompra, CajaConstantes.TipoIngreso,
+                    compra.Total, $"Cancelación de Compra Folio: {compra.Codigo}. {observacion?.Trim()}".Trim());
             }
 
             // 4. Confirmar en la BD
@@ -242,42 +220,6 @@ namespace Negocio.Services
         public async Task<string> ObtenerSiguienteCodigoAsync()
         {
             return await _unitOfWork.Compra.GenerarSiguienteCodigoAsync();
-        }
-
-        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
-        {
-            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-
-            if (corteAbierto == null)
-            {
-                // 1. Consultar la configuración del Efectivo Inicial predeterminado
-                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
-                decimal efectivoInicial = 0.00m;
-
-                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
-                {
-                    efectivoInicial = monto;
-                }
-
-                // 2. Crear automáticamente la caja para el usuario actual
-                corteAbierto = new Corte
-                {
-                    UsuarioID = usuarioId,
-                    FechaApertura = DateTime.Now,
-                    MontoInicial = efectivoInicial,
-                    TotalIngresos = 0m,
-                    TotalEgresos = 0m,
-                    MontoFinal = efectivoInicial,
-                    Observaciones = "Apertura automática iniciada por movimiento de Compra",
-                    Estado = "Abierto",
-                    Activo = true
-                };
-
-                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            return corteAbierto;
         }
 
         #region Métodos Privados Auxiliares

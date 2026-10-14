@@ -25,7 +25,19 @@ namespace Presentacion.ViewModels
             public string PrecioTexto => Precio.ToString("C2"); // Formato de moneda local ($)
 
             public decimal TotalPagado { get; set; }
-            public string EstadoMembresia => (TotalPagado >= Precio && Precio > 0) ? "Pagada" : "Sin Pagar";
+            public string EstadoMembresia
+            {
+                get
+                {
+                    if (TotalPagado >= Precio && Precio > 0)
+                        return "Pagada";
+
+                    if (TotalPagado > 0)
+                        return "Parcial"; // O "Con Deuda"
+
+                    return "Sin Pagar";
+                }
+            }
 
             public DateTime? CreatedAt { get; set; }
             public DateTime? UpdatedAt { get; set; }

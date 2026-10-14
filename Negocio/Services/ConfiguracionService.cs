@@ -3,8 +3,10 @@ using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,9 +18,10 @@ namespace Negocio.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<CorteConfiguracionDto> _corteConfigValidator;
 
-        // Claves constantes para evitar errores tipográficos
-        private const string CLAVE_EFECTIVO_INICIAL = "Corte_EfectivoInicial";
-        private const string CLAVE_EMAIL_NOTIFICACION = "Corte_EmailNotificacion";
+        // Claves constantes para evitar errores tipográficos.
+        // La clave del fondo vive en CajaConstantes, porque CajaHelper la usa para abrir cortes automáticos.
+        public const string CLAVE_EFECTIVO_INICIAL = CajaConstantes.ClaveEfectivoInicial;
+        public const string CLAVE_EMAIL_NOTIFICACION = "Corte_EmailNotificacion";
 
         public ConfiguracionService(
             IUnitOfWork unitOfWork,
@@ -33,7 +36,8 @@ namespace Negocio.Services
             var cfgEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_EFECTIVO_INICIAL);
             var cfgEmail = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_EMAIL_NOTIFICACION);
 
-            decimal.TryParse(cfgEfectivo?.Valor ?? "0", out decimal efectivo);
+            // El monto se guarda siempre con punto decimal (InvariantCulture), sin depender de la región del equipo.
+            decimal.TryParse(cfgEfectivo?.Valor, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal efectivo);
 
             return new CorteConfiguracionDto
             {
@@ -44,26 +48,20 @@ namespace Negocio.Services
 
         public async Task GuardarConfigCorteCajaAsync(CorteConfiguracionDto dto)
         {
-            // 1. Validar el DTO usando FluentValidation
             var validationResult = await _corteConfigValidator.ValidateAsync(dto);
             if (!validationResult.IsValid)
-            {
-                var errorMsg = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new BusinessException(errorMsg);
-            }
+                throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
 
-            // 2. Guardar o actualizar las claves en la base de datos
             await _unitOfWork.Configuracion.GuardarOActualizarAsync(
                 CLAVE_EFECTIVO_INICIAL,
-                dto.EfectivoInicial.ToString("F2"),
+                dto.EfectivoInicial.ToString("F2", CultureInfo.InvariantCulture),
                 "Monto de efectivo inicial predeterminado para la caja");
 
             await _unitOfWork.Configuracion.GuardarOActualizarAsync(
                 CLAVE_EMAIL_NOTIFICACION,
-                dto.EmailNotificacion.Trim(),
+                (dto.EmailNotificacion ?? string.Empty).Trim(),
                 "Correo electrónico donde se enviarán los reportes de cortes de caja");
 
-            // 3. Confirmar la transacción
             await _unitOfWork.SaveChangesAsync();
         }
 

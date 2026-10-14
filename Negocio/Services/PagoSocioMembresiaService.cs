@@ -4,6 +4,7 @@ using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +18,18 @@ namespace Negocio.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<PagoSocioMembresiaCreateDto> _createValidator;
         private readonly IValidator<PagoSocioMembresiaUpdateDto> _updateValidator;
+        private readonly CajaHelper _caja;
 
         public PagoSocioMembresiaService(
             IUnitOfWork unitOfWork,
             IValidator<PagoSocioMembresiaCreateDto> createValidator,
-            IValidator<PagoSocioMembresiaUpdateDto> updateValidator)
+            IValidator<PagoSocioMembresiaUpdateDto> updateValidator,
+            CajaHelper caja)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _caja = caja;
         }
 
         public async Task<IEnumerable<PagoSocioMembresiaDto>> ObtenerTodasAsync(bool incluirInactivas = false)
@@ -78,25 +82,15 @@ namespace Negocio.Services
 
             await _unitOfWork.PagoSocioMembresia.AgregarAsync(nuevoPago);
 
-            // 1. REGISTRAR INGRESO EN CAJA - ConceptoID 3 ('Pago Membresia')
+            // 1. REGISTRAR INGRESO EN CAJA - 'Pago Membresia'
             if (dto.Monto > 0)
             {
-                // Obtiene el corte abierto o lo abre automáticamente si no existe
-                var corteAbierto = await ObtenerOAbrirCorteAsync(dto.UsuarioID);
+                // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con el pago).
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "cobro de Membresía");
 
-                var movimientoIngreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = dto.UsuarioID,
-                    ConceptoID = 3, // 3: 'Pago Membresia' (Ingreso)
-                    Tipo = "Ingreso",
-                    FormaPago = string.IsNullOrWhiteSpace(dto.FormaPago) ? "Efectivo" : dto.FormaPago.Trim(),
-                    Total = dto.Monto,
-                    Observacion = $"Pago Membresía ID: {dto.SocioMembresiaID}. {dto.Observacion}".Trim(),
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoIngreso);
+                await _caja.AgregarMovimientoAsync(
+                    corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
+                    dto.Monto, $"Pago Membresía ID: {dto.SocioMembresiaID}. {dto.Observacion}".Trim(), nuevoPago.FormaPago);
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -192,25 +186,15 @@ namespace Negocio.Services
 
             _unitOfWork.PagoSocioMembresia.Actualizar(pago);
 
-            // 2. REGISTRAR EGRESO EN CAJA - ConceptoID 4 ('Cancelacion Pago Membresia')
+            // 2. REGISTRAR EGRESO EN CAJA - 'Cancelacion Pago Membresia'
             if (pago.Monto > 0)
             {
-                // Obtiene el corte abierto o lo abre automáticamente si no existe
-                var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioId);
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "anulación de pago de Membresía");
 
-                var movimientoEgreso = new Movimiento
-                {
-                    CorteID = corteAbierto.CorteID,
-                    UsuarioID = usuarioId,
-                    ConceptoID = 4, // 4: 'Cancelacion Pago Membresia' (Egreso)
-                    Tipo = "Egreso",
-                    FormaPago = string.IsNullOrWhiteSpace(pago.FormaPago) ? "Efectivo" : pago.FormaPago,
-                    Total = pago.Monto,
-                    Observacion = $"Cancelación Pago Membresía Folio/ID: {pago.Folio ?? pago.PagoID.ToString()}. Motivo: {motivo}".Trim(),
-                    Activo = true
-                };
-
-                await _unitOfWork.Movimiento.AgregarAsync(movimientoEgreso);
+                await _caja.AgregarMovimientoAsync(
+                    corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionPagoMembresia, CajaConstantes.TipoEgreso,
+                    pago.Monto, $"Cancelación Pago Membresía Folio/ID: {pago.Folio ?? pago.PagoID.ToString()}. Motivo: {motivo?.Trim()}".Trim(),
+                    pago.FormaPago);
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -230,42 +214,6 @@ namespace Negocio.Services
                 CreatedAt = pago.CreatedAt,
                 UpdatedAt = pago.UpdatedAt
             };
-        }
-
-        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
-        {
-            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-
-            if (corteAbierto == null)
-            {
-                // 1. Consultar la configuración del Efectivo Inicial predeterminado
-                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
-                decimal efectivoInicial = 0.00m;
-
-                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
-                {
-                    efectivoInicial = monto;
-                }
-
-                // 2. Crear automáticamente la caja para el usuario actual
-                corteAbierto = new Corte
-                {
-                    UsuarioID = usuarioId,
-                    FechaApertura = DateTime.Now,
-                    MontoInicial = efectivoInicial,
-                    TotalIngresos = 0m,
-                    TotalEgresos = 0m,
-                    MontoFinal = efectivoInicial,
-                    Observaciones = "Apertura automática iniciada por cobro/movimiento de Membresía",
-                    Estado = "Abierto",
-                    Activo = true
-                };
-
-                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            return corteAbierto;
         }
     }
 }

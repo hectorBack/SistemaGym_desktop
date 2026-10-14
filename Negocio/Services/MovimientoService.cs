@@ -4,6 +4,7 @@ using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,15 +18,18 @@ namespace Negocio.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<MovimientoCreateDto> _createValidator;
         private readonly IValidator<MovimientoUpdateDto> _updateValidator;
+        private readonly CajaHelper _caja;
 
         public MovimientoService(
             IUnitOfWork unitOfWork,
             IValidator<MovimientoCreateDto> createValidator,
-            IValidator<MovimientoUpdateDto> updateValidator)
+            IValidator<MovimientoUpdateDto> updateValidator,
+            CajaHelper caja)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _caja = caja;
         }
 
         public async Task<IEnumerable<MovimientoDto>> ObtenerTodosAsync(bool incluirInactivos = false)
@@ -92,22 +96,14 @@ namespace Negocio.Services
                 throw new BusinessException("No se encontró una sesión de usuario válida.");
             }
 
-            // Obtener o abrir automáticamente el corte de caja para este usuario
-            var corteAbierto = await ObtenerOAbrirCorteAsync(usuarioId);
+            // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con el movimiento).
+            // Antes este servicio tenía su propia copia de la apertura: usaba una clave de configuración
+            // incorrecta (fondo en 0) y la observación decía "venta de productos".
+            var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "movimiento manual de caja");
 
-            var nuevoMovimiento = new Movimiento
-            {
-                Tipo = dto.Tipo.Trim(),
-                ConceptoID = dto.ConceptoID,
-                FormaPago = dto.FormaPago.Trim(),
-                Total = dto.Total,
-                Observacion = dto.Observacion?.Trim(),
-                CorteID = corteAbierto.CorteID,
-                UsuarioID = usuarioId, // Utiliza el ID que viene del DTO
-                Activo = true
-            };
+            var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
+                corteAbierto, usuarioId, dto.ConceptoID, dto.Tipo.Trim(), dto.Total, dto.Observacion, dto.FormaPago);
 
-            await _unitOfWork.Movimiento.AgregarAsync(nuevoMovimiento);
             await _unitOfWork.SaveChangesAsync();
 
             return new MovimientoDto
@@ -141,6 +137,11 @@ namespace Negocio.Services
                 throw new BusinessException("El movimiento que intenta actualizar no existe.");
             }
 
+            // Un movimiento de un corte ya cerrado no se modifica: cambiaría las cifras de un corte que ya se entregó.
+            await ValidarCorteEditableAsync(movimiento.CorteID);
+            if (dto.CorteID != movimiento.CorteID)
+                await ValidarCorteEditableAsync(dto.CorteID);
+
             movimiento.Tipo = dto.Tipo.Trim();
             movimiento.ConceptoID = dto.ConceptoID;
             movimiento.FormaPago = dto.FormaPago.Trim();
@@ -162,6 +163,8 @@ namespace Negocio.Services
                 throw new BusinessException("El movimiento a cambiar de estado no existe.");
             }
 
+            await ValidarCorteEditableAsync(movimiento.CorteID);
+
             _unitOfWork.Movimiento.EliminarLogico(movimiento);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -173,6 +176,8 @@ namespace Negocio.Services
             {
                 throw new BusinessException("El movimiento a eliminar no existe.");
             }
+
+            await ValidarCorteEditableAsync(movimiento.CorteID);
 
             _unitOfWork.Movimiento.EliminarFisico(movimiento);
             await _unitOfWork.SaveChangesAsync();
@@ -201,41 +206,13 @@ namespace Negocio.Services
             });
         }
 
-        private async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId)
+        private async Task ValidarCorteEditableAsync(int? corteId)
         {
-            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+            if (!corteId.HasValue) return;
 
-            if (corteAbierto == null)
-            {
-                // 1. Consultar la configuración del Efectivo Inicial predeterminado
-                var configEfectivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("EfectivoInicial");
-                decimal efectivoInicial = 0.00m;
-
-                if (configEfectivo != null && decimal.TryParse(configEfectivo.Valor, out decimal monto))
-                {
-                    efectivoInicial = monto;
-                }
-
-                // 2. Crear automáticamente la caja para el usuario actual
-                corteAbierto = new Corte
-                {
-                    UsuarioID = usuarioId,
-                    FechaApertura = DateTime.Now,
-                    MontoInicial = efectivoInicial,
-                    TotalIngresos = 0m,
-                    TotalEgresos = 0m,
-                    MontoFinal = efectivoInicial,
-                    Observaciones = "Apertura automática iniciada por venta de productos",
-                    Estado = "Abierto",
-                    Activo = true
-                };
-
-                await _unitOfWork.Corte.AgregarAsync(corteAbierto);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            return corteAbierto;
+            var corte = await _unitOfWork.Corte.ObtenerPorIdAsync(corteId.Value);
+            if (corte != null && corte.Estado == CajaConstantes.EstadoCerrado)
+                throw new BusinessException("El movimiento pertenece a un corte de caja ya cerrado y no puede modificarse.");
         }
-
     }
 }

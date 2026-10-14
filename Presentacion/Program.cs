@@ -2,12 +2,6 @@
 using Datos.Repositories;
 using Negocio.Services;
 using Presentacion.Forms;
-using System;
-using System.Windows.Forms;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Datos.Interfaces;
 using FluentValidation;
@@ -29,6 +23,7 @@ using Presentacion.Forms.Compras;
 using Presentacion.Forms.Reportes;
 using Presentacion.Forms.Corte;
 using Presentacion.Forms.Configuracion;
+using Presentacion.Helpers;
 
 namespace Presentacion
 {
@@ -57,7 +52,7 @@ namespace Presentacion
                 using var principal = ActivatorUtilities.CreateInstance<FrmPrincipal>(sp, login.UsuarioAutenticado);
                 Application.Run(principal);
 
-                // SesionUsuario.Limpiar();   // descomenta cuando crees ese método
+                SesionUsuario.Limpiar();
                 if (!principal.CerrarSesionSolicitado) break;
             }
         }
@@ -129,6 +124,7 @@ namespace Presentacion
             services.AddScoped<IReporteService, ReporteService>();
             services.AddScoped<ICorteService, CorteService>();
             services.AddScoped<IConfiguracionService, ConfiguracionService>();
+            services.AddScoped<CajaHelper>(); // apertura de cortes y movimientos de caja compartidos
 
 
             // 4. Controladores de Presentación
@@ -167,7 +163,7 @@ namespace Presentacion
             services.AddTransient<FrmReportes>();
             services.AddTransient<FrmCortes>();
             services.AddTransient<FrmConfiguraciones>();
-           
+
         }
     }
 }

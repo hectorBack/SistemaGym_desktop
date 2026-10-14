@@ -21,7 +21,6 @@ namespace Presentacion.Controller
         public async Task<IEnumerable<CorteViewModel>> ObtenerCortesAsync(bool incluirInactivos = true)
         {
             var dtos = await _corteService.ObtenerTodosAsync(incluirInactivos);
-
             return dtos.Select(MapearAViewModel);
         }
 
@@ -33,9 +32,7 @@ namespace Presentacion.Controller
         public async Task<CorteViewModel?> ObtenerCorteAbiertoPorUsuarioAsync(int usuarioId)
         {
             var dto = await _corteService.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
-            if (dto == null) return null;
-
-            return MapearAViewModel(dto);
+            return dto == null ? null : MapearAViewModel(dto);
         }
 
         public async Task<IEnumerable<CorteViewModel>> ObtenerPorRangoFechasAsync(DateTime inicio, DateTime fin)
@@ -56,8 +53,19 @@ namespace Presentacion.Controller
             return await _corteService.AbrirCorteAsync(createDto);
         }
 
-        public async Task CerrarCorteAsync(int corteId, decimal totalIngresos, decimal totalEgresos, decimal montoFinal, string? observaciones = null)
+        /// <param name="periodoInicio">
+        /// Desde cuándo abarca el corte (el "Fecha inicio" que el usuario vio al confirmar).
+        /// Con él, el servicio verifica los totales contra los movimientos reales y ajusta la apertura del corte.
+        /// </param>
+        public async Task CerrarCorteAsync(
+            int corteId,
+            decimal totalIngresos,
+            decimal totalEgresos,
+            decimal montoFinal,
+            string? observaciones = null,
+            DateTime? periodoInicio = null)
         {
+            // El estado y "Activo" ya no se mandan: el servicio siempre cierra el corte y lo deja activo.
             var updateDto = new CorteUpdateDto
             {
                 CorteID = corteId,
@@ -65,8 +73,7 @@ namespace Presentacion.Controller
                 TotalEgresos = totalEgresos,
                 MontoFinal = montoFinal,
                 Observaciones = observaciones,
-                Estado = "Cerrado",
-                Activo = true
+                PeriodoInicio = periodoInicio
             };
 
             await _corteService.CerrarCorteAsync(updateDto);
@@ -87,24 +94,21 @@ namespace Presentacion.Controller
             return await _corteService.ObtenerEfectivoEnCajaAsync();
         }
 
-        private static CorteViewModel MapearAViewModel(CorteDto dto)
+        private static CorteViewModel MapearAViewModel(CorteDto dto) => new()
         {
-            return new CorteViewModel
-            {
-                CorteID = dto.CorteID,
-                UsuarioID = dto.UsuarioID,
-                Usuario = dto.NombreUsuario,
-                FechaApertura = dto.FechaApertura,
-                FechaCierre = dto.FechaCierre,
-                MontoInicial = dto.MontoInicial,
-                TotalIngresos = dto.TotalIngresos,
-                TotalEgresos = dto.TotalEgresos,
-                MontoFinal = dto.MontoFinal,
-                Observaciones = dto.Observaciones ?? string.Empty,
-                Estado = dto.Estado,
-                Activo = dto.Activo,
-                CreatedAt = dto.CreatedAt
-            };
-        }
+            CorteID = dto.CorteID,
+            UsuarioID = dto.UsuarioID,
+            Usuario = dto.NombreUsuario,
+            FechaApertura = dto.FechaApertura,
+            FechaCierre = dto.FechaCierre,
+            MontoInicial = dto.MontoInicial,
+            TotalIngresos = dto.TotalIngresos,
+            TotalEgresos = dto.TotalEgresos,
+            MontoFinal = dto.MontoFinal,
+            Observaciones = dto.Observaciones ?? string.Empty,
+            Estado = dto.Estado,
+            Activo = dto.Activo,
+            CreatedAt = dto.CreatedAt
+        };
     }
 }

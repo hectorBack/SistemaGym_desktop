@@ -47,7 +47,18 @@ namespace Negocio.DTOs
         public decimal TotalEgresos { get; set; }
         public decimal MontoFinal { get; set; }
         public string? Observaciones { get; set; }
+
+        /// <summary>
+        /// Desde cuándo abarca el corte (el "Fecha inicio" que el usuario vio al confirmar).
+        /// Con este dato el servicio verifica los totales contra los movimientos reales y
+        /// ajusta la fecha de apertura del corte para que el detalle muestre todo el periodo.
+        /// Opcional: si es null, no se verifica (compatibilidad con llamadas anteriores).
+        /// </summary>
+        public DateTime? PeriodoInicio { get; set; }
+
+        // Ya no se usan: el servicio siempre cierra el corte y no cambia "Activo".
+        // Se conservan para no romper llamadas existentes; puedes eliminarlas cuando nada más las use.
         public string Estado { get; set; } = "Cerrado";
-        public bool Activo { get; set; }
+        public bool Activo { get; set; } = true;
     }
 }

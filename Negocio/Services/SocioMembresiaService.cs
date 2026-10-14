@@ -106,6 +106,29 @@ namespace Negocio.Services
                 throw new BusinessException("La membresía seleccionada no existe o no se encuentra activa.");
             }
 
+            // VALIDACIÓN: Verificar si tiene membresías anteriores sin terminar de pagar
+            var historialMembresias = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(dto.SocioID);
+
+            foreach (var sm in historialMembresias)
+            {
+                // Ignorar membresías que fueron canceladas explícitamente
+                if (sm.Estado == "Cancelada") continue;
+
+                decimal precioMembresia = sm.Membresia?.Precio ?? 0m;
+
+                // Sumar únicamente los pagos que estén activos (evita contar pagos anulados)
+                decimal totalPagado = sm.Pagos != null && sm.Pagos.Any()
+                    ? sm.Pagos.Where(p => p.Activo).Sum(p => p.Monto)
+                    : 0m;
+
+                // Si el total pagado es menor al precio de la membresía, tiene adeudo pendiente
+                if (totalPagado < precioMembresia)
+                {
+                    decimal adeudo = precioMembresia - totalPagado;
+                    throw new BusinessException($"Acceso denegado: El socio tiene un saldo pendiente de ${adeudo:N2} (Pagado: ${totalPagado:N2} de ${precioMembresia:N2}) en su membresía '{sm.Membresia?.Nombre ?? "N/A"}'. Debe liquidar el adeudo antes de asignar una nueva.");
+                }
+            }
+
             DateTime fechaFinCalculada = dto.FechaInicio.AddDays(membresia.DuracionDias);
 
             var nuevaSocioMembresia = new SocioMembresia

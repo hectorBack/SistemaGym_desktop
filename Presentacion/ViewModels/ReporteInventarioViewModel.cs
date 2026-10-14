@@ -122,7 +122,7 @@ namespace Presentacion.ViewModels
         public string Usuario { get; set; } = string.Empty;
         public string Observacion { get; set; } = string.Empty;
         public string CorteInfo { get; set; } = string.Empty;    // Rango de fechas/horas del corte
-    public DateTime Fecha { get; set; }
+        public DateTime Fecha { get; set; }
         public string FechaTexto => Fecha.ToString("dd/MM/yyyy HH:mm");
     }
 }

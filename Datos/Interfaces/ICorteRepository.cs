@@ -20,6 +20,11 @@ namespace Datos.Interfaces
         Task<Corte?> ObtenerCorteAbiertoPorUsuarioAsync(int usuarioId);
         Task<bool> TieneCorteAbiertoAsync(int usuarioId);
         Task<IEnumerable<Corte>> ObtenerPorRangoFechasAsync(DateTime inicio, DateTime fin);
+
+        /// <summary>Todos los cortes activos que siguen abiertos (uno por usuario como máximo).</summary>
+        Task<IEnumerable<Corte>> ObtenerAbiertosAsync();
+
+        /// <summary>OBSOLETO: el servicio ya no lo usa (sumaba el fondo dos veces y no tomaba en cuenta los movimientos).</summary>
         Task<decimal> ObtenerEfectivoEnCajaAsync();
     }
 }
