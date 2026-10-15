@@ -37,6 +37,10 @@ namespace Negocio.Services
                 MembresiaID = m.MembresiaID,
                 Nombre = m.Nombre,
                 Precio = m.Precio,
+                Tipo = m.Tipo,         
+                Meses = m.Meses,      
+                Semanas = m.Semanas, 
+                Dias = m.Dias,
                 DuracionDias = m.DuracionDias,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt,
@@ -54,6 +58,10 @@ namespace Negocio.Services
                 MembresiaID = membresia.MembresiaID,
                 Nombre = membresia.Nombre,
                 Precio = membresia.Precio,
+                Tipo = membresia.Tipo,        
+                Meses = membresia.Meses, 
+                Semanas = membresia.Semanas,
+                Dias = membresia.Dias,
                 DuracionDias = membresia.DuracionDias,
                 Activo = membresia.Activo,
                 CreatedAt = membresia.CreatedAt,
@@ -79,7 +87,10 @@ namespace Negocio.Services
             {
                 Nombre = dto.Nombre.Trim(),
                 Precio = dto.Precio,
-                DuracionDias = dto.DuracionDias,
+                Tipo = dto.Tipo.Trim(),
+                Meses = dto.Meses,
+                Semanas = dto.Semanas,
+                Dias = dto.Dias,
                 Activo = true
             };
 
@@ -91,7 +102,10 @@ namespace Negocio.Services
                 MembresiaID = nuevaMembresia.MembresiaID,
                 Nombre = nuevaMembresia.Nombre,
                 Precio = nuevaMembresia.Precio,
-                DuracionDias = nuevaMembresia.DuracionDias,
+                Tipo = nuevaMembresia.Tipo,
+                Meses = nuevaMembresia.Meses,
+                Semanas = nuevaMembresia.Semanas,
+                Dias = nuevaMembresia.Dias,
                 Activo = nuevaMembresia.Activo,
                 CreatedAt = nuevaMembresia.CreatedAt,
                 UpdatedAt = nuevaMembresia.UpdatedAt
@@ -120,7 +134,11 @@ namespace Negocio.Services
 
             membresia.Nombre = dto.Nombre.Trim();
             membresia.Precio = dto.Precio;
-            membresia.DuracionDias = dto.DuracionDias;
+            membresia.Tipo = dto.Tipo;
+            membresia.Meses = dto.Meses;
+            membresia.Semanas = dto.Semanas;
+            membresia.Dias = dto.Dias;
+            membresia.DuracionDias = dto.Dias;
             membresia.Activo = dto.Activo;
 
             _unitOfWork.Membresia.Actualizar(membresia);

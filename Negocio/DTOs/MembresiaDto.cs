@@ -11,6 +11,10 @@ namespace Negocio.DTOs
         public int MembresiaID { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public decimal Precio { get; set; }
+        public string Tipo { get; set; } = string.Empty;
+        public int Meses { get; set; }
+        public int Semanas { get; set; }
+        public int Dias { get; set; }
         public int DuracionDias { get; set; }
         public bool Activo { get; set; }
         public DateTime? CreatedAt { get; set; }
@@ -21,7 +25,10 @@ namespace Negocio.DTOs
     {
         public string Nombre { get; set; } = string.Empty;
         public decimal Precio { get; set; }
-        public int DuracionDias { get; set; }
+        public string Tipo { get; set; } = "Mensual";
+        public int Meses { get; set; }
+        public int Semanas { get; set; }
+        public int Dias { get; set; }
     }
 
     public class MembresiaUpdateDto
@@ -29,7 +36,10 @@ namespace Negocio.DTOs
         public int MembresiaID { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public decimal Precio { get; set; }
-        public int DuracionDias { get; set; }
+        public string Tipo { get; set; } = "Mensual";
+        public int Meses { get; set; }
+        public int Semanas { get; set; }
+        public int Dias { get; set; }
         public bool Activo { get; set; }
     }
 }

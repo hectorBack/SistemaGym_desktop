@@ -50,11 +50,14 @@ namespace Presentacion.Forms.Membresias
             dgvMembresias.AutoGenerateColumns = false;
 
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.MembresiaID), "ID", 45);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Nombre), "Membresía", 180, 110);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Nombre), "Nombre", 160, 110);
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Precio), "Precio", 90, 80, "C2", alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.DuracionDias), "Duración", 100, 90, "0\" días\"", alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Estado), "Estado", 80, 70);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Tipo), "Tipo", 90, 80);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Meses), "Meses", 70, 60, alinearDerecha: true);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Semanas), "Semanas", 80, 70, alinearDerecha: true);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Dias), "Dias", 70, 60, alinearDerecha: true);
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.CreatedAt), "Fecha de creación", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Estado), "Estado", 90, 80);
         }
 
         private async Task CargarMembresiasAsync(int? idASeleccionar = null)
@@ -163,10 +166,10 @@ namespace Presentacion.Forms.Membresias
         {
             using var modal = membresia == null
                 ? new FrmMembresiaModal(_controller)
-                : new FrmMembresiaModal(_controller, membresia.MembresiaID, membresia.Nombre, membresia.Precio, membresia.DuracionDias);
+                : new FrmMembresiaModal(_controller, membresia.MembresiaID, membresia.Nombre, membresia.Precio, membresia.Tipo, membresia.Meses, membresia.Semanas, membresia.Dias);
 
             if (modal.ShowDialog() == DialogResult.OK)
-                await CargarMembresiasAsync(membresia?.MembresiaID); // para una nueva (null) se conserva la selección actual
+                await CargarMembresiasAsync(membresia?.MembresiaID);
         }
 
         private async void btnDesactivar_Click(object? sender, EventArgs e)

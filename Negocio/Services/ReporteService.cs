@@ -159,23 +159,27 @@ namespace Negocio.Services
                         : $"{r.Nombre} {r.Apellido}".Trim(),
                     FechaRegistro = r.CreatedAt
                 });
-        } 
+        }
 
         public async Task<IEnumerable<ReporteSocioDto>> ObtenerSociosAsync()
         {
             // 1. Obtener socios
             var socios = await _unitOfWork.Socio.ObtenerTodosAsync(incluirInactivos: true);
 
-            // 2. Obtener todas las asignaciones de membresías
+            // 2. Obtener las asignaciones de membresías (ObtenerTodasAsync ya excluye las inactivas)
             var membresiasSocios = await _unitOfWork.SocioMembresia.ObtenerTodasAsync();
+
+            // Las canceladas no cuentan como membresía del socio; se agrupan por socio una sola vez
+            var membresiasPorSocio = membresiasSocios
+                .Where(m => m.Estado != "Cancelada")
+                .ToLookup(m => m.SocioID);
 
             DateTime hoy = DateTime.Today;
 
             return socios.Select(s =>
             {
-                // Buscar la última membresía asociada al socio
-                var ultimaMembresia = membresiasSocios
-                    .Where(m => m.SocioID == s.SocioID)
+                // Última membresía (no cancelada) del socio
+                var ultimaMembresia = membresiasPorSocio[s.SocioID]
                     .OrderByDescending(m => m.FechaFin)
                     .FirstOrDefault();
 
@@ -183,17 +187,11 @@ namespace Negocio.Services
                 string estatus;
 
                 if (fechaVencimiento == null)
-                {
                     estatus = "Sin Membresía";
-                }
                 else if (fechaVencimiento.Value.Date >= hoy)
-                {
                     estatus = "Sin Vencer";
-                }
                 else
-                {
                     estatus = "Vencido";
-                }
 
                 return new ReporteSocioDto
                 {

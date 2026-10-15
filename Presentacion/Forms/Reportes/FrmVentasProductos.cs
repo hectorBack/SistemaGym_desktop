@@ -17,9 +17,9 @@ namespace Presentacion.Forms.Reportes
 {
     public partial class FrmVentasProductos : Form
     {
-        /// <summary>Una fila del reporte. Los importes se guardan como decimal (no como texto) para que ordenen y sumen bien.</summary>
+        /// <summary>Una fila del reporte. Fecha e importes se guardan con su tipo real (no como texto) para que ordenen y sumen bien.</summary>
         private sealed record FilaVentaProducto(
-            string FechaRegistro,
+            DateTime FechaRegistro,
             string Producto,
             decimal CostoUnitario,
             decimal PrecioUnitario,
@@ -51,16 +51,11 @@ namespace Presentacion.Forms.Reportes
         {
             dgvVentasProductos.AutoGenerateColumns = false;
 
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 120, 120);
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy HH:mm");
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Producto), "Nombre del producto", 200, 140);
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.CostoUnitario), "Costo Unitario", 90, 90, "C2", alinearDerecha: true);
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.PrecioUnitario), "Precio Unitario", 90, 90, "C2", alinearDerecha: true);
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Ganancia), "Ganancia", 90, 90, "C2", alinearDerecha: true);
-
-            // La fecha llega como texto del reporte: ordenarla alfabéticamente daría un orden engañoso.
-            foreach (DataGridViewColumn c in dgvVentasProductos.Columns)
-                if (c.DataPropertyName == nameof(FilaVentaProducto.FechaRegistro))
-                    c.SortMode = DataGridViewColumnSortMode.NotSortable;
         }
 
         private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechasAsync();
@@ -92,11 +87,11 @@ namespace Presentacion.Forms.Reportes
                 if (IsDisposed) return; // el usuario cambió de pestaña o módulo mientras cargaba
 
                 var filas = ventas.Select(v => new FilaVentaProducto(
-                    string.IsNullOrWhiteSpace(v.FechaRegistro) ? "N/A" : v.FechaRegistro,
+                    v.FechaRegistro,
                     string.IsNullOrWhiteSpace(v.Producto) ? "N/A" : v.Producto,
-                    ADecimal(v.CostoUnitario),
-                    ADecimal(v.PrecioUnitario),
-                    ADecimal(v.Ganancia)));
+                    v.CostoUnitario,
+                    v.PrecioUnitario,
+                    v.Ganancia));
 
                 // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
                 var columnaOrden = dgvVentasProductos.SortedColumn;
@@ -119,22 +114,6 @@ namespace Presentacion.Forms.Reportes
             panelTop, panelFiltros);
         }
 
-        // Acepta decimal o texto con formato de moneda ("$1,250.00"), sea cual sea el tipo del ViewModel.
-        private static decimal ADecimal(object? valor) => valor switch
-        {
-            null => 0m,
-            decimal d => d,
-            string s when decimal.TryParse(s, NumberStyles.Currency, CultureInfo.CurrentCulture, out var r) => r,
-            IConvertible c => TryConvertir(c),
-            _ => 0m
-        };
-
-        private static decimal TryConvertir(IConvertible c)
-        {
-            try { return c.ToDecimal(CultureInfo.CurrentCulture); }
-            catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException) { return 0m; }
-        }
-
         private void ActualizarResumen()
         {
             lblTotal.Text = $"{_vista.Count} registro(s)  ·  Total Ganancia {_vista.Sum(f => f.Ganancia):C2}";
@@ -151,8 +130,7 @@ namespace Presentacion.Forms.Reportes
                 e.CellStyle.ForeColor = g < 0 ? Tema.Peligro : Tema.Exito;
         }
 
-        // Antes este botón mostraba "exportado con éxito" sin exportar nada.
-        // Ahora genera un .csv que Excel abre directamente.
+        // Genera un .csv que Excel abre directamente.
         private void btnExportarExcel_Click(object? sender, EventArgs e)
         {
             if (_vista.Count == 0)

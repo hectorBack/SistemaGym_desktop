@@ -24,7 +24,7 @@ namespace Datos.Repositories
             return await _context.SocioMembresia
                 .Include(sm => sm.Membresia)
                 .Include(sm => sm.Pagos)
-                .Where(sm => sm.SocioID == socioId)
+                .Where(sm => sm.SocioID == socioId && sm.Activo)
                 .OrderByDescending(sm => sm.FechaInicio)
                 .ToListAsync();
         }
@@ -34,6 +34,7 @@ namespace Datos.Repositories
             return await _context.SocioMembresia
                 .Include(sm => sm.Socio)
                 .Include(sm => sm.Membresia)
+                .Include(sm => sm.Pagos)
                 .FirstOrDefaultAsync(sm => sm.SocioMembresiaID == id);
         }
 

@@ -17,8 +17,8 @@ namespace Presentacion.ViewModels
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
         public decimal ValorTotalInventario { get; set; }
-        public string Estado => Activo ? "Activo" : "Inactivo";
         public bool Activo { get; set; }
+        public string Estado => Activo ? "Activo" : "Inactivo";
     }
 
     public class ReporteMembresiaViewModel
@@ -39,14 +39,12 @@ namespace Presentacion.ViewModels
         public int SocioID { get; set; }
         public string Clave { get; set; } = string.Empty;
         public string NombreCompleto { get; set; } = string.Empty;
+        public DateTime? FechaVencimiento { get; set; }
+        public string Estatus { get; set; } = string.Empty; // "Sin Vencer", "Vencido", "Sin Membresía"
 
-        // Propiedad con formato para mostrar limpio en la tabla
         public string FechaVencimientoTexto => FechaVencimiento.HasValue
             ? FechaVencimiento.Value.ToString("dd/MM/yyyy")
             : "N/A";
-
-        public DateTime? FechaVencimiento { get; set; }
-        public string Estatus { get; set; } = string.Empty; // "Sin Vencer", "Vencido", "Sin Membresía"
     }
 
     public class ReporteRegistroViewModel
@@ -59,15 +57,16 @@ namespace Presentacion.ViewModels
     }
 
     public class ReporteVentaProductoViewModel
-    {   
+    {
         public int ProductoID { get; set; }
-        public string FechaRegistro { get; set; } = string.Empty;
+        public DateTime FechaRegistro { get; set; }
         public string Producto { get; set; } = string.Empty;
         public int CantidadVendida { get; set; }
-        public string CostoUnitario { get; set; } = string.Empty;       
-        public string PrecioUnitario { get; set; } = string.Empty;
+        public decimal CostoUnitario { get; set; }
+        public decimal PrecioUnitario { get; set; }
+        public decimal Ganancia { get; set; }
 
-        public string Ganancia { get; set; } = string.Empty;
+        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy HH:mm");
     }
 
     public class ReporteVisitaViewModel
@@ -77,6 +76,7 @@ namespace Presentacion.ViewModels
         public string Nombre { get; set; } = string.Empty;
         public decimal Monto { get; set; }
         public DateTime FechaHora { get; set; }
+
         public string FechaHoraTexto => FechaHora.ToString("dd/MM/yyyy hh:mm tt");
     }
 
@@ -89,24 +89,21 @@ namespace Presentacion.ViewModels
         public DateTime FechaInicio { get; set; }
         public string Folio { get; set; } = string.Empty;
         public string Observaciones { get; set; } = string.Empty;
-        public decimal Monto { get; set; }           // Importe del pago actual ($100)
-        public decimal TotalPagado { get; set; }    // Total abonado acumulado
-        public decimal PrecioMembresia { get; set; }// Precio total ($300)
+        public decimal Monto { get; set; }            // Importe de este pago
+        public decimal TotalPagado { get; set; }      // Total abonado acumulado
+        public decimal PrecioMembresia { get; set; }  // Precio total de la membresía
         public string FormaPago { get; set; } = string.Empty;
         public DateTime FechaPago { get; set; }
 
         public string FechaPagoTexto => FechaPago.ToString("dd/MM/yyyy HH:mm");
         public string FechaInicioTexto => FechaInicio.ToString("dd/MM/yyyy");
 
-        // Lógica para evaluar si la membresía ligada al pago está pagada o en parcialidad
         public string EstadoMembresia
         {
             get
             {
-                if (TotalPagado >= PrecioMembresia && PrecioMembresia > 0)
-                    return "Pagada";
-                if (TotalPagado > 0)
-                    return "Parcial";
+                if (PrecioMembresia > 0 && TotalPagado >= PrecioMembresia) return "Pagada";
+                if (TotalPagado > 0) return "Parcial";
                 return "Sin Pagar";
             }
         }
@@ -121,8 +118,9 @@ namespace Presentacion.ViewModels
         public string FormaPago { get; set; } = string.Empty;
         public string Usuario { get; set; } = string.Empty;
         public string Observacion { get; set; } = string.Empty;
-        public string CorteInfo { get; set; } = string.Empty;    // Rango de fechas/horas del corte
+        public string CorteInfo { get; set; } = string.Empty;  // Rango de fechas/horas del corte
         public DateTime Fecha { get; set; }
+
         public string FechaTexto => Fecha.ToString("dd/MM/yyyy HH:mm");
     }
 }

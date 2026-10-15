@@ -27,6 +27,10 @@ namespace Presentacion.Controller
                 MembresiaID = m.MembresiaID,
                 Nombre = m.Nombre,
                 Precio = m.Precio,
+                Tipo = m.Tipo,         
+                Meses = m.Meses,       
+                Semanas = m.Semanas,   
+                Dias = m.Dias,        
                 DuracionDias = m.DuracionDias,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt
@@ -38,7 +42,8 @@ namespace Presentacion.Controller
             return await _membresiaService.ObtenerPorIdAsync(id);
         }
 
-        public async Task GuardarMembresiaAsync(int? id, string nombre, decimal precio, int duracionDias)
+        // Método actualizado para aceptar los nuevos parámetros desde el modal
+        public async Task GuardarMembresiaAsync(int? id, string nombre, decimal precio, string tipo, int meses, int semanas, int dias)
         {
             if (id.HasValue && id.Value > 0)
             {
@@ -47,7 +52,10 @@ namespace Presentacion.Controller
                     MembresiaID = id.Value,
                     Nombre = nombre,
                     Precio = precio,
-                    DuracionDias = duracionDias,
+                    Tipo = tipo,
+                    Meses = meses,
+                    Semanas = semanas,
+                    Dias = dias,
                     Activo = true
                 };
                 await _membresiaService.ActualizarAsync(updateDto);
@@ -58,7 +66,10 @@ namespace Presentacion.Controller
                 {
                     Nombre = nombre,
                     Precio = precio,
-                    DuracionDias = duracionDias
+                    Tipo = tipo,
+                    Meses = meses,
+                    Semanas = semanas,
+                    Dias = dias
                 };
                 await _membresiaService.CrearAsync(createDto);
             }

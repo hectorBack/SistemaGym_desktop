@@ -76,11 +76,16 @@ namespace Presentacion.Forms.Socios
         {
             await FormHelper.EjecutarAsync(async () =>
             {
-                // Solo membresías activas: una membresía desactivada ya no debe poder asignarse a un socio.
+                // Obtener membresías activas
                 var membresias = await _membresiaController.ObtenerMembresiasAsync(false);
                 if (IsDisposed) return;
 
-                cboMembresias.DataSource = membresias.ToList();
+                // 🟢 Filtrar y excluir aquellas cuyo nombre contenga "Visita" (usadas solo para visitas casuales)
+                var membresiasValidas = membresias
+                    .Where(m => !m.Nombre.Contains("Visita", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                cboMembresias.DataSource = membresiasValidas;
                 cboMembresias.DisplayMember = nameof(MembresiaViewModel.Nombre);
                 cboMembresias.ValueMember = nameof(MembresiaViewModel.MembresiaID);
 
@@ -188,7 +193,24 @@ namespace Presentacion.Forms.Socios
         {
             if (cboMembresias.SelectedItem is MembresiaViewModel membresia)
             {
-                lblPrecioValor.Text = $"{membresia.Precio:C2}  ·  {membresia.DuracionDias} días";
+                // Construir el texto descriptivo dinámico combinando Meses, Semanas y Días según corresponda
+                var partesDuracion = new List<string>();
+
+                if (membresia.Meses > 0)
+                    partesDuracion.Add($"{membresia.Meses} mes{(membresia.Meses == 1 ? "" : "es")}");
+
+                if (membresia.Semanas > 0)
+                    partesDuracion.Add($"{membresia.Semanas} semana{(membresia.Semanas == 1 ? "" : "s")}");
+
+                if (membresia.Dias > 0)
+                    partesDuracion.Add($"{membresia.Dias} día{(membresia.Dias == 1 ? "" : "s")}");
+
+                string textoDuracion = partesDuracion.Count > 0
+                    ? string.Join(", ", partesDuracion)
+                    : $"{membresia.DuracionDias} días";
+
+                // Mostrar precio y el desglose dinámico en la etiqueta
+                lblPrecioValor.Text = $"{membresia.Precio:C2}  ·  {textoDuracion}";
                 btnAgregarMembresia.Enabled = true;
             }
             else

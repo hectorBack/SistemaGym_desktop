@@ -87,12 +87,12 @@ namespace Presentacion.Controller
             return dtos.Select(r => new ReporteVentaProductoViewModel
             {
                 ProductoID = r.ProductoID,
-                FechaRegistro = r.FechaRegistro.ToString("dd/MM/yyyy HH:mm"),
+                FechaRegistro = r.FechaRegistro,
                 Producto = r.Producto,
                 CantidadVendida = r.Cantidad,
-                CostoUnitario = r.CostoUnitario.ToString("C2"),
-                PrecioUnitario = r.PrecioUnitario.ToString("C2"),
-                Ganancia = r.Ganancia.ToString("C2")
+                CostoUnitario = r.CostoUnitario,
+                PrecioUnitario = r.PrecioUnitario,
+                Ganancia = r.Ganancia
             });
         }
 

@@ -14,6 +14,9 @@ namespace Negocio.Services
 {
     public class SocioMembresiaService : ISocioMembresiaService
     {
+        private const string EstadoActiva = "Activa";
+        private const string EstadoCancelada = "Cancelada";
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<AsignarMembresiaDto> _asignarValidator;
 
@@ -28,61 +31,19 @@ namespace Negocio.Services
         public async Task<IEnumerable<SocioMembresiaDto>> ObtenerPorSocioIdAsync(int socioId)
         {
             var registros = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(socioId);
-
-            return registros.Select(sm => new SocioMembresiaDto
-            {
-                SocioMembresiaID = sm.SocioMembresiaID,
-                SocioID = sm.SocioID,
-                MembresiaID = sm.MembresiaID,
-                NombreMembresia = sm.Membresia?.Nombre,
-                Precio = sm.Membresia?.Precio ?? 0,
-                FechaInicio = sm.FechaInicio,
-                FechaFin = sm.FechaFin,
-                CreatedAt = sm.CreatedAt,
-                Estado = sm.Estado,
-                TotalPagado = sm.Pagos != null && sm.Pagos.Any()
-            ? sm.Pagos.Sum(p => p.Monto)
-            : 0
-            });
+            return registros.Select(MapearADto).ToList();
         }
 
         public async Task<SocioMembresiaDto?> ObtenerPorIdAsync(int id)
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerPorIdAsync(id);
-            if (registro == null) return null;
-
-            return new SocioMembresiaDto
-            {
-                SocioMembresiaID = registro.SocioMembresiaID,
-                SocioID = registro.SocioID,
-                MembresiaID = registro.MembresiaID,
-                NombreMembresia = registro.Membresia?.Nombre,
-                Precio = registro.Membresia?.Precio ?? 0,
-                FechaInicio = registro.FechaInicio,
-                FechaFin = registro.FechaFin,
-                CreatedAt = registro.CreatedAt,
-                Estado = registro.Estado,
-                TotalPagado = registro.Pagos != null ? registro.Pagos.Sum(p => p.Monto) : 0
-            };
+            return registro == null ? null : MapearADto(registro);
         }
 
         public async Task<SocioMembresiaDto?> ObtenerMembresiaActivaPorSocioIdAsync(int socioId)
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerMembresiaActivaPorSocioIdAsync(socioId);
-            if (registro == null) return null;
-
-            return new SocioMembresiaDto
-            {
-                SocioMembresiaID = registro.SocioMembresiaID,
-                SocioID = registro.SocioID,
-                MembresiaID = registro.MembresiaID,
-                NombreMembresia = registro.Membresia?.Nombre,
-                Precio = registro.Membresia?.Precio ?? 0,
-                FechaInicio = registro.FechaInicio,
-                FechaFin = registro.FechaFin,
-                CreatedAt = registro.CreatedAt,
-                Estado = registro.Estado
-            };
+            return registro == null ? null : MapearADto(registro);
         }
 
         public async Task<SocioMembresiaDto> AsignarMembresiaAsync(AsignarMembresiaDto dto)
@@ -96,50 +57,41 @@ namespace Negocio.Services
 
             var socio = await _unitOfWork.Socio.ObtenerPorIdAsync(dto.SocioID);
             if (socio == null || !socio.Activo)
-            {
                 throw new BusinessException("El socio especificado no existe o no se encuentra activo.");
-            }
 
             var membresia = await _unitOfWork.Membresia.ObtenerPorIdAsync(dto.MembresiaID);
             if (membresia == null || !membresia.Activo)
-            {
                 throw new BusinessException("La membresía seleccionada no existe o no se encuentra activa.");
-            }
 
-            // VALIDACIÓN: Verificar si tiene membresías anteriores sin terminar de pagar
-            var historialMembresias = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(dto.SocioID);
+            // Solo la fecha: evita que la hora de captura mueva el vencimiento
+            var fechaInicio = dto.FechaInicio.Date;
+            var fechaFin = fechaInicio.AddDays(membresia.DuracionDias);
 
-            foreach (var sm in historialMembresias)
+            // No permitir periodos encimados con otra membresía no cancelada del mismo socio.
+            // Para renovar por adelantado basta elegir como inicio la fecha de vencimiento de la actual.
+            var existentes = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(dto.SocioID);
+            var choque = existentes.FirstOrDefault(sm =>
+                sm.Activo &&
+                sm.Estado != EstadoCancelada &&
+                fechaInicio < sm.FechaFin.Date &&
+                fechaFin > sm.FechaInicio.Date);
+
+            if (choque != null)
             {
-                // Ignorar membresías que fueron canceladas explícitamente
-                if (sm.Estado == "Cancelada") continue;
-
-                decimal precioMembresia = sm.Membresia?.Precio ?? 0m;
-
-                // Sumar únicamente los pagos que estén activos (evita contar pagos anulados)
-                decimal totalPagado = sm.Pagos != null && sm.Pagos.Any()
-                    ? sm.Pagos.Where(p => p.Activo).Sum(p => p.Monto)
-                    : 0m;
-
-                // Si el total pagado es menor al precio de la membresía, tiene adeudo pendiente
-                if (totalPagado < precioMembresia)
-                {
-                    decimal adeudo = precioMembresia - totalPagado;
-                    throw new BusinessException($"Acceso denegado: El socio tiene un saldo pendiente de ${adeudo:N2} (Pagado: ${totalPagado:N2} de ${precioMembresia:N2}) en su membresía '{sm.Membresia?.Nombre ?? "N/A"}'. Debe liquidar el adeudo antes de asignar una nueva.");
-                }
+                throw new BusinessException(
+                    $"El socio ya tiene una membresía vigente del {choque.FechaInicio:dd/MM/yyyy} al {choque.FechaFin:dd/MM/yyyy}. " +
+                    "Elija una fecha de inicio posterior a su vencimiento.");
             }
-
-            DateTime fechaFinCalculada = dto.FechaInicio.AddDays(membresia.DuracionDias);
 
             var nuevaSocioMembresia = new SocioMembresia
             {
                 SocioID = dto.SocioID,
                 MembresiaID = dto.MembresiaID,
-                FechaInicio = dto.FechaInicio,
-                FechaFin = fechaFinCalculada,
-                Estado = "Activa"
-                // Si tu tabla de BD TIENE la columna Precio, descomenta la siguiente línea:
-                // Precio = membresia.Precio 
+                FechaInicio = fechaInicio,
+                FechaFin = fechaFin,
+                Estado = EstadoActiva
+                // Si tu tabla TIENE la columna Precio, descomenta para congelar el precio al momento de la venta:
+                // Precio = membresia.Precio
             };
 
             await _unitOfWork.SocioMembresia.AgregarAsync(nuevaSocioMembresia);
@@ -153,9 +105,10 @@ namespace Negocio.Services
                 NombreMembresia = membresia.Nombre,
                 FechaInicio = nuevaSocioMembresia.FechaInicio,
                 FechaFin = nuevaSocioMembresia.FechaFin,
-                Precio = membresia.Precio, // Se obtiene el precio base de la membresía asignada
+                Precio = membresia.Precio,
                 CreatedAt = nuevaSocioMembresia.CreatedAt,
-                Estado = nuevaSocioMembresia.Estado
+                Estado = nuevaSocioMembresia.Estado,
+                TotalPagado = 0
             };
         }
 
@@ -163,11 +116,12 @@ namespace Negocio.Services
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerPorIdAsync(socioMembresiaId);
             if (registro == null)
-            {
                 throw new BusinessException("El registro de membresía del socio no existe.");
-            }
 
-            registro.Estado = "Cancelada";
+            if (registro.Estado == EstadoCancelada)
+                throw new BusinessException("La membresía ya se encuentra cancelada.");
+
+            registro.Estado = EstadoCancelada;
 
             _unitOfWork.SocioMembresia.Actualizar(registro);
             await _unitOfWork.SaveChangesAsync();
@@ -177,12 +131,32 @@ namespace Negocio.Services
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerPorIdAsync(id);
             if (registro == null)
-            {
                 throw new BusinessException("La membresía que intenta eliminar no existe.");
-            }
+
+            // Borrar una membresía con pagos (activos o no) dejaría movimientos de caja sin origen.
+            // Requiere que el repositorio incluya los Pagos en ObtenerPorIdAsync (ver cambio indicado).
+            if (registro.Pagos != null && registro.Pagos.Any())
+                throw new BusinessException("No se puede eliminar la membresía porque tiene pagos registrados. Cancélela en su lugar.");
 
             _unitOfWork.SocioMembresia.Eliminar(registro);
             await _unitOfWork.SaveChangesAsync();
         }
+
+        // ───────── Helpers ─────────
+
+        private static SocioMembresiaDto MapearADto(SocioMembresia sm) => new()
+        {
+            SocioMembresiaID = sm.SocioMembresiaID,
+            SocioID = sm.SocioID,
+            MembresiaID = sm.MembresiaID,
+            NombreMembresia = sm.Membresia?.Nombre,
+            Precio = sm.Membresia?.Precio ?? 0,
+            FechaInicio = sm.FechaInicio,
+            FechaFin = sm.FechaFin,
+            CreatedAt = sm.CreatedAt,
+            Estado = sm.Estado,
+            // Solo pagos activos, igual que el reporte y el repositorio de pagos
+            TotalPagado = sm.Pagos?.Where(p => p.Activo).Sum(p => p.Monto) ?? 0
+        };
     }
 }
