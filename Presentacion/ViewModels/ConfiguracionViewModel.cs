@@ -10,9 +10,11 @@ namespace Presentacion.ViewModels
     {
         // Pestaña Corte de Caja
         public CorteConfiguracionViewModel CorteCaja { get; set; } = new CorteConfiguracionViewModel();
+        public GimnasioConfiguracionViewModel DatosGimnasio { get; set; } = new GimnasioConfiguracionViewModel();
+        public CorreoConfiguracionViewModel Correos { get; set; } = new CorreoConfiguracionViewModel();
 
         // Futuras pestañas (preparadas para cuando las agregues):
-        // public DatosGimnasioViewModel DatosGimnasio { get; set; } = new DatosGimnasioViewModel();
+
         // public EmailConfiguracionViewModel Correos { get; set; } = new EmailConfiguracionViewModel();
         // public RespaldoConfiguracionViewModel Respaldos { get; set; } = new RespaldoConfiguracionViewModel();
     }

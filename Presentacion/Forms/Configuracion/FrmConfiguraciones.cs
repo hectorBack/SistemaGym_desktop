@@ -17,6 +17,8 @@ namespace Presentacion.Forms.Configuracion
 
         // Subformularios incrustados en las pestañas
         private FrmConfiguracionCorteCaja? _frmConfiguracionCorteCaja;
+        private FrmConfiguracionDatosGimnasio? _frmConfiguracionGimnasioDatos;
+        private FrmConfiguracionCorreos? _frmConfiguracionCorreos;
 
         public FrmConfiguraciones(ConfiguracionController configuracionController)
         {
@@ -65,11 +67,11 @@ namespace Presentacion.Forms.Configuracion
                         break;
 
                     case "tabDatosGimnasio":
-                        // Próximamente: CargarFormularioDatosGimnasio();
+                        CargarFormularioDatosGimnasio();
                         break;
 
                     case "tabCorreos":
-                        // Próximamente: CargarFormularioCorreos();
+                        CargarFormularioCorreos();
                         break;
 
                     case "tabRespaldos":
@@ -96,6 +98,27 @@ namespace Presentacion.Forms.Configuracion
         /// </summary>
         private void CargarFormularioCorteCaja()
         {
+            if (_frmConfiguracionGimnasioDatos != null && !_frmConfiguracionGimnasioDatos.IsDisposed)
+            {
+                return;
+            }
+
+            tabCorteCaja.Controls.Clear();
+
+            _frmConfiguracionGimnasioDatos = new FrmConfiguracionDatosGimnasio(_configuracionController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabDatosGimnasio.Controls.Add(_frmConfiguracionGimnasioDatos);
+            _frmConfiguracionGimnasioDatos.Show();
+        }
+
+        private void CargarFormularioDatosGimnasio()
+        {
             if (_frmConfiguracionCorteCaja != null && !_frmConfiguracionCorteCaja.IsDisposed)
             {
                 return;
@@ -113,6 +136,27 @@ namespace Presentacion.Forms.Configuracion
 
             tabCorteCaja.Controls.Add(_frmConfiguracionCorteCaja);
             _frmConfiguracionCorteCaja.Show();
+        }
+
+        private void CargarFormularioCorreos()
+        {
+            if (_frmConfiguracionCorreos != null && !_frmConfiguracionCorreos.IsDisposed)
+            {
+                return;
+            }
+
+            tabCorreos.Controls.Clear();
+
+            _frmConfiguracionCorreos = new FrmConfiguracionCorreos(_configuracionController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabCorreos.Controls.Add(_frmConfiguracionCorreos);
+            _frmConfiguracionCorreos.Show();
         }
 
         protected override void OnControlAdded(ControlEventArgs e)

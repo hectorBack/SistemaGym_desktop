@@ -20,9 +20,6 @@ namespace Presentacion.Controller
 
         #region Pestaña: Corte de Caja
 
-        /// <summary>
-        /// Obtiene la configuración actual de la pestaña Corte de Caja mapeada al ViewModel.
-        /// </summary>
         public async Task<CorteConfiguracionViewModel> ObtenerConfigCorteCajaAsync()
         {
             var dto = await _configuracionService.ObtenerConfigCorteCajaAsync();
@@ -34,9 +31,6 @@ namespace Presentacion.Controller
             };
         }
 
-        /// <summary>
-        /// Guarda o actualiza los parámetros de la pestaña Corte de Caja.
-        /// </summary>
         public async Task GuardarConfigCorteCajaAsync(CorteConfiguracionViewModel model)
         {
             var dto = new CorteConfiguracionDto
@@ -50,21 +44,83 @@ namespace Presentacion.Controller
 
         #endregion
 
-        #region Consultas Generales
+        #region Pestaña: Datos del Gimnasio
+
+        public async Task<GimnasioConfiguracionViewModel> ObtenerConfigGimnasioAsync()
+        {
+            var dto = await _configuracionService.ObtenerConfigGimnasioAsync();
+
+            return new GimnasioConfiguracionViewModel
+            {
+                Nombre = dto.Nombre,
+                Domicilio = dto.Domicilio,
+                Telefono = dto.Telefono,
+                Rfc = dto.Rfc,
+                Mensaje = dto.Mensaje,
+                Logo = dto.Logo
+            };
+        }
+
+        public async Task GuardarConfigGimnasioAsync(GimnasioConfiguracionViewModel model)
+        {
+            var dto = new GimnasioConfiguracionDto
+            {
+                Nombre = model.Nombre,
+                Domicilio = model.Domicilio,
+                Telefono = model.Telefono,
+                Rfc = model.Rfc,
+                Mensaje = model.Mensaje,
+                Logo = model.Logo
+            };
+
+            await _configuracionService.GuardarConfigGimnasioAsync(dto);
+        }
+
+        #endregion
+
+        #region Pestaña: Configuración de Correos
 
         /// <summary>
-        /// Obtiene el valor de cualquier clave de configuración del sistema.
+        /// Obtiene la configuración actual de la pestaña Configuración de Correos mapeada al ViewModel.
         /// </summary>
+        public async Task<CorreoConfiguracionViewModel> ObtenerConfigCorreosAsync()
+        {
+            var dto = await _configuracionService.ObtenerConfigCorreosAsync();
+
+            return new CorreoConfiguracionViewModel
+            {
+                Email = dto.Email,
+                Password = dto.Password,
+                EnviarRecordatorioVencimiento = dto.EnviarRecordatorioVencimiento,
+                EnviarFelicitaciones = dto.EnviarFelicitaciones
+            };
+        }
+
+        /// <summary>
+        /// Guarda o actualiza los parámetros de la pestaña Configuración de Correos.
+        /// </summary>
+        public async Task GuardarConfigCorreosAsync(CorreoConfiguracionViewModel model)
+        {
+            var dto = new CorreosConfiguracionDto
+            {
+                Email = model.Email,
+                Password = model.Password,
+                EnviarRecordatorioVencimiento = model.EnviarRecordatorioVencimiento,
+                EnviarFelicitaciones = model.EnviarFelicitaciones
+            };
+
+            await _configuracionService.GuardarConfigCorreosAsync(dto);
+        }
+
+        #endregion
+
+        #region Consultas Generales
+
         public async Task<string?> ObtenerValorPorClaveAsync(string clave)
         {
             return await _configuracionService.ObtenerValorPorClaveAsync(clave);
         }
 
         #endregion
-
-        // Próximamente se agregarán las demás secciones:
-        // #region Pestaña: Datos del Gimnasio
-        // #region Pestaña: Configuración de Correos
-        // #region Pestaña: Respaldos
     }
 }

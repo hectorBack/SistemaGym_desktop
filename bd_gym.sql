@@ -367,3 +367,11 @@ CREATE TABLE Configuraciones (
 INSERT INTO Configuraciones (Clave, Valor, Descripcion) VALUES
 ('Corte_EfectivoInicial', '0.00', 'Monto de efectivo inicial predeterminado para la caja'),
 ('Corte_EmailNotificacion', 'admin@gimnasio.com', 'Correo electrónico donde se enviarán los reportes de cortes de caja');
+
+INSERT INTO Configuraciones (Clave, Valor, Descripcion) VALUES
+('Gym_Nombre', 'Mi Gimnasio', 'Nombre comercial del gimnasio'),
+('Gym_Domicilio', 'Sin dirección registrada', 'Domicilio fiscal o físico del gimnasio'),
+('Gym_Telefono', '', 'Teléfono de contacto principal'),
+('Gym_Rfc', '', 'RFC del establecimiento'),
+('Gym_Mensaje', '¡Bienvenidos a su entrenamiento!', 'Mensaje de bienvenida para los socios'),
+('Gym_Logo', '', 'Ruta o identificador del logotipo del gimnasio');
