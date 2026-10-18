@@ -30,6 +30,7 @@ namespace Presentacion.Controller
                 Apellido = s.Apellido,
                 Telefono = s.Telefono,
                 Email = s.Email,
+                FechaNacimiento = s.FechaNacimiento,
                 Foto = s.Foto,
                 Observaciones = s.Observaciones,
                 Activo = s.Activo,
@@ -49,6 +50,7 @@ namespace Presentacion.Controller
             string apellido,
             string? telefono = null,
             string? email = null,
+            DateTime? fechaNacimiento = null,
             string? foto = null,
             string? observaciones = null,
             bool activo = true)
@@ -63,6 +65,7 @@ namespace Presentacion.Controller
                     Apellido = apellido,
                     Telefono = telefono,
                     Email = email,
+                    FechaNacimiento = fechaNacimiento,
                     Foto = foto,
                     Observaciones = observaciones,
                     Activo = activo
@@ -78,6 +81,7 @@ namespace Presentacion.Controller
                     Apellido = apellido,
                     Telefono = telefono,
                     Email = email,
+                    FechaNacimiento = fechaNacimiento,
                     Foto = foto,
                     Observaciones = observaciones
                 };

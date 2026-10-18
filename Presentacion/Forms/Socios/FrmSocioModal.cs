@@ -22,11 +22,8 @@ namespace Presentacion.Forms.Socios
     {
         private const string TextoTomarFoto = "📷 Tomar foto";
         private const string TextoCapturar = "📸 Capturar";
-        private const int LadoMaximoFoto = 640; // las fotos se reducen a este tamaño antes de guardarse
+        private const int LadoMaximoFoto = 640;
 
-        // Las fotos se guardan en una carpeta con permiso de escritura para todos los usuarios de Windows
-        // (ProgramData). Antes se usaba la carpeta del programa, que si se instala en "Program Files" es de solo lectura.
-        // Cuando tengas más de un módulo con archivos conviene mover esta ruta a una clase de configuración.
         private static readonly string CarpetaFotos = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
             "GymSystem", "FotosSocios");
@@ -34,9 +31,9 @@ namespace Presentacion.Forms.Socios
         private readonly SocioController _controller;
         private readonly int? _socioId;
 
-        private string? _rutaFoto;          // foto actual (la de la base de datos o la que eligió el usuario)
-        private bool _fotoCambiada;         // true si el usuario cargó, tomó o quitó la foto en esta sesión
-        private string? _fotoOrigenProcesada;   // evita crear copias duplicadas si el guardado se reintenta
+        private string? _rutaFoto;
+        private bool _fotoCambiada;
+        private string? _fotoOrigenProcesada;
         private string? _fotoDestinoProcesada;
         private bool _guardando;
 
@@ -66,7 +63,6 @@ namespace Presentacion.Forms.Socios
                     "No se pudieron cargar los datos del socio.",
                     panelCampos, btnGuardar);
 
-                // Si no se cargaron los datos no se deja editar: guardar un formulario vacío borraría los datos reales.
                 if (!cargado && !IsDisposed)
                 {
                     DialogResult = DialogResult.Cancel;
@@ -100,11 +96,22 @@ namespace Presentacion.Forms.Socios
             txtApellido.Text = socio.Apellido;
             txtTelefono.Text = socio.Telefono;
             txtEmail.Text = socio.Email;
+
+            // Cargar Fecha de Nacimiento si está registrada
+            if (socio.FechaNacimiento.HasValue)
+            {
+                dtpFechaNacimiento.Value = socio.FechaNacimiento.Value;
+                dtpFechaNacimiento.Checked = true;
+            }
+            else
+            {
+                dtpFechaNacimiento.Checked = false;
+            }
+
             txtObservaciones.Text = socio.Observaciones;
             chkActivo.Checked = socio.Activo;
             _rutaFoto = socio.Foto;
 
-            // Si el archivo ya no existe o está dañado, el socio se abre sin foto (y no se toca la referencia al guardar).
             if (!string.IsNullOrEmpty(_rutaFoto) && File.Exists(_rutaFoto))
             {
                 try { MostrarImagen(CargarImagenSinBloqueo(_rutaFoto)); }
@@ -114,8 +121,6 @@ namespace Presentacion.Forms.Socios
 
         // ───────────── Foto ─────────────
 
-        // Image.FromFile mantiene el archivo bloqueado mientras la imagen existe;
-        // así se lee completo y se suelta el archivo de inmediato.
         private static Bitmap CargarImagenSinBloqueo(string ruta)
         {
             using var stream = new FileStream(ruta, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -123,7 +128,6 @@ namespace Presentacion.Forms.Socios
             return new Bitmap(original);
         }
 
-        // Cambia la imagen mostrada liberando la anterior (si no, cada cuadro de la cámara acumula memoria).
         private void MostrarImagen(Image? nueva)
         {
             var anterior = picFoto.Image;
@@ -146,7 +150,7 @@ namespace Presentacion.Forms.Socios
             try
             {
                 MostrarImagen(CargarImagenSinBloqueo(dialogo.FileName));
-                _rutaFoto = dialogo.FileName; // se copia a la carpeta de fotos al guardar
+                _rutaFoto = dialogo.FileName;
                 _fotoCambiada = true;
             }
             catch (Exception ex)
@@ -198,8 +202,6 @@ namespace Presentacion.Forms.Socios
             }
         }
 
-        // Este evento llega desde el hilo de la cámara, no desde el de la pantalla:
-        // por eso el cuadro se pasa al hilo de la interfaz antes de mostrarlo.
         private void FuenteVideo_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             Bitmap cuadro = (Bitmap)eventArgs.Frame.Clone();
@@ -216,14 +218,12 @@ namespace Presentacion.Forms.Socios
             }
             catch (Exception ex) when (ex is ObjectDisposedException or InvalidOperationException)
             {
-                cuadro.Dispose(); // el formulario se cerró justo ahora
+                cuadro.Dispose();
             }
         }
 
         private void MostrarCuadro(Bitmap cuadro)
         {
-            // Si la cámara ya se detuvo, el cuadro que venía en camino se descarta
-            // para no pisar la foto capturada.
             if (IsDisposed || _fuenteVideo == null)
             {
                 cuadro.Dispose();
@@ -242,7 +242,6 @@ namespace Presentacion.Forms.Socios
                 return;
             }
 
-            // Primero se detiene la cámara (así la imagen ya no cambia) y luego se guarda lo que se ve.
             DetenerCamara();
 
             try
@@ -251,7 +250,7 @@ namespace Presentacion.Forms.Socios
                 using (var copia = new Bitmap(picFoto.Image))
                     copia.Save(temporal, ImageFormat.Jpeg);
 
-                _rutaFoto = temporal; // se copia a la carpeta de fotos al guardar
+                _rutaFoto = temporal;
                 _fotoCambiada = true;
             }
             catch (Exception ex)
@@ -276,9 +275,6 @@ namespace Presentacion.Forms.Socios
                 btnTomarFoto.Text = TextoTomarFoto;
         }
 
-        // Copia la foto elegida a la carpeta de la aplicación, reducida y en JPEG.
-        // Así no depende de que el archivo original (USB, Descargas...) siga existiendo
-        // y no se guardan fotos de varios MB. No toca la interfaz: se ejecuta en otro hilo.
         private static string? PrepararFoto(string? origen)
         {
             if (string.IsNullOrWhiteSpace(origen) || !File.Exists(origen))
@@ -303,10 +299,9 @@ namespace Presentacion.Forms.Socios
                 reducida.Save(destino, ImageFormat.Jpeg);
             }
 
-            // Si venía de una captura de la cámara (archivo temporal), se limpia.
             if (origen.StartsWith(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase))
             {
-                try { File.Delete(origen); } catch { /* no es crítico */ }
+                try { File.Delete(origen); } catch { }
             }
 
             return destino;
@@ -352,10 +347,13 @@ namespace Presentacion.Forms.Socios
 
             DetenerCamara();
 
-            // Se copian los valores antes de la operación asíncrona.
             string clave = txtClave.Text.Trim();
             string nombre = txtNombre.Text.Trim();
             string apellido = txtApellido.Text.Trim();
+
+            // 🟢 Obtener la Fecha de Nacimiento si está marcada en el control
+            DateTime? fechaNacimiento = dtpFechaNacimiento.Checked ? dtpFechaNacimiento.Value.Date : (DateTime?)null;
+
             string? observaciones = NullSiVacio(txtObservaciones.Text);
             bool activo = chkActivo.Checked;
             string? fotoActual = NullSiVacio(_rutaFoto);
@@ -366,7 +364,6 @@ namespace Presentacion.Forms.Socios
             {
                 string? foto = fotoActual;
 
-                // Solo se procesa la foto si el usuario la cambió; una foto existente se deja como está.
                 if (fotoCambiada)
                 {
                     if (fotoActual != _fotoOrigenProcesada)
@@ -378,15 +375,16 @@ namespace Presentacion.Forms.Socios
                     foto = _fotoDestinoProcesada;
                 }
 
+                // 🟢 Enviar fecha de nacimiento al controlador
                 await _controller.GuardarSocioAsync(
-                    _socioId, clave, nombre, apellido, telefono, email, foto, observaciones, activo);
+                    _socioId, clave, nombre, apellido, telefono, email, fechaNacimiento, foto, observaciones, activo);
             },
             "No se pudo guardar el socio.",
             panelCampos, btnGuardar, btnCancelar);
             _guardando = false;
 
             if (guardado && !IsDisposed)
-                DialogResult = DialogResult.OK; // cierra el diálogo; el grid se recarga solo
+                DialogResult = DialogResult.OK;
         }
 
         private static void Invalido(string mensaje, Control campo)
@@ -416,11 +414,11 @@ namespace Presentacion.Forms.Socios
         {
             if (_guardando)
             {
-                e.Cancel = true; // no cerrar mientras se está guardando
+                e.Cancel = true;
             }
             else
             {
-                DetenerCamara(); // libera la cámara siempre que se cierre el formulario
+                DetenerCamara();
             }
 
             base.OnFormClosing(e);
@@ -428,7 +426,7 @@ namespace Presentacion.Forms.Socios
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            MostrarImagen(null); // libera la imagen que tenía el PictureBox
+            MostrarImagen(null);
             base.OnFormClosed(e);
         }
     }

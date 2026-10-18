@@ -59,32 +59,31 @@ namespace Presentacion.Forms.Socios
         }
 
         // Las columnas se definen una sola vez (no en cada recarga).
-        // "Nombre" y "Apellido" por separado ya no se muestran: "Nombre completo" los contiene.
         private void ConfigurarColumnas()
         {
             dgvSocios.AutoGenerateColumns = false;
 
             dgvSocios.AgregarTexto(nameof(SocioViewModel.SocioID), "ID", 45);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Clave), "Clave", 75, 70);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 200, 130);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 190, 130);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Telefono), "Teléfono", 100, 90);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.Email), "Correo", 150, 110);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.Email), "Correo", 140, 110);
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.FechaNacimiento), "Nacimiento", 100, 90, "dd/MM/yyyy");
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Estado), "Estado", 80, 70);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+            dgvSocios.AgregarTexto(nameof(SocioViewModel.CreatedAt), "Registro", 110, 90, "dd/MM/yyyy");
         }
 
         private async Task CargarSociosAsync(int? idASeleccionar = null)
         {
-            // Si no se pide otro, se conserva el socio seleccionado.
             int? idObjetivo = idASeleccionar ?? SocioSeleccionado?.SocioID;
 
             await FormHelper.EjecutarAsync(async () =>
             {
                 var socios = await _controller.ObtenerSociosAsync(true);
-                if (IsDisposed) return; // el usuario cambió de módulo mientras cargaba
+                if (IsDisposed) return;
 
                 _todos = socios.ToList();
-                AplicarFiltro(idObjetivo); // vuelve a aplicar lo que haya escrito en el buscador
+                AplicarFiltro(idObjetivo);
             },
             "No se pudieron cargar los socios.",
             flowAcciones);
@@ -92,7 +91,6 @@ namespace Presentacion.Forms.Socios
 
         // ───────────── Búsqueda ─────────────
 
-        // Se espera un instante tras la última tecla para no filtrar en cada letra.
         private void txtBuscar_TextChanged(object? sender, EventArgs e)
         {
             temporizadorBusqueda.Stop();
@@ -110,13 +108,13 @@ namespace Presentacion.Forms.Socios
             if (e.KeyCode == Keys.Escape && txtBuscar.TextLength > 0)
             {
                 e.SuppressKeyPress = true;
-                txtBuscar.Clear(); // dispara TextChanged y limpia el filtro
+                txtBuscar.Clear();
             }
             else if (e.KeyCode == Keys.Enter)
             {
                 e.SuppressKeyPress = true;
                 temporizadorBusqueda.Stop();
-                AplicarFiltro(); // sin esperar
+                AplicarFiltro();
             }
         }
 
@@ -124,8 +122,6 @@ namespace Presentacion.Forms.Socios
         {
             int? idObjetivo = idASeleccionar ?? SocioSeleccionado?.SocioID;
 
-            // Cada palabra escrita debe aparecer en algún dato del socio, sin importar acentos ni mayúsculas:
-            // "juan 55" encuentra a Juan Pérez con teléfono 55...
             var palabras = Normalizar(txtBuscar.Text)
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -137,7 +133,6 @@ namespace Presentacion.Forms.Socios
                     return palabras.All(texto.Contains);
                 }).ToList();
 
-            // Se recuerda el orden elegido para reaplicarlo tras volver a enlazar.
             var columnaOrden = dgvSocios.SortedColumn;
             var sentidoOrden = dgvSocios.SortOrder;
 
@@ -193,7 +188,7 @@ namespace Presentacion.Forms.Socios
                     if (_vista[i].SocioID != id.Value) continue;
 
                     dgvSocios.Rows[i].Selected = true;
-                    dgvSocios.CurrentCell = dgvSocios.Rows[i].Cells[0]; // también hace scroll hasta la fila
+                    dgvSocios.CurrentCell = dgvSocios.Rows[i].Cells[0];
                     break;
                 }
             }
@@ -201,7 +196,6 @@ namespace Presentacion.Forms.Socios
             ActualizarEstadoBotones();
         }
 
-        // Todas las acciones sobre un socio solo tienen sentido con una fila seleccionada.
         private void ActualizarEstadoBotones()
         {
             var socio = SocioSeleccionado;
@@ -220,7 +214,6 @@ namespace Presentacion.Forms.Socios
 
         private void dgvSocios_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
 
-        // Socios inactivos en gris, y "Activo" en verde.
         private void dgvSocios_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= _vista.Count || e.CellStyle is null) return;
@@ -249,7 +242,7 @@ namespace Presentacion.Forms.Socios
         private async void btnEditar_Click(object? sender, EventArgs e)
         {
             var socio = SocioSeleccionado;
-            if (socio == null) return; // el botón ya está deshabilitado sin selección; esto es solo defensivo
+            if (socio == null) return;
 
             await AbrirModalSocioAsync(socio.SocioID);
         }
@@ -259,7 +252,7 @@ namespace Presentacion.Forms.Socios
             using var modal = new FrmSocioModal(_controller, socioId);
 
             if (modal.ShowDialog() == DialogResult.OK)
-                await CargarSociosAsync(socioId); // para un socio nuevo (null) se conserva la selección actual
+                await CargarSociosAsync(socioId);
         }
 
         private void btnInfo_Click(object? sender, EventArgs e)
@@ -284,7 +277,7 @@ namespace Presentacion.Forms.Socios
                 SesionUsuario.UsuarioID);
 
             if (modal.ShowDialog() == DialogResult.OK)
-                await CargarSociosAsync(socio.SocioID); // por si la membresía afectó los datos en pantalla
+                await CargarSociosAsync(socio.SocioID);
         }
 
         private async void btnDesactivar_Click(object? sender, EventArgs e)

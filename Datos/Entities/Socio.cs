@@ -14,6 +14,7 @@ namespace Datos.Entities
         public string Apellido { get; set; } = string.Empty;
         public string? Telefono { get; set; }
         public string? Email { get; set; }
+        public DateTime? FechaNacimiento { get; set; }
         public string? Foto { get; set; }
         public string? Observaciones { get; set; }
 

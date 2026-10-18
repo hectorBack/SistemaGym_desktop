@@ -77,5 +77,37 @@ namespace Presentacion.Forms.Configuracion
                 btnGuardar.Enabled = true;
             }
         }
+
+        // 🟢 Método para manejar la acción del botón de prueba de correo
+        private async void btnProbarCorreo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                btnProbarCorreo.Enabled = false;
+                Cursor = Cursors.WaitCursor;
+
+                string emailDestino = txtEmail.Text.Trim();
+
+                if (string.IsNullOrWhiteSpace(emailDestino))
+                {
+                    MessageBox.Show("Por favor ingresa un correo electrónico en el campo superior antes de realizar la prueba.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtEmail.Focus();
+                    return;
+                }
+
+                await _configuracionController.EnviarCorreoPruebaAsync(emailDestino);
+
+                MessageBox.Show($"Correo de prueba enviado exitosamente a: {emailDestino}\nRevisa tu bandeja de entrada o spam.", "Prueba Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudo enviar el correo de prueba. Asegúrate de guardar los cambios primero, que la contraseña de aplicación de 16 caracteres de Gmail sea correcta y tengas conexión a internet.\n\nDetalle: {ex.Message}", "Error de Envío", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+                btnProbarCorreo.Enabled = true;
+            }
+        }
     }
 }

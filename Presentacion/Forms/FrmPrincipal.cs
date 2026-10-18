@@ -14,6 +14,7 @@ using Presentacion.Forms.Compras;
 using Presentacion.Forms.Reportes;
 using Presentacion.Forms.Corte;
 using Presentacion.Forms.Configuracion;
+using Negocio.Interfaces;
 
 namespace Presentacion.Forms
 {
@@ -45,6 +46,7 @@ namespace Presentacion.Forms
 
         private readonly UsuarioDto _usuarioSesion;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IEmailService _emailService;
         private readonly List<ModuloMenu> _modulos = new();
 
         private Form _formularioActivo;
@@ -60,11 +62,12 @@ namespace Presentacion.Forms
         /// </summary>
         public bool CerrarSesionSolicitado { get; private set; }
 
-        public FrmPrincipal(UsuarioDto usuario, IServiceProvider serviceProvider)
+        public FrmPrincipal(UsuarioDto usuario, IServiceProvider serviceProvider, IEmailService emailService)
         {
             // Se validan una sola vez aquí, no en cada clic.
             _usuarioSesion = usuario ?? throw new ArgumentNullException(nameof(usuario));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
 
             InitializeComponent();
 
@@ -72,6 +75,7 @@ namespace Presentacion.Forms
             btnUsuarioMenu.Text = $"{_usuarioSesion.NombreCompleto} ▾";
 
             ConfigurarMenu();
+            _ = VerYEnviarFelicitacionesAsync();
 
             // Cuando exista el dashboard de inicio, ábrelo aquí:
             // AbrirFormulario(typeof(FrmDashboard), null);
@@ -201,6 +205,28 @@ namespace Presentacion.Forms
             // Program.cs vuelve a mostrar el login al ver CerrarSesionSolicitado = true.
             CerrarSesionSolicitado = true;
             Close();
+        }
+
+        private async Task VerYEnviarFelicitacionesAsync()
+        {
+            try
+            {
+                // Se ejecuta en segundo plano para no congelar la apertura de la ventana principal
+                await Task.Run(async () =>
+                {
+                    // Nota: Si usas Scopes independientes en servicios EF Core, 
+                    // puedes abrir un scope temporal aquí para evitar conflictos de concurrencia.
+                    using var scope = _serviceProvider.CreateScope();
+                    var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                    await emailService.EnviarFelicitacionesCumpleanosAsync();
+                    await emailService.EnviarRecordatorioVencimientoAsync();
+                });
+            }
+            catch (Exception ex)
+            {
+                // Los errores de correo en segundo plano no deben interrumpir la apertura del sistema
+                System.Diagnostics.Debug.WriteLine($"Error al enviar felicitaciones automáticas: {ex.Message}");
+            }
         }
 
         // Si se cierra la ventana con un módulo abierto, también se libera su scope.

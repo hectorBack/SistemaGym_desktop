@@ -112,6 +112,11 @@ namespace Presentacion.Controller
             await _configuracionService.GuardarConfigCorreosAsync(dto);
         }
 
+        public async Task EnviarCorreoPruebaAsync(string emailDestino)
+        {
+            await _configuracionService.EnviarCorreoPruebaAsync(emailDestino);
+        }
+
         #endregion
 
         #region Consultas Generales

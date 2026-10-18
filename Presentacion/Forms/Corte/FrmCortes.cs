@@ -1,4 +1,5 @@
-﻿using Presentacion.Controller;
+﻿using Negocio.Interfaces;
+using Presentacion.Controller;
 using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
@@ -18,6 +19,7 @@ namespace Presentacion.Forms.Corte
         private readonly CorteController _corteController;
         private readonly MovimientoController _movimientoController;
         private readonly ConfiguracionController _configuracionController;
+        private readonly IEmailService _emailService;
         private readonly int _usuarioId;
 
         // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
@@ -29,11 +31,13 @@ namespace Presentacion.Forms.Corte
             CorteController corteController,
             MovimientoController movimientoController,
             ConfiguracionController configuracionController,
+            IEmailService emailService,
             int? usuarioIdSesion = null)
         {
             _corteController = corteController ?? throw new ArgumentNullException(nameof(corteController));
             _movimientoController = movimientoController ?? throw new ArgumentNullException(nameof(movimientoController));
             _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             _usuarioId = usuarioIdSesion is > 0 ? usuarioIdSesion.Value : SesionUsuario.UsuarioID;
 
             InitializeComponent();
@@ -225,7 +229,7 @@ namespace Presentacion.Forms.Corte
 
             if (!leida || IsDisposed) return;
 
-            using var modal = new FrmCorteModal(_corteController, _movimientoController, efectivoInicialPredeterminado, _usuarioId);
+            using var modal = new FrmCorteModal(_corteController, _movimientoController, _emailService, efectivoInicialPredeterminado, _usuarioId);
 
             if (modal.ShowDialog() == DialogResult.OK)
                 await RecargarAsync();

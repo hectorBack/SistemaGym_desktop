@@ -19,6 +19,7 @@ namespace Negocio.Services
         private readonly IValidator<CorteConfiguracionDto> _corteConfigValidator;
         private readonly IValidator<GimnasioConfiguracionDto> _gimnasioConfigValidator;
         private readonly IValidator<CorreosConfiguracionDto> _correosConfigValidator;
+        private readonly IEmailService _emailService;
 
         // Claves constantes para el Corte de Caja
         public const string CLAVE_EFECTIVO_INICIAL = CajaConstantes.ClaveEfectivoInicial;
@@ -42,12 +43,14 @@ namespace Negocio.Services
             IUnitOfWork unitOfWork,
             IValidator<CorteConfiguracionDto> corteConfigValidator,
             IValidator<GimnasioConfiguracionDto> gimnasioConfigValidator,
-            IValidator<CorreosConfiguracionDto> correosConfigValidator)
+            IValidator<CorreosConfiguracionDto> correosConfigValidator,
+            IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _corteConfigValidator = corteConfigValidator;
             _gimnasioConfigValidator = gimnasioConfigValidator;
             _correosConfigValidator = correosConfigValidator;
+            _emailService = emailService;
         }
 
         public async Task<CorteConfiguracionDto> ObtenerConfigCorteCajaAsync()
@@ -198,6 +201,19 @@ namespace Negocio.Services
                 "Indica si se envían felicitaciones automáticas por correo electrónico");
 
             await _unitOfWork.SaveChangesAsync();
-        }  
+        }
+
+        public async Task EnviarCorreoPruebaAsync(string destinatario)
+        {
+            if (string.IsNullOrWhiteSpace(destinatario))
+            {
+                throw new BusinessException("Debe ingresar y guardar un correo electrónico válido antes de realizar una prueba.");
+            }
+
+            string asunto = "Prueba de Configuración - Sistema de Gimnasio";
+            string mensaje = "<h3>¡Prueba de correo exitosa!</h3><p>Si estás leyendo este mensaje, tu configuración de Gmail y la contraseña de aplicación funcionan correctamente en el sistema de gimnasio.</p>";
+
+            await _emailService.EnviarCorreoAsync(destinatario, asunto, mensaje);
+        }
     }
 }

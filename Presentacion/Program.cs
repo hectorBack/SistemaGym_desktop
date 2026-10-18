@@ -126,6 +126,7 @@ namespace Presentacion
             services.AddScoped<IReporteService, ReporteService>();
             services.AddScoped<ICorteService, CorteService>();
             services.AddScoped<IConfiguracionService, ConfiguracionService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<CajaHelper>(); // apertura de cortes y movimientos de caja compartidos
 
 

@@ -31,6 +31,10 @@ namespace Negocio.Validators
                 .EmailAddress().When(x => !string.IsNullOrEmpty(x.Email))
                 .WithMessage("El formato del correo electrónico no es válido.")
                 .MaximumLength(100).WithMessage("El correo electrónico no puede exceder los 100 caracteres.");
+
+            RuleFor(x => x.FechaNacimiento)
+                .LessThanOrEqualTo(DateTime.Today).When(x => x.FechaNacimiento.HasValue)
+                .WithMessage("La fecha de nacimiento no puede ser una fecha futura.");
         }
     }
 
@@ -60,6 +64,10 @@ namespace Negocio.Validators
                 .EmailAddress().When(x => !string.IsNullOrEmpty(x.Email))
                 .WithMessage("El formato del correo electrónico no es válido.")
                 .MaximumLength(100).WithMessage("El correo electrónico no puede exceder los 100 caracteres.");
+
+            RuleFor(x => x.FechaNacimiento)
+                .LessThanOrEqualTo(DateTime.Today).When(x => x.FechaNacimiento.HasValue)
+                .WithMessage("La fecha de nacimiento no puede ser una fecha futura.");
         }
     }
 }

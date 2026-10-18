@@ -58,6 +58,7 @@ namespace Negocio.Services
                 Apellido = dto.Apellido.Trim(),
                 Telefono = LimpiarOpcional(dto.Telefono),
                 Email = LimpiarOpcional(dto.Email),
+                FechaNacimiento = dto.FechaNacimiento,
                 Foto = dto.Foto,
                 Observaciones = LimpiarOpcional(dto.Observaciones),
                 Activo = true
@@ -86,6 +87,7 @@ namespace Negocio.Services
             socio.Apellido = dto.Apellido.Trim();
             socio.Telefono = LimpiarOpcional(dto.Telefono);
             socio.Email = LimpiarOpcional(dto.Email);
+            socio.FechaNacimiento = dto.FechaNacimiento;
             socio.Foto = dto.Foto;
             socio.Observaciones = LimpiarOpcional(dto.Observaciones);
             socio.Activo = dto.Activo;
@@ -192,6 +194,7 @@ namespace Negocio.Services
             Apellido = s.Apellido,
             Telefono = s.Telefono,
             Email = s.Email,
+            FechaNacimiento = s.FechaNacimiento,
             Foto = s.Foto,
             Observaciones = s.Observaciones,
             Activo = s.Activo,

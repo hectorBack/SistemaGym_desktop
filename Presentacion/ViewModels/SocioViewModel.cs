@@ -15,6 +15,7 @@ namespace Presentacion.ViewModels
         public string NombreCompleto => $"{Nombre} {Apellido}";
         public string? Telefono { get; set; }
         public string? Email { get; set; }
+        public DateTime? FechaNacimiento { get; set; }
         public string? Foto { get; set; }
         public string? Observaciones { get; set; }
         public bool Activo { get; set; }

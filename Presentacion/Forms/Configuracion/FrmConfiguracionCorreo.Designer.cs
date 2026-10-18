@@ -31,6 +31,7 @@
             chkFelicitaciones = new CheckBox();
 
             btnGuardar = new Button();
+            btnProbarCorreo = new Button(); // 🟢 Declaración del botón de prueba
 
             panelTop.SuspendLayout();
             panelContenido.SuspendLayout();
@@ -71,6 +72,7 @@
             panelContenido.Controls.Add(chkRecordatorio);
             panelContenido.Controls.Add(chkFelicitaciones);
             panelContenido.Controls.Add(btnGuardar);
+            panelContenido.Controls.Add(btnProbarCorreo); // 🟢 Añadido al panel
             panelContenido.Dock = DockStyle.Fill;
             panelContenido.Location = new Point(0, 70);
             panelContenido.Margin = new Padding(3, 4, 3, 4);
@@ -172,6 +174,23 @@
             btnGuardar.Click += btnGuardar_Click;
 
             // 
+            // btnProbarCorreo
+            // 
+            btnProbarCorreo.BackColor = Color.FromArgb(40, 167, 69); // Color verde distintivo para la prueba
+            btnProbarCorreo.FlatAppearance.BorderSize = 0;
+            btnProbarCorreo.FlatStyle = FlatStyle.Flat;
+            btnProbarCorreo.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            btnProbarCorreo.ForeColor = Color.White;
+            btnProbarCorreo.Location = new Point(230, 350);
+            btnProbarCorreo.Margin = new Padding(3, 4, 3, 4);
+            btnProbarCorreo.Name = "btnProbarCorreo";
+            btnProbarCorreo.Size = new Size(180, 42);
+            btnProbarCorreo.TabIndex = 7;
+            btnProbarCorreo.Text = "Probar Correo";
+            btnProbarCorreo.UseVisualStyleBackColor = false;
+            btnProbarCorreo.Click += btnProbarCorreo_Click;
+
+            // 
             // FrmConfiguracionCorreos
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -206,5 +225,6 @@
         private CheckBox chkRecordatorio;
         private CheckBox chkFelicitaciones;
         private Button btnGuardar;
+        private Button btnProbarCorreo;
     }
 }

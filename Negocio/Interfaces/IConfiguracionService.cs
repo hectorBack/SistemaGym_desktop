@@ -12,5 +12,7 @@ namespace Negocio.Interfaces
 
         Task<CorreosConfiguracionDto> ObtenerConfigCorreosAsync();
         Task GuardarConfigCorreosAsync(CorreosConfiguracionDto dto);
+
+        Task EnviarCorreoPruebaAsync(string destinatario);
     }
 }
