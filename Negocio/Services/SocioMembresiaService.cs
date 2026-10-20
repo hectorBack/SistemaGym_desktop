@@ -63,14 +63,33 @@ namespace Negocio.Services
             if (membresia == null || !membresia.Activo)
                 throw new BusinessException("La membresía seleccionada no existe o no se encuentra activa.");
 
+            // 🟢 NUEVA VALIDACIÓN: Verificar si el socio tiene alguna membresía en estado "Parcial" (con pagos pendientes)
+            var historialesSocio = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(dto.SocioID);
+
+            foreach (var hist in historialesSocio)
+            {
+                if (hist.Activo && hist.Estado != EstadoCancelada)
+                {
+                    // Calculamos lo pagado de esa membresía
+                    decimal totalPagadoHist = hist.Pagos?.Where(p => p.Activo).Sum(p => p.Monto) ?? 0;
+                    decimal precioMembresiaHist = hist.Membresia?.Precio ?? 0;
+
+                    // Si el estado es "Parcial" o el total pagado es menor al precio total, bloqueamos la asignación
+                    if (string.Equals(hist.Estado, "Parcial", StringComparison.OrdinalIgnoreCase) || (precioMembresiaHist > 0 && totalPagadoHist < precioMembresiaHist))
+                    {
+                        throw new BusinessException(
+                            $"El socio tiene una membresía previa ('{hist.Membresia?.Nombre}') en estado Parcial con saldo pendiente. " +
+                            "Debe liquidar el pago total de la membresía actual antes de poder asignar una nueva.");
+                    }
+                }
+            }
+
             // Solo la fecha: evita que la hora de captura mueva el vencimiento
             var fechaInicio = dto.FechaInicio.Date;
             var fechaFin = fechaInicio.AddDays(membresia.DuracionDias);
 
             // No permitir periodos encimados con otra membresía no cancelada del mismo socio.
-            // Para renovar por adelantado basta elegir como inicio la fecha de vencimiento de la actual.
-            var existentes = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(dto.SocioID);
-            var choque = existentes.FirstOrDefault(sm =>
+            var choque = historialesSocio.FirstOrDefault(sm =>
                 sm.Activo &&
                 sm.Estado != EstadoCancelada &&
                 fechaInicio < sm.FechaFin.Date &&
@@ -90,8 +109,6 @@ namespace Negocio.Services
                 FechaInicio = fechaInicio,
                 FechaFin = fechaFin,
                 Estado = EstadoActiva
-                // Si tu tabla TIENE la columna Precio, descomenta para congelar el precio al momento de la venta:
-                // Precio = membresia.Precio
             };
 
             await _unitOfWork.SocioMembresia.AgregarAsync(nuevaSocioMembresia);

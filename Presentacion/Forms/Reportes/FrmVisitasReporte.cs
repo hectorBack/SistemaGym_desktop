@@ -168,17 +168,20 @@ namespace Presentacion.Forms.Reportes
             }
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Eliminar definitivamente la visita de \"{visita.Nombre}\" del {visita.FechaRegistro}?\n\nEsta acción no se puede deshacer.",
-                    "Confirmar eliminación",
+                    $"¿Desea cancelar y dar de baja la visita de \"{visita.Nombre}\" del {visita.FechaRegistro}?\n\nEsta acción generará el registro de devolución correspondiente en caja.",
+                    "Confirmar cancelación de visita",
                     destructiva: true))
                 return;
 
-            bool eliminada = await FormHelper.EjecutarAsync(
-                async () => await _visitaController.EliminarFisicoAsync(visita.VisitaID),
-                "No se pudo eliminar la visita.",
+            // Obtenemos el usuario actual de la sesión para registrar el movimiento de caja
+            int usuarioId = SesionUsuario.UsuarioID;
+
+            bool cancelada = await FormHelper.EjecutarAsync(
+                async () => await _visitaController.CancelarVisitaAsync(visita.VisitaID, usuarioId, "Cancelada desde reporte de visitas"),
+                "No se pudo cancelar la visita.",
                 panelTop, panelFiltros);
 
-            if (eliminada && !IsDisposed)
+            if (cancelada && !IsDisposed)
                 await BuscarPorFechasAsync();
         }
 
