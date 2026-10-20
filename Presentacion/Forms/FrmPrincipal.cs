@@ -15,6 +15,7 @@ using Presentacion.Forms.Reportes;
 using Presentacion.Forms.Corte;
 using Presentacion.Forms.Configuracion;
 using Negocio.Interfaces;
+using Presentacion.Forms.Inicio;
 
 namespace Presentacion.Forms
 {
@@ -38,6 +39,7 @@ namespace Presentacion.Forms
             public const string Reportes = "Reportes";
             public const string CorteDeCaja = "Corte de Caja";
             public const string Configuracion = "Configuracion";
+            public const string Inicio = "Inicio";
         }
 
         // Un módulo del menú: su botón, el permiso necesario y el formulario que abre.
@@ -102,6 +104,7 @@ namespace Presentacion.Forms
          new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
          new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
          new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
+         new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
             });
 
             // Búsqueda rápida y sin distinguir mayúsculas de minúsculas.

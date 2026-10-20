@@ -24,6 +24,7 @@ using Presentacion.Forms.Reportes;
 using Presentacion.Forms.Corte;
 using Presentacion.Forms.Configuracion;
 using Presentacion.Helpers;
+using Presentacion.Forms.Inicio;
 
 namespace Presentacion
 {
@@ -147,6 +148,7 @@ namespace Presentacion
             services.AddTransient<ReporteController>();
             services.AddTransient<CorteController>();
             services.AddTransient<ConfiguracionController>();
+            services.AddTransient<InicioController>();
 
 
             // 5. Formularios
@@ -166,6 +168,7 @@ namespace Presentacion
             services.AddTransient<FrmReportes>();
             services.AddTransient<FrmCortes>();
             services.AddTransient<FrmConfiguraciones>();
+            services.AddTransient<FrmInicio>();
 
         }
     }

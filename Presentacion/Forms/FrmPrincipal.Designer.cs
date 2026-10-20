@@ -40,6 +40,7 @@
             menuUsuario = new ContextMenuStrip(components);
             itemCerrarSesion = new ToolStripMenuItem();
             panelContenedor = new Panel();
+            btnInicio = new FontAwesome.Sharp.IconButton();
             panelSideMenu.SuspendLayout();
             panelLogo.SuspendLayout();
             panelSuperior.SuspendLayout();
@@ -49,6 +50,7 @@
             // panelSideMenu
             // 
             panelSideMenu.BackColor = Color.FromArgb(15, 42, 79);
+            panelSideMenu.Controls.Add(btnInicio);
             panelSideMenu.Controls.Add(btnConfiguracion);
             panelSideMenu.Controls.Add(btnCorte);
             panelSideMenu.Controls.Add(btnReportes);
@@ -68,7 +70,7 @@
             panelSideMenu.Location = new Point(0, 0);
             panelSideMenu.Margin = new Padding(3, 4, 3, 4);
             panelSideMenu.Name = "panelSideMenu";
-            panelSideMenu.Size = new Size(229, 700);
+            panelSideMenu.Size = new Size(229, 733);
             panelSideMenu.TabIndex = 0;
             // 
             // btnConfiguracion
@@ -510,15 +512,41 @@
             panelContenedor.Location = new Point(229, 50);
             panelContenedor.Margin = new Padding(3, 4, 3, 4);
             panelContenedor.Name = "panelContenedor";
-            panelContenedor.Size = new Size(971, 650);
+            panelContenedor.Size = new Size(971, 683);
             panelContenedor.TabIndex = 1;
+            // 
+            // btnInicio
+            // 
+            btnInicio.BackColor = Color.FromArgb(15, 42, 79);
+            btnInicio.Dock = DockStyle.Top;
+            btnInicio.FlatAppearance.BorderSize = 0;
+            btnInicio.FlatAppearance.MouseDownBackColor = Color.FromArgb(18, 48, 88);
+            btnInicio.FlatAppearance.MouseOverBackColor = Color.FromArgb(23, 58, 105);
+            btnInicio.FlatStyle = FlatStyle.Flat;
+            btnInicio.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnInicio.ForeColor = Color.FromArgb(230, 238, 252);
+            btnInicio.IconChar = FontAwesome.Sharp.IconChar.Cog;
+            btnInicio.IconColor = Color.FromArgb(230, 238, 252);
+            btnInicio.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnInicio.IconSize = 26;
+            btnInicio.ImageAlign = ContentAlignment.MiddleLeft;
+            btnInicio.Location = new Point(0, 686);
+            btnInicio.Margin = new Padding(3, 4, 3, 4);
+            btnInicio.Name = "btnInicio";
+            btnInicio.Padding = new Padding(15, 0, 0, 0);
+            btnInicio.Size = new Size(229, 44);
+            btnInicio.TabIndex = 15;
+            btnInicio.Text = "Inicio";
+            btnInicio.TextAlign = ContentAlignment.MiddleLeft;
+            btnInicio.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnInicio.UseVisualStyleBackColor = false;
             // 
             // FrmPrincipal
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
-            ClientSize = new Size(1200, 700);
+            ClientSize = new Size(1200, 733);
             Controls.Add(panelContenedor);
             Controls.Add(panelSuperior);
             Controls.Add(panelSideMenu);
@@ -559,5 +587,6 @@
         private FontAwesome.Sharp.IconButton btnReportes;
         private FontAwesome.Sharp.IconButton btnCorte;
         private FontAwesome.Sharp.IconButton btnConfiguracion;
+        private FontAwesome.Sharp.IconButton btnInicio;
     }
 }

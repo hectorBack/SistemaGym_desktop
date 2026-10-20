@@ -273,8 +273,9 @@ VALUES (
 );
 
 UPDATE roles 
-SET ModulosPermitidos = '["Usuarios", "Roles", "Socios", "Membresias", "Clases", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldar", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos", "Categorias"]'
+SET ModulosPermitidos = '["Usuarios", "Roles", "Socios", "Membresias", "Clases", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldar", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos", "Categorias", "Inicio"]'
 WHERE Nombre = 'Administrador';
+
 
 -- 2. Rol Recepción / Operativo (Acceso limitado)
 INSERT INTO roles (Nombre, Descripcion, ModulosPermitidos) 
