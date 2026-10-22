@@ -27,5 +27,16 @@ namespace Presentacion.Controller
 
             await _respaldoService.GenerarRespaldoManualAsync(dto);
         }
+
+        // método para manejar la restauración desde la capa de presentación
+        public async Task RestaurarBaseDatosAsync(RestaurarViewModel model)
+        {
+            var dto = new RestaurarManualDto
+            {
+                RutaArchivo = model.RutaArchivo
+            };
+
+            await _respaldoService.RestaurarBaseDatosAsync(dto);
+        }
     }
 }

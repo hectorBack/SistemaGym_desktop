@@ -10,5 +10,6 @@ namespace Negocio.Interfaces
     public interface IRespaldoService
     {
         Task GenerarRespaldoManualAsync(RespaldoManualDto dto);
+        Task RestaurarBaseDatosAsync(RestaurarManualDto dto);
     }
 }

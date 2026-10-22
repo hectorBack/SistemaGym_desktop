@@ -111,6 +111,7 @@ namespace Presentacion
             services.AddScoped<IValidator<CorreosConfiguracionDto>, CorreosConfiguracionValidator>();
             services.AddScoped<IValidator<RespaldosConfiguracionDto>, RespaldosConfiguracionValidator>();
             services.AddScoped<IValidator<RespaldoManualDto>, RespaldoManualValidator>();
+            services.AddScoped<IValidator<RestaurarManualDto>, RestaurarManualValidator>();
 
             // 3. Servicios de Negocio
             services.AddScoped<IUsuarioService, UsuarioService>();

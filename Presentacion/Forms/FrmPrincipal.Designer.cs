@@ -21,6 +21,7 @@
             panelSideMenu = new Panel();
             btnConfiguracion = new FontAwesome.Sharp.IconButton();
             btnRespaldosManuales = new FontAwesome.Sharp.IconButton();
+            btnRestaurar = new FontAwesome.Sharp.IconButton();
             btnCorte = new FontAwesome.Sharp.IconButton();
             btnReportes = new FontAwesome.Sharp.IconButton();
             btnCompras = new FontAwesome.Sharp.IconButton();
@@ -54,6 +55,7 @@
             panelSideMenu.Controls.Add(btnInicio);
             panelSideMenu.Controls.Add(btnConfiguracion);
             panelSideMenu.Controls.Add(btnRespaldosManuales);
+            panelSideMenu.Controls.Add(btnRestaurar);
             panelSideMenu.Controls.Add(btnCorte);
             panelSideMenu.Controls.Add(btnReportes);
             panelSideMenu.Controls.Add(btnCompras);
@@ -100,6 +102,33 @@
             btnConfiguracion.TextAlign = ContentAlignment.MiddleLeft;
             btnConfiguracion.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnConfiguracion.UseVisualStyleBackColor = false;
+            // 
+            // btnRestaurar
+            // 
+            btnRestaurar.BackColor = Color.FromArgb(15, 42, 79);
+            btnRestaurar.Dock = DockStyle.Top;
+            btnRestaurar.FlatAppearance.BorderSize = 0;
+            btnRestaurar.FlatAppearance.MouseDownBackColor = Color.FromArgb(18, 48, 88);
+            btnRestaurar.FlatAppearance.MouseOverBackColor = Color.FromArgb(23, 58, 105);
+            btnRestaurar.FlatStyle = FlatStyle.Flat;
+            btnRestaurar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnRestaurar.ForeColor = Color.FromArgb(230, 238, 252);
+            btnRestaurar.IconChar = FontAwesome.Sharp.IconChar.RotateBack; // O el icono que prefieras de FontAwesome
+            btnRestaurar.IconColor = Color.FromArgb(230, 238, 252);
+            btnRestaurar.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnRestaurar.IconSize = 26;
+            btnRestaurar.ImageAlign = ContentAlignment.MiddleLeft;
+            btnRestaurar.Location = new Point(0, 730);
+            btnRestaurar.Margin = new Padding(3, 4, 3, 4);
+            btnRestaurar.Name = "btnRestaurar";
+            btnRestaurar.Padding = new Padding(15, 0, 0, 0);
+            btnRestaurar.Size = new Size(229, 44);
+            btnRestaurar.TabIndex = 17;
+            btnRestaurar.Text = "  Restaurar";
+            btnRestaurar.TextAlign = ContentAlignment.MiddleLeft;
+            btnRestaurar.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnRestaurar.UseVisualStyleBackColor = false;
+            btnRestaurar.Click += btnRestaurar_Click;
 
             // 
             // btnRespaldosManuales
@@ -619,5 +648,6 @@
         private FontAwesome.Sharp.IconButton btnConfiguracion;
         private FontAwesome.Sharp.IconButton btnInicio;
         private FontAwesome.Sharp.IconButton btnRespaldosManuales;
+        private FontAwesome.Sharp.IconButton btnRestaurar;
     }
 }

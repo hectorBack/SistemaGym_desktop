@@ -42,6 +42,7 @@ namespace Presentacion.Forms
             public const string Configuracion = "Configuracion";
             public const string Inicio = "Inicio";
             public const string Respaldos = "Respaldos";
+            public const string Restaurar = "Restaurar";
         }
 
         // Un módulo del menú: su botón, el permiso necesario y el formulario que abre.
@@ -325,6 +326,64 @@ namespace Presentacion.Forms
                         MessageBox.Show(
                             $"No se pudo completar el respaldo: {ex.Message}",
                             "Error de Respaldo",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        Cursor = Cursors.Default;
+                    }
+                }
+            }
+        }
+
+        private async void btnRestaurar_Click(object? sender, EventArgs e)
+        {
+            var confirmacion = MessageBox.Show(
+                "ADVERTENCIA: Restaurar una base de datos reemplazará toda la información actual con los datos del respaldo seleccionado.\n\n¿Desea continuar?",
+                "Confirmar Restauración",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirmacion != DialogResult.Yes) return;
+
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = "Seleccionar archivo de respaldo SQL";
+                openFileDialog.Filter = "Archivos SQL (*.sql)|*.sql|Todos los archivos (*.*)|*.*";
+                openFileDialog.CheckFileExists = true;
+                openFileDialog.CheckPathExists = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string rutaArchivoSeleccionado = openFileDialog.FileName;
+
+                    try
+                    {
+                        Cursor = Cursors.WaitCursor;
+
+                        // Creamos un scope para invocar el servicio de respaldos/restauración de forma segura
+                        using var scope = _serviceProvider.CreateScope();
+                        var respaldoService = scope.ServiceProvider.GetRequiredService<IRespaldoService>();
+
+                        var dto = new RestaurarManualDto
+                        {
+                            RutaArchivo = rutaArchivoSeleccionado
+                        };
+
+                        await respaldoService.RestaurarBaseDatosAsync(dto);
+
+                        MessageBox.Show(
+                            "La base de datos se ha restaurado exitosamente.",
+                            "Restauración Exitosa",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"No se pudo completar la restauración: {ex.Message}",
+                            "Error de Restauración",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Error);
                     }
