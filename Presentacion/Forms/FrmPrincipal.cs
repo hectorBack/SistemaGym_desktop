@@ -22,31 +22,29 @@ namespace Presentacion.Forms
 {
     public partial class FrmPrincipal : Form
     {
-        // Nombres de módulo tal como se guardan en la BD (los mismos de FrmRolModal).
-        // Si alguno cambia, se corrige solo aquí.
+        // Nombres de módulo ordenados y limpios
         private static class Permiso
         {
-            public const string Productos = "Productos";
-            public const string Categorias = "Categorias";
+            public const string Inicio = "Inicio";
             public const string Ventas = "Ventas";
             public const string Membresias = "Membresias";
             public const string Socios = "Socios";
             public const string Registro = "Registro";
+            public const string Productos = "Productos";
+            public const string Categorias = "Categorias";
+            public const string Compras = "Compras";
             public const string Conceptos = "Conceptos";
             public const string Movimientos = "Movimientos";
             public const string Roles = "Roles";
             public const string Usuarios = "Usuarios";
-            public const string Compras = "Compras";
             public const string Reportes = "Reportes";
             public const string CorteDeCaja = "Corte de Caja";
             public const string Configuracion = "Configuracion";
-            public const string Inicio = "Inicio";
             public const string Respaldos = "Respaldos";
             public const string Restaurar = "Restaurar";
         }
 
         // Un módulo del menú: su botón, el permiso necesario y el formulario que abre.
-        // El aspecto del botón (icono, texto, colores) vive en el Designer.
         private sealed record ModuloMenu(IconButton Boton, string Permiso, Type Formulario);
 
         private readonly UsuarioDto _usuarioSesion;
@@ -59,19 +57,12 @@ namespace Presentacion.Forms
         private System.Windows.Forms.Timer? _timerRespaldo;
         private NotifyIcon? _notifyIconRespaldo;
 
-        // Cada módulo abierto trabaja con su propio scope (y por tanto su propio DbContext).
-        // Se libera al cerrar el módulo, así no se arrastran datos viejos entre pantallas.
         private IServiceScope? _scopeActivo;
 
-        /// <summary>
-        /// Es true cuando el usuario eligió "Cerrar sesión". Program.cs lo revisa para volver
-        /// a mostrar el login; si es false (se cerró la ventana con la X), la aplicación termina.
-        /// </summary>
         public bool CerrarSesionSolicitado { get; private set; }
 
         public FrmPrincipal(UsuarioDto usuario, IServiceProvider serviceProvider, IEmailService emailService)
         {
-            // Se validan una sola vez aquí, no en cada clic.
             _usuarioSesion = usuario ?? throw new ArgumentNullException(nameof(usuario));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
@@ -86,45 +77,41 @@ namespace Presentacion.Forms
 
             InicializarSistemaRespaldo();
 
-            // Cuando exista el dashboard de inicio, ábrelo aquí:
-            AbrirFormulario(typeof(FrmInicio), null);
+            // Abrir el inicio por defecto al arrancar
+            AbrirFormulario(typeof(FrmInicio), btnInicio);
         }
 
-        // ───────────── Menú lateral ─────────────
+        // ───────────── Menú lateral ordenado ─────────────
 
         private void ConfigurarMenu()
         {
-            // Para agregar un módulo nuevo: botón en el Designer + una línea aquí.
+            // 🟢 Orden lógico y visual de los botones en el menú lateral
             _modulos.AddRange(new ModuloMenu[]
             {
-         new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
-         new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
-         new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
-         new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
-         new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
-         new(btnRegistrarVisita, Permiso.Registro,      typeof(FrmRegistroVisita)),
-         new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
-         new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
-         new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
-         new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
-         new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
-         new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
-         new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
-         new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
-         new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
+                new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
+                new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
+                new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
+                new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
+                new(btnRegistrarVisita, Permiso.Registro,      typeof(FrmRegistroVisita)),
+                new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
+                new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
+                new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
+                new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
+                new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
+                new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
+                new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
+                new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
+                new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
+                new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
             });
 
-            // Búsqueda rápida y sin distinguir mayúsculas de minúsculas.
             var permitidos = new HashSet<string>(
                 _usuarioSesion.ModulosPermitidos ?? new List<string>(),
                 StringComparer.OrdinalIgnoreCase);
 
             foreach (var modulo in _modulos)
             {
-                // Ojo: ocultar el botón solo protege la interfaz.
-                // La capa de Negocio también debe validar el permiso en acciones sensibles.
                 modulo.Boton.Visible = permitidos.Contains(modulo.Permiso);
-
                 modulo.Boton.Click += (s, e) => AbrirFormulario(modulo.Formulario, modulo.Boton);
             }
         }
@@ -142,12 +129,8 @@ namespace Presentacion.Forms
 
         // ───────────── Formularios dentro del contenedor ─────────────
 
-        /// <summary>
-        /// Abre un formulario interno incrustado en panelContenedor, resuelto por inyección de dependencias.
-        /// </summary>
         private void AbrirFormulario(Type tipoFormulario, IconButton botonOrigen)
         {
-            // Si ya está abierto ese módulo, no lo cierres y reabras.
             if (_formularioActivo != null
                 && !_formularioActivo.IsDisposed
                 && _formularioActivo.GetType() == tipoFormulario)
@@ -158,8 +141,6 @@ namespace Presentacion.Forms
             if (_formularioActivo != null)
             {
                 _formularioActivo.Close();
-
-                // Si el formulario canceló su cierre (por ejemplo, cambios sin guardar), no se abre el nuevo.
                 if (!_formularioActivo.IsDisposed) return;
             }
 
@@ -211,8 +192,6 @@ namespace Presentacion.Forms
 
             if (resultado != DialogResult.Yes) return;
 
-            // Ya no se crea el login aquí: solo se avisa y se cierra.
-            // Program.cs vuelve a mostrar el login al ver CerrarSesionSolicitado = true.
             CerrarSesionSolicitado = true;
             Close();
         }
@@ -221,11 +200,8 @@ namespace Presentacion.Forms
         {
             try
             {
-                // Se ejecuta en segundo plano para no congelar la apertura de la ventana principal
                 await Task.Run(async () =>
                 {
-                    // Nota: Si usas Scopes independientes en servicios EF Core, 
-                    // puedes abrir un scope temporal aquí para evitar conflictos de concurrencia.
                     using var scope = _serviceProvider.CreateScope();
                     var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
                     await emailService.EnviarFelicitacionesCumpleanosAsync();
@@ -234,22 +210,19 @@ namespace Presentacion.Forms
             }
             catch (Exception ex)
             {
-                // Los errores de correo en segundo plano no deben interrumpir la apertura del sistema
                 System.Diagnostics.Debug.WriteLine($"Error al enviar felicitaciones automáticas: {ex.Message}");
             }
         }
 
         private void InicializarSistemaRespaldo()
         {
-            // Crear el NotifyIcon para las burbujas de notificación en la barra de tareas
             _notifyIconRespaldo = new NotifyIcon
             {
-                Icon = SystemIcons.Information, // O puedes usar un ícono personalizado de tu aplicación
+                Icon = SystemIcons.Information,
                 Text = "Sistema Gimnasio - Respaldo",
                 Visible = true
             };
 
-            // Configurar el Timer para que revise cada 1 minuto (60,000 milisegundos)
             _timerRespaldo = new System.Windows.Forms.Timer
             {
                 Interval = 60000
@@ -262,23 +235,18 @@ namespace Presentacion.Forms
         {
             try
             {
-                // Supongamos que deseas que el respaldo se ejecute automáticamente todos los días a las 20:00 hrs (8:00 PM)
-                // Puedes cambiar la hora según lo prefieras.
                 TimeSpan horaProgramada = new TimeSpan(20, 0, 0);
                 TimeSpan horaActual = DateTime.Now.TimeOfDay;
 
                 if (horaActual.Hours == horaProgramada.Hours && horaActual.Minutes >= horaProgramada.Minutes)
                 {
-                    // Creamos un scope para consultar el servicio de configuración de manera segura
                     using var scope = _serviceProvider.CreateScope();
                     var configuracionService = scope.ServiceProvider.GetRequiredService<IConfiguracionService>();
 
-                    // Obtenemos la ruta configurada en la pestaña de Respaldos (OneDrive)
                     var configRespaldos = await configuracionService.ObtenerConfigRespaldosAsync();
 
                     if (configRespaldos != null && !string.IsNullOrWhiteSpace(configRespaldos.RutaRespaldo))
                     {
-                        // Ejecutamos el respaldo mediante el Helper que creamos
                         await RespaldoHelper.EjecutarRespaldoAutomaticoAsync(configRespaldos.RutaRespaldo, _notifyIconRespaldo);
                     }
                 }
@@ -304,7 +272,6 @@ namespace Presentacion.Forms
                     {
                         Cursor = Cursors.WaitCursor;
 
-                        // Creamos un scope para invocar el servicio de respaldos de forma segura
                         using var scope = _serviceProvider.CreateScope();
                         var respaldoService = scope.ServiceProvider.GetRequiredService<IRespaldoService>();
 
@@ -362,7 +329,6 @@ namespace Presentacion.Forms
                     {
                         Cursor = Cursors.WaitCursor;
 
-                        // Creamos un scope para invocar el servicio de respaldos/restauración de forma segura
                         using var scope = _serviceProvider.CreateScope();
                         var respaldoService = scope.ServiceProvider.GetRequiredService<IRespaldoService>();
 
@@ -395,7 +361,6 @@ namespace Presentacion.Forms
             }
         }
 
-        // Si se cierra la ventana con un módulo abierto, también se libera su scope.
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _timerRespaldo?.Stop();
