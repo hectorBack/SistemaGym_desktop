@@ -16,6 +16,7 @@ using Presentacion.Forms.Corte;
 using Presentacion.Forms.Configuracion;
 using Negocio.Interfaces;
 using Presentacion.Forms.Inicio;
+using Negocio.Helpers;
 
 namespace Presentacion.Forms
 {
@@ -53,6 +54,8 @@ namespace Presentacion.Forms
 
         private Form _formularioActivo;
         private IconButton _botonActivo;
+        private System.Windows.Forms.Timer? _timerRespaldo;
+        private NotifyIcon? _notifyIconRespaldo;
 
         // Cada módulo abierto trabaja con su propio scope (y por tanto su propio DbContext).
         // Se libera al cerrar el módulo, así no se arrastran datos viejos entre pantallas.
@@ -79,8 +82,10 @@ namespace Presentacion.Forms
             ConfigurarMenu();
             _ = VerYEnviarFelicitacionesAsync();
 
+            InicializarSistemaRespaldo();
+
             // Cuando exista el dashboard de inicio, ábrelo aquí:
-            // AbrirFormulario(typeof(FrmDashboard), null);
+            AbrirFormulario(typeof(FrmInicio), null);
         }
 
         // ───────────── Menú lateral ─────────────
@@ -232,9 +237,68 @@ namespace Presentacion.Forms
             }
         }
 
+        private void InicializarSistemaRespaldo()
+        {
+            // Crear el NotifyIcon para las burbujas de notificación en la barra de tareas
+            _notifyIconRespaldo = new NotifyIcon
+            {
+                Icon = SystemIcons.Information, // O puedes usar un ícono personalizado de tu aplicación
+                Text = "Sistema Gimnasio - Respaldo",
+                Visible = true
+            };
+
+            // Configurar el Timer para que revise cada 1 minuto (60,000 milisegundos)
+            _timerRespaldo = new System.Windows.Forms.Timer
+            {
+                Interval = 60000
+            };
+            _timerRespaldo.Tick += TimerRespaldo_Tick;
+            _timerRespaldo.Start();
+        }
+
+        private async void TimerRespaldo_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Supongamos que deseas que el respaldo se ejecute automáticamente todos los días a las 20:00 hrs (8:00 PM)
+                // Puedes cambiar la hora según lo prefieras.
+                TimeSpan horaProgramada = new TimeSpan(20, 0, 0);
+                TimeSpan horaActual = DateTime.Now.TimeOfDay;
+
+                if (horaActual.Hours == horaProgramada.Hours && horaActual.Minutes >= horaProgramada.Minutes)
+                {
+                    // Creamos un scope para consultar el servicio de configuración de manera segura
+                    using var scope = _serviceProvider.CreateScope();
+                    var configuracionService = scope.ServiceProvider.GetRequiredService<IConfiguracionService>();
+
+                    // Obtenemos la ruta configurada en la pestaña de Respaldos (OneDrive)
+                    var configRespaldos = await configuracionService.ObtenerConfigRespaldosAsync();
+
+                    if (configRespaldos != null && !string.IsNullOrWhiteSpace(configRespaldos.RutaRespaldo))
+                    {
+                        // Ejecutamos el respaldo mediante el Helper que creamos
+                        await RespaldoHelper.EjecutarRespaldoAutomaticoAsync(configRespaldos.RutaRespaldo, _notifyIconRespaldo);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en el temporizador de respaldo automático: {ex.Message}");
+            }
+        }
+
         // Si se cierra la ventana con un módulo abierto, también se libera su scope.
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            _timerRespaldo?.Stop();
+            _timerRespaldo?.Dispose();
+
+            if (_notifyIconRespaldo != null)
+            {
+                _notifyIconRespaldo.Visible = false;
+                _notifyIconRespaldo.Dispose();
+            }
+
             _scopeActivo?.Dispose();
             _scopeActivo = null;
             base.OnFormClosed(e);

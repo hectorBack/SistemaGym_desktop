@@ -19,6 +19,7 @@ namespace Negocio.Services
         private readonly IValidator<CorteConfiguracionDto> _corteConfigValidator;
         private readonly IValidator<GimnasioConfiguracionDto> _gimnasioConfigValidator;
         private readonly IValidator<CorreosConfiguracionDto> _correosConfigValidator;
+        private readonly IValidator<RespaldosConfiguracionDto> _respaldosConfigValidator;
         private readonly IEmailService _emailService;
 
         // Claves constantes para el Corte de Caja
@@ -39,17 +40,22 @@ namespace Negocio.Services
         public const string CLAVE_CORREO_RECORDATORIO = "Correo_RecordatorioVencimiento";
         public const string CLAVE_CORREO_FELICITACIONES = "Correo_EnviarFelicitaciones";
 
+        // Claves constantes para la Configuracion de Respaldos
+        public const string CLAVE_RESPALDO_RUTA = "Respaldo_RutaDestino";
+
         public ConfiguracionService(
             IUnitOfWork unitOfWork,
             IValidator<CorteConfiguracionDto> corteConfigValidator,
             IValidator<GimnasioConfiguracionDto> gimnasioConfigValidator,
             IValidator<CorreosConfiguracionDto> correosConfigValidator,
+            IValidator<RespaldosConfiguracionDto> respaldosConfigValidator,
             IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _corteConfigValidator = corteConfigValidator;
             _gimnasioConfigValidator = gimnasioConfigValidator;
             _correosConfigValidator = correosConfigValidator;
+            _respaldosConfigValidator = respaldosConfigValidator;
             _emailService = emailService;
         }
 
@@ -86,7 +92,7 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        // 🟢 Implementación para Obtener los Datos del Gimnasio
+        // Implementación para Obtener los Datos del Gimnasio
         public async Task<GimnasioConfiguracionDto> ObtenerConfigGimnasioAsync()
         {
             var cfgNombre = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_GYM_NOMBRE);
@@ -107,7 +113,7 @@ namespace Negocio.Services
             };
         }
 
-        // 🟢 Implementación para Guardar los Datos del Gimnasio
+        // Implementación para Guardar los Datos del Gimnasio
         public async Task GuardarConfigGimnasioAsync(GimnasioConfiguracionDto dto)
         {
             var validationResult = await _gimnasioConfigValidator.ValidateAsync(dto);
@@ -214,6 +220,33 @@ namespace Negocio.Services
             string mensaje = "<h3>¡Prueba de correo exitosa!</h3><p>Si estás leyendo este mensaje, tu configuración de Gmail y la contraseña de aplicación funcionan correctamente en el sistema de gimnasio.</p>";
 
             await _emailService.EnviarCorreoAsync(destinatario, asunto, mensaje);
+        }
+
+        // Implementación para Obtener la Configuración de Respaldos
+        public async Task<RespaldosConfiguracionDto> ObtenerConfigRespaldosAsync()
+        {
+            var cfgRuta = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_RESPALDO_RUTA);
+
+            return new RespaldosConfiguracionDto
+            {
+                RutaRespaldo = cfgRuta?.Valor ?? string.Empty
+            };
+        }
+
+
+        // Implementación para Guardar la Configuración de Respaldos
+        public async Task GuardarConfigRespaldosAsync(RespaldosConfiguracionDto dto)
+        {
+            var validationResult = await _respaldosConfigValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+                throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_RESPALDO_RUTA,
+                (dto.RutaRespaldo ?? string.Empty).Trim(),
+                "Ruta o directorio seleccionado para almacenar los respaldos de la base de datos");
+
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

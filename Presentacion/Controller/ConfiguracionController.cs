@@ -127,5 +127,29 @@ namespace Presentacion.Controller
         }
 
         #endregion
+
+        #region Pestaña: Respaldos
+
+        public async Task<RespaldosConfiguracionViewModel> ObtenerConfigRespaldosAsync()
+        {
+            var dto = await _configuracionService.ObtenerConfigRespaldosAsync();
+
+            return new RespaldosConfiguracionViewModel
+            {
+                RutaRespaldo = dto.RutaRespaldo
+            };
+        }
+
+        public async Task GuardarConfigRespaldosAsync(RespaldosConfiguracionViewModel model)
+        {
+            var dto = new RespaldosConfiguracionDto
+            {
+                RutaRespaldo = model.RutaRespaldo
+            };
+
+            await _configuracionService.GuardarConfigRespaldosAsync(dto);
+        }
+
+        #endregion
     }
 }

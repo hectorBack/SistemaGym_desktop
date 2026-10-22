@@ -19,6 +19,7 @@ namespace Presentacion.Forms.Configuracion
         private FrmConfiguracionCorteCaja? _frmConfiguracionCorteCaja;
         private FrmConfiguracionDatosGimnasio? _frmConfiguracionGimnasioDatos;
         private FrmConfiguracionCorreos? _frmConfiguracionCorreos;
+        private FrmConfiguracionRespaldos _frmConfiguracionRespaldos;
 
         public FrmConfiguraciones(ConfiguracionController configuracionController)
         {
@@ -75,7 +76,7 @@ namespace Presentacion.Forms.Configuracion
                         break;
 
                     case "tabRespaldos":
-                        // Próximamente: CargarFormularioRespaldos();
+                        CargarFormularioRespaldos();
                         break;
 
                     case "tabMasConfiguraciones":
@@ -157,6 +158,27 @@ namespace Presentacion.Forms.Configuracion
 
             tabCorreos.Controls.Add(_frmConfiguracionCorreos);
             _frmConfiguracionCorreos.Show();
+        }
+
+        private void CargarFormularioRespaldos()
+        {
+            if (_frmConfiguracionRespaldos != null && !_frmConfiguracionRespaldos.IsDisposed)
+            {
+                return;
+            }
+
+            tabRespaldos.Controls.Clear();
+
+            _frmConfiguracionRespaldos = new FrmConfiguracionRespaldos(_configuracionController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabRespaldos.Controls.Add(_frmConfiguracionRespaldos);
+            _frmConfiguracionRespaldos.Show();
         }
 
         protected override void OnControlAdded(ControlEventArgs e)
