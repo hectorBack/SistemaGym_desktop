@@ -56,7 +56,6 @@ namespace Presentacion.Forms.Productos
         {
             dgvProductos.AutoGenerateColumns = false;
 
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.ProductoID), "ID", 45);
             dgvProductos.AgregarTexto(nameof(ProductoViewModel.CodigoBarras), "Código de barras", 100, 110);
             dgvProductos.AgregarTexto(nameof(ProductoViewModel.Nombre), "Producto", 175, 110);
             dgvProductos.AgregarTexto(nameof(ProductoViewModel.CategoriaNombre), "Categoría", 120, 110);

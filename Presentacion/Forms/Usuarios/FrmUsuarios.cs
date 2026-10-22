@@ -52,7 +52,6 @@ namespace Presentacion.Forms.Usuarios
         {
             dgvUsuarios.AutoGenerateColumns = false;
 
-            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.UsuarioID), "ID", 40, 60);
             dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreUsuario), "Usuario", 110, 90);
             dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreCompleto), "Nombre", 180, 130);
             dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.RolNombre), "Rol", 110, 90);

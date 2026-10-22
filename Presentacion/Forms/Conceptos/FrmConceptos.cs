@@ -54,7 +54,6 @@ namespace Presentacion.Forms.Conceptos
         {
             dgvConceptos.AutoGenerateColumns = false;
 
-            dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.ConceptoID), "ID", 45);
             dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Nombre), "Nombre", 150, 100);
             dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Tipo), "Tipo", 100, 80);
             dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Observacion), "Observación", 200, 120);

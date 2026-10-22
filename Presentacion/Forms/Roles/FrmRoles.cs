@@ -47,7 +47,6 @@ namespace Presentacion.Forms.Roles
         {
             dgvRoles.AutoGenerateColumns = false;
 
-            dgvRoles.AgregarTexto(nameof(RolViewModel.RolID), "ID", 40);
             dgvRoles.AgregarTexto(nameof(RolViewModel.Nombre), "Rol", 100, 100);
             dgvRoles.AgregarTexto(nameof(RolViewModel.Descripcion), "Descripción", 150, 100);
             dgvRoles.AgregarTexto(nameof(RolViewModel.ModulosTexto), "Módulos permitidos", 200, 150);

@@ -63,7 +63,6 @@ namespace Presentacion.Forms.Socios
         {
             dgvSocios.AutoGenerateColumns = false;
 
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.SocioID), "ID", 45);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Clave), "Clave", 75, 70);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 190, 130);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Telefono), "Teléfono", 100, 90);

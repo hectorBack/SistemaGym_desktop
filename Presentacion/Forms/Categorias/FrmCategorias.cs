@@ -49,7 +49,6 @@ namespace Presentacion.Forms
         {
             dgvCategorias.AutoGenerateColumns = false;
 
-            dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.CategoriaID), "ID", 45);
             dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Nombre), "Categoría", 200, 120);
             dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Estado), "Estado", 80, 70);
             dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");

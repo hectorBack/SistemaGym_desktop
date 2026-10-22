@@ -53,7 +53,6 @@ namespace Presentacion.Forms.Reportes
         {
             dgvSocios.AutoGenerateColumns = false;
 
-            dgvSocios.AgregarTexto(nameof(FilaSocio.Id), "ID", 50, 55, alinearDerecha: true);
             dgvSocios.AgregarTexto(nameof(FilaSocio.Clave), "Clave", 80, 70);
             dgvSocios.AgregarTexto(nameof(FilaSocio.NombreSocio), "Nombre del Socio", 200, 130);
             dgvSocios.AgregarTexto(nameof(FilaSocio.FechaVencimiento), "Fecha de Vencimiento", 110, 110);

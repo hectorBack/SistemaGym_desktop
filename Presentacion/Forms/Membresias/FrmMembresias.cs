@@ -49,7 +49,6 @@ namespace Presentacion.Forms.Membresias
         {
             dgvMembresias.AutoGenerateColumns = false;
 
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.MembresiaID), "ID", 45);
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Nombre), "Nombre", 160, 110);
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Precio), "Precio", 90, 80, "C2", alinearDerecha: true);
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Tipo), "Tipo", 90, 80);
