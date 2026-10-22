@@ -20,6 +20,9 @@ namespace Presentacion.Forms
             MultiSelect = false;
             SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             RowHeadersVisible = false;
+
+            // Volvemos a Fill para que la tabla luzca limpia y completa a lo ancho del contenedor,
+            // controlando el espacio mediante los pesos (FillWeight) de cada columna.
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
             // Aspecto general
@@ -33,7 +36,7 @@ namespace Presentacion.Forms
             ColumnHeadersHeight = 38;
             RowTemplate.Height = 32;
 
-            var relleno = new Padding(8, 0, 8, 0);
+            var relleno = new Padding(12, 0, 12, 0); // Un poco más de espacio interno para mayor elegancia
 
             // Encabezados
             var encabezado = ColumnHeadersDefaultCellStyle;
@@ -59,19 +62,18 @@ namespace Presentacion.Forms
 
         /// <summary>
         /// Agrega una columna de texto enlazada a una propiedad del modelo.
-        /// Se llama una sola vez al construir el formulario (con AutoGenerateColumns = false).
         /// </summary>
-        /// <param name="propiedad">Nombre de la propiedad del modelo (usa nameof).</param>
-        /// <param name="encabezado">Texto que se muestra arriba de la columna.</param>
-        /// <param name="peso">Ancho relativo (FillWeight) respecto a las demás columnas.</param>
+        /// <param name="propiedad">Nombre de la propiedad del modelo.</param>
+        /// <param name="encabezado">Texto del encabezado.</param>
+        /// <param name="peso">Proporción de ancho relativa (FillWeight).</param>
         /// <param name="anchoMinimo">Ancho mínimo en píxeles.</param>
-        /// <param name="formato">Formato opcional, por ejemplo "C2" o "dd/MM/yyyy".</param>
-        /// <param name="alinearDerecha">Para columnas numéricas o de dinero.</param>
+        /// <param name="formato">Formato opcional (ej. "C2", "dd/MM/yyyy HH:mm").</param>
+        /// <param name="alinearDerecha">Alineación a la derecha para valores numéricos.</param>
         public DataGridViewTextBoxColumn AgregarTexto(
             string propiedad,
             string encabezado,
-            float peso,
-            int anchoMinimo = 55,
+            float peso = 100f,
+            int anchoMinimo = 60,
             string? formato = null,
             bool alinearDerecha = false)
         {
@@ -80,7 +82,7 @@ namespace Presentacion.Forms
                 Name = "col" + propiedad,
                 DataPropertyName = propiedad,
                 HeaderText = encabezado,
-                FillWeight = peso,
+                FillWeight = peso, // Controla qué tan ancha es una columna en proporción a las demás
                 MinimumWidth = anchoMinimo,
                 SortMode = DataGridViewColumnSortMode.Automatic
             };
@@ -92,6 +94,11 @@ namespace Presentacion.Forms
             {
                 columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+            else
+            {
+                columna.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                columna.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
             }
 
             Columns.Add(columna);

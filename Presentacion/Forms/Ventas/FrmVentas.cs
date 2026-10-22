@@ -55,12 +55,9 @@ namespace Presentacion.Forms.Ventas
         {
             dgvVentas.AutoGenerateColumns = false;
 
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.VentaID), "N°", 50, 50);
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.FechaVenta), "Fecha", 130, 130, "dd/MM/yyyy HH:mm");
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.UsuarioNombre), "Atendió", 110, 90);
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.CantidadProductos), "Artículos", 70, 70, alinearDerecha: true);
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.Total), "Total", 90, 80, "C2", alinearDerecha: true);
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.Estado), "Estado", 80, 80);
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.Total), "Total", peso: 60, anchoMinimo: 80, formato: "C2", alinearDerecha: true);
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.FechaVenta), "Fecha de registro", peso: 120, anchoMinimo: 130, formato: "dd/MM/yyyy HH:mm");
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.Estado), "Estado", peso: 60, anchoMinimo: 80);
         }
 
         private async Task CargarVentasAsync(int? idASeleccionar = null)
