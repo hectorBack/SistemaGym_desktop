@@ -41,6 +41,7 @@ namespace Presentacion.Forms
             public const string CorteDeCaja = "Corte de Caja";
             public const string Configuracion = "Configuracion";
             public const string Inicio = "Inicio";
+            public const string Respaldos = "Respaldos";
         }
 
         // Un módulo del menú: su botón, el permiso necesario y el formulario que abre.
@@ -284,6 +285,54 @@ namespace Presentacion.Forms
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error en el temporizador de respaldo automático: {ex.Message}");
+            }
+        }
+
+        private async void btnRespaldos_Click(object? sender, EventArgs e)
+        {
+            using (var folderDialog = new FolderBrowserDialog())
+            {
+                folderDialog.Description = "Selecciona la carpeta donde deseas guardar tu archivo gym.sql";
+                folderDialog.UseDescriptionForTitle = true;
+
+                if (folderDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string rutaSeleccionada = folderDialog.SelectedPath;
+
+                    try
+                    {
+                        Cursor = Cursors.WaitCursor;
+
+                        // Creamos un scope para invocar el servicio de respaldos de forma segura
+                        using var scope = _serviceProvider.CreateScope();
+                        var respaldoService = scope.ServiceProvider.GetRequiredService<IRespaldoService>();
+
+                        var dto = new RespaldoManualDto
+                        {
+                            RutaDestino = rutaSeleccionada
+                        };
+
+                        await respaldoService.GenerarRespaldoManualAsync(dto);
+
+                        MessageBox.Show(
+                            $"El respaldo de la base de datos se generó exitosamente como 'gym.sql' en:\n{rutaSeleccionada}",
+                            "Respaldo Exitoso",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"No se pudo completar el respaldo: {ex.Message}",
+                            "Error de Respaldo",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        Cursor = Cursors.Default;
+                    }
+                }
             }
         }
 

@@ -20,6 +20,7 @@
             components = new System.ComponentModel.Container();
             panelSideMenu = new Panel();
             btnConfiguracion = new FontAwesome.Sharp.IconButton();
+            btnRespaldosManuales = new FontAwesome.Sharp.IconButton();
             btnCorte = new FontAwesome.Sharp.IconButton();
             btnReportes = new FontAwesome.Sharp.IconButton();
             btnCompras = new FontAwesome.Sharp.IconButton();
@@ -52,6 +53,7 @@
             panelSideMenu.BackColor = Color.FromArgb(15, 42, 79);
             panelSideMenu.Controls.Add(btnInicio);
             panelSideMenu.Controls.Add(btnConfiguracion);
+            panelSideMenu.Controls.Add(btnRespaldosManuales);
             panelSideMenu.Controls.Add(btnCorte);
             panelSideMenu.Controls.Add(btnReportes);
             panelSideMenu.Controls.Add(btnCompras);
@@ -98,6 +100,34 @@
             btnConfiguracion.TextAlign = ContentAlignment.MiddleLeft;
             btnConfiguracion.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnConfiguracion.UseVisualStyleBackColor = false;
+
+            // 
+            // btnRespaldosManuales
+            // 
+            btnRespaldosManuales.BackColor = Color.FromArgb(15, 42, 79);
+            btnRespaldosManuales.Dock = DockStyle.Top;
+            btnRespaldosManuales.FlatAppearance.BorderSize = 0;
+            btnRespaldosManuales.FlatAppearance.MouseDownBackColor = Color.FromArgb(18, 48, 88);
+            btnRespaldosManuales.FlatAppearance.MouseOverBackColor = Color.FromArgb(23, 58, 105);
+            btnRespaldosManuales.FlatStyle = FlatStyle.Flat;
+            btnRespaldosManuales.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnRespaldosManuales.ForeColor = Color.FromArgb(230, 238, 252);
+            btnRespaldosManuales.IconChar = FontAwesome.Sharp.IconChar.Database;
+            btnRespaldosManuales.IconColor = Color.FromArgb(230, 238, 252);
+            btnRespaldosManuales.IconFont = FontAwesome.Sharp.IconFont.Auto;
+            btnRespaldosManuales.IconSize = 26;
+            btnRespaldosManuales.ImageAlign = ContentAlignment.MiddleLeft;
+            btnRespaldosManuales.Location = new Point(0, 686); // Ajusta la posición según el orden que desees en el menú
+            btnRespaldosManuales.Margin = new Padding(3, 4, 3, 4);
+            btnRespaldosManuales.Name = "btnRespaldosManuales";
+            btnRespaldosManuales.Padding = new Padding(15, 0, 0, 0);
+            btnRespaldosManuales.Size = new Size(229, 44);
+            btnRespaldosManuales.TabIndex = 16;
+            btnRespaldosManuales.Text = "  Respaldos";
+            btnRespaldosManuales.TextAlign = ContentAlignment.MiddleLeft;
+            btnRespaldosManuales.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnRespaldosManuales.UseVisualStyleBackColor = false;
+            btnRespaldosManuales.Click += btnRespaldos_Click; // Vinculación directa al evento
             // 
             // btnCorte
             // 
@@ -588,5 +618,6 @@
         private FontAwesome.Sharp.IconButton btnCorte;
         private FontAwesome.Sharp.IconButton btnConfiguracion;
         private FontAwesome.Sharp.IconButton btnInicio;
+        private FontAwesome.Sharp.IconButton btnRespaldosManuales;
     }
 }

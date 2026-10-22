@@ -110,6 +110,7 @@ namespace Presentacion
             services.AddScoped<IValidator<GimnasioConfiguracionDto>, GimnasioConfiguracionValidator>();
             services.AddScoped<IValidator<CorreosConfiguracionDto>, CorreosConfiguracionValidator>();
             services.AddScoped<IValidator<RespaldosConfiguracionDto>, RespaldosConfiguracionValidator>();
+            services.AddScoped<IValidator<RespaldoManualDto>, RespaldoManualValidator>();
 
             // 3. Servicios de Negocio
             services.AddScoped<IUsuarioService, UsuarioService>();
@@ -130,6 +131,7 @@ namespace Presentacion
             services.AddScoped<IConfiguracionService, ConfiguracionService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<CajaHelper>(); // apertura de cortes y movimientos de caja compartidos
+            services.AddScoped<IRespaldoService, RespaldoService>(); // apertura de cortes y movimientos de caja compartidos
 
 
             // 4. Controladores de Presentación
@@ -150,6 +152,8 @@ namespace Presentacion
             services.AddTransient<CorteController>();
             services.AddTransient<ConfiguracionController>();
             services.AddTransient<InicioController>();
+            services.AddTransient<RespaldoController>();
+
 
 
             // 5. Formularios
