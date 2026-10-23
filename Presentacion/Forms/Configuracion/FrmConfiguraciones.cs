@@ -19,7 +19,7 @@ namespace Presentacion.Forms.Configuracion
         private FrmConfiguracionCorteCaja? _frmConfiguracionCorteCaja;
         private FrmConfiguracionDatosGimnasio? _frmConfiguracionGimnasioDatos;
         private FrmConfiguracionCorreos? _frmConfiguracionCorreos;
-        private FrmConfiguracionRespaldos _frmConfiguracionRespaldos;
+        private FrmConfiguracionRespaldos? _frmConfiguracionRespaldos;
 
         public FrmConfiguraciones(ConfiguracionController configuracionController)
         {
@@ -34,7 +34,6 @@ namespace Presentacion.Forms.Configuracion
             ConfigurarTabPage(tabDatosGimnasio, "tabDatosGimnasio", "Datos del Gimnasio");
             ConfigurarTabPage(tabCorreos, "tabCorreos", "Configuración de Correos");
             ConfigurarTabPage(tabRespaldos, "tabRespaldos", "Respaldos");
-            ConfigurarTabPage(tabMasConfiguraciones, "tabMasConfiguraciones", "Más Configuraciones");
         }
 
         private void ConfigurarTabPage(TabPage page, string name, string text)
@@ -46,6 +45,12 @@ namespace Presentacion.Forms.Configuracion
 
         private async void FrmConfiguraciones_Load(object sender, EventArgs e)
         {
+            // Seleccionar explícitamente la pestaña de Datos del Gimnasio al iniciar como principal
+            if (tabControlConfiguraciones.TabPages.Contains(tabDatosGimnasio))
+            {
+                tabControlConfiguraciones.SelectedTab = tabDatosGimnasio;
+            }
+
             tabControlConfiguraciones.Invalidate();
             await CargarConfiguracionTabActualAsync();
         }
@@ -78,10 +83,6 @@ namespace Presentacion.Forms.Configuracion
                     case "tabRespaldos":
                         CargarFormularioRespaldos();
                         break;
-
-                    case "tabMasConfiguraciones":
-                        // Próximamente: CargarFormularioMasConfiguraciones();
-                        break;
                 }
             }
             catch (Exception ex)
@@ -98,27 +99,6 @@ namespace Presentacion.Forms.Configuracion
         /// Instancia e incrusta el formulario FrmConfiguracionCorteCaja dentro de la pestaña tabCorteCaja
         /// </summary>
         private void CargarFormularioCorteCaja()
-        {
-            if (_frmConfiguracionGimnasioDatos != null && !_frmConfiguracionGimnasioDatos.IsDisposed)
-            {
-                return;
-            }
-
-            tabCorteCaja.Controls.Clear();
-
-            _frmConfiguracionGimnasioDatos = new FrmConfiguracionDatosGimnasio(_configuracionController)
-            {
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None,
-                Dock = DockStyle.Fill,
-                BackColor = ColorTranslator.FromHtml("#0b0f1a")
-            };
-
-            tabDatosGimnasio.Controls.Add(_frmConfiguracionGimnasioDatos);
-            _frmConfiguracionGimnasioDatos.Show();
-        }
-
-        private void CargarFormularioDatosGimnasio()
         {
             if (_frmConfiguracionCorteCaja != null && !_frmConfiguracionCorteCaja.IsDisposed)
             {
@@ -137,6 +117,30 @@ namespace Presentacion.Forms.Configuracion
 
             tabCorteCaja.Controls.Add(_frmConfiguracionCorteCaja);
             _frmConfiguracionCorteCaja.Show();
+        }
+
+        /// <summary>
+        /// Instancia e incrusta el formulario FrmConfiguracionDatosGimnasio dentro de la pestaña tabDatosGimnasio
+        /// </summary>
+        private void CargarFormularioDatosGimnasio()
+        {
+            if (_frmConfiguracionGimnasioDatos != null && !_frmConfiguracionGimnasioDatos.IsDisposed)
+            {
+                return;
+            }
+
+            tabDatosGimnasio.Controls.Clear();
+
+            _frmConfiguracionGimnasioDatos = new FrmConfiguracionDatosGimnasio(_configuracionController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabDatosGimnasio.Controls.Add(_frmConfiguracionGimnasioDatos);
+            _frmConfiguracionGimnasioDatos.Show();
         }
 
         private void CargarFormularioCorreos()

@@ -90,7 +90,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
-                    dto.Monto, $"Pago Membresía ID: {dto.SocioMembresiaID}. {dto.Observacion}".Trim(), nuevoPago.FormaPago);
+                   dto.Monto, string.Empty, nuevoPago.FormaPago);
             }
 
             await _unitOfWork.SaveChangesAsync();

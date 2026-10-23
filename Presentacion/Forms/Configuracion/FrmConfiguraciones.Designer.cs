@@ -27,7 +27,6 @@ namespace Presentacion.Forms.Configuracion
             tabDatosGimnasio = new TabPage();
             tabCorreos = new TabPage();
             tabRespaldos = new TabPage();
-            tabMasConfiguraciones = new TabPage();
 
             panelTop.SuspendLayout();
             tabControlConfiguraciones.SuspendLayout();
@@ -74,7 +73,6 @@ namespace Presentacion.Forms.Configuracion
             tabControlConfiguraciones.Controls.Add(tabDatosGimnasio);
             tabControlConfiguraciones.Controls.Add(tabCorreos);
             tabControlConfiguraciones.Controls.Add(tabRespaldos);
-            tabControlConfiguraciones.Controls.Add(tabMasConfiguraciones);
 
             // 
             // FrmConfiguraciones
@@ -108,6 +106,5 @@ namespace Presentacion.Forms.Configuracion
         private TabPage tabDatosGimnasio;
         private TabPage tabCorreos;
         private TabPage tabRespaldos;
-        private TabPage tabMasConfiguraciones;
     }
 }
