@@ -28,9 +28,8 @@ namespace Negocio.Helpers
 
             try
             {
-                // Simulamos o realizamos la exportación del respaldo de la base de datos
-                // (Nota: Si usas SQLite es un File.Copy, si usas MySQL puedes invocar mysqldump o respaldar los archivos de datos)
-                string nombreArchivo = $"Respaldo_Gym_{hoy:yyyyMMdd_HHmmss}.bak";
+                // 🟢 Cambiamos el formato a .sql con el prefijo gym y marca de tiempo
+                string nombreArchivo = $"gym_{hoy:yyyyMMdd_HHmmss}.sql";
                 string rutaCompleta = Path.Combine(rutaDestino, nombreArchivo);
 
                 // Ejemplo de respaldo lógico o copiado (ajústalo según cómo manejes tu archivo de BD local):
@@ -44,7 +43,7 @@ namespace Negocio.Helpers
 
                 _ultimoRespaldoEjecutado = DateTime.Now;
 
-                // 🟢 Lanzar Notificación de Windows
+                // Lanzar Notificación de Windows
                 MostrarNotificacionWindows(
                     notifyIcon,
                     "Respaldo Automático Exitoso",
