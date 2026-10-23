@@ -115,7 +115,7 @@ namespace Negocio.Services
                 // El ID de la venta no existe hasta guardar, por eso la observación lleva la fecha y hora.
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoVenta, CajaConstantes.TipoIngreso,
-                    nuevaVenta.Total, $"Cobro por venta de productos - {nuevaVenta.FechaVenta:dd/MM/yyyy HH:mm}");
+                    nuevaVenta.Total, string.Empty);
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -159,7 +159,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionVenta, CajaConstantes.TipoEgreso,
-                    montoDevuelto, $"Devolución por cancelación de venta ID #{venta.VentaID}. {motivo?.Trim()}".Trim());
+                    montoDevuelto, string.Empty);
             }
 
             await _unitOfWork.SaveChangesAsync();

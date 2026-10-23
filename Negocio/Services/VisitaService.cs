@@ -143,7 +143,7 @@ namespace Negocio.Services
                 var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion!.Value, "cobro de Visita");
                 await _caja.AgregarMovimientoAsync(
                     corte, usuarioIdSesion.Value, CONCEPTO_VISITA, TIPO_INGRESO, montoCobrado,
-                    $"Cobro Visita Casual - {nuevaVisita.Nombre} {nuevaVisita.Apellido}".Trim());
+                   string.Empty);
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -214,10 +214,8 @@ namespace Negocio.Services
             if (montoDevuelto > 0)
             {
                 var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de Visita");
-                string obs = $"Devolución por cancelación de visita ID {visita.VisitaID}"
-                             + (string.IsNullOrEmpty(motivoLimpio) ? string.Empty : $": {motivoLimpio}");
 
-                await _caja.AgregarMovimientoAsync(corte, usuarioId, CONCEPTO_CANCELACION_VISITA, TIPO_EGRESO, montoDevuelto, obs);
+                await _caja.AgregarMovimientoAsync(corte, usuarioId, CONCEPTO_CANCELACION_VISITA, TIPO_EGRESO, montoDevuelto, string.Empty);
             }
 
             // Cancelación y egreso se guardan juntos.
@@ -268,7 +266,7 @@ namespace Negocio.Services
                 var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion, "cobro de Visita (acceso rápido)");
                 await _caja.AgregarMovimientoAsync(
                     corte, usuarioIdSesion, CONCEPTO_VISITA, TIPO_INGRESO, monto,
-                    "Cobro de Visita Casual - Acceso Rápido");
+                   string.Empty);
             }
 
             // Visita, movimiento (y corte, si hubo que abrirlo) se guardan en un solo paso.

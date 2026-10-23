@@ -129,7 +129,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
-                    totalCompra, $"Compra Folio: {nuevaCompra.Codigo}", dto.FormaPago);
+                    totalCompra, string.Empty);
             }
 
             // 6. Confirmar la transacción en la BD
@@ -186,7 +186,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionCompra, CajaConstantes.TipoIngreso,
-                    compra.Total, $"Cancelación de Compra Folio: {compra.Codigo}. {observacion?.Trim()}".Trim());
+                    compra.Total, string.Empty);
             }
 
             // 4. Confirmar en la BD

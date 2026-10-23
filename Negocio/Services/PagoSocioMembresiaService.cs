@@ -90,7 +90,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
-                   dto.Monto, string.Empty, nuevoPago.FormaPago);
+                   dto.Monto, string.Empty, nuevoPago.FormaPago); 
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -193,7 +193,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionPagoMembresia, CajaConstantes.TipoEgreso,
-                    pago.Monto, $"Cancelación Pago Membresía Folio/ID: {pago.Folio ?? pago.PagoID.ToString()}. Motivo: {motivo?.Trim()}".Trim(),
+                  pago.Monto, string.Empty,
                     pago.FormaPago);
             }
 
