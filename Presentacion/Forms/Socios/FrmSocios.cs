@@ -67,7 +67,6 @@ namespace Presentacion.Forms.Socios
             dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 190, 130);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Telefono), "Teléfono", 100, 90);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Email), "Correo", 140, 110);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.FechaNacimiento), "Nacimiento", 100, 90, "dd/MM/yyyy");
             dgvSocios.AgregarTexto(nameof(SocioViewModel.Estado), "Estado", 80, 70);
             dgvSocios.AgregarTexto(nameof(SocioViewModel.CreatedAt), "Registro", 110, 90, "dd/MM/yyyy");
         }

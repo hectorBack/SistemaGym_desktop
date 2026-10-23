@@ -82,6 +82,11 @@ namespace Presentacion.Forms.Socios
                 lblNombreCompleto.Text = socio.NombreCompleto;
                 lblTelefono.Text = string.IsNullOrWhiteSpace(socio.Telefono) ? "N/A" : socio.Telefono;
                 lblEmail.Text = string.IsNullOrWhiteSpace(socio.Email) ? "N/A" : socio.Email;
+
+                lblFechaNacimiento.Text = socio.FechaNacimiento.HasValue
+                    ? socio.FechaNacimiento.Value.ToString("dd/MM/yyyy")
+                    : "N/A";
+
                 lblEstado.Text = socio.Activo ? "ACTIVO" : "INACTIVO";
                 lblEstado.ForeColor = socio.Activo ? Tema.Exito : Tema.Peligro;
 

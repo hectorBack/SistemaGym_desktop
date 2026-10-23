@@ -147,6 +147,7 @@ namespace Negocio.Services
                 Apellidos = socio.Apellido,
                 Telefono = socio.Telefono,
                 Email = socio.Email,
+                FechaNacimiento = socio.FechaNacimiento,
                 Foto = socio.Foto,
                 Activo = socio.Activo,
 

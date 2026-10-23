@@ -15,6 +15,7 @@ namespace Presentacion.ViewModels
         public string NombreCompleto => $"{Nombre} {Apellidos}";
         public string Telefono { get; set; } = "N/A";
         public string Email { get; set; } = "N/A";
+        public DateTime? FechaNacimiento { get; set; }
         public string? Foto { get; set; }
         public bool Activo { get; set; }
         public string Estado => Activo ? "Activo" : "Inactivo";

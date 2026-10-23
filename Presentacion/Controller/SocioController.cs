@@ -117,6 +117,7 @@ namespace Presentacion.Controller
                 Apellidos = dto.Apellidos,
                 Telefono = string.IsNullOrWhiteSpace(dto.Telefono) ? "N/A" : dto.Telefono,
                 Email = string.IsNullOrWhiteSpace(dto.Email) ? "N/A" : dto.Email,
+                FechaNacimiento = dto.FechaNacimiento,
                 Foto = dto.Foto,
                 Activo = dto.Activo,
                 HistorialMembresias = dto.HistorialMembresias.Select(m => new SocioMembresiaHistorialViewModel
