@@ -25,7 +25,7 @@
             lblTipo = new Label();
             cmbTipo = new ComboBox();
             lblMeses = new Label();
-            numMeses = new NumericUpDown();
+            cmbMeses = new ComboBox();
             lblSemanas = new Label();
             numSemanas = new NumericUpDown();
             lblDias = new Label();
@@ -35,7 +35,6 @@
             panelHeader = new Panel();
             panelHeader.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numPrecio).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)numMeses).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numSemanas).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numDias).BeginInit();
             SuspendLayout();
@@ -142,18 +141,19 @@
             lblMeses.Size = new Size(46, 17);
             lblMeses.TabIndex = 7;
             lblMeses.Text = "Meses:";
-            //
-            // numMeses
-            //
-            numMeses.BackColor = Color.FromArgb(15, 42, 79);
-            numMeses.BorderStyle = BorderStyle.FixedSingle;
-            numMeses.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            numMeses.ForeColor = Color.FromArgb(230, 238, 252);
-            numMeses.Location = new Point(25, 265);
-            numMeses.Maximum = new decimal(new int[] { 120, 0, 0, 0 });
-            numMeses.Name = "numMeses";
-            numMeses.Size = new Size(330, 25);
-            numMeses.TabIndex = 8;
+            // 
+            // cmbMeses
+            // 
+            cmbMeses.BackColor = Color.FromArgb(15, 42, 79);
+            cmbMeses.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbMeses.FlatStyle = FlatStyle.Flat;
+            cmbMeses.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            cmbMeses.ForeColor = Color.FromArgb(230, 238, 252);
+            cmbMeses.FormattingEnabled = true;
+            cmbMeses.Location = new Point(25, 265);
+            cmbMeses.Name = "cmbMeses";
+            cmbMeses.Size = new Size(330, 25);
+            cmbMeses.TabIndex = 8;
             //
             // lblSemanas
             //
@@ -234,7 +234,7 @@
             Controls.Add(lblDias);
             Controls.Add(numSemanas);
             Controls.Add(lblSemanas);
-            Controls.Add(numMeses);
+            Controls.Add(cmbMeses);
             Controls.Add(lblMeses);
             Controls.Add(cmbTipo);
             Controls.Add(lblTipo);
@@ -253,7 +253,6 @@
             panelHeader.ResumeLayout(false);
             panelHeader.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numPrecio).EndInit();
-            ((System.ComponentModel.ISupportInitialize)numMeses).EndInit();
             ((System.ComponentModel.ISupportInitialize)numSemanas).EndInit();
             ((System.ComponentModel.ISupportInitialize)numDias).EndInit();
             ResumeLayout(false);
@@ -271,7 +270,7 @@
         private Label lblTipo;
         private ComboBox cmbTipo;
         private Label lblMeses;
-        private NumericUpDown numMeses;
+        private ComboBox cmbMeses;
         private Label lblSemanas;
         private NumericUpDown numSemanas;
         private Label lblDias;
