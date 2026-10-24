@@ -73,7 +73,7 @@ namespace Presentacion.Forms.Movimientos
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FechaCorte), "Fecha de corte", 110, 100, "dd/MM/yyyy");
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.UsuarioNombre), "Usuario", 100, 90);
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Estado), "Estado", 70, 65);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.CreatedAt), "Fecha de registro", 120, 110, "dd/MM/yyyy HH:mm");
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.CreatedAt), "Fecha de registro", 120, 110, "dd/MM/yyyy hh:mm tt");
         }
 
         // Lee y valida el rango de los selectores; si es válido lo aplica y busca.

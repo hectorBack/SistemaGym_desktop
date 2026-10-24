@@ -64,15 +64,14 @@
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
-            panelHeader.Size = new Size(800, 67);
-            panelHeader.TabIndex = 0;
+            panelHeader.Size = new Size(780, 67);
             //
             // lblTitulo
             //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(23, 16);
+            lblTitulo.Location = new Point(23, 19);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(260, 32);
             lblTitulo.TabIndex = 0;
@@ -88,7 +87,7 @@
             panelContenido.Location = new Point(0, 67);
             panelContenido.Name = "panelContenido";
             panelContenido.Padding = new Padding(20, 10, 20, 10);
-            panelContenido.Size = new Size(800, 513);
+            panelContenido.Size = new Size(780, 513);
             panelContenido.TabIndex = 1;
             //
             // grpDetallesMembresia
@@ -106,7 +105,7 @@
             grpDetallesMembresia.ForeColor = Color.FromArgb(45, 212, 255);
             grpDetallesMembresia.Location = new Point(20, 10);
             grpDetallesMembresia.Name = "grpDetallesMembresia";
-            grpDetallesMembresia.Size = new Size(760, 95);
+            grpDetallesMembresia.Size = new Size(740, 95);
             grpDetallesMembresia.TabIndex = 0;
             grpDetallesMembresia.TabStop = false;
             grpDetallesMembresia.Text = "Detalles de la membresía";
@@ -215,7 +214,7 @@
             grpRegistrarPago.ForeColor = Color.FromArgb(45, 212, 255);
             grpRegistrarPago.Location = new Point(20, 105);
             grpRegistrarPago.Name = "grpRegistrarPago";
-            grpRegistrarPago.Size = new Size(760, 145);
+            grpRegistrarPago.Size = new Size(740, 145);
             grpRegistrarPago.TabIndex = 1;
             grpRegistrarPago.TabStop = false;
             grpRegistrarPago.Text = "Registrar nuevo pago";
@@ -316,14 +315,14 @@
             txtObservacion.Location = new Point(17, 110);
             txtObservacion.MaxLength = 200;
             txtObservacion.Name = "txtObservacion";
-            txtObservacion.Size = new Size(500, 27);
+            txtObservacion.Size = new Size(488, 27);
             txtObservacion.TabIndex = 3;
             //
             // btnAgregarPago
             //
             btnAgregarPago.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnAgregarPago.Estilo = EstiloBoton.Primario;
-            btnAgregarPago.Location = new Point(545, 98);
+            btnAgregarPago.Location = new Point(525, 98);
             btnAgregarPago.Name = "btnAgregarPago";
             btnAgregarPago.Size = new Size(200, 40);
             btnAgregarPago.TabIndex = 4;
@@ -337,7 +336,7 @@
             panelPagosBarra.Dock = DockStyle.Top;
             panelPagosBarra.Location = new Point(20, 250);
             panelPagosBarra.Name = "panelPagosBarra";
-            panelPagosBarra.Size = new Size(760, 52);
+            panelPagosBarra.Size = new Size(740, 52);
             panelPagosBarra.TabIndex = 2;
             //
             // lblPagos
@@ -357,7 +356,7 @@
             panelAccionesPagos.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             panelAccionesPagos.Controls.Add(btnAnularPago);
             panelAccionesPagos.Dock = DockStyle.Right;
-            panelAccionesPagos.Location = new Point(640, 0);
+            panelAccionesPagos.Location = new Point(620, 0);
             panelAccionesPagos.Name = "panelAccionesPagos";
             panelAccionesPagos.Padding = new Padding(0, 8, 0, 0);
             panelAccionesPagos.Size = new Size(120, 52);
@@ -380,7 +379,7 @@
             dgvPagos.Dock = DockStyle.Fill;
             dgvPagos.Location = new Point(20, 302);
             dgvPagos.Name = "dgvPagos";
-            dgvPagos.Size = new Size(760, 201);
+            dgvPagos.Size = new Size(740, 201);
             dgvPagos.TabIndex = 3;
             dgvPagos.CellFormatting += dgvPagos_CellFormatting;
             dgvPagos.SelectionChanged += dgvPagos_SelectionChanged;
@@ -392,14 +391,14 @@
             panelPie.Dock = DockStyle.Bottom;
             panelPie.Location = new Point(0, 580);
             panelPie.Name = "panelPie";
-            panelPie.Size = new Size(800, 60);
+            panelPie.Size = new Size(780, 60);
             panelPie.TabIndex = 2;
             //
             // btnCerrar
             //
             btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnCerrar.DialogResult = DialogResult.Cancel;
-            btnCerrar.Location = new Point(680, 10);
+            btnCerrar.Location = new Point(660, 10);
             btnCerrar.Name = "btnCerrar";
             btnCerrar.Size = new Size(100, 40);
             btnCerrar.TabIndex = 0;
@@ -411,14 +410,14 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             CancelButton = btnCerrar;
-            ClientSize = new Size(800, 640);
+            ClientSize = new Size(780, 640);
             Controls.Add(panelContenido);
             Controls.Add(panelPie);
             Controls.Add(panelHeader);
             FormBorderStyle = FormBorderStyle.Sizable;
-            MaximizeBox = true;
+            MaximizeBox = false;
             MinimizeBox = false;
-            MinimumSize = new Size(760, 600);
+            MinimumSize = new Size(740, 560);
             Name = "FrmPagoSocioMembresiaModal";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;

@@ -51,7 +51,7 @@ namespace Presentacion.Forms
 
             dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Nombre), "Categoría", 200, 120);
             dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Estado), "Estado", 80, 70);
-            dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+            dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy hh:mm tt");
         }
 
         private async Task CargarCategoriasAsync(int? idASeleccionar = null)

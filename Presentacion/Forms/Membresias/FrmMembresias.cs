@@ -55,7 +55,7 @@ namespace Presentacion.Forms.Membresias
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Meses), "Meses", 70, 60, alinearDerecha: true);
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Semanas), "Semanas", 80, 70, alinearDerecha: true);
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Dias), "Dias", 70, 60, alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.CreatedAt), "Fecha de creación", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.CreatedAt), "Fecha de creación", 130, 110, "dd/MM/yyyy hh:mm tt");
             dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Estado), "Estado", 90, 80);
         }
 

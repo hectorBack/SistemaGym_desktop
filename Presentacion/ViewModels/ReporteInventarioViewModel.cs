@@ -53,7 +53,7 @@ namespace Presentacion.ViewModels
         public string NombreCompleto { get; set; } = string.Empty;
         public DateTime FechaRegistro { get; set; }
 
-        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy HH:mm");
+        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy hh:mm tt");
     }
 
     public class ReporteVentaProductoViewModel
@@ -66,7 +66,7 @@ namespace Presentacion.ViewModels
         public decimal PrecioUnitario { get; set; }
         public decimal Ganancia { get; set; }
 
-        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy HH:mm");
+        public string FechaRegistroTexto => FechaRegistro.ToString("dd/MM/yyyy hh:mm tt");
     }
 
     public class ReporteVisitaViewModel
@@ -95,7 +95,7 @@ namespace Presentacion.ViewModels
         public string FormaPago { get; set; } = string.Empty;
         public DateTime FechaPago { get; set; }
 
-        public string FechaPagoTexto => FechaPago.ToString("dd/MM/yyyy HH:mm");
+        public string FechaPagoTexto => FechaPago.ToString("dd/MM/yyyy hh:mm tt");
         public string FechaInicioTexto => FechaInicio.ToString("dd/MM/yyyy");
 
         public string EstadoMembresia
@@ -121,6 +121,6 @@ namespace Presentacion.ViewModels
         public string CorteInfo { get; set; } = string.Empty;  // Rango de fechas/horas del corte
         public DateTime Fecha { get; set; }
 
-        public string FechaTexto => Fecha.ToString("dd/MM/yyyy HH:mm");
+        public string FechaTexto => Fecha.ToString("dd/MM/yyyy hh:mm tt");
     }
 }

@@ -53,14 +53,13 @@ namespace Presentacion.Forms.Socios
         {
             dgvPagos.AutoGenerateColumns = false;
 
-            // La fecha llega ya formateada como texto: no se ordena alfabéticamente.
-            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.FechaFormateada), "Fecha", 130, 110)
-                .SortMode = DataGridViewColumnSortMode.NotSortable;
-            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Monto), "Monto", 85, 80, "C2", alinearDerecha: true);
-            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.FormaPago), "Forma de pago", 110, 95);
-            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Folio), "Folio", 90, 70);
-            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Estado), "Estado", 90, 80);
-            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Observacion), "Observación", 160, 100);
+            // CreatedAt es DateTime?: la columna ordena por fecha real.
+            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.CreatedAt), "Fecha", 150, 150, "dd/MM/yyyy HH:mm");
+            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Monto), "Monto", 90, 90, "C2", alinearDerecha: true);
+            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.FormaPago), "Forma de pago", 130, 140);
+            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Folio), "Folio", 90, 80);
+            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Estado), "Estado", 90, 90);
+            dgvPagos.AgregarTexto(nameof(PagoSocioMembresiaViewModel.Observacion), "Observación", 160, 130);
         }
 
         // ───────────── Carga ─────────────

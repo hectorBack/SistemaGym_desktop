@@ -30,11 +30,11 @@ namespace Presentacion.ViewModels
         public string Estado => Activo ? "Activo" : "Inactivo";
 
         public string FechaRegistro => CreatedAt.HasValue
-            ? CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+            ? CreatedAt.Value.ToString("dd/MM/yyyy hh:mm tt")
             : string.Empty;
 
         public string FechaTexto => CreatedAt.HasValue
-        ? CreatedAt.Value.ToString("dd/MM/yyyy")
+        ? CreatedAt.Value.ToString("dd/MM/yyyy hh:mm tt")
         : string.Empty;
 
         public string DiaSemana => CreatedAt.HasValue

@@ -56,7 +56,7 @@ namespace Presentacion.Forms.Ventas
             dgvVentas.AutoGenerateColumns = false;
 
             dgvVentas.AgregarTexto(nameof(VentaViewModel.Total), "Total", peso: 60, anchoMinimo: 80, formato: "C2", alinearDerecha: true);
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.FechaVenta), "Fecha de registro", peso: 120, anchoMinimo: 130, formato: "dd/MM/yyyy HH:mm");
+            dgvVentas.AgregarTexto(nameof(VentaViewModel.FechaVenta), "Fecha de registro", peso: 120, anchoMinimo: 130, formato: "dd/MM/yyyy hh:mm tt");
             dgvVentas.AgregarTexto(nameof(VentaViewModel.Estado), "Estado", peso: 60, anchoMinimo: 80);
         }
 

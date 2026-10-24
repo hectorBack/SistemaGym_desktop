@@ -54,7 +54,7 @@ namespace Presentacion.Forms.Reportes
 
             dgvMembresias.AgregarTexto(nameof(FilaMembresia.Membresia), "Membresía", 120, 100);
             dgvMembresias.AgregarTexto(nameof(FilaMembresia.Socio), "Nombre del Socio", 160, 120);
-            dgvMembresias.AgregarTexto(nameof(FilaMembresia.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy HH:mm");
+            dgvMembresias.AgregarTexto(nameof(FilaMembresia.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy hh:mm tt");
             dgvMembresias.AgregarTexto(nameof(FilaMembresia.FechaInicio), "Fecha de Inicio", 100, 100, "dd/MM/yyyy");
             dgvMembresias.AgregarTexto(nameof(FilaMembresia.Vencimiento), "Vencimiento", 100, 100, "dd/MM/yyyy");
             dgvMembresias.AgregarTexto(nameof(FilaMembresia.EstadoMembresia), "Estado Membresía", 100, 100);

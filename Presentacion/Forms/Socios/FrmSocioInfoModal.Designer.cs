@@ -70,8 +70,7 @@ namespace Presentacion.Forms.Socios
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
-            panelHeader.Size = new Size(700, 67);
-            panelHeader.TabIndex = 0;
+            panelHeader.Size = new Size(780, 67);
             // 
             // lblTitulo
             // 
@@ -255,7 +254,7 @@ namespace Presentacion.Forms.Socios
             panelTabs.Location = new Point(0, 272);
             panelTabs.Name = "panelTabs";
             panelTabs.Padding = new Padding(20, 0, 20, 10);
-            panelTabs.Size = new Size(700, 308);
+            panelTabs.Size = new Size(780, 328);
             panelTabs.TabIndex = 2;
             // 
             // tabControlDetalles
@@ -270,7 +269,7 @@ namespace Presentacion.Forms.Socios
             tabControlDetalles.Location = new Point(20, 0);
             tabControlDetalles.Name = "tabControlDetalles";
             tabControlDetalles.SelectedIndex = 0;
-            tabControlDetalles.Size = new Size(660, 298);
+            tabControlDetalles.Size = new Size(740, 318);
             tabControlDetalles.SizeMode = TabSizeMode.Fixed;
             tabControlDetalles.TabIndex = 0;
             tabControlDetalles.DrawItem += tabControlDetalles_DrawItem;

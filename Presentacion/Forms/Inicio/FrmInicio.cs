@@ -48,7 +48,7 @@ namespace Presentacion.Forms.Inicio
 
             dgvVisitantes.AgregarTexto(nameof(InicioViewModel.Nombre), "Nombre", 180, 140);
             dgvVisitantes.AgregarTexto(nameof(InicioViewModel.Apellido), "Apellido", 180, 140);
-            dgvVisitantes.AgregarTexto(nameof(InicioViewModel.CreatedAt), "Fecha", 160, 120, "dd/MM/yyyy HH:mm");
+            dgvVisitantes.AgregarTexto(nameof(InicioViewModel.CreatedAt), "Fecha", 160, 120, "dd/MM/yyyy hh:mm tt");
         }
 
         private async Task CargarVisitantesAsync()

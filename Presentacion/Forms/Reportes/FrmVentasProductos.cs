@@ -51,7 +51,7 @@ namespace Presentacion.Forms.Reportes
         {
             dgvVentasProductos.AutoGenerateColumns = false;
 
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy HH:mm");
+            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy hh:mm tt");
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Producto), "Nombre del producto", 200, 140);
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.CostoUnitario), "Costo Unitario", 90, 90, "C2", alinearDerecha: true);
             dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.PrecioUnitario), "Precio Unitario", 90, 90, "C2", alinearDerecha: true);

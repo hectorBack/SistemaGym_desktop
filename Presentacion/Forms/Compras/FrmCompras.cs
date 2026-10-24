@@ -59,7 +59,7 @@ namespace Presentacion.Forms.Compras
             dgvCompras.AutoGenerateColumns = false;
 
             dgvCompras.AgregarTexto(nameof(CompraViewModel.Total), "Total", peso: 60, anchoMinimo: 80, formato: "C2", alinearDerecha: true);
-            dgvCompras.AgregarTexto(nameof(CompraViewModel.CreatedAt), "Fecha de registro", peso: 120, anchoMinimo: 130, formato: "dd/MM/yyyy HH:mm");
+            dgvCompras.AgregarTexto(nameof(CompraViewModel.CreatedAt), "Fecha de registro", peso: 120, anchoMinimo: 130, formato: "dd/MM/yyyy hh:mm tt");
             dgvCompras.AgregarTexto(nameof(CompraViewModel.Estado), "Estado", peso: 60, anchoMinimo: 80);
         }
 

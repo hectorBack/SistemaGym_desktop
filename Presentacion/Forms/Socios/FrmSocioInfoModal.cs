@@ -47,20 +47,20 @@ namespace Presentacion.Forms.Socios
         private void ConfigurarColumnas()
         {
             dgvHistorialMembresias.AutoGenerateColumns = false;
-            dgvHistorialMembresias.AgregarTexto("NombreMembresia", "Membresía", 150, 110);
-            dgvHistorialMembresias.AgregarTexto("FechaInicio", "Fecha inicio", 95, 90, "dd/MM/yyyy");
-            dgvHistorialMembresias.AgregarTexto("FechaFin", "Fecha fin", 95, 90, "dd/MM/yyyy");
-            dgvHistorialMembresias.AgregarTexto("Precio", "Precio", 80, 75, "C2", alinearDerecha: true);
-            dgvHistorialMembresias.AgregarTexto("Estado", "Estado", 90, 80);
+            dgvHistorialMembresias.AgregarTexto("NombreMembresia", "Membresía", 140, 100);
+            dgvHistorialMembresias.AgregarTexto("FechaInicio", "Fecha inicio", 135, 115, "dd/MM/yyyy");
+            dgvHistorialMembresias.AgregarTexto("FechaFin", "Fecha fin", 135, 115, "dd/MM/yyyy");
+            dgvHistorialMembresias.AgregarTexto("Precio", "Precio", 85, 75, "C2", alinearDerecha: true);
+            dgvHistorialMembresias.AgregarTexto("Estado", "Estado", 95, 80);
 
             dgvHistorialVisitas.AutoGenerateColumns = false;
 
             // FechaRegistro llega como texto ya formateado: ordenarlo alfabéticamente no tendría sentido,
             // así que se respeta el orden en que lo entrega el servidor.
-            dgvHistorialVisitas.AgregarTexto(nameof(VisitaViewModel.FechaRegistro), "Fecha de visita", 130, 120)
+            dgvHistorialVisitas.AgregarTexto(nameof(VisitaViewModel.FechaRegistro), "Fecha de visita", 160, 140)
                 .SortMode = DataGridViewColumnSortMode.NotSortable;
-            dgvHistorialVisitas.AgregarTexto(nameof(VisitaViewModel.TipoAcceso), "Tipo de acceso", 120, 110);
-            dgvHistorialVisitas.AgregarTexto(nameof(VisitaViewModel.NombreMembresia), "Membresía", 150, 110);
+            dgvHistorialVisitas.AgregarTexto(nameof(VisitaViewModel.TipoAcceso), "Tipo de acceso", 130, 110);
+            dgvHistorialVisitas.AgregarTexto(nameof(VisitaViewModel.NombreMembresia), "Membresía", 160, 110);
         }
 
         // ───────────── Carga ─────────────

@@ -41,7 +41,7 @@ namespace Presentacion.Forms.Corte
         {
             dgvMovimientos.AutoGenerateColumns = false;
 
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 110, 110, "dd/MM/yyyy HH:mm");
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 190, 190, "dd/MM/yyyy hh:mm tt");
             dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Concepto), "Concepto", 170, 100);
             dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.TipoPago), "Tipo de pago", 90, 90);
             dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Ingresos), "Ingresos", 85, 85, "C2", alinearDerecha: true)
@@ -59,9 +59,9 @@ namespace Presentacion.Forms.Corte
                 ? Tema.Advertencia
                 : Tema.Exito;
 
-            lblFechaInicioValor.Text = _corte.FechaApertura.ToString("dd/MM/yyyy HH:mm");
+            lblFechaInicioValor.Text = _corte.FechaApertura.ToString("dd/MM/yyyy hh:mm tt");
             lblFechaFinValor.Text = _corte.FechaCierre.HasValue
-                ? _corte.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm")
+                ? _corte.FechaCierre.Value.ToString("dd/MM/yyyy hh:mm tt")
                 : "En proceso";
 
             lblObservacionValor.Text = string.IsNullOrWhiteSpace(_corte.Observaciones)

@@ -396,7 +396,7 @@ namespace Negocio.Services
             {
                 DayOfWeek dia = acceso.CreatedAt.DayOfWeek;
                 if (!asistencias.ContainsKey(dia))
-                    asistencias.Add(dia, acceso.CreatedAt.ToString("HH:mm"));
+                    asistencias.Add(dia, acceso.CreatedAt.ToString("hh:mm tt"));
             }
 
             return asistencias;

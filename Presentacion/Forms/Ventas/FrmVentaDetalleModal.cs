@@ -45,7 +45,7 @@ namespace Presentacion.Forms.Ventas
                 .ToList();
 
             // Cabecera
-            lblFechaValor.Text = _venta.FechaVenta.ToString("dd/MM/yyyy HH:mm");
+            lblFechaValor.Text = _venta.FechaVenta.ToString("dd/MM/yyyy hh:mm tt");
             lblTotalCalculado.Text = _venta.Total.ToString("C2");
 
             int articulos = filas.Sum(f => f.Cantidad);

@@ -8,6 +8,9 @@ namespace Presentacion.Forms
 {
     public class GridTema : DataGridView
     {
+        // Espacio que ocupa la flecha de ordenamiento en el encabezado.
+        private const int AnchoFlechaOrden = 24;
+
         public GridTema()
         {
             DoubleBuffered = true; // menos parpadeo al hacer scroll
@@ -21,7 +24,7 @@ namespace Presentacion.Forms
             SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             RowHeadersVisible = false;
 
-            // Volvemos a Fill para que la tabla luzca limpia y completa a lo ancho del contenedor,
+            // Fill para que la tabla luzca completa a lo ancho del contenedor,
             // controlando el espacio mediante los pesos (FillWeight) de cada columna.
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
@@ -36,7 +39,7 @@ namespace Presentacion.Forms
             ColumnHeadersHeight = 38;
             RowTemplate.Height = 32;
 
-            var relleno = new Padding(12, 0, 12, 0); // Un poco más de espacio interno para mayor elegancia
+            var relleno = new Padding(12, 0, 12, 0);
 
             // Encabezados
             var encabezado = ColumnHeadersDefaultCellStyle;
@@ -47,6 +50,8 @@ namespace Presentacion.Forms
             encabezado.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             encabezado.Alignment = DataGridViewContentAlignment.MiddleLeft;
             encabezado.Padding = relleno;
+            // Sin ajuste de línea: el ancho mínimo de cada columna se calcula para que el texto quepa en una sola línea.
+            encabezado.WrapMode = DataGridViewTriState.False;
 
             // Celdas
             var celda = DefaultCellStyle;
@@ -66,7 +71,7 @@ namespace Presentacion.Forms
         /// <param name="propiedad">Nombre de la propiedad del modelo.</param>
         /// <param name="encabezado">Texto del encabezado.</param>
         /// <param name="peso">Proporción de ancho relativa (FillWeight).</param>
-        /// <param name="anchoMinimo">Ancho mínimo en píxeles.</param>
+        /// <param name="anchoMinimo">Ancho mínimo en píxeles (se amplía si el encabezado no cabe).</param>
         /// <param name="formato">Formato opcional (ej. "C2", "dd/MM/yyyy HH:mm").</param>
         /// <param name="alinearDerecha">Alineación a la derecha para valores numéricos.</param>
         public DataGridViewTextBoxColumn AgregarTexto(
@@ -83,7 +88,7 @@ namespace Presentacion.Forms
                 DataPropertyName = propiedad,
                 HeaderText = encabezado,
                 FillWeight = peso, // Controla qué tan ancha es una columna en proporción a las demás
-                MinimumWidth = anchoMinimo,
+                MinimumWidth = Math.Max(anchoMinimo, AnchoNecesarioEncabezado(encabezado)),
                 SortMode = DataGridViewColumnSortMode.Automatic
             };
 
@@ -103,6 +108,14 @@ namespace Presentacion.Forms
 
             Columns.Add(columna);
             return columna;
+        }
+
+        // Ancho que necesita el encabezado: texto + relleno lateral + flecha de ordenamiento.
+        private int AnchoNecesarioEncabezado(string texto)
+        {
+            var fuente = ColumnHeadersDefaultCellStyle.Font ?? Font;
+            int textoPx = TextRenderer.MeasureText(texto, fuente, Size.Empty, TextFormatFlags.NoPadding).Width;
+            return textoPx + ColumnHeadersDefaultCellStyle.Padding.Horizontal + AnchoFlechaOrden;
         }
     }
 }

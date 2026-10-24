@@ -51,7 +51,7 @@ namespace Presentacion.Forms.Compras
                 lblTitulo.Text = $"Detalle de Compra · {_folio}";
 
             // Cabecera
-            lblFechaValor.Text = (_compra.CreatedAt ?? DateTime.Now).ToString("dd/MM/yyyy HH:mm");
+            lblFechaValor.Text = (_compra.CreatedAt ?? DateTime.Now).ToString("dd/MM/yyyy hh:mm tt");
             lblTotalCalculado.Text = _compra.Total.ToString("C2");
 
             int articulos = filas.Sum(f => f.Cantidad);

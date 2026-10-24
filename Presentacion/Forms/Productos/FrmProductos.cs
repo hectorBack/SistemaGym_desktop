@@ -62,7 +62,7 @@ namespace Presentacion.Forms.Productos
             dgvProductos.AgregarTexto(nameof(ProductoViewModel.Costo), "Costo", 80, 70, "C2", alinearDerecha: true);
             dgvProductos.AgregarTexto(nameof(ProductoViewModel.Precio), "Precio", 80, 70, "C2", alinearDerecha: true);
             dgvProductos.AgregarTexto(nameof(ProductoViewModel.Estado), "Estado", 80, 70);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy hh:mm tt");
         }
 
         private async Task CargarProductosAsync(int? idASeleccionar = null)

@@ -65,14 +65,14 @@ namespace Presentacion.Forms.Corte
         {
             dgvCortes.AutoGenerateColumns = false;
 
-            dgvCortes.AgregarTexto(nameof(CorteViewModel.FechaApertura), "Fecha Inicio", 130, 110, "dd/MM/yyyy HH:mm");
-            dgvCortes.AgregarTexto(nameof(CorteViewModel.FechaCierre), "Fecha Final", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.FechaApertura), "Fecha Inicio", 130, 110, "dd/MM/yyyy hh:mm tt");
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.FechaCierre), "Fecha Final", 130, 110, "dd/MM/yyyy hh:mm tt");
             dgvCortes.AgregarTexto(nameof(CorteViewModel.TotalIngresos), "Ingresos", 90, 90, "C2", alinearDerecha: true);
             dgvCortes.AgregarTexto(nameof(CorteViewModel.TotalEgresos), "Egresos", 90, 90, "C2", alinearDerecha: true);
             dgvCortes.AgregarTexto(nameof(CorteViewModel.MontoInicial), "Caja Inicial", 90, 90, "C2", alinearDerecha: true);
             dgvCortes.AgregarTexto(nameof(CorteViewModel.MontoFinal), "Caja Final", 90, 90, "C2", alinearDerecha: true);
             dgvCortes.AgregarTexto(nameof(CorteViewModel.Usuario), "Usuario", 110, 120);
-            dgvCortes.AgregarTexto(nameof(CorteViewModel.CreatedAt), "Fecha Registro", 130, 110, "dd/MM/yyyy HH:mm");
+            dgvCortes.AgregarTexto(nameof(CorteViewModel.CreatedAt), "Fecha Registro", 130, 110, "dd/MM/yyyy hh:mm tt");
             dgvCortes.AgregarTexto(nameof(CorteViewModel.Observaciones), "Observación", 150, 150);
         }
 

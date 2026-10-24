@@ -21,6 +21,6 @@ namespace Presentacion.ViewModels
 
         // Propiedades de formato conveniente para el DataGridView
         public string MontoFormateado => Monto.ToString("C2");
-        public string FechaFormateada => CreatedAt.HasValue ? CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : string.Empty;
+        public string FechaFormateada => CreatedAt.HasValue ? CreatedAt.Value.ToString("dd/MM/yyyy hh:mm tt") : string.Empty;
     }
 }
