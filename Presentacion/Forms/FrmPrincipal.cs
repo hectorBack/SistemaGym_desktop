@@ -235,7 +235,7 @@ namespace Presentacion.Forms
         {
             try
             {
-                TimeSpan horaProgramada = new TimeSpan(20, 0, 0);
+                TimeSpan horaProgramada = new TimeSpan(21, 0, 0);
                 TimeSpan horaActual = DateTime.Now.TimeOfDay;
 
                 if (horaActual.Hours == horaProgramada.Hours && horaActual.Minutes >= horaProgramada.Minutes)

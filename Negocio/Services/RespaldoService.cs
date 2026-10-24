@@ -41,7 +41,7 @@ namespace Negocio.Services
                 }
 
                 string servidor = "localhost";
-                string puerto = "3306";
+                string puerto = "3308";
                 string usuario = "root";
                 string password = string.Empty;
                 string nombreBaseDatos = "bd_gym";
@@ -141,7 +141,7 @@ namespace Negocio.Services
                 }
 
                 string servidor = "localhost";
-                string puerto = "3306";
+                string puerto = "3308";
                 string usuario = "root";
                 string password = string.Empty;
                 string nombreBaseDatos = "bd_gym";

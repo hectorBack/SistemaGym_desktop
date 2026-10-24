@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Datos;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,18 +30,96 @@ namespace Negocio.Helpers
 
             try
             {
-                // 🟢 Cambiamos el formato a .sql con el prefijo gym y marca de tiempo
                 string nombreArchivo = $"gym_{hoy:yyyyMMdd_HHmmss}.sql";
                 string rutaCompleta = Path.Combine(rutaDestino, nombreArchivo);
 
-                // Ejemplo de respaldo lógico o copiado (ajústalo según cómo manejes tu archivo de BD local):
-                // Si tu BD es un archivo local (como SQLite/LocalDB):
-                // string rutaBdOrigen = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tu_base_datos.db");
-                // if (File.Exists(rutaBdOrigen)) File.Copy(rutaBdOrigen, rutaCompleta, true);
+                // 1. Obtener la cadena de conexión desde tu clase Conexion
+                var conexionDatos = new Conexion();
+                string connectionString = string.Empty;
 
-                // Si manejas MySQL, aquí puedes integrar la ejecución de procesos de respaldo con mysqldump.
-                // Para efectos de prueba y asegurar que cree un archivo físico:
-                await File.WriteAllTextAsync(rutaCompleta, $"Respaldo automático generado exitosamente el {DateTime.Now}");
+                using (var conn = conexionDatos.ObtenerConexion())
+                {
+                    connectionString = conn.ConnectionString;
+                }
+
+                // 2. Valores por defecto (puerto 3308 para tu XAMPP)
+                string servidor = "localhost";
+                string puerto = "3308";
+                string usuario = "root";
+                string password = string.Empty;
+                string nombreBaseDatos = "bd_gym";
+
+                // 3. Extraer los parámetros reales de la cadena de conexión
+                foreach (var parte in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var kv = parte.Split('=', 2);
+                    if (kv.Length == 2)
+                    {
+                        string clave = kv[0].Trim().ToLower();
+                        string valor = kv[1].Trim();
+
+                        if (clave == "server" || clave == "data source") servidor = valor;
+                        else if (clave == "port") puerto = valor;
+                        else if (clave == "database" || clave == "initial catalog") nombreBaseDatos = valor;
+                        else if (clave == "uid" || clave == "user id") usuario = valor;
+                        else if (clave == "pwd" || clave == "password") password = valor;
+                    }
+                }
+
+                // 4. Buscar la ruta de mysqldump.exe (priorizando XAMPP)
+                string rutaMysqldump = @"C:\xampp\mysql\bin\mysqldump.exe";
+
+                if (!File.Exists(rutaMysqldump))
+                {
+                    string rutaAlternativa1 = @"C:\Program Files\MySQL\MySQL Workbench 8.0 CE\mysqldump.exe";
+
+                    if (File.Exists(rutaAlternativa1))
+                        rutaMysqldump = rutaAlternativa1;
+                    else
+                    {
+                        throw new Exception("No se encontró el ejecutable 'mysqldump.exe' en XAMPP ni en las rutas predeterminadas.");
+                    }
+                }
+
+                // 5. Configurar argumentos para mysqldump
+                string argumentos = string.IsNullOrEmpty(password)
+                    ? $"-h{servidor} -P{puerto} -u{usuario} {nombreBaseDatos}"
+                    : $"-h{servidor} -P{puerto} -u{usuario} -p{password} {nombreBaseDatos}";
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = rutaMysqldump,
+                    Arguments = argumentos,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                // 6. Ejecutar el proceso y guardar el archivo .sql real
+                using (var proceso = Process.Start(startInfo))
+                {
+                    if (proceso == null)
+                        throw new Exception("No se pudo iniciar el proceso de respaldo de MySQL.");
+
+                    using (var lector = proceso.StandardOutput)
+                    {
+                        string resultadoSql = await lector.ReadToEndAsync();
+
+                        if (string.IsNullOrWhiteSpace(resultadoSql))
+                        {
+                            throw new Exception("El volcado de la base de datos devolvió un resultado vacío.");
+                        }
+
+                        await File.WriteAllTextAsync(rutaCompleta, resultadoSql);
+                    }
+
+                    proceso.WaitForExit();
+
+                    if (proceso.ExitCode != 0)
+                    {
+                        throw new Exception("El comando mysqldump finalizó con un código de error.");
+                    }
+                }
 
                 _ultimoRespaldoEjecutado = DateTime.Now;
 
