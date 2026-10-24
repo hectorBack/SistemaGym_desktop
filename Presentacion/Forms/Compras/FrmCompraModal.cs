@@ -217,6 +217,8 @@ namespace Presentacion.Forms.Compras
 
             SeleccionarLinea(linea); // la última línea tocada queda lista para + / -
 
+            SonidoHelper.ReproducirEscaner();
+
             // Listo para el siguiente producto.
             txtCodigoBarras.Clear();
             cmbProductos.SelectedIndex = -1;
