@@ -51,19 +51,20 @@ namespace Presentacion.Forms.Roles
                 "Roles",
                 "Socios",
                 "Membresias",
-                "Clases",
                 "Productos",
                 "Compras",
                 "Ventas",
                 "Registro",
                 "Reportes",
                 "Configuracion",
-                "Respaldar",
+                "Respaldos",
                 "Restaurar",
                 "Corte de Caja",
                 "Eliminar",
                 "Conceptos",
-                "Movimientos"
+                "Movimientos",
+                "Categorias", 
+                "Inicio"
             };
 
             foreach (var modulo in modulos)
