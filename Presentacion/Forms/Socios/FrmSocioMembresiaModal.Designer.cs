@@ -36,6 +36,7 @@
             btnAgregarMembresia = new BotonTema();
             grpDetallesSocio = new GroupBox();
             picFotoSocio = new PictureBox();
+            lblSinFoto = new Label();
             lblNombreSocio = new Label();
             lblTelHeader = new Label();
             lblTelefono = new Label();
@@ -51,6 +52,7 @@
             grpAsignarMembresia.SuspendLayout();
             grpDetallesSocio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picFotoSocio).BeginInit();
+            picFotoSocio.SuspendLayout();
             panelPie.SuspendLayout();
             SuspendLayout();
             //
@@ -85,7 +87,7 @@
             panelContenido.Location = new Point(0, 67);
             panelContenido.Name = "panelContenido";
             panelContenido.Padding = new Padding(20, 10, 20, 10);
-            panelContenido.Size = new Size(900, 513);
+            panelContenido.Size = new Size(900, 548);
             panelContenido.TabIndex = 1;
             //
             // grpDetallesSocio
@@ -101,28 +103,40 @@
             grpDetallesSocio.ForeColor = Color.FromArgb(45, 212, 255);
             grpDetallesSocio.Location = new Point(20, 10);
             grpDetallesSocio.Name = "grpDetallesSocio";
-            grpDetallesSocio.Size = new Size(860, 150);
+            grpDetallesSocio.Size = new Size(860, 185);
             grpDetallesSocio.TabIndex = 0;
             grpDetallesSocio.TabStop = false;
             grpDetallesSocio.Text = "Detalles del socio";
             //
             // picFotoSocio
             //
-            picFotoSocio.BackColor = Color.FromArgb(15, 42, 79);
-            picFotoSocio.BorderStyle = BorderStyle.FixedSingle;
-            picFotoSocio.Location = new Point(17, 28);
+            picFotoSocio.BackColor = Color.FromArgb(11, 15, 26);
+            picFotoSocio.BorderStyle = BorderStyle.None;
+            picFotoSocio.Controls.Add(lblSinFoto);
+            picFotoSocio.Location = new Point(17, 30);
             picFotoSocio.Name = "picFotoSocio";
-            picFotoSocio.Size = new Size(100, 106);
+            picFotoSocio.Size = new Size(105, 140);
             picFotoSocio.SizeMode = PictureBoxSizeMode.Zoom;
             picFotoSocio.TabIndex = 0;
             picFotoSocio.TabStop = false;
+            //
+            // lblSinFoto
+            //
+            lblSinFoto.BackColor = Color.Transparent;
+            lblSinFoto.Dock = DockStyle.Fill;
+            lblSinFoto.Font = new Font("Segoe UI", 9F);
+            lblSinFoto.ForeColor = Color.FromArgb(124, 138, 165);
+            lblSinFoto.Name = "lblSinFoto";
+            lblSinFoto.TabIndex = 0;
+            lblSinFoto.Text = "Sin foto";
+            lblSinFoto.TextAlign = ContentAlignment.MiddleCenter;
             //
             // lblNombreSocio
             //
             lblNombreSocio.AutoSize = true;
             lblNombreSocio.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblNombreSocio.ForeColor = Color.FromArgb(230, 238, 252);
-            lblNombreSocio.Location = new Point(135, 28);
+            lblNombreSocio.Location = new Point(145, 30);
             lblNombreSocio.Name = "lblNombreSocio";
             lblNombreSocio.Size = new Size(167, 28);
             lblNombreSocio.TabIndex = 1;
@@ -133,7 +147,7 @@
             lblTelHeader.AutoSize = true;
             lblTelHeader.Font = new Font("Segoe UI", 9F);
             lblTelHeader.ForeColor = Color.FromArgb(124, 138, 165);
-            lblTelHeader.Location = new Point(135, 64);
+            lblTelHeader.Location = new Point(145, 68);
             lblTelHeader.Name = "lblTelHeader";
             lblTelHeader.Size = new Size(70, 20);
             lblTelHeader.TabIndex = 2;
@@ -144,7 +158,7 @@
             lblTelefono.AutoSize = true;
             lblTelefono.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblTelefono.ForeColor = Color.FromArgb(230, 238, 252);
-            lblTelefono.Location = new Point(210, 64);
+            lblTelefono.Location = new Point(220, 68);
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(99, 20);
             lblTelefono.TabIndex = 3;
@@ -155,7 +169,7 @@
             lblObsHeader.AutoSize = true;
             lblObsHeader.Font = new Font("Segoe UI", 9F);
             lblObsHeader.ForeColor = Color.FromArgb(124, 138, 165);
-            lblObsHeader.Location = new Point(135, 90);
+            lblObsHeader.Location = new Point(145, 98);
             lblObsHeader.Name = "lblObsHeader";
             lblObsHeader.Size = new Size(108, 20);
             lblObsHeader.TabIndex = 4;
@@ -168,12 +182,12 @@
             txtObservaciones.BorderStyle = BorderStyle.None;
             txtObservaciones.Font = new Font("Segoe UI", 9F);
             txtObservaciones.ForeColor = Color.FromArgb(230, 238, 252);
-            txtObservaciones.Location = new Point(135, 112);
+            txtObservaciones.Location = new Point(145, 122);
             txtObservaciones.Multiline = true;
             txtObservaciones.Name = "txtObservaciones";
             txtObservaciones.ReadOnly = true;
             txtObservaciones.ScrollBars = ScrollBars.Vertical;
-            txtObservaciones.Size = new Size(710, 32);
+            txtObservaciones.Size = new Size(695, 48);
             txtObservaciones.TabIndex = 5;
             txtObservaciones.TabStop = false;
             //
@@ -189,7 +203,7 @@
             grpAsignarMembresia.Dock = DockStyle.Top;
             grpAsignarMembresia.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             grpAsignarMembresia.ForeColor = Color.FromArgb(45, 212, 255);
-            grpAsignarMembresia.Location = new Point(20, 160);
+            grpAsignarMembresia.Location = new Point(20, 195);
             grpAsignarMembresia.Name = "grpAsignarMembresia";
             grpAsignarMembresia.Size = new Size(860, 105);
             grpAsignarMembresia.TabIndex = 1;
@@ -280,7 +294,7 @@
             panelHistorialBarra.Controls.Add(panelAccionesHistorial);
             panelHistorialBarra.Controls.Add(lblHistorial);
             panelHistorialBarra.Dock = DockStyle.Top;
-            panelHistorialBarra.Location = new Point(20, 265);
+            panelHistorialBarra.Location = new Point(20, 300);
             panelHistorialBarra.Name = "panelHistorialBarra";
             panelHistorialBarra.Size = new Size(860, 52);
             panelHistorialBarra.TabIndex = 2;
@@ -335,7 +349,7 @@
             // dgvHistorial
             //
             dgvHistorial.Dock = DockStyle.Fill;
-            dgvHistorial.Location = new Point(20, 317);
+            dgvHistorial.Location = new Point(20, 352);
             dgvHistorial.Name = "dgvHistorial";
             dgvHistorial.Size = new Size(860, 186);
             dgvHistorial.TabIndex = 3;
@@ -347,7 +361,7 @@
             panelPie.BackColor = Color.FromArgb(14, 20, 36);
             panelPie.Controls.Add(btnCerrar);
             panelPie.Dock = DockStyle.Bottom;
-            panelPie.Location = new Point(0, 580);
+            panelPie.Location = new Point(0, 615);
             panelPie.Name = "panelPie";
             panelPie.Size = new Size(900, 60);
             panelPie.TabIndex = 2;
@@ -368,14 +382,14 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             CancelButton = btnCerrar;
-            ClientSize = new Size(900, 640);
+            ClientSize = new Size(900, 675);
             Controls.Add(panelContenido);
             Controls.Add(panelPie);
             Controls.Add(panelHeader);
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = true;
             MinimizeBox = false;
-            MinimumSize = new Size(860, 600);
+            MinimumSize = new Size(860, 635);
             Name = "FrmSocioMembresiaModal";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
@@ -392,6 +406,7 @@
             grpAsignarMembresia.PerformLayout();
             grpDetallesSocio.ResumeLayout(false);
             grpDetallesSocio.PerformLayout();
+            picFotoSocio.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picFotoSocio).EndInit();
             panelPie.ResumeLayout(false);
             ResumeLayout(false);
@@ -418,6 +433,7 @@
         private BotonTema btnAgregarMembresia;
         private GroupBox grpDetallesSocio;
         private PictureBox picFotoSocio;
+        private Label lblSinFoto;
         private Label lblNombreSocio;
         private Label lblTelHeader;
         private Label lblTelefono;

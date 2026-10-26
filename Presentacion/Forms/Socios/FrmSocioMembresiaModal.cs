@@ -70,6 +70,7 @@ namespace Presentacion.Forms.Socios
                 : _socio.Observaciones;
 
             ImagenHelper.MostrarEn(picFotoSocio, ImagenHelper.CargarFoto(_socio.Foto));
+            lblSinFoto.Visible = picFotoSocio.Image == null; // sin imagen, se muestra "Sin foto"
         }
 
         private async Task CargarComboMembresiasAsync()

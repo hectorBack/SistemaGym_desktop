@@ -57,7 +57,7 @@
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
-            panelHeader.Size = new Size(800, 67);
+            panelHeader.Size = new Size(940, 67);
             panelHeader.TabIndex = 0;
             //
             // lblTitulo
@@ -79,7 +79,7 @@
             panelFiltros.Dock = DockStyle.Top;
             panelFiltros.Location = new Point(0, 67);
             panelFiltros.Name = "panelFiltros";
-            panelFiltros.Size = new Size(800, 60);
+            panelFiltros.Size = new Size(940, 60);
             panelFiltros.TabIndex = 1;
             //
             // flowFiltros
@@ -157,7 +157,7 @@
             lblConteo.Dock = DockStyle.Right;
             lblConteo.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             lblConteo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblConteo.Location = new Point(620, 0);
+            lblConteo.Location = new Point(760, 0);
             lblConteo.Name = "lblConteo";
             lblConteo.Padding = new Padding(0, 0, 20, 0);
             lblConteo.Size = new Size(180, 60);
@@ -169,7 +169,7 @@
             dgvMovimientos.Dock = DockStyle.Fill;
             dgvMovimientos.Location = new Point(0, 127);
             dgvMovimientos.Name = "dgvMovimientos";
-            dgvMovimientos.Size = new Size(800, 273);
+            dgvMovimientos.Size = new Size(940, 313);
             dgvMovimientos.TabIndex = 2;
             dgvMovimientos.CellFormatting += dgvMovimientos_CellFormatting;
             //
@@ -182,9 +182,9 @@
             panelPie.Controls.Add(btnRealizarCorte);
             panelPie.Controls.Add(btnCancelar);
             panelPie.Dock = DockStyle.Bottom;
-            panelPie.Location = new Point(0, 400);
+            panelPie.Location = new Point(0, 440);
             panelPie.Name = "panelPie";
-            panelPie.Size = new Size(800, 220);
+            panelPie.Size = new Size(940, 220);
             panelPie.TabIndex = 3;
             //
             // tablaTotales
@@ -209,7 +209,7 @@
             tablaTotales.RowCount = 2;
             tablaTotales.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
             tablaTotales.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            tablaTotales.Size = new Size(800, 76);
+            tablaTotales.Size = new Size(940, 76);
             tablaTotales.TabIndex = 0;
             //
             // lblEfectivoInicialEtiqueta
@@ -305,6 +305,7 @@
             //
             // txtObservaciones
             //
+            txtObservaciones.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtObservaciones.BackColor = Color.FromArgb(15, 42, 79);
             txtObservaciones.BorderStyle = BorderStyle.FixedSingle;
             txtObservaciones.Font = new Font("Segoe UI", 9.5F);
@@ -313,14 +314,14 @@
             txtObservaciones.Multiline = true;
             txtObservaciones.Name = "txtObservaciones";
             txtObservaciones.ScrollBars = ScrollBars.Vertical;
-            txtObservaciones.Size = new Size(430, 80);
+            txtObservaciones.Size = new Size(570, 80);
             txtObservaciones.TabIndex = 2;
             //
             // btnRealizarCorte
             //
             btnRealizarCorte.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnRealizarCorte.Estilo = EstiloBoton.Exito;
-            btnRealizarCorte.Location = new Point(487, 147);
+            btnRealizarCorte.Location = new Point(627, 147);
             btnRealizarCorte.Name = "btnRealizarCorte";
             btnRealizarCorte.Size = new Size(150, 47);
             btnRealizarCorte.TabIndex = 3;
@@ -331,7 +332,7 @@
             //
             btnCancelar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnCancelar.DialogResult = DialogResult.Cancel;
-            btnCancelar.Location = new Point(646, 147);
+            btnCancelar.Location = new Point(786, 147);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(125, 47);
             btnCancelar.TabIndex = 4;
@@ -344,7 +345,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             CancelButton = btnCancelar;
-            ClientSize = new Size(800, 620);
+            ClientSize = new Size(940, 660);
             Controls.Add(dgvMovimientos);
             Controls.Add(panelPie);
             Controls.Add(panelFiltros);
@@ -352,7 +353,7 @@
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = true;
             MinimizeBox = false;
-            MinimumSize = new Size(816, 620);
+            MinimumSize = new Size(900, 640);
             Name = "FrmCorteModal";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;

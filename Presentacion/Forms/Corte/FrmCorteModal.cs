@@ -65,7 +65,7 @@ namespace Presentacion.Forms.Corte
         {
             _corteController = corteController ?? throw new ArgumentNullException(nameof(corteController));
             _movimientoController = movimientoController ?? throw new ArgumentNullException(nameof(movimientoController));
-            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService)); 
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             _efectivoInicialPredeterminado = efectivoInicialPredeterminado;
             _usuarioIdActual = usuarioIdActual > 0 ? usuarioIdActual : SesionUsuario.UsuarioID;
 
@@ -89,15 +89,15 @@ namespace Presentacion.Forms.Corte
         {
             dgvMovimientos.AutoGenerateColumns = false;
 
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 110, 110, "dd/MM/yyyy HH:mm");
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Concepto), "Concepto", 150, 100);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Tipo), "Tipo", 70, 70);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.FormaPago), "Forma de pago", 90, 90);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Ingresos), "Ingresos", 80, 85, "C2", alinearDerecha: true)
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 190, 190, "dd/MM/yyyy hh:mm tt");
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Concepto), "Concepto", 180, 160);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Tipo), "Tipo", 70, 80);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.FormaPago), "Forma de pago", 110, 130);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Ingresos), "Ingresos", 90, 100, "C2", alinearDerecha: true)
                 .DefaultCellStyle.ForeColor = Tema.Exito;
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Egresos), "Egresos", 80, 85, "C2", alinearDerecha: true)
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Egresos), "Egresos", 90, 100, "C2", alinearDerecha: true)
                 .DefaultCellStyle.ForeColor = Tema.Peligro;
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Observacion), "Observación", 130, 100);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Observacion), "Observación", 140, 120);
         }
 
         // Los importes en cero se dejan en blanco para que se lea mejor qué es ingreso y qué es egreso.

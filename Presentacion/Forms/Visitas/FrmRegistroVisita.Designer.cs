@@ -38,6 +38,7 @@
             btnCancelarVisita = new BotonTema();
             panelFoto = new Panel();
             picFoto = new PictureBox();
+            lblSinFoto = new Label();
             panelBottom = new Panel();
             dgvAsistenciasSemana = new GridTema();
             lblTituloAsistencia = new Label();
@@ -47,6 +48,7 @@
             panelBotones.SuspendLayout();
             panelFoto.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)picFoto).BeginInit();
+            picFoto.SuspendLayout();
             panelBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvAsistenciasSemana).BeginInit();
             SuspendLayout();
@@ -135,15 +137,26 @@
             //
             // picFoto
             //
-            picFoto.BackColor = Color.FromArgb(15, 42, 79);
-            picFoto.BorderStyle = BorderStyle.FixedSingle;
-            picFoto.Dock = DockStyle.Fill;
+            picFoto.BackColor = Color.FromArgb(11, 15, 26);
+            picFoto.BorderStyle = BorderStyle.None;
+            picFoto.Controls.Add(lblSinFoto);
             picFoto.Location = new Point(0, 0);
             picFoto.Name = "picFoto";
-            picFoto.Size = new Size(275, 485);
+            picFoto.Size = new Size(270, 360);
             picFoto.SizeMode = PictureBoxSizeMode.Zoom;
             picFoto.TabIndex = 0;
             picFoto.TabStop = false;
+            //
+            // lblSinFoto
+            //
+            lblSinFoto.BackColor = Color.Transparent;
+            lblSinFoto.Dock = DockStyle.Fill;
+            lblSinFoto.Font = new Font("Segoe UI", 11F);
+            lblSinFoto.ForeColor = Color.FromArgb(124, 138, 165);
+            lblSinFoto.Name = "lblSinFoto";
+            lblSinFoto.TabIndex = 0;
+            lblSinFoto.Text = "Sin foto";
+            lblSinFoto.TextAlign = ContentAlignment.MiddleCenter;
             //
             // panelDatos
             //
@@ -167,7 +180,7 @@
             lblLabelSocio.AutoSize = true;
             lblLabelSocio.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblLabelSocio.ForeColor = Color.FromArgb(45, 212, 255);
-            lblLabelSocio.Location = new Point(0, 0);
+            lblLabelSocio.Location = new Point(0, 84);
             lblLabelSocio.Name = "lblLabelSocio";
             lblLabelSocio.Size = new Size(67, 23);
             lblLabelSocio.TabIndex = 0;
@@ -179,7 +192,7 @@
             lblNombreSocio.AutoEllipsis = true;
             lblNombreSocio.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblNombreSocio.ForeColor = Color.FromArgb(230, 238, 252);
-            lblNombreSocio.Location = new Point(0, 26);
+            lblNombreSocio.Location = new Point(0, 110);
             lblNombreSocio.Name = "lblNombreSocio";
             lblNombreSocio.Size = new Size(564, 40);
             lblNombreSocio.TabIndex = 1;
@@ -191,7 +204,7 @@
             lblLabelMembresia.AutoSize = true;
             lblLabelMembresia.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblLabelMembresia.ForeColor = Color.FromArgb(45, 212, 255);
-            lblLabelMembresia.Location = new Point(0, 84);
+            lblLabelMembresia.Location = new Point(0, 168);
             lblLabelMembresia.Name = "lblLabelMembresia";
             lblLabelMembresia.Size = new Size(114, 23);
             lblLabelMembresia.TabIndex = 2;
@@ -202,9 +215,9 @@
             lblMembresia.AutoEllipsis = true;
             lblMembresia.Font = new Font("Segoe UI", 13F);
             lblMembresia.ForeColor = Color.FromArgb(230, 238, 252);
-            lblMembresia.Location = new Point(0, 110);
+            lblMembresia.Location = new Point(0, 194);
             lblMembresia.Name = "lblMembresia";
-            lblMembresia.Size = new Size(270, 32);
+            lblMembresia.Size = new Size(240, 32);
             lblMembresia.TabIndex = 3;
             lblMembresia.Text = "N/A";
             lblMembresia.TextAlign = ContentAlignment.MiddleLeft;
@@ -214,7 +227,7 @@
             lblLabelVencimiento.AutoSize = true;
             lblLabelVencimiento.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             lblLabelVencimiento.ForeColor = Color.FromArgb(45, 212, 255);
-            lblLabelVencimiento.Location = new Point(290, 84);
+            lblLabelVencimiento.Location = new Point(260, 168);
             lblLabelVencimiento.Name = "lblLabelVencimiento";
             lblLabelVencimiento.Size = new Size(129, 23);
             lblLabelVencimiento.TabIndex = 4;
@@ -222,12 +235,13 @@
             //
             // lblVencimiento
             //
+            lblVencimiento.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lblVencimiento.AutoEllipsis = true;
             lblVencimiento.Font = new Font("Segoe UI", 13F);
             lblVencimiento.ForeColor = Color.FromArgb(230, 238, 252);
-            lblVencimiento.Location = new Point(290, 110);
+            lblVencimiento.Location = new Point(260, 194);
             lblVencimiento.Name = "lblVencimiento";
-            lblVencimiento.Size = new Size(270, 32);
+            lblVencimiento.Size = new Size(304, 32);
             lblVencimiento.TabIndex = 5;
             lblVencimiento.Text = "N/A";
             lblVencimiento.TextAlign = ContentAlignment.MiddleLeft;
@@ -237,7 +251,7 @@
             lblDeuda.AutoSize = true;
             lblDeuda.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblDeuda.ForeColor = Color.FromArgb(230, 238, 252);
-            lblDeuda.Location = new Point(0, 162);
+            lblDeuda.Location = new Point(0, 246);
             lblDeuda.Name = "lblDeuda";
             lblDeuda.Size = new Size(154, 30);
             lblDeuda.TabIndex = 6;
@@ -247,14 +261,15 @@
             //
             lblEstadoAcceso.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lblEstadoAcceso.AutoEllipsis = true;
-            lblEstadoAcceso.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblEstadoAcceso.BackColor = Color.FromArgb(11, 15, 26);
+            lblEstadoAcceso.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
             lblEstadoAcceso.ForeColor = Color.FromArgb(31, 111, 235);
-            lblEstadoAcceso.Location = new Point(0, 206);
+            lblEstadoAcceso.Location = new Point(0, 0);
             lblEstadoAcceso.Name = "lblEstadoAcceso";
-            lblEstadoAcceso.Size = new Size(564, 46);
+            lblEstadoAcceso.Size = new Size(564, 64);
             lblEstadoAcceso.TabIndex = 7;
             lblEstadoAcceso.Text = "ESCANEE CLAVE";
-            lblEstadoAcceso.TextAlign = ContentAlignment.MiddleLeft;
+            lblEstadoAcceso.TextAlign = ContentAlignment.MiddleCenter;
             //
             // panelBotones
             //
@@ -358,6 +373,7 @@
             panelDatos.PerformLayout();
             panelBotones.ResumeLayout(false);
             panelFoto.ResumeLayout(false);
+            picFoto.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)picFoto).EndInit();
             panelBottom.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvAsistenciasSemana).EndInit();
@@ -375,6 +391,7 @@
         private Panel panelDatos;
         private Panel panelFoto;
         private PictureBox picFoto;
+        private Label lblSinFoto;
         private Label lblLabelSocio;
         private Label lblNombreSocio;
         private Label lblLabelMembresia;

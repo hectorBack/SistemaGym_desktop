@@ -39,6 +39,10 @@ namespace Presentacion.Forms.Visitas
         private int? _ultimaVisitaId;
         private bool _procesando;
 
+        // Tras unos segundos la pantalla vuelve a "esperando lectura" (no deja datos del socio anterior a la vista).
+        private const int SegundosLimpiarPantalla = 10;
+        private readonly System.Windows.Forms.Timer _timerLimpieza = new() { Interval = SegundosLimpiarPantalla * 1000 };
+
         // El usuario sale de la sesión: antes llegaba como parámetro con valor por defecto 1,
         // y si el llamador lo olvidaba, las visitas quedaban registradas a nombre del usuario 1.
         private static int UsuarioId => SesionUsuario.UsuarioID;
@@ -58,6 +62,12 @@ namespace Presentacion.Forms.Visitas
 
             InitializeComponent();
             ConfigurarAsistencias();
+
+            _timerLimpieza.Tick += (_, _) =>
+            {
+                _timerLimpieza.Stop();
+                RestablecerPantalla("--- ESPERANDO LECTURA ---", "ESCANEE CLAVE", Tema.Primario);
+            };
         }
 
         private void FrmRegistroVisita_Load(object? sender, EventArgs e)
@@ -152,11 +162,21 @@ namespace Presentacion.Forms.Visitas
                 if (IsDisposed) return;
 
                 if (!consultado || resultado == null)
+                {
                     RestablecerPantalla("—", "ERROR AL REGISTRAR", Tema.Peligro);
+                    System.Media.SystemSounds.Hand.Play();
+                }
                 else if (!resultado.Exitoso)
+                {
                     RestablecerPantalla("—", (resultado.MensajeError ?? "ACCESO DENEGADO").ToUpper(), Tema.Peligro);
+                    System.Media.SystemSounds.Hand.Play();
+                }
                 else
+                {
                     MostrarAcceso(resultado);
+                }
+
+                ReiniciarTemporizadorLimpieza();
             }
             finally
             {
@@ -174,17 +194,59 @@ namespace Presentacion.Forms.Visitas
 
             lblNombreSocio.Text = resultado.NombreCompleto;
             lblMembresia.Text = resultado.NombreMembresia;
-            lblVencimiento.Text = resultado.FechaVencimientoTexto;
+            MostrarVencimiento(resultado);
             PonerFoto(resultado.ObtenerImagenFoto());
 
             lblDeuda.Text = $"Deuda: {resultado.Deuda:C2}";
             lblDeuda.ForeColor = resultado.Deuda > 0 ? Tema.Peligro : Tema.Exito;
 
             bool permitido = resultado.MembresiaVigente || resultado.EsVisitaCasual;
-            lblEstadoAcceso.Text = permitido ? "ACCESO PERMITIDO" : "MEMBRESÍA VENCIDA";
-            lblEstadoAcceso.ForeColor = permitido ? Tema.Exito : Tema.Advertencia;
+            AplicarEstado(permitido ? "ACCESO PERMITIDO" : "MEMBRESÍA VENCIDA", permitido ? Tema.Exito : Tema.Advertencia);
+
+            // Un tono distinto según el resultado: en recepción no siempre se está mirando la pantalla.
+            if (permitido)
+                System.Media.SystemSounds.Asterisk.Play();
+            else
+                System.Media.SystemSounds.Exclamation.Play();
 
             PintarAsistenciasSemana(resultado.AsistenciasSemana);
+        }
+
+        // Vencimiento; si la membresía vigente vence en 7 días o menos se avisa en ámbar (oportunidad de renovar).
+        private void MostrarVencimiento(AccesoResultadoViewModel resultado)
+        {
+            lblVencimiento.Text = resultado.FechaVencimientoTexto;
+            lblVencimiento.ForeColor = Tema.Texto;
+
+            if (!resultado.MembresiaVigente || !resultado.FechaVencimiento.HasValue) return;
+
+            int dias = (resultado.FechaVencimiento.Value.Date - DateTime.Today).Days;
+            if (dias is < 0 or > 7) return;
+
+            string aviso = dias == 0 ? "vence hoy" : dias == 1 ? "vence mañana" : $"vence en {dias} días";
+            lblVencimiento.Text = $"{resultado.FechaVencimientoTexto} · {aviso}";
+            lblVencimiento.ForeColor = Tema.Advertencia;
+        }
+
+        // Franja de estado: texto del color del resultado sobre un fondo suave del mismo color.
+        private void AplicarEstado(string texto, Color color)
+        {
+            lblEstadoAcceso.Text = texto;
+            lblEstadoAcceso.ForeColor = color;
+            lblEstadoAcceso.BackColor = Mezclar(Tema.Fondo, color, 0.22f);
+        }
+
+        private static Color Mezclar(Color fondo, Color color, float cantidad) => Color.FromArgb(
+            (int)(fondo.R + (color.R - fondo.R) * cantidad),
+            (int)(fondo.G + (color.G - fondo.G) * cantidad),
+            (int)(fondo.B + (color.B - fondo.B) * cantidad));
+
+        private void ReiniciarTemporizadorLimpieza()
+        {
+            if (IsDisposed) return;
+
+            _timerLimpieza.Stop();
+            _timerLimpieza.Start();
         }
 
         // Deja la pantalla sin socio: lecturas fallidas, errores y visitas canceladas.
@@ -197,10 +259,10 @@ namespace Presentacion.Forms.Visitas
             lblNombreSocio.Text = nombre;
             lblMembresia.Text = "N/A";
             lblVencimiento.Text = "N/A";
+            lblVencimiento.ForeColor = Tema.Texto;
             lblDeuda.Text = "Deuda: $0.00";
             lblDeuda.ForeColor = Tema.Texto;
-            lblEstadoAcceso.Text = estado;
-            lblEstadoAcceso.ForeColor = colorEstado;
+            AplicarEstado(estado, colorEstado);
 
             PonerFoto(null);
             PintarAsistenciasSemana(null);
@@ -231,6 +293,8 @@ namespace Presentacion.Forms.Visitas
             var anterior = picFoto.Image;
             picFoto.Image = nueva;
             anterior?.Dispose();
+
+            lblSinFoto.Visible = nueva == null; // sin imagen, se muestra "Sin foto"
         }
 
         // ───────────── Información y membresías ─────────────
@@ -239,11 +303,14 @@ namespace Presentacion.Forms.Visitas
         {
             if (_socioIdActual is not > 0) return;
 
+            _timerLimpieza.Stop(); // no limpiar la pantalla mientras hay una ventana abierta
+
             using (var modal = new FrmSocioInfoModal(_socioController, _visitaController, _socioIdActual.Value))
             {
                 modal.ShowDialog(this);
             }
 
+            ReiniciarTemporizadorLimpieza();
             txtClave.Focus();
         }
 
@@ -277,6 +344,8 @@ namespace Presentacion.Forms.Visitas
 
             if (!cargado || socio == null || IsDisposed) return;
 
+            _timerLimpieza.Stop(); // no limpiar la pantalla mientras hay una ventana abierta
+
             using (var modal = new FrmSocioMembresiaModal(
                 _socioMembresiaController,
                 _membresiaController,
@@ -287,6 +356,7 @@ namespace Presentacion.Forms.Visitas
                 modal.ShowDialog(this);
             }
 
+            ReiniciarTemporizadorLimpieza();
             txtClave.Focus();
         }
 
@@ -317,7 +387,10 @@ namespace Presentacion.Forms.Visitas
 
             // Sin mensaje de éxito: el cambio de estado en pantalla ya lo confirma.
             if (cancelada)
+            {
                 RestablecerPantalla("—", "VISITA CANCELADA", Tema.Advertencia);
+                ReiniciarTemporizadorLimpieza();
+            }
 
             PrepararSiguienteLectura();
         }
@@ -326,6 +399,8 @@ namespace Presentacion.Forms.Visitas
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            _timerLimpieza.Stop();
+            _timerLimpieza.Dispose();
             PonerFoto(null); // libera la foto
             base.OnFormClosed(e);
         }

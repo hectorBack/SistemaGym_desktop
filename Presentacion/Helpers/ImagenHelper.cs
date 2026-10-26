@@ -42,12 +42,43 @@ namespace Presentacion.Helpers
             }
         }
 
-        /// <summary>Pone la imagen en el PictureBox y libera la anterior.</summary>
-        public static void MostrarEn(PictureBox caja, Bitmap? nueva)
+        /// <summary>
+        /// Pone la imagen en el PictureBox y libera la anterior.
+        /// Con <paramref name="recortarCuadrada"/> la foto se recorta al centro en forma cuadrada para llenar
+        /// un PictureBox cuadrado sin franjas a los lados. En ese caso la imagen original se libera aquí:
+        /// el llamador no debe seguir usándola después de llamar a este método.
+        /// </summary>
+        public static void MostrarEn(PictureBox caja, Bitmap? nueva, bool recortarCuadrada = false)
         {
+            if (recortarCuadrada && nueva != null)
+            {
+                var recortada = RecortarCuadrada(nueva);
+                if (!ReferenceEquals(recortada, nueva))
+                    nueva.Dispose();
+                nueva = recortada;
+            }
+
             var anterior = caja.Image;
             caja.Image = nueva;
             anterior?.Dispose();
+        }
+
+        /// <summary>
+        /// Recorta la imagen al centro para dejarla cuadrada (lado = el menor de ancho y alto).
+        /// Si ya es cuadrada devuelve la misma instancia; si no, una copia nueva que el llamador debe liberar.
+        /// </summary>
+        public static Bitmap RecortarCuadrada(Bitmap origen)
+        {
+            int lado = Math.Min(origen.Width, origen.Height);
+            if (origen.Width == origen.Height)
+                return origen;
+
+            var region = new Rectangle((origen.Width - lado) / 2, (origen.Height - lado) / 2, lado, lado);
+
+            var resultado = new Bitmap(lado, lado);
+            using var g = Graphics.FromImage(resultado);
+            g.DrawImage(origen, new Rectangle(0, 0, lado, lado), region, GraphicsUnit.Pixel);
+            return resultado;
         }
     }
 }

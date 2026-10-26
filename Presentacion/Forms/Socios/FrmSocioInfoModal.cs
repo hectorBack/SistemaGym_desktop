@@ -91,6 +91,7 @@ namespace Presentacion.Forms.Socios
                 lblEstado.ForeColor = socio.Activo ? Tema.Exito : Tema.Peligro;
 
                 ImagenHelper.MostrarEn(picFotoSocio, ImagenHelper.CargarFoto(socio.Foto));
+                lblSinFoto.Visible = picFotoSocio.Image == null; // sin imagen, se muestra "Sin foto"
 
                 dgvHistorialMembresias.DataSource = Ordenable(socio.HistorialMembresias);
                 dgvHistorialMembresias.ClearSelection();

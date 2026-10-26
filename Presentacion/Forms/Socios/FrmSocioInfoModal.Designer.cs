@@ -23,6 +23,7 @@ namespace Presentacion.Forms.Socios
             lblTitulo = new Label();
             panelDatos = new Panel();
             picFotoSocio = new PictureBox();
+            lblSinFoto = new Label();
             lblClaveTag = new Label();
             lblClave = new Label();
             lblNombreTag = new Label();
@@ -101,26 +102,38 @@ namespace Presentacion.Forms.Socios
             panelDatos.Dock = DockStyle.Top;
             panelDatos.Location = new Point(0, 67);
             panelDatos.Name = "panelDatos";
-            panelDatos.Size = new Size(700, 205);
+            panelDatos.Size = new Size(700, 230);
             panelDatos.TabIndex = 1;
             // 
             // picFotoSocio
             // 
-            picFotoSocio.BackColor = Color.FromArgb(15, 42, 79);
-            picFotoSocio.BorderStyle = BorderStyle.FixedSingle;
+            picFotoSocio.BackColor = Color.FromArgb(11, 15, 26);
+            picFotoSocio.Controls.Add(lblSinFoto);
+            picFotoSocio.BorderStyle = BorderStyle.None;
             picFotoSocio.Location = new Point(23, 15);
             picFotoSocio.Name = "picFotoSocio";
-            picFotoSocio.Size = new Size(140, 140);
+            picFotoSocio.Size = new Size(150, 200);
             picFotoSocio.SizeMode = PictureBoxSizeMode.Zoom;
             picFotoSocio.TabIndex = 0;
             picFotoSocio.TabStop = false;
+            //
+            // lblSinFoto
+            //
+            lblSinFoto.BackColor = Color.Transparent;
+            lblSinFoto.Dock = DockStyle.Fill;
+            lblSinFoto.Font = new Font("Segoe UI", 10F);
+            lblSinFoto.ForeColor = Color.FromArgb(124, 138, 165);
+            lblSinFoto.Name = "lblSinFoto";
+            lblSinFoto.TabIndex = 0;
+            lblSinFoto.Text = "Sin foto";
+            lblSinFoto.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblClaveTag
             // 
             lblClaveTag.AutoSize = true;
             lblClaveTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             lblClaveTag.ForeColor = Color.FromArgb(45, 212, 255);
-            lblClaveTag.Location = new Point(185, 12);
+            lblClaveTag.Location = new Point(195, 18);
             lblClaveTag.Name = "lblClaveTag";
             lblClaveTag.Size = new Size(52, 21);
             lblClaveTag.TabIndex = 1;
@@ -131,7 +144,7 @@ namespace Presentacion.Forms.Socios
             lblClave.AutoSize = true;
             lblClave.Font = new Font("Segoe UI", 10F);
             lblClave.ForeColor = Color.FromArgb(230, 238, 252);
-            lblClave.Location = new Point(295, 11);
+            lblClave.Location = new Point(305, 17);
             lblClave.Name = "lblClave";
             lblClave.Size = new Size(39, 23);
             lblClave.TabIndex = 2;
@@ -142,7 +155,7 @@ namespace Presentacion.Forms.Socios
             lblNombreTag.AutoSize = true;
             lblNombreTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             lblNombreTag.ForeColor = Color.FromArgb(45, 212, 255);
-            lblNombreTag.Location = new Point(185, 38);
+            lblNombreTag.Location = new Point(195, 54);
             lblNombreTag.Name = "lblNombreTag";
             lblNombreTag.Size = new Size(75, 21);
             lblNombreTag.TabIndex = 3;
@@ -153,7 +166,7 @@ namespace Presentacion.Forms.Socios
             lblNombreCompleto.AutoSize = true;
             lblNombreCompleto.Font = new Font("Segoe UI", 10F);
             lblNombreCompleto.ForeColor = Color.FromArgb(230, 238, 252);
-            lblNombreCompleto.Location = new Point(295, 37);
+            lblNombreCompleto.Location = new Point(305, 53);
             lblNombreCompleto.Name = "lblNombreCompleto";
             lblNombreCompleto.Size = new Size(39, 23);
             lblNombreCompleto.TabIndex = 4;
@@ -164,7 +177,7 @@ namespace Presentacion.Forms.Socios
             lblTelefonoTag.AutoSize = true;
             lblTelefonoTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             lblTelefonoTag.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTelefonoTag.Location = new Point(185, 64);
+            lblTelefonoTag.Location = new Point(195, 90);
             lblTelefonoTag.Name = "lblTelefonoTag";
             lblTelefonoTag.Size = new Size(77, 21);
             lblTelefonoTag.TabIndex = 5;
@@ -175,7 +188,7 @@ namespace Presentacion.Forms.Socios
             lblTelefono.AutoSize = true;
             lblTelefono.Font = new Font("Segoe UI", 10F);
             lblTelefono.ForeColor = Color.FromArgb(230, 238, 252);
-            lblTelefono.Location = new Point(295, 63);
+            lblTelefono.Location = new Point(305, 89);
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(39, 23);
             lblTelefono.TabIndex = 6;
@@ -186,7 +199,7 @@ namespace Presentacion.Forms.Socios
             lblEmailTag.AutoSize = true;
             lblEmailTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             lblEmailTag.ForeColor = Color.FromArgb(45, 212, 255);
-            lblEmailTag.Location = new Point(185, 90);
+            lblEmailTag.Location = new Point(195, 126);
             lblEmailTag.Name = "lblEmailTag";
             lblEmailTag.Size = new Size(52, 21);
             lblEmailTag.TabIndex = 7;
@@ -197,7 +210,7 @@ namespace Presentacion.Forms.Socios
             lblEmail.AutoSize = true;
             lblEmail.Font = new Font("Segoe UI", 10F);
             lblEmail.ForeColor = Color.FromArgb(230, 238, 252);
-            lblEmail.Location = new Point(295, 89);
+            lblEmail.Location = new Point(305, 125);
             lblEmail.Name = "lblEmail";
             lblEmail.Size = new Size(39, 23);
             lblEmail.TabIndex = 8;
@@ -208,7 +221,7 @@ namespace Presentacion.Forms.Socios
             lblNacimientoTag.AutoSize = true;
             lblNacimientoTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             lblNacimientoTag.ForeColor = Color.FromArgb(45, 212, 255);
-            lblNacimientoTag.Location = new Point(185, 116);
+            lblNacimientoTag.Location = new Point(195, 162);
             lblNacimientoTag.Name = "lblNacimientoTag";
             lblNacimientoTag.Size = new Size(100, 21);
             lblNacimientoTag.TabIndex = 9;
@@ -219,7 +232,7 @@ namespace Presentacion.Forms.Socios
             lblFechaNacimiento.AutoSize = true;
             lblFechaNacimiento.Font = new Font("Segoe UI", 10F);
             lblFechaNacimiento.ForeColor = Color.FromArgb(230, 238, 252);
-            lblFechaNacimiento.Location = new Point(295, 115);
+            lblFechaNacimiento.Location = new Point(305, 161);
             lblFechaNacimiento.Name = "lblFechaNacimiento";
             lblFechaNacimiento.Size = new Size(39, 23);
             lblFechaNacimiento.TabIndex = 10;
@@ -230,7 +243,7 @@ namespace Presentacion.Forms.Socios
             lblEstadoTag.AutoSize = true;
             lblEstadoTag.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
             lblEstadoTag.ForeColor = Color.FromArgb(45, 212, 255);
-            lblEstadoTag.Location = new Point(185, 142);
+            lblEstadoTag.Location = new Point(195, 198);
             lblEstadoTag.Name = "lblEstadoTag";
             lblEstadoTag.Size = new Size(63, 21);
             lblEstadoTag.TabIndex = 11;
@@ -241,7 +254,7 @@ namespace Presentacion.Forms.Socios
             lblEstado.AutoSize = true;
             lblEstado.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             lblEstado.ForeColor = Color.FromArgb(52, 211, 153);
-            lblEstado.Location = new Point(295, 141);
+            lblEstado.Location = new Point(305, 197);
             lblEstado.Name = "lblEstado";
             lblEstado.Size = new Size(71, 23);
             lblEstado.TabIndex = 12;
@@ -251,10 +264,10 @@ namespace Presentacion.Forms.Socios
             // 
             panelTabs.Controls.Add(tabControlDetalles);
             panelTabs.Dock = DockStyle.Fill;
-            panelTabs.Location = new Point(0, 272);
+            panelTabs.Location = new Point(0, 297);
             panelTabs.Name = "panelTabs";
             panelTabs.Padding = new Padding(20, 0, 20, 10);
-            panelTabs.Size = new Size(780, 328);
+            panelTabs.Size = new Size(780, 303);
             panelTabs.TabIndex = 2;
             // 
             // tabControlDetalles
@@ -269,7 +282,7 @@ namespace Presentacion.Forms.Socios
             tabControlDetalles.Location = new Point(20, 0);
             tabControlDetalles.Name = "tabControlDetalles";
             tabControlDetalles.SelectedIndex = 0;
-            tabControlDetalles.Size = new Size(740, 318);
+            tabControlDetalles.Size = new Size(740, 293);
             tabControlDetalles.SizeMode = TabSizeMode.Fixed;
             tabControlDetalles.TabIndex = 0;
             tabControlDetalles.DrawItem += tabControlDetalles_DrawItem;
@@ -282,7 +295,7 @@ namespace Presentacion.Forms.Socios
             tabMembresias.Location = new Point(4, 36);
             tabMembresias.Name = "tabMembresias";
             tabMembresias.Padding = new Padding(3);
-            tabMembresias.Size = new Size(652, 258);
+            tabMembresias.Size = new Size(652, 233);
             tabMembresias.TabIndex = 0;
             tabMembresias.Text = "Historial de membresías";
             // 
@@ -291,7 +304,7 @@ namespace Presentacion.Forms.Socios
             dgvHistorialMembresias.Dock = DockStyle.Fill;
             dgvHistorialMembresias.Location = new Point(3, 3);
             dgvHistorialMembresias.Name = "dgvHistorialMembresias";
-            dgvHistorialMembresias.Size = new Size(646, 252);
+            dgvHistorialMembresias.Size = new Size(646, 227);
             dgvHistorialMembresias.TabIndex = 0;
             // 
             // tabVisitas
@@ -303,7 +316,7 @@ namespace Presentacion.Forms.Socios
             tabVisitas.Location = new Point(4, 36);
             tabVisitas.Name = "tabVisitas";
             tabVisitas.Padding = new Padding(3);
-            tabVisitas.Size = new Size(652, 258);
+            tabVisitas.Size = new Size(652, 233);
             tabVisitas.TabIndex = 1;
             tabVisitas.Text = "Historial de visitas";
             // 
@@ -386,7 +399,7 @@ namespace Presentacion.Forms.Socios
             dgvHistorialVisitas.Dock = DockStyle.Fill;
             dgvHistorialVisitas.Location = new Point(3, 49);
             dgvHistorialVisitas.Name = "dgvHistorialVisitas";
-            dgvHistorialVisitas.Size = new Size(646, 206);
+            dgvHistorialVisitas.Size = new Size(646, 181);
             dgvHistorialVisitas.TabIndex = 1;
             dgvHistorialVisitas.SelectionChanged += dgvHistorialVisitas_SelectionChanged;
             // 
@@ -395,7 +408,7 @@ namespace Presentacion.Forms.Socios
             panelPie.BackColor = Color.FromArgb(14, 20, 36);
             panelPie.Controls.Add(btnCerrar);
             panelPie.Dock = DockStyle.Bottom;
-            panelPie.Location = new Point(0, 580);
+            panelPie.Location = new Point(0, 605);
             panelPie.Name = "panelPie";
             panelPie.Size = new Size(700, 60);
             panelPie.TabIndex = 3;
@@ -418,7 +431,7 @@ namespace Presentacion.Forms.Socios
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             CancelButton = btnCerrar;
-            ClientSize = new Size(700, 640);
+            ClientSize = new Size(700, 665);
             Controls.Add(panelTabs);
             Controls.Add(panelPie);
             Controls.Add(panelDatos);
@@ -426,7 +439,7 @@ namespace Presentacion.Forms.Socios
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = false;
             MinimizeBox = false;
-            MinimumSize = new Size(680, 560);
+            MinimumSize = new Size(680, 585);
             Name = "FrmSocioInfoModal";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
@@ -455,6 +468,7 @@ namespace Presentacion.Forms.Socios
         private Label lblTitulo;
         private Panel panelDatos;
         private PictureBox picFotoSocio;
+        private Label lblSinFoto;
         private Label lblClaveTag;
         private Label lblClave;
         private Label lblNombreTag;

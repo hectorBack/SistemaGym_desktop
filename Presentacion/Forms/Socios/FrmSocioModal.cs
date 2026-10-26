@@ -133,6 +133,10 @@ namespace Presentacion.Forms.Socios
             var anterior = picFoto.Image;
             picFoto.Image = nueva;
             anterior?.Dispose();
+
+            // Sin imagen se muestra el texto "Sin foto" en lugar de un hueco vacío.
+            if (!lblSinFoto.IsDisposed)
+                lblSinFoto.Visible = nueva == null;
         }
 
         private void btnCargarFoto_Click(object? sender, EventArgs e)
@@ -187,8 +191,23 @@ namespace Presentacion.Forms.Socios
                     return;
                 }
 
+                // Buscar específicamente "Irium", "Android" o "USB"
+                int indiceDispositivo = 0;
+                for (int i = 0; i < dispositivos.Count; i++)
+                {
+                    string nombreCamara = dispositivos[i].Name.ToLower();
+                    System.Diagnostics.Debug.WriteLine($"Cámara disponible [{i}]: {dispositivos[i].Name}");
+
+                    if (nombreCamara.Contains("iriun") || nombreCamara.Contains("android") || nombreCamara.Contains("ivcam") || nombreCamara.Contains("usb"))
+                    {
+                        indiceDispositivo = i;
+                        break;
+                    }
+                }
+
                 _hayFrame = false;
-                _fuenteVideo = new VideoCaptureDevice(dispositivos[0].MonikerString);
+                // Usar el índice detectado en lugar del [0] fijo
+                _fuenteVideo = new VideoCaptureDevice(dispositivos[indiceDispositivo].MonikerString);
                 _fuenteVideo.NewFrame += FuenteVideo_NewFrame;
                 _fuenteVideo.Start();
 
@@ -198,7 +217,7 @@ namespace Presentacion.Forms.Socios
             {
                 System.Diagnostics.Debug.WriteLine(ex);
                 DetenerCamara();
-                FormHelper.MostrarError("No se pudo iniciar la cámara. Verifique que no la esté usando otra aplicación.");
+                FormHelper.MostrarError("No se pudo iniciar la cámara del celular. Verifique que Irium Webcam esté abierto y conectado por USB.");
             }
         }
 
@@ -375,7 +394,7 @@ namespace Presentacion.Forms.Socios
                     foto = _fotoDestinoProcesada;
                 }
 
-                // 🟢 Enviar fecha de nacimiento al controlador
+                // Enviar fecha de nacimiento al controlador
                 await _controller.GuardarSocioAsync(
                     _socioId, clave, nombre, apellido, telefono, email, fechaNacimiento, foto, observaciones, activo);
             },

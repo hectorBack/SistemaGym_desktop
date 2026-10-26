@@ -34,6 +34,7 @@
             dtpFechaNacimiento = new DateTimePicker(); // 🟢 Selector de Fecha de Nacimiento
             chkActivo = new CheckBox();
             picFoto = new PictureBox();
+            lblSinFoto = new Label();
             btnTomarFoto = new BotonTema();
             btnCargarFoto = new BotonTema();
             btnQuitarFoto = new BotonTema();
@@ -93,19 +94,19 @@
             panelCampos.Dock = DockStyle.Fill;
             panelCampos.Location = new Point(0, 67);
             panelCampos.Name = "panelCampos";
-            panelCampos.Size = new Size(760, 415);
+            panelCampos.Size = new Size(760, 455);
             panelCampos.TabIndex = 1;
             //
             // lblClave
             //
             lblClave.AutoSize = true;
             lblClave.Font = new Font("Segoe UI", 9.5F);
-            lblClave.ForeColor = Color.FromArgb(230, 238, 252);
+            lblClave.ForeColor = Color.FromArgb(124, 138, 165);
             lblClave.Location = new Point(29, 15);
             lblClave.Name = "lblClave";
             lblClave.Size = new Size(51, 21);
             lblClave.TabIndex = 0;
-            lblClave.Text = "Clave:";
+            lblClave.Text = "Clave *";
             //
             // txtClave
             //
@@ -122,12 +123,12 @@
             //
             lblNombre.AutoSize = true;
             lblNombre.Font = new Font("Segoe UI", 9.5F);
-            lblNombre.ForeColor = Color.FromArgb(230, 238, 252);
-            lblNombre.Location = new Point(29, 73);
+            lblNombre.ForeColor = Color.FromArgb(124, 138, 165);
+            lblNombre.Location = new Point(29, 79);
             lblNombre.Name = "lblNombre";
             lblNombre.Size = new Size(71, 21);
             lblNombre.TabIndex = 2;
-            lblNombre.Text = "Nombre:";
+            lblNombre.Text = "Nombre *";
             //
             // txtNombre
             //
@@ -135,21 +136,21 @@
             txtNombre.BorderStyle = BorderStyle.FixedSingle;
             txtNombre.Font = new Font("Segoe UI", 10F);
             txtNombre.ForeColor = Color.FromArgb(230, 238, 252);
-            txtNombre.Location = new Point(29, 96);
+            txtNombre.Location = new Point(29, 102);
             txtNombre.Name = "txtNombre";
             txtNombre.Size = new Size(340, 30);
-            txtNombre.TabIndex = 2;
+            txtNombre.TabIndex = 3;
             //
             // lblApellido
             //
             lblApellido.AutoSize = true;
             lblApellido.Font = new Font("Segoe UI", 9.5F);
-            lblApellido.ForeColor = Color.FromArgb(230, 238, 252);
-            lblApellido.Location = new Point(29, 131);
+            lblApellido.ForeColor = Color.FromArgb(124, 138, 165);
+            lblApellido.Location = new Point(29, 143);
             lblApellido.Name = "lblApellido";
             lblApellido.Size = new Size(70, 21);
             lblApellido.TabIndex = 4;
-            lblApellido.Text = "Apellido:";
+            lblApellido.Text = "Apellido *";
             //
             // txtApellido
             //
@@ -157,21 +158,21 @@
             txtApellido.BorderStyle = BorderStyle.FixedSingle;
             txtApellido.Font = new Font("Segoe UI", 10F);
             txtApellido.ForeColor = Color.FromArgb(230, 238, 252);
-            txtApellido.Location = new Point(29, 154);
+            txtApellido.Location = new Point(29, 166);
             txtApellido.Name = "txtApellido";
             txtApellido.Size = new Size(340, 30);
-            txtApellido.TabIndex = 3;
+            txtApellido.TabIndex = 5;
             //
             // lblTelefono
             //
             lblTelefono.AutoSize = true;
             lblTelefono.Font = new Font("Segoe UI", 9.5F);
-            lblTelefono.ForeColor = Color.FromArgb(230, 238, 252);
-            lblTelefono.Location = new Point(29, 189);
+            lblTelefono.ForeColor = Color.FromArgb(124, 138, 165);
+            lblTelefono.Location = new Point(29, 207);
             lblTelefono.Name = "lblTelefono";
             lblTelefono.Size = new Size(71, 21);
             lblTelefono.TabIndex = 6;
-            lblTelefono.Text = "Teléfono:";
+            lblTelefono.Text = "Teléfono";
             //
             // txtTelefono
             //
@@ -179,21 +180,21 @@
             txtTelefono.BorderStyle = BorderStyle.FixedSingle;
             txtTelefono.Font = new Font("Segoe UI", 10F);
             txtTelefono.ForeColor = Color.FromArgb(230, 238, 252);
-            txtTelefono.Location = new Point(29, 212);
+            txtTelefono.Location = new Point(29, 230);
             txtTelefono.Name = "txtTelefono";
             txtTelefono.Size = new Size(340, 30);
-            txtTelefono.TabIndex = 4;
+            txtTelefono.TabIndex = 7;
             //
             // lblEmail
             //
             lblEmail.AutoSize = true;
             lblEmail.Font = new Font("Segoe UI", 9.5F);
-            lblEmail.ForeColor = Color.FromArgb(230, 238, 252);
-            lblEmail.Location = new Point(29, 247);
+            lblEmail.ForeColor = Color.FromArgb(124, 138, 165);
+            lblEmail.Location = new Point(29, 271);
             lblEmail.Name = "lblEmail";
             lblEmail.Size = new Size(141, 21);
             lblEmail.TabIndex = 8;
-            lblEmail.Text = "Correo electrónico:";
+            lblEmail.Text = "Correo electrónico";
             //
             // txtEmail
             //
@@ -201,21 +202,21 @@
             txtEmail.BorderStyle = BorderStyle.FixedSingle;
             txtEmail.Font = new Font("Segoe UI", 10F);
             txtEmail.ForeColor = Color.FromArgb(230, 238, 252);
-            txtEmail.Location = new Point(29, 270);
+            txtEmail.Location = new Point(29, 294);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(340, 30);
-            txtEmail.TabIndex = 5;
+            txtEmail.TabIndex = 9;
             //
             // lblFechaNacimiento
             //
             lblFechaNacimiento.AutoSize = true;
             lblFechaNacimiento.Font = new Font("Segoe UI", 9.5F);
-            lblFechaNacimiento.ForeColor = Color.FromArgb(230, 238, 252);
-            lblFechaNacimiento.Location = new Point(29, 305);
+            lblFechaNacimiento.ForeColor = Color.FromArgb(124, 138, 165);
+            lblFechaNacimiento.Location = new Point(29, 335);
             lblFechaNacimiento.Name = "lblFechaNacimiento";
             lblFechaNacimiento.Size = new Size(150, 21);
             lblFechaNacimiento.TabIndex = 10;
-            lblFechaNacimiento.Text = "Fecha de nacimiento:";
+            lblFechaNacimiento.Text = "Fecha de nacimiento";
             //
             // dtpFechaNacimiento
             //
@@ -224,12 +225,12 @@
             dtpFechaNacimiento.CustomFormat = "dd/MM/yyyy";
             dtpFechaNacimiento.Format = DateTimePickerFormat.Custom;
             dtpFechaNacimiento.Font = new Font("Segoe UI", 10F);
-            dtpFechaNacimiento.Location = new Point(29, 328);
+            dtpFechaNacimiento.Location = new Point(29, 358);
             dtpFechaNacimiento.Name = "dtpFechaNacimiento";
             dtpFechaNacimiento.ShowCheckBox = true;
             dtpFechaNacimiento.Checked = false;
             dtpFechaNacimiento.Size = new Size(340, 30);
-            dtpFechaNacimiento.TabIndex = 6;
+            dtpFechaNacimiento.TabIndex = 11;
             //
             // chkActivo
             //
@@ -238,48 +239,63 @@
             chkActivo.CheckState = CheckState.Checked;
             chkActivo.Font = new Font("Segoe UI", 9.5F);
             chkActivo.ForeColor = Color.FromArgb(230, 238, 252);
-            chkActivo.Location = new Point(29, 372);
+            chkActivo.Location = new Point(29, 406);
             chkActivo.Name = "chkActivo";
             chkActivo.Size = new Size(75, 25);
-            chkActivo.TabIndex = 7;
+            chkActivo.TabIndex = 12;
             chkActivo.Text = "Activo";
             chkActivo.UseVisualStyleBackColor = true;
             //
             // picFoto
             //
-            picFoto.BackColor = Color.FromArgb(15, 42, 79);
-            picFoto.BorderStyle = BorderStyle.FixedSingle;
+            picFoto.BackColor = Color.FromArgb(11, 15, 26);
+            picFoto.Controls.Add(lblSinFoto);
+            picFoto.BorderStyle = BorderStyle.None;
             picFoto.Location = new Point(400, 21);
             picFoto.Name = "picFoto";
-            picFoto.Size = new Size(150, 150);
+            picFoto.Size = new Size(165, 220);
             picFoto.SizeMode = PictureBoxSizeMode.Zoom;
-            picFoto.TabIndex = 20;
+            picFoto.TabIndex = 15;
             picFoto.TabStop = false;
+            //
+            // lblSinFoto
+            //
+            lblSinFoto.BackColor = Color.Transparent;
+            lblSinFoto.Dock = DockStyle.Fill;
+            lblSinFoto.Font = new Font("Segoe UI", 10F);
+            lblSinFoto.ForeColor = Color.FromArgb(124, 138, 165);
+            lblSinFoto.Name = "lblSinFoto";
+            lblSinFoto.TabIndex = 0;
+            lblSinFoto.Text = "Sin foto";
+            lblSinFoto.TextAlign = ContentAlignment.MiddleCenter;
             //
             // btnTomarFoto
             //
-            btnTomarFoto.Location = new Point(565, 21);
+            btnTomarFoto.Estilo = EstiloBoton.Secundario;
+            btnTomarFoto.Location = new Point(590, 21);
             btnTomarFoto.Name = "btnTomarFoto";
-            btnTomarFoto.Size = new Size(165, 38);
-            btnTomarFoto.TabIndex = 8;
+            btnTomarFoto.Size = new Size(140, 38);
+            btnTomarFoto.TabIndex = 16;
             btnTomarFoto.Text = "📷 Tomar foto";
             btnTomarFoto.Click += btnTomarFoto_Click;
             //
             // btnCargarFoto
             //
-            btnCargarFoto.Location = new Point(565, 67);
+            btnCargarFoto.Estilo = EstiloBoton.Secundario;
+            btnCargarFoto.Location = new Point(590, 112);
             btnCargarFoto.Name = "btnCargarFoto";
-            btnCargarFoto.Size = new Size(165, 38);
-            btnCargarFoto.TabIndex = 9;
+            btnCargarFoto.Size = new Size(140, 38);
+            btnCargarFoto.TabIndex = 17;
             btnCargarFoto.Text = "📁 Cargar foto";
             btnCargarFoto.Click += btnCargarFoto_Click;
             //
             // btnQuitarFoto
             //
-            btnQuitarFoto.Location = new Point(565, 113);
+            btnQuitarFoto.Estilo = EstiloBoton.Peligro;
+            btnQuitarFoto.Location = new Point(590, 203);
             btnQuitarFoto.Name = "btnQuitarFoto";
-            btnQuitarFoto.Size = new Size(165, 38);
-            btnQuitarFoto.TabIndex = 10;
+            btnQuitarFoto.Size = new Size(140, 38);
+            btnQuitarFoto.TabIndex = 18;
             btnQuitarFoto.Text = "Quitar foto";
             btnQuitarFoto.Click += btnQuitarFoto_Click;
             //
@@ -287,12 +303,12 @@
             //
             lblObservaciones.AutoSize = true;
             lblObservaciones.Font = new Font("Segoe UI", 9.5F);
-            lblObservaciones.ForeColor = Color.FromArgb(230, 238, 252);
-            lblObservaciones.Location = new Point(400, 190);
+            lblObservaciones.ForeColor = Color.FromArgb(124, 138, 165);
+            lblObservaciones.Location = new Point(400, 258);
             lblObservaciones.Name = "lblObservaciones";
             lblObservaciones.Size = new Size(115, 21);
-            lblObservaciones.TabIndex = 21;
-            lblObservaciones.Text = "Observaciones:";
+            lblObservaciones.TabIndex = 13;
+            lblObservaciones.Text = "Observaciones";
             //
             // txtObservaciones
             //
@@ -301,12 +317,12 @@
             txtObservaciones.BorderStyle = BorderStyle.FixedSingle;
             txtObservaciones.Font = new Font("Segoe UI", 10F);
             txtObservaciones.ForeColor = Color.FromArgb(230, 238, 252);
-            txtObservaciones.Location = new Point(400, 213);
+            txtObservaciones.Location = new Point(400, 281);
             txtObservaciones.Multiline = true;
             txtObservaciones.Name = "txtObservaciones";
             txtObservaciones.ScrollBars = ScrollBars.Vertical;
-            txtObservaciones.Size = new Size(330, 145);
-            txtObservaciones.TabIndex = 11;
+            txtObservaciones.Size = new Size(330, 150);
+            txtObservaciones.TabIndex = 14;
             //
             // panelPie
             //
@@ -314,7 +330,7 @@
             panelPie.Controls.Add(btnGuardar);
             panelPie.Controls.Add(btnCancelar);
             panelPie.Dock = DockStyle.Bottom;
-            panelPie.Location = new Point(0, 482);
+            panelPie.Location = new Point(0, 522);
             panelPie.Name = "panelPie";
             panelPie.Size = new Size(760, 70);
             panelPie.TabIndex = 2;
@@ -345,7 +361,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
             CancelButton = btnCancelar;
-            ClientSize = new Size(760, 552);
+            ClientSize = new Size(760, 592);
             Controls.Add(panelCampos);
             Controls.Add(panelPie);
             Controls.Add(panelHeader);
@@ -381,10 +397,11 @@
         private TextBox txtTelefono;
         private Label lblEmail;
         private TextBox txtEmail;
-        private Label lblFechaNacimiento;       
-        private DateTimePicker dtpFechaNacimiento; 
+        private Label lblFechaNacimiento;
+        private DateTimePicker dtpFechaNacimiento;
         private CheckBox chkActivo;
         private PictureBox picFoto;
+        private Label lblSinFoto;
         private BotonTema btnTomarFoto;
         private BotonTema btnCargarFoto;
         private BotonTema btnQuitarFoto;
