@@ -67,6 +67,8 @@ namespace Presentacion.Forms.Socios
 
         private async void FrmSocioInfoModal_Load(object? sender, EventArgs e)
         {
+            btnEliminarVisita.Visible = SesionUsuario.TienePermiso("Eliminar");
+
             // Por defecto se muestran las visitas del día.
             dtpVisitaDesde.Value = DateTime.Today;
             dtpVisitaHasta.Value = DateTime.Today;

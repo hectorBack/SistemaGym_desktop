@@ -54,6 +54,8 @@ namespace Presentacion.Forms.Socios
 
         private async void FrmSocioMembresiaModal_Load(object? sender, EventArgs e)
         {
+            btnEliminarMembresia.Visible = SesionUsuario.TienePermiso("Eliminar");
+
             // Se fija antes de las cargas asíncronas (antes se hacía al final, ya con la pantalla visible).
             dtpFechaInicio.Value = DateTime.Today;
 
