@@ -114,7 +114,11 @@ namespace Presentacion.Forms
             foreach (var modulo in _modulos)
             {
                 modulo.Boton.Visible = permitidos.Contains(modulo.Permiso);
-                modulo.Boton.Click += (s, e) => AbrirFormulario(modulo.Formulario, modulo.Boton);
+
+                if (modulo.Formulario != null)
+                {
+                    modulo.Boton.Click += (s, e) => AbrirFormulario(modulo.Formulario, modulo.Boton);
+                }
             }
         }
 

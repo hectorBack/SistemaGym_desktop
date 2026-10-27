@@ -291,7 +291,7 @@ VALUES (
 );
 
 UPDATE roles 
-SET ModulosPermitidos = '["Usuarios", "Roles", "Socios", "Membresias", "Clases", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldos", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos", "Categorias", "Inicio"]'
+SET ModulosPermitidos = '["Usuarios", "Roles", "Socios", "Membresias", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldos", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos", "Categorias", "Inicio"]'
 WHERE Nombre = 'Administrador';
 
 
