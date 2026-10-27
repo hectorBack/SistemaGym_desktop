@@ -103,21 +103,24 @@ namespace Negocio.Services
                 nuevaVenta.Total += detalleDto.Cantidad * detalleDto.PrecioUnitario;
             }
 
-            await _unitOfWork.Venta.AgregarAsync(nuevaVenta);
-
-            // REGISTRAR INGRESO EN CAJA - 'Venta Producto'.
-            // Venta, stock, movimiento (y el corte, si hubo que abrirlo) se guardan en UN solo paso:
-            // antes eran tres guardados y un fallo en medio dejaba la venta sin su ingreso en caja.
+            // 4. REGISTRAR INGRESO EN CAJA - 'Venta Producto' PRIMERO (si la venta tiene total mayor a 0)
             if (nuevaVenta.Total > 0)
             {
                 var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "venta de productos");
 
-                // El ID de la venta no existe hasta guardar, por eso la observación lleva la fecha y hora.
-                await _caja.AgregarMovimientoAsync(
+                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
                     corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoVenta, CajaConstantes.TipoIngreso,
                     nuevaVenta.Total, string.Empty);
+
+                // Si el movimiento genera un ID temporal, EF lo manejará al hacer SaveChangesAsync conjunto.
+                // Para asegurar que la relación EF mapee el objeto Movimiento directamente:
+                nuevaVenta.Movimiento = nuevoMovimiento;
             }
 
+            // 5. Agregar la venta al repositorio del UnitOfWork
+            await _unitOfWork.Venta.AgregarAsync(nuevaVenta);
+
+            // 6. Guardar todo en un solo bloque atómico de transacción
             await _unitOfWork.SaveChangesAsync();
 
             return MapToDto(nuevaVenta);

@@ -88,9 +88,11 @@ namespace Negocio.Services
                 // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con el pago).
                 var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "cobro de Membresía");
 
-                await _caja.AgregarMovimientoAsync(
-                    corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
-                   dto.Monto, string.Empty, nuevoPago.FormaPago); 
+                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
+                dto.Monto, string.Empty, nuevoPago.FormaPago);
+
+                // Enlazamos el pago con el movimiento financiero exacto
+                nuevoPago.Movimiento = nuevoMovimiento;
             }
 
             await _unitOfWork.SaveChangesAsync();

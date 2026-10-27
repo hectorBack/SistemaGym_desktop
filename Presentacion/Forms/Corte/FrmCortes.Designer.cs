@@ -23,6 +23,7 @@
             btnNuevo = new BotonTema();
             btnVerDetalle = new BotonTema();
             btnExportar = new BotonTema();
+            btnEliminar = new BotonTema();
             panelFiltros = new Panel();
             flowFiltros = new FlowLayoutPanel();
             lblDesde = new Label();
@@ -68,6 +69,7 @@
             flowAcciones.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             flowAcciones.Controls.Add(btnNuevo);
             flowAcciones.Controls.Add(btnVerDetalle);
+            flowAcciones.Controls.Add(btnEliminar);
             flowAcciones.Controls.Add(btnExportar);
             flowAcciones.Dock = DockStyle.Right;
             flowAcciones.Location = new Point(500, 0);
@@ -96,6 +98,17 @@
             btnVerDetalle.TabIndex = 1;
             btnVerDetalle.Text = "Ver detalle";
             btnVerDetalle.Click += btnVerDetalle_Click;
+            // 
+            // btnEliminar
+            // 
+            btnEliminar.Enabled = false;
+            btnEliminar.Estilo = EstiloBoton.Peligro; // Se muestra con estilo de alerta/peligro
+            btnEliminar.Margin = new Padding(0, 0, 8, 0);
+            btnEliminar.Name = "btnEliminar";
+            btnEliminar.Size = new Size(110, 38);
+            btnEliminar.TabIndex = 2;
+            btnEliminar.Text = "Eliminar";
+            btnEliminar.Click += btnEliminar_Click;
             // 
             // btnExportar
             // 
@@ -250,6 +263,7 @@
         private FlowLayoutPanel flowAcciones;
         private BotonTema btnNuevo;
         private BotonTema btnVerDetalle;
+        private BotonTema btnEliminar;
         private BotonTema btnExportar;
         private Panel panelFiltros;
         private FlowLayoutPanel flowFiltros;

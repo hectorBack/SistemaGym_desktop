@@ -102,6 +102,12 @@ CREATE TABLE Ventas (
     FOREIGN KEY (SocioID) REFERENCES Socios(SocioID)
 );
 
+ALTER TABLE Ventas 
+ADD COLUMN MovimientoID INT NULL AFTER SocioID,
+ADD CONSTRAINT FK_Ventas_Movimientos 
+FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
+ON DELETE SET NULL;
+
 -- 8. TABLA DETALLE VENTAS
 CREATE TABLE DetalleVentas (
     DetalleID INT AUTO_INCREMENT PRIMARY KEY,
@@ -137,6 +143,12 @@ CREATE TABLE Visitas (
 ALTER TABLE Visitas 
 ADD COLUMN Activo TINYINT(1) NOT NULL DEFAULT 1 AFTER Observaciones;
 
+ALTER TABLE Visitas 
+ADD COLUMN MovimientoID INT NULL AFTER Observaciones,
+ADD CONSTRAINT FK_Visitas_Movimientos 
+FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
+ON DELETE SET NULL;
+
 CREATE TABLE pagos_sociomembresia (
     PagoID INT AUTO_INCREMENT PRIMARY KEY,
     SocioMembresiaID INT NOT NULL,
@@ -161,6 +173,12 @@ ADD CONSTRAINT FK_Pagos_Usuarios
     REFERENCES Usuarios(UsuarioID) 
     ON DELETE SET NULL 
     ON UPDATE CASCADE;
+    
+ALTER TABLE pagos_sociomembresia 
+ADD COLUMN MovimientoID INT NULL AFTER UsuarioID,
+ADD CONSTRAINT FK_PagosMembresia_Movimientos 
+FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
+ON DELETE SET NULL;
 
 CREATE TABLE Conceptos (
     ConceptoID INT AUTO_INCREMENT PRIMARY KEY,
@@ -269,11 +287,11 @@ INSERT INTO roles (Nombre, Descripcion, ModulosPermitidos)
 VALUES (
     'Administrador', 
     'Acceso total al sistema', 
-    '["Usuarios", "Roles", "Socios", "Membresias", "Clases", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldar", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos"]'
+    '["Usuarios", "Roles", "Socios", "Membresias", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldos", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos"]'
 );
 
 UPDATE roles 
-SET ModulosPermitidos = '["Usuarios", "Roles", "Socios", "Membresias", "Clases", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldar", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos", "Categorias", "Inicio"]'
+SET ModulosPermitidos = '["Usuarios", "Roles", "Socios", "Membresias", "Clases", "Productos", "Compras", "Ventas", "Registro", "Reportes", "Configuracion", "Respaldos", "Restaurar", "Corte de Caja", "Eliminar", "Conceptos", "Movimientos", "Categorias", "Inicio"]'
 WHERE Nombre = 'Administrador';
 
 
@@ -319,6 +337,12 @@ CREATE TABLE IF NOT EXISTS Compras (
     UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE Compras 
+ADD COLUMN MovimientoID INT NULL AFTER UsuarioID,
+ADD CONSTRAINT FK_Compras_Movimientos 
+FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
+ON DELETE SET NULL;
 
 -- 2. Tabla Detalle de Compras (asociada a ProductoID)
 CREATE TABLE IF NOT EXISTS DetalleCompras (

@@ -14,6 +14,9 @@ namespace Datos.Entities
         public decimal Total { get; set; }
         public DateTime FechaVenta { get; set; } = DateTime.Now;
 
+        public int? MovimientoID { get; set; }
+        public virtual Movimiento? Movimiento { get; set; }
+
         // Propiedad de navegación para el detalle
         public List<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
     }

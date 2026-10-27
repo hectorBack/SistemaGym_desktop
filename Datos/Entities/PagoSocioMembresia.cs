@@ -20,6 +20,8 @@ namespace Datos.Entities
         public string? Folio { get; set; }
         public string FormaPago { get; set; } = "Efectivo";
         public string? Observacion { get; set; }
+        public int? MovimientoID { get; set; }
+        public virtual Movimiento? Movimiento { get; set; }
 
         // Propiedad de navegación (Relación 1 a N)
         public virtual SocioMembresia SocioMembresia { get; set; } = null!;

@@ -127,9 +127,11 @@ namespace Negocio.Services
                 // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con la compra).
                 var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "movimiento de Compra");
 
-                await _caja.AgregarMovimientoAsync(
-                    corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
-                    totalCompra, string.Empty);
+                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
+                totalCompra, string.Empty);
+
+                // Enlazamos la compra con el movimiento financiero exacto
+                nuevaCompra.Movimiento = nuevoMovimiento;
             }
 
             // 6. Confirmar la transacción en la BD

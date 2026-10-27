@@ -179,9 +179,77 @@ namespace Negocio.Services
 
             await ValidarCorteEditableAsync(movimiento.CorteID);
 
+            // 1. Si es un movimiento de Visita, buscamos directamente por la relación exacta
+            if (movimiento.ConceptoID == CajaConstantes.ConceptoVisita)
+            {
+                var visitas = await _unitOfWork.Visita.ObtenerTodasAsync();
+                var visitaAsociada = visitas.FirstOrDefault(v => v.MovimientoID == movimiento.MovimientoID);
+                if (visitaAsociada != null)
+                {
+                    _unitOfWork.Visita.EliminarFisico(visitaAsociada);
+                }
+            }
+            // 2. Si es una Venta de Producto
+            else if (movimiento.ConceptoID == CajaConstantes.ConceptoVenta)
+            {
+                var ventas = await _unitOfWork.Venta.ObtenerTodasAsync(); // O un método específico por MovimientoID si lo creas en el repositorio
+                var ventaAsociada = ventas.FirstOrDefault(v => v.MovimientoID == movimiento.MovimientoID);
+                if (ventaAsociada != null)
+                {
+                    if (ventaAsociada.Detalles != null)
+                    {
+                        foreach (var detalle in ventaAsociada.Detalles)
+                        {
+                            var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(detalle.ProductoID);
+                            if (producto != null)
+                            {
+                                producto.Stock += detalle.Cantidad; // Devolvemos stock
+                                _unitOfWork.Producto.Actualizar(producto);
+                            }
+                        }
+                    }
+                    _unitOfWork.Venta.EliminarFisico(ventaAsociada);
+                }
+            }
+            // 3. Si es una Compra de Producto
+            else if (movimiento.ConceptoID == CajaConstantes.ConceptoCompra)
+            {
+                var compras = await _unitOfWork.Compra.ObtenerTodasAsync();
+                var compraAsociada = compras.FirstOrDefault(c => c.MovimientoID == movimiento.MovimientoID);
+                if (compraAsociada != null)
+                {
+                    if (compraAsociada.Detalles != null)
+                    {
+                        foreach (var detalle in compraAsociada.Detalles)
+                        {
+                            var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(detalle.ProductoID);
+                            if (producto != null)
+                            {
+                                producto.Stock -= detalle.Cantidad; // Restamos stock
+                                _unitOfWork.Producto.Actualizar(producto);
+                            }
+                        }
+                    }
+                    _unitOfWork.Compra.EliminarFisico(compraAsociada);
+                }
+            }
+
+            // 4. Si el movimiento corresponde a un Pago de Membresía
+            else if (movimiento.ConceptoID == CajaConstantes.ConceptoPagoMembresia)
+            {
+                var pagos = await _unitOfWork.PagoSocioMembresia.ObtenerTodasAsync(true);
+                var pagoAsociado = pagos.FirstOrDefault(p => p.MovimientoID == movimiento.MovimientoID);
+                if (pagoAsociado != null)
+                {
+                    _unitOfWork.PagoSocioMembresia.EliminarFisico(pagoAsociado);
+                }
+            }
+
+            // Finalmente eliminamos el movimiento de caja
             _unitOfWork.Movimiento.EliminarFisico(movimiento);
             await _unitOfWork.SaveChangesAsync();
         }
+
 
         public async Task<IEnumerable<MovimientoDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
         {

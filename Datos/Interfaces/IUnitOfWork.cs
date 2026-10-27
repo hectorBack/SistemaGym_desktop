@@ -13,6 +13,7 @@ namespace Datos.Interfaces
         // Aquí agregaremos repositorios de Socios, Productos, Ventas, etc.
         IProductoRepository Producto { get;  }
         IVentaRepository Venta { get; }
+
         IMembresiaRepository Membresia { get; }
 
         ISocioRepository Socio { get; }

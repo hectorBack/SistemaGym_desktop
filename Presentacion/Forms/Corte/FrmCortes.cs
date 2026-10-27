@@ -54,6 +54,8 @@ namespace Presentacion.Forms.Corte
 
         private async void FrmCortes_Load(object? sender, EventArgs e)
         {
+            btnEliminar.Visible = SesionUsuario.TienePermiso("Eliminar");
+
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
@@ -187,6 +189,7 @@ namespace Presentacion.Forms.Corte
         private void ActualizarEstadoBotones()
         {
             btnVerDetalle.Enabled = CorteSeleccionado != null;
+            btnEliminar.Enabled = CorteSeleccionado != null;
             btnExportar.Enabled = _vista.Count > 0;
         }
 
@@ -241,6 +244,26 @@ namespace Presentacion.Forms.Corte
             if (corte == null) return;
 
             await MostrarDetalleAsync(corte);
+        }
+
+        private async void btnEliminar_Click(object? sender, EventArgs e)
+        {
+            var corte = CorteSeleccionado;
+            if (corte == null) return;
+
+            if (!FormHelper.ConfirmarAccion(
+                    $"¿Desea eliminar permanentemente el corte de caja del usuario '{corte.Usuario}' registrado el {corte.FechaApertura:dd/MM/yyyy hh:mm tt}?\n\nEsta acción no se puede deshacer.",
+                    "Eliminar corte",
+                    destructiva: true))
+                return;
+
+            bool eliminado = await FormHelper.EjecutarAsync(
+                () => _corteController.EliminarFisicoAsync(corte.CorteID),
+                "No se pudo eliminar el corte de caja.",
+                panelTop, panelFiltros);
+
+            if (eliminado)
+                await RecargarAsync();
         }
 
         private async Task MostrarDetalleAsync(CorteViewModel corte)

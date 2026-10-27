@@ -141,9 +141,10 @@ namespace Negocio.Services
             if (montoCobrado > 0)
             {
                 var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion!.Value, "cobro de Visita");
-                await _caja.AgregarMovimientoAsync(
-                    corte, usuarioIdSesion.Value, CONCEPTO_VISITA, TIPO_INGRESO, montoCobrado,
-                   string.Empty);
+                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corte, usuarioIdSesion.Value, CONCEPTO_VISITA, TIPO_INGRESO, montoCobrado, string.Empty);
+
+                // Enlazamos la visita con el movimiento financiero exacto
+                nuevaVisita.MovimientoID = nuevoMovimiento.MovimientoID;
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -264,9 +265,10 @@ namespace Negocio.Services
             if (monto > 0)
             {
                 var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion, "cobro de Visita (acceso rápido)");
-                await _caja.AgregarMovimientoAsync(
-                    corte, usuarioIdSesion, CONCEPTO_VISITA, TIPO_INGRESO, monto,
-                   string.Empty);
+                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corte, usuarioIdSesion, CONCEPTO_VISITA, TIPO_INGRESO, monto, string.Empty);
+
+                // Enlazamos la visita con el movimiento financiero exacto
+                nuevaVisita.Movimiento = nuevoMovimiento;
             }
 
             // Visita, movimiento (y corte, si hubo que abrirlo) se guardan en un solo paso.

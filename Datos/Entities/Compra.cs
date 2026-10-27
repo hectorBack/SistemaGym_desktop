@@ -16,6 +16,9 @@ namespace Datos.Entities
         public string? Observacion { get; set; }
         public int UsuarioID { get; set; }
 
+        public int? MovimientoID { get; set; }
+        public virtual Movimiento? Movimiento { get; set; }
+
         // Propiedad de navegación para el detalle de la compra
         public List<DetalleCompra> Detalles { get; set; } = new List<DetalleCompra>();
     }
