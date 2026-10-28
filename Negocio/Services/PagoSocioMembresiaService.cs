@@ -180,11 +180,8 @@ namespace Negocio.Services
                 throw new BusinessException("El pago seleccionado ya se encuentra anulado o inactivo.");
             }
 
-            // 1. Desactivar el pago y actualizar observación
+            // 1. Desactivar el pago
             pago.Activo = false;
-            pago.Observacion = string.IsNullOrEmpty(pago.Observacion)
-                ? $"[ANULADO]: {motivo}"
-                : $"{pago.Observacion} | [ANULADO]: {motivo}";
 
             _unitOfWork.PagoSocioMembresia.Actualizar(pago);
 

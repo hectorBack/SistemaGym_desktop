@@ -4,6 +4,7 @@ using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,16 @@ namespace Negocio.Services
 
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<AsignarMembresiaDto> _asignarValidator;
+        private readonly CajaHelper _caja;
 
         public SocioMembresiaService(
             IUnitOfWork unitOfWork,
-            IValidator<AsignarMembresiaDto> asignarValidator)
+            IValidator<AsignarMembresiaDto> asignarValidator,
+            CajaHelper caja)
         {
             _unitOfWork = unitOfWork;
             _asignarValidator = asignarValidator;
+            _caja = caja;
         }
 
         public async Task<IEnumerable<SocioMembresiaDto>> ObtenerPorSocioIdAsync(int socioId)
@@ -150,11 +154,39 @@ namespace Negocio.Services
             if (registro == null)
                 throw new BusinessException("La membresía que intenta eliminar no existe.");
 
-            // Borrar una membresía con pagos (activos o no) dejaría movimientos de caja sin origen.
-            // Requiere que el repositorio incluya los Pagos en ObtenerPorIdAsync (ver cambio indicado).
-            if (registro.Pagos != null && registro.Pagos.Any())
-                throw new BusinessException("No se puede eliminar la membresía porque tiene pagos registrados. Cancélela en su lugar.");
+            var pagosAsociados = await _unitOfWork.PagoSocioMembresia.ObtenerPorSocioMembresiaIdAsync(id);
+            var pagosActivos = pagosAsociados?.Where(p => p.Activo).ToList() ?? new List<PagoSocioMembresia>();
 
+            decimal montoTotalPagado = pagosActivos.Sum(p => p.Monto);
+            int usuarioIdSesion = pagosActivos.FirstOrDefault()?.UsuarioID ?? 1;
+            string formaPagoOriginal = pagosActivos.FirstOrDefault()?.FormaPago ?? "Efectivo";
+
+            if (montoTotalPagado > 0)
+            {
+                // 1. Obtener o abrir el corte de caja vigente
+                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion, "cancelación de membresía y devolución");
+
+                // 2. Registrar el egreso en la tabla Movimientos de forma explícita
+                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
+                    corteAbierto,
+                    usuarioIdSesion,
+                    CajaConstantes.ConceptoCancelacionPagoMembresia,
+                    CajaConstantes.TipoEgreso,
+                    montoTotalPagado,
+                    string.Empty,
+                    formaPagoOriginal // Pasamos la forma de pago para que no quede vacía
+                );
+
+                // 3. Desactivar lógicamente los pagos asociados y asignarles el MovimientoID de la cancelación si aplica
+                foreach (var pago in pagosActivos)
+                {
+                    pago.Activo = false;
+                    // Opcional: si tu entidad PagoSocioMembresia tiene MovimientoID, puedes enlazarlo aquí también
+                    _unitOfWork.PagoSocioMembresia.Actualizar(pago);
+                }
+            }
+
+            // 4. Eliminar la membresía y confirmar los cambios en la base de datos
             _unitOfWork.SocioMembresia.Eliminar(registro);
             await _unitOfWork.SaveChangesAsync();
         }
