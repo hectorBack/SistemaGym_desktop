@@ -34,6 +34,7 @@ namespace Presentacion.Forms.Visitas
         private readonly SocioMembresiaController _socioMembresiaController;
         private readonly MembresiaController _membresiaController;
         private readonly PagoSocioMembresiaController _pagoSocioMembresiaController;
+        private readonly ConfiguracionController _configuracionController;
 
         private int? _socioIdActual;
         private int? _ultimaVisitaId;
@@ -52,13 +53,15 @@ namespace Presentacion.Forms.Visitas
             SocioController socioController,
             SocioMembresiaController socioMembresiaController,
             MembresiaController membresiaController,
-            PagoSocioMembresiaController pagoSocioMembresiaController)
+            PagoSocioMembresiaController pagoSocioMembresiaController,
+            ConfiguracionController configuracionController)
         {
             _visitaController = visitaController ?? throw new ArgumentNullException(nameof(visitaController));
             _socioController = socioController ?? throw new ArgumentNullException(nameof(socioController));
             _socioMembresiaController = socioMembresiaController ?? throw new ArgumentNullException(nameof(socioMembresiaController));
             _membresiaController = membresiaController ?? throw new ArgumentNullException(nameof(membresiaController));
             _pagoSocioMembresiaController = pagoSocioMembresiaController ?? throw new ArgumentNullException(nameof(pagoSocioMembresiaController));
+            _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
 
             InitializeComponent();
             ConfigurarAsistencias();
@@ -70,10 +73,12 @@ namespace Presentacion.Forms.Visitas
             };
         }
 
-        private void FrmRegistroVisita_Load(object? sender, EventArgs e)
+        private async void FrmRegistroVisita_Load(object? sender, EventArgs e)
         {
             RestablecerPantalla("--- ESPERANDO LECTURA ---", "ESCANEE CLAVE", Tema.Primario);
             ActiveControl = txtClave;
+
+            await CargarDatosGimnasioAsync();
         }
 
         // En recepción el cursor siempre debe estar en la clave:
@@ -82,6 +87,43 @@ namespace Presentacion.Forms.Visitas
         {
             if (Visible && !IsDisposed)
                 txtClave.Focus();
+        }
+
+        private async Task CargarDatosGimnasioAsync()
+        {
+            try
+            {
+                var config = await _configuracionController.ObtenerConfigGimnasioAsync();
+                if (config != null)
+                {
+                    // 1. Nombre del gimnasio (en el título o etiqueta principal)
+                    if (!string.IsNullOrWhiteSpace(config.Nombre))
+                    {
+                        lblTitulo.Text = config.Nombre.Trim();
+                    }
+
+                    // 2. Logotipo / Imagen del gimnasio
+                    if (!string.IsNullOrWhiteSpace(config.Logo))
+                    {
+                        // Asegúrate de tener un PictureBox llamado picLogoGimnasio en tu panel superior
+                        ImagenHelper.MostrarEn(picLogoGimnasio, ImagenHelper.CargarFoto(config.Logo));
+                    }
+
+                    // 3. Mensaje del gimnasio (bajo el nombre)
+                    lblMensaje.Text = config.Mensaje?.Trim() ?? string.Empty;
+
+                    // 4. Datos de contacto en una sola línea al pie; los que no estén capturados se omiten.
+                    var contacto = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(config.Domicilio)) contacto.Add($"Domicilio: {config.Domicilio.Trim()}");
+                    if (!string.IsNullOrWhiteSpace(config.Telefono)) contacto.Add($"Tel: {config.Telefono.Trim()}");
+                    if (!string.IsNullOrWhiteSpace(config.Rfc)) contacto.Add($"RFC: {config.Rfc.Trim()}");
+                    lblContacto.Text = string.Join("   ·   ", contacto);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al cargar datos del gimnasio en visitas: {ex.Message}");
+            }
         }
 
         // ───────────── Asistencia de la semana ─────────────
@@ -402,7 +444,9 @@ namespace Presentacion.Forms.Visitas
             _timerLimpieza.Stop();
             _timerLimpieza.Dispose();
             PonerFoto(null); // libera la foto
+            ImagenHelper.MostrarEn(picLogoGimnasio, null); // y el logotipo
             base.OnFormClosed(e);
         }
+
     }
 }

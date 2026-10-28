@@ -91,6 +91,7 @@ namespace Negocio.Helpers
                     FileName = rutaMysqldump,
                     Arguments = argumentos,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
@@ -101,24 +102,27 @@ namespace Negocio.Helpers
                     if (proceso == null)
                         throw new Exception("No se pudo iniciar el proceso de respaldo de MySQL.");
 
-                    using (var lector = proceso.StandardOutput)
-                    {
-                        string resultadoSql = await lector.ReadToEndAsync();
-
-                        if (string.IsNullOrWhiteSpace(resultadoSql))
-                        {
-                            throw new Exception("El volcado de la base de datos devolvió un resultado vacío.");
-                        }
-
-                        await File.WriteAllTextAsync(rutaCompleta, resultadoSql);
-                    }
-
-                    proceso.WaitForExit();
+                    Task<string> lecturaSalida = proceso.StandardOutput.ReadToEndAsync();
+                    Task<string> lecturaError = proceso.StandardError.ReadToEndAsync();
+                    await proceso.WaitForExitAsync();
+                    string resultadoSql = await lecturaSalida;
+                    string errorSql = await lecturaError;
 
                     if (proceso.ExitCode != 0)
                     {
-                        throw new Exception("El comando mysqldump finalizó con un código de error.");
+                        string detalleError = string.IsNullOrWhiteSpace(errorSql)
+                            ? string.Empty
+                            : $" Detalle: {errorSql.Trim()}";
+                        throw new Exception($"El comando mysqldump finalizó con el código de error {proceso.ExitCode}.{detalleError}");
                     }
+
+                    if (!string.IsNullOrWhiteSpace(errorSql))
+                        Debug.WriteLine($"Advertencia de mysqldump: {errorSql.Trim()}");
+
+                    if (string.IsNullOrWhiteSpace(resultadoSql))
+                        throw new Exception("El volcado de la base de datos devolvió un resultado vacío.");
+
+                    await File.WriteAllTextAsync(rutaCompleta, resultadoSql);
                 }
 
                 _ultimoRespaldoEjecutado = DateTime.Now;

@@ -42,7 +42,18 @@
             panelBottom = new Panel();
             dgvAsistenciasSemana = new GridTema();
             lblTituloAsistencia = new Label();
+
+            // Inicialización de controles adicionales del gimnasio
+            picLogoGimnasio = new PictureBox();
+            panelClave = new Panel();
+            lblModulo = new Label();
+            lblMensaje = new Label();
+            panelContacto = new Panel();
+            lblContacto = new Label();
+
             panelTop.SuspendLayout();
+            panelClave.SuspendLayout();
+            panelContacto.SuspendLayout();
             panelCentral.SuspendLayout();
             panelDatos.SuspendLayout();
             panelBotones.SuspendLayout();
@@ -51,38 +62,85 @@
             picFoto.SuspendLayout();
             panelBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvAsistenciasSemana).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picLogoGimnasio).BeginInit();
             SuspendLayout();
             //
             // panelTop
             //
             panelTop.BackColor = Color.FromArgb(15, 42, 79);
+            panelTop.Controls.Add(panelClave);
+            panelTop.Controls.Add(picLogoGimnasio);
             panelTop.Controls.Add(lblTitulo);
-            panelTop.Controls.Add(lblClavePrompt);
-            panelTop.Controls.Add(txtClave);
-            panelTop.Controls.Add(btnRegistrar);
+            panelTop.Controls.Add(lblMensaje);
+            panelTop.Controls.Add(lblModulo);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
             panelTop.Name = "panelTop";
-            panelTop.Size = new Size(914, 110);
+            panelTop.Size = new Size(914, 164);
             panelTop.TabIndex = 0;
             //
-            // lblTitulo
+            // picLogoGimnasio
+            //
+            picLogoGimnasio.Location = new Point(20, 12);
+            picLogoGimnasio.Name = "picLogoGimnasio";
+            picLogoGimnasio.Size = new Size(90, 90);
+            picLogoGimnasio.SizeMode = PictureBoxSizeMode.Zoom;
+            picLogoGimnasio.TabIndex = 1;
+            picLogoGimnasio.TabStop = false;
+            //
+            // lblTitulo (nombre del gimnasio)
             //
             lblTitulo.AutoSize = true;
-            lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblTitulo.Location = new Point(20, 15);
+            lblTitulo.Location = new Point(126, 20);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(300, 32);
-            lblTitulo.TabIndex = 0;
-            lblTitulo.Text = "Control de Acceso / Visitas";
+            lblTitulo.Size = new Size(120, 41);
+            lblTitulo.TabIndex = 2;
+            lblTitulo.Text = "Gimnasio";
+            //
+            // lblMensaje
+            //
+            lblMensaje.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblMensaje.AutoEllipsis = true;
+            lblMensaje.Font = new Font("Segoe UI", 10F, FontStyle.Italic);
+            lblMensaje.ForeColor = Color.FromArgb(230, 238, 252);
+            lblMensaje.Location = new Point(129, 66);
+            lblMensaje.Name = "lblMensaje";
+            lblMensaje.Size = new Size(630, 28);
+            lblMensaje.TabIndex = 3;
+            lblMensaje.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // lblModulo
+            //
+            lblModulo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblModulo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblModulo.ForeColor = Color.FromArgb(160, 180, 210);
+            lblModulo.Location = new Point(484, 24);
+            lblModulo.Name = "lblModulo";
+            lblModulo.Size = new Size(280, 24);
+            lblModulo.TabIndex = 4;
+            lblModulo.Text = "CONTROL DE ACCESO / VISITAS";
+            lblModulo.TextAlign = ContentAlignment.MiddleRight;
+            //
+            // panelClave
+            //
+            panelClave.BackColor = Color.FromArgb(14, 20, 36);
+            panelClave.Controls.Add(lblClavePrompt);
+            panelClave.Controls.Add(txtClave);
+            panelClave.Controls.Add(btnRegistrar);
+            panelClave.Dock = DockStyle.Bottom;
+            panelClave.Location = new Point(0, 108);
+            panelClave.Name = "panelClave";
+            panelClave.Size = new Size(914, 56);
+            panelClave.TabIndex = 0;
             //
             // lblClavePrompt
             //
             lblClavePrompt.AutoSize = true;
             lblClavePrompt.Font = new Font("Segoe UI", 9.5F);
             lblClavePrompt.ForeColor = Color.FromArgb(230, 238, 252);
-            lblClavePrompt.Location = new Point(20, 65);
+            lblClavePrompt.Location = new Point(20, 17);
             lblClavePrompt.Name = "lblClavePrompt";
             lblClavePrompt.Size = new Size(115, 21);
             lblClavePrompt.TabIndex = 1;
@@ -94,7 +152,7 @@
             txtClave.BorderStyle = BorderStyle.FixedSingle;
             txtClave.Font = new Font("Segoe UI", 12F);
             txtClave.ForeColor = Color.FromArgb(230, 238, 252);
-            txtClave.Location = new Point(140, 59);
+            txtClave.Location = new Point(140, 11);
             txtClave.MaxLength = 50;
             txtClave.Name = "txtClave";
             txtClave.Size = new Size(260, 34);
@@ -103,11 +161,10 @@
             //
             // btnRegistrar
             //
-            btnRegistrar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnRegistrar.Estilo = EstiloBoton.Primario;
-            btnRegistrar.Location = new Point(764, 56);
+            btnRegistrar.Location = new Point(415, 8);
             btnRegistrar.Name = "btnRegistrar";
-            btnRegistrar.Size = new Size(130, 40);
+            btnRegistrar.Size = new Size(110, 40);
             btnRegistrar.TabIndex = 1;
             btnRegistrar.TabStop = false;
             btnRegistrar.Text = "Ingresar";
@@ -119,10 +176,10 @@
             panelCentral.Controls.Add(panelDatos);
             panelCentral.Controls.Add(panelFoto);
             panelCentral.Dock = DockStyle.Fill;
-            panelCentral.Location = new Point(0, 110);
+            panelCentral.Location = new Point(0, 164);
             panelCentral.Name = "panelCentral";
             panelCentral.Padding = new Padding(25, 20, 25, 10);
-            panelCentral.Size = new Size(914, 515);
+            panelCentral.Size = new Size(914, 429);
             panelCentral.TabIndex = 1;
             //
             // panelFoto
@@ -323,11 +380,31 @@
             panelBottom.Controls.Add(dgvAsistenciasSemana);
             panelBottom.Controls.Add(lblTituloAsistencia);
             panelBottom.Dock = DockStyle.Bottom;
-            panelBottom.Location = new Point(0, 625);
+            panelBottom.Location = new Point(0, 593);
             panelBottom.Name = "panelBottom";
             panelBottom.Padding = new Padding(25, 5, 25, 20);
             panelBottom.Size = new Size(914, 175);
             panelBottom.TabIndex = 2;
+            //
+            // panelContacto
+            //
+            panelContacto.BackColor = Color.FromArgb(14, 20, 36);
+            panelContacto.Controls.Add(lblContacto);
+            panelContacto.Dock = DockStyle.Bottom;
+            panelContacto.Location = new Point(0, 768);
+            panelContacto.Name = "panelContacto";
+            panelContacto.Size = new Size(914, 32);
+            panelContacto.TabIndex = 3;
+            //
+            // lblContacto
+            //
+            lblContacto.AutoEllipsis = true;
+            lblContacto.Dock = DockStyle.Fill;
+            lblContacto.Font = new Font("Segoe UI", 9F);
+            lblContacto.ForeColor = Color.FromArgb(124, 138, 165);
+            lblContacto.Name = "lblContacto";
+            lblContacto.TabIndex = 0;
+            lblContacto.TextAlign = ContentAlignment.MiddleCenter;
             //
             // lblTituloAsistencia
             //
@@ -360,14 +437,25 @@
             ClientSize = new Size(914, 800);
             Controls.Add(panelCentral);
             Controls.Add(panelBottom);
+            Controls.Add(panelContacto);
             Controls.Add(panelTop);
-            FormBorderStyle = FormBorderStyle.None;
+
+            // Configuraciones para ventana flotante e independiente nativa
+            FormBorderStyle = FormBorderStyle.Sizable;
+            StartPosition = FormStartPosition.CenterScreen;
+            WindowState = FormWindowState.Maximized;
+            MaximizeBox = true;
+            MinimizeBox = true;
+
             Name = "FrmRegistroVisita";
-            Text = "Registro de Visita";
+            Text = "Control de Acceso / Visitas";
             Load += FrmRegistroVisita_Load;
             VisibleChanged += FrmRegistroVisita_VisibleChanged;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
+            panelClave.ResumeLayout(false);
+            panelClave.PerformLayout();
+            panelContacto.ResumeLayout(false);
             panelCentral.ResumeLayout(false);
             panelDatos.ResumeLayout(false);
             panelDatos.PerformLayout();
@@ -377,6 +465,7 @@
             ((System.ComponentModel.ISupportInitialize)picFoto).EndInit();
             panelBottom.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvAsistenciasSemana).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picLogoGimnasio).EndInit();
             ResumeLayout(false);
         }
 
@@ -407,5 +496,11 @@
         private Panel panelBottom;
         private Label lblTituloAsistencia;
         private GridTema dgvAsistenciasSemana;
+        private PictureBox picLogoGimnasio;
+        private Panel panelClave;
+        private Label lblModulo;
+        private Label lblMensaje;
+        private Panel panelContacto;
+        private Label lblContacto;
     }
 }

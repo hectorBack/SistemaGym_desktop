@@ -85,26 +85,25 @@ namespace Presentacion.Forms
 
         private void ConfigurarMenu()
         {
-            // 🟢 Orden lógico y visual de los botones en el menú lateral
+            // 🟢 El botón de registro de visitas ya no va dentro de los formularios internos del contenedor
             _modulos.AddRange(new ModuloMenu[]
             {
-                new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
-                new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
-                new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
-                new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
-                new(btnRegistrarVisita, Permiso.Registro,      typeof(FrmRegistroVisita)),
-                new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
-                new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
-                new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
-                new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
-                new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
-                new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
-                new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
-                new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
-                new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
-                new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
-                new(btnRespaldosManuales,       Permiso.Respaldos,     null), 
-                new(btnRestaurar,       Permiso.Restaurar,     null)
+        new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
+        new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
+        new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
+        new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
+        new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
+        new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
+        new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
+        new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
+        new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
+        new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
+        new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
+        new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
+        new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
+        new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
+        new(btnRespaldosManuales, Permiso.Respaldos,   null),
+        new(btnRestaurar,       Permiso.Restaurar,     null)
             });
 
             var permitidos = new HashSet<string>(
@@ -119,6 +118,56 @@ namespace Presentacion.Forms
                 {
                     modulo.Boton.Click += (s, e) => AbrirFormulario(modulo.Formulario, modulo.Boton);
                 }
+            }
+
+            // 🟢 Configurar de forma independiente el botón de Registrar Visita
+            bool tienePermisoVisita = permitidos.Contains(Permiso.Registro);
+            btnRegistrarVisita.Visible = tienePermisoVisita;
+
+            if (tienePermisoVisita)
+            {
+                btnRegistrarVisita.Click += BtnRegistrarVisita_Click_Independiente;
+            }
+        }
+
+        // Método que oculta el menú principal y abre el control de visitas como ventana independiente
+        private void BtnRegistrarVisita_Click_Independiente(object? sender, EventArgs e)
+        {
+            MarcarBotonActivo(btnRegistrarVisita);
+
+            var scope = _serviceProvider.CreateScope();
+            try
+            {
+                var frmVisitas = ActivatorUtilities.CreateInstance<FrmRegistroVisita>(scope.ServiceProvider);
+
+                // Opcional: Detectar si hay un segundo monitor conectado y moverlo ahí
+                if (Screen.AllScreens.Length > 1)
+                {
+                    var segundoMonitor = Screen.AllScreens[1]; // El índice 1 es el segundo monitor
+                    frmVisitas.StartPosition = FormStartPosition.Manual;
+                    frmVisitas.Location = segundoMonitor.WorkingArea.Location;
+                    frmVisitas.WindowState = FormWindowState.Maximized; // Pantalla completa en el monitor secundario
+                }
+                else
+                {
+                    frmVisitas.WindowState = FormWindowState.Maximized;
+                }
+
+                // Usamos Show() en lugar de ShowDialog() para que NO bloquee la ventana principal.
+                // Así el recepcionista podrá seguir usando FrmPrincipal en el monitor 1 mientras 
+                // el módulo de visitas opera de forma exclusiva en el monitor 2.
+                frmVisitas.Show();
+
+                // Limpiamos el scope cuando se cierre la ventana de visitas
+                frmVisitas.FormClosed += (s, args) =>
+                {
+                    scope.Dispose();
+                };
+            }
+            catch
+            {
+                scope.Dispose();
+                throw;
             }
         }
 
