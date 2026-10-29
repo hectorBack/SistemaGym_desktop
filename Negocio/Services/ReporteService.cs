@@ -96,10 +96,8 @@ namespace Negocio.Services
                     FormaPago = m.FormaPago,
                     Usuario = m.Usuario != null ? m.Usuario.NombreUsuario : (m.UsuarioID.HasValue ? $"Usuario #{m.UsuarioID.Value}" : "Sistema"),
                     Observacion = m.Observacion ?? string.Empty,
-                    // Formatea el rango del corte (Apertura - Cierre/Actual)
-                    CorteInfo = m.Corte != null
-                        ? $"{m.Corte.FechaApertura:dd/MM/yyyy HH:mm} - {(m.Corte.FechaCierre.HasValue ? m.Corte.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm") : "Abierto")}"
-                        : "N/A",
+                    FechaAperturaCorte = m.Corte != null ? m.Corte.FechaApertura : (DateTime?)null,
+                    FechaCierreCorte = m.Corte != null ? m.Corte.FechaCierre : (DateTime?)null,
                     Fecha = m.CreatedAt
                 });
         }

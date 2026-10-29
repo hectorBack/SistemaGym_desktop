@@ -70,7 +70,7 @@ namespace Presentacion.Forms.Movimientos
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FormaPago), "Forma de pago", 90, 80);
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Total), "Total", 85, 80, "C2", alinearDerecha: true);
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Observacion), "Observaciones", 150, 100);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FechaCorte), "Fecha de corte", 110, 100, "dd/MM/yyyy");
+            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.RangoCorteTexto), "Corte", 280, 180);
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.UsuarioNombre), "Usuario", 100, 90);
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Estado), "Estado", 70, 65);
             dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.CreatedAt), "Fecha de registro", 120, 110, "dd/MM/yyyy hh:mm tt");

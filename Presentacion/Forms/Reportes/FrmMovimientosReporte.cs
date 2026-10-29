@@ -59,14 +59,14 @@ namespace Presentacion.Forms.Reportes
         {
             dgvMovimientos.AutoGenerateColumns = false;
 
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 120, 110);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Concepto), "Concepto", 150, 120);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Tipo), "Tipo", 90, 80);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Total), "Total", 90, 85, "C2", alinearDerecha: true);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.FormaPago), "Tipo de Pago", 110, 100);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Corte), "Corte", 140, 120);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Usuario), "Usuario", 120, 100);
-            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Observacion), "Observación", 180, 130);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Fecha), "Fecha", 150, 120);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Concepto), "Concepto", 220, 150); 
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Tipo), "Tipo", 80, 70);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Total), "Total", 85, 80, "C2", alinearDerecha: true);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.FormaPago), "Tipo de Pago", 100, 90);
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Corte), "Corte", 260, 200);      
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Usuario), "Usuario", 90, 80);  
+            dgvMovimientos.AgregarTexto(nameof(FilaMovimiento.Observacion), "Observación", 150, 100);
 
             // La fecha llega como texto: evitar ordenamiento alfabético impreciso.
             foreach (DataGridViewColumn c in dgvMovimientos.Columns)
@@ -118,7 +118,7 @@ namespace Presentacion.Forms.Reportes
                     m.Tipo,
                     m.Total,
                     m.FormaPago,
-                    string.IsNullOrWhiteSpace(m.CorteInfo) ? "N/A" : m.CorteInfo,
+                    m.CorteInfo,
                     string.IsNullOrWhiteSpace(m.Usuario) ? "N/A" : m.Usuario,
                     m.Observacion ?? string.Empty));
 

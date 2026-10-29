@@ -144,7 +144,8 @@ namespace Presentacion.Controller
                 FormaPago = r.FormaPago,
                 Usuario = r.Usuario,
                 Observacion = r.Observacion,
-                CorteInfo = r.CorteInfo,
+                FechaAperturaCorte = r.FechaAperturaCorte,
+                FechaCierreCorte = r.FechaCierreCorte,
                 Fecha = r.Fecha
             });
         }

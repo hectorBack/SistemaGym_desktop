@@ -16,7 +16,13 @@ namespace Presentacion.ViewModels
         public decimal Total { get; set; }
         public string? Observacion { get; set; }
         public int? CorteID { get; set; }
-        public DateTime? FechaCorte { get; set; } 
+        public DateTime? FechaAperturaCorte { get; set; }
+        public DateTime? FechaCierreCorte { get; set; }
+        // Si el corte tiene fecha de apertura y de cierre (está cerrado), muestra el rango. 
+        // De lo contrario (sigue abierto), devuelve vacío para que la celda aparezca limpia.
+        public string RangoCorteTexto => (FechaAperturaCorte.HasValue && FechaCierreCorte.HasValue)
+             ? $"{FechaAperturaCorte.Value:yyyy-MM-dd HH:mm:ss} - {FechaCierreCorte.Value:yyyy-MM-dd HH:mm:ss}"
+             : string.Empty;
         public int? UsuarioID { get; set; }
         public string UsuarioNombre { get; set; } = string.Empty;
         public bool Activo { get; set; }

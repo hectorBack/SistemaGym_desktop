@@ -17,6 +17,7 @@ namespace Negocio.DTOs
         public string? Observacion { get; set; }
         public int? CorteID { get; set; }
         public DateTime? FechaAperturaCorte { get; set; }
+        public DateTime? FechaCierreCorte { get; set; }
         public int? UsuarioID { get; set; }
 
         public string? UsuarioNombre { get; set; }

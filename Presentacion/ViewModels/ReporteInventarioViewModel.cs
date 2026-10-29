@@ -118,7 +118,13 @@ namespace Presentacion.ViewModels
         public string FormaPago { get; set; } = string.Empty;
         public string Usuario { get; set; } = string.Empty;
         public string Observacion { get; set; } = string.Empty;
-        public string CorteInfo { get; set; } = string.Empty;  // Rango de fechas/horas del corte
+        public DateTime? FechaAperturaCorte { get; set; }
+        public DateTime? FechaCierreCorte { get; set; }
+
+        // Si tiene fecha de cierre (está cerrado), muestra el rango. Si está abierto, devuelve vacío.
+        public string CorteInfo => (FechaAperturaCorte.HasValue && FechaCierreCorte.HasValue)
+            ? $"{FechaAperturaCorte.Value:dd/MM/yyyy HH:mm} - {FechaCierreCorte.Value:dd/MM/yyyy HH:mm}"
+            : string.Empty;
         public DateTime Fecha { get; set; }
 
         public string FechaTexto => Fecha.ToString("dd/MM/yyyy hh:mm tt");

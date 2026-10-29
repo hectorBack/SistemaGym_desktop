@@ -105,7 +105,8 @@ namespace Negocio.DTOs
             public string FormaPago { get; set; } = string.Empty;
             public string Usuario { get; set; } = string.Empty;
             public string Observacion { get; set; } = string.Empty;
-            public string CorteInfo { get; set; } = string.Empty;
+            public DateTime? FechaAperturaCorte { get; set; }
+            public DateTime? FechaCierreCorte { get; set; }
             public DateTime Fecha { get; set; }
         }
     }
