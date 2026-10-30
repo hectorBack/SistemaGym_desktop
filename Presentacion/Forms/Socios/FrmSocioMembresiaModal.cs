@@ -56,9 +56,6 @@ namespace Presentacion.Forms.Socios
         {
             btnEliminarMembresia.Visible = SesionUsuario.TienePermiso("Eliminar");
 
-            // Se fija antes de las cargas asíncronas (antes se hacía al final, ya con la pantalla visible).
-            dtpFechaInicio.Value = DateTime.Today;
-
             await CargarComboMembresiasAsync();
             await CargarHistorialAsync();
         }
@@ -83,7 +80,7 @@ namespace Presentacion.Forms.Socios
                 var membresias = await _membresiaController.ObtenerMembresiasAsync(false);
                 if (IsDisposed) return;
 
-                // 🟢 Filtrar y excluir aquellas cuyo nombre contenga "Visita" (usadas solo para visitas casuales)
+                // Filtrar y excluir aquellas cuyo nombre contenga "Visita" (usadas solo para visitas casuales)
                 var membresiasValidas = membresias
                     .Where(m => !m.Nombre.Contains("Visita", StringComparison.OrdinalIgnoreCase))
                     .ToList();
@@ -112,6 +109,39 @@ namespace Presentacion.Forms.Socios
             dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.Precio), "Precio", 80, 75, "C2", alinearDerecha: true);
             dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.TotalPagado), "Pagado", 80, 75, "C2", alinearDerecha: true);
             dgvHistorial.AgregarTexto(nameof(SocioMembresiaViewModel.EstadoMembresia), "Estado", 100, 85);
+        }
+
+        private void ActualizarFechaInicioSugerida()
+        {
+            // Si el socio tiene membresías en el historial (_vista), tomamos la fecha fin de la más reciente.
+            // De lo contrario, por defecto usamos DateTime.Today.
+            DateTime fechaBase = DateTime.Today;
+
+            if (_vista != null && _vista.Count > 0)
+            {
+                // Buscamos la fecha de fin (FechaFin) más alta/reciente del historial
+                DateTime ultimaFechaFin = _vista.Max(m => m.FechaFin);
+
+                // Si la última membresía ya venció o vence hoy/futuro, sugerimos empezar desde el día siguiente o el mismo día del vencimiento.
+                // Comúnmente se asigna a partir de la fecha de fin de la última membresía:
+                if (ultimaFechaFin >= DateTime.Today)
+                {
+                    fechaBase = ultimaFechaFin;
+                }
+            }
+
+            // Nota: El DateTimePicker de Windows Forms puede arrojar una excepción si se asigna un MinDate 
+            // menor al permitido por defecto (usualmente 1753). Validamos que sea seguro.
+            if (fechaBase < dtpFechaInicio.MinDate)
+            {
+                dtpFechaInicio.MinDate = fechaBase;
+            }
+
+            // Restringimos los días anteriores para que no se puedan seleccionar en el calendario
+            dtpFechaInicio.MinDate = fechaBase;
+
+            // Asignamos la fecha calculada al control
+            dtpFechaInicio.Value = fechaBase;
         }
 
         private async Task CargarHistorialAsync(bool seleccionarLaMasNueva = false)
@@ -145,7 +175,11 @@ namespace Presentacion.Forms.Socios
                 if (seleccionarLaMasNueva && _vista.Count > 0)
                     idObjetivo = _vista.Max(m => m.SocioMembresiaID); // la que se acaba de asignar
 
+                ActualizarFechaInicioSugerida();
+
                 SeleccionarMembresia(idObjetivo);
+
+
             },
             "No se pudo cargar el historial de membresías.",
             panelAccionesHistorial);
