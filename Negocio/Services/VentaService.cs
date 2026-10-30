@@ -67,7 +67,8 @@ namespace Negocio.Services
                 SocioID = dto.SocioID,
                 FechaVenta = DateTime.Now,
                 Activo = true,
-                Total = 0
+                Total = 0,
+                FormaPago = dto.FormaPago,
             };
 
             foreach (var detalleDto in dto.Detalles)
@@ -110,7 +111,7 @@ namespace Negocio.Services
 
                 var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
                     corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoVenta, CajaConstantes.TipoIngreso,
-                    nuevaVenta.Total, string.Empty);
+                    nuevaVenta.Total, string.Empty, dto.FormaPago);
 
                 // Si el movimiento genera un ID temporal, EF lo manejará al hacer SaveChangesAsync conjunto.
                 // Para asegurar que la relación EF mapee el objeto Movimiento directamente:
@@ -140,6 +141,7 @@ namespace Negocio.Services
             }
 
             decimal montoDevuelto = venta.Total;
+            string formaPagoOriginal = venta.FormaPago;
 
             // Revertir el stock de los productos al anular la venta
             foreach (var detalle in venta.Detalles)
@@ -162,7 +164,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionVenta, CajaConstantes.TipoEgreso,
-                    montoDevuelto, string.Empty);
+                    montoDevuelto, string.Empty, formaPagoOriginal);
             }
 
             await _unitOfWork.SaveChangesAsync();

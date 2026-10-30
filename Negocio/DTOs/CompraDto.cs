@@ -28,7 +28,7 @@ namespace Negocio.DTOs
         public string Codigo { get; set; } = string.Empty;
         public string? Observacion { get; set; }
         public int UsuarioID { get; set; }
-        public string FormaPago { get; set; } = "Efectivo"; // Necesario para registrar en Movimientos
+        public string FormaPago { get; set; } = "Efectivo";
 
         public List<DetalleCompraCreateDto> Detalles { get; set; } = new List<DetalleCompraCreateDto>();
     }

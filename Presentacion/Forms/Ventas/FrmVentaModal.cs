@@ -28,6 +28,8 @@ namespace Presentacion.Forms.Ventas
             public decimal Subtotal => Cantidad * PrecioUnitario;
         }
 
+        private static readonly string[] FormasPago = { "Efectivo", "Tarjeta", "Otro" };
+
         private readonly VentaController _ventaController;
         private readonly ProductoController _productoController;
 
@@ -47,6 +49,14 @@ namespace Presentacion.Forms.Ventas
 
             InitializeComponent();
             ConfigurarColumnas();
+
+            // Inicializar el ComboBox de Formas de Pago
+            cmbFormaPago.DataSource = FormasPago;
+            // Validar que existan elementos antes de asignar un índice
+            if (cmbFormaPago.Items.Count > 0)
+            {
+                cmbFormaPago.SelectedIndex = 0; // "Efectivo" por defecto
+            }
 
             dgvCarrito.DataSource = _carrito;
             _carrito.ListChanged += (_, _) => ActualizarResumen();
@@ -334,12 +344,13 @@ namespace Presentacion.Forms.Ventas
             decimal total = _carrito.Sum(l => l.Subtotal);
             int usuarioId = SesionUsuario.UsuarioID; // el cajero real, ya no un 1 fijo
             int? socioId = null;
+            string formaPago = cmbFormaPago.SelectedItem?.ToString() ?? "Efectivo";
 
             _guardando = true;
             bool registrada = await FormHelper.EjecutarAsync(
-                () => _ventaController.RegistrarVentaAsync(usuarioId, socioId, total, detalles),
+                () => _ventaController.RegistrarVentaAsync(usuarioId, socioId, total, detalles, formaPago),
                 "No se pudo registrar la venta.",
-                btnGuardar, btnCancelar, btnAgregar, btnQuitar, dgvCarrito);
+                btnGuardar, btnCancelar, btnAgregar, btnQuitar, dgvCarrito, cmbFormaPago);
             _guardando = false;
 
             if (registrada && !IsDisposed)

@@ -12,6 +12,8 @@ namespace Datos.Entities
         public int CompraID { get; set; }
         public string Codigo { get; set; } = string.Empty; // Código/Folio de la compra
         public decimal Total { get; set; }
+
+        public string FormaPago { get; set; } = "Efectivo";
         public string Estado { get; set; } = "Completada"; // "Completada", "Cancelada"
         public string? Observacion { get; set; }
         public int UsuarioID { get; set; }

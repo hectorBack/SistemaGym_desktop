@@ -108,6 +108,9 @@ ADD CONSTRAINT FK_Ventas_Movimientos
 FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
 ON DELETE SET NULL;
 
+ALTER TABLE Ventas 
+ADD COLUMN FormaPago VARCHAR(50) NOT NULL DEFAULT 'Efectivo' AFTER Total;
+
 -- 8. TABLA DETALLE VENTAS
 CREATE TABLE DetalleVentas (
     DetalleID INT AUTO_INCREMENT PRIMARY KEY,
@@ -343,6 +346,9 @@ ADD COLUMN MovimientoID INT NULL AFTER UsuarioID,
 ADD CONSTRAINT FK_Compras_Movimientos 
 FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
 ON DELETE SET NULL;
+
+ALTER TABLE Compras 
+ADD COLUMN FormaPago VARCHAR(50) NOT NULL DEFAULT 'Efectivo' AFTER Total;
 
 -- 2. Tabla Detalle de Compras (asociada a ProductoID)
 CREATE TABLE IF NOT EXISTS DetalleCompras (

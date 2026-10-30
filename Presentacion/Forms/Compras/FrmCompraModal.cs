@@ -27,7 +27,7 @@ namespace Presentacion.Forms.Compras
             public decimal Subtotal => Cantidad * CostoUnitario;
         }
 
-        private static readonly string[] FormasPago = { "Efectivo", "Tarjeta", "Transferencia" };
+        private static readonly string[] FormasPago = { "Efectivo", "Tarjeta", "Otro" };
 
         private readonly CompraController _compraController;
         private readonly ProductoController _productoController;

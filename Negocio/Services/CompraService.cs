@@ -85,6 +85,7 @@ namespace Negocio.Services
                 Codigo = dto.Codigo.Trim(),
                 Observacion = dto.Observacion?.Trim(),
                 UsuarioID = dto.UsuarioID,
+                FormaPago = dto.FormaPago,
                 Estado = "Completada",
                 Activo = true
             };
@@ -128,7 +129,7 @@ namespace Negocio.Services
                 var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "movimiento de Compra");
 
                 var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
-                totalCompra, string.Empty);
+                totalCompra, string.Empty, dto.FormaPago);
 
                 // Enlazamos la compra con el movimiento financiero exacto
                 nuevaCompra.Movimiento = nuevoMovimiento;
@@ -152,6 +153,10 @@ namespace Negocio.Services
             {
                 throw new BusinessException("La compra ya se encuentra cancelada.");
             }
+
+            // Se guardan antes de modificar la compra, igual que en la venta.
+            decimal montoDevuelto = compra.Total;
+            string formaPagoOriginal = compra.FormaPago;
 
             // 1. Revertir el stock acumulado de cada producto
             foreach (var detalle in compra.Detalles)
@@ -188,7 +193,7 @@ namespace Negocio.Services
 
                 await _caja.AgregarMovimientoAsync(
                     corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionCompra, CajaConstantes.TipoIngreso,
-                    compra.Total, string.Empty);
+                    compra.Total, string.Empty, formaPagoOriginal);
             }
 
             // 4. Confirmar en la BD

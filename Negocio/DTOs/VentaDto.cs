@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +28,7 @@ namespace Negocio.DTOs
         public int UsuarioID { get; set; }
         public int? SocioID { get; set; }
         public decimal Total { get; set; }
+        public string FormaPago { get; set; } = "Efectivo";
 
         public List<DetalleVentaCreateDto> Detalles { get; set; } = new List<DetalleVentaCreateDto>();
     }

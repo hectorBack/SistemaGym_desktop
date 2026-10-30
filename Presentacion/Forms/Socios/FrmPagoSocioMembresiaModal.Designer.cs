@@ -265,7 +265,7 @@
             cmbTipoPago.Font = new Font("Segoe UI", 9F);
             cmbTipoPago.ForeColor = Color.FromArgb(230, 238, 252);
             cmbTipoPago.FormattingEnabled = true;
-            cmbTipoPago.Items.AddRange(new object[] { "Efectivo", "Tarjeta", "Transferencia" });
+            cmbTipoPago.Items.AddRange(new object[] { "Efectivo", "Tarjeta", "Otro" });
             cmbTipoPago.Location = new Point(177, 52);
             cmbTipoPago.Name = "cmbTipoPago";
             cmbTipoPago.Size = new Size(160, 28);

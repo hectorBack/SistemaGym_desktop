@@ -30,6 +30,8 @@
             lblAviso = new Label();
             dgvCarrito = new GridTema();
             panelPie = new Panel();
+            lblFormaPago = new Label();
+            cmbFormaPago = new ComboBox();
             btnQuitar = new BotonTema();
             lblTotalEtiqueta = new Label();
             lblTotalCalculado = new Label();
@@ -190,6 +192,8 @@
             // panelPie
             //
             panelPie.BackColor = Color.FromArgb(14, 20, 36);
+            panelPie.Controls.Add(lblFormaPago);
+            panelPie.Controls.Add(cmbFormaPago);
             panelPie.Controls.Add(btnQuitar);
             panelPie.Controls.Add(lblTotalEtiqueta);
             panelPie.Controls.Add(lblTotalCalculado);
@@ -201,13 +205,36 @@
             panelPie.Size = new Size(760, 130);
             panelPie.TabIndex = 3;
             //
+            // lblFormaPago
+            //
+            lblFormaPago.AutoSize = true;
+            lblFormaPago.Font = new Font("Segoe UI", 9.5F);
+            lblFormaPago.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFormaPago.Location = new Point(29, 18);
+            lblFormaPago.Name = "lblFormaPago";
+            lblFormaPago.Size = new Size(118, 21);
+            lblFormaPago.TabIndex = 0;
+            lblFormaPago.Text = "Forma pago:";
+            //
+            // cmbFormaPago
+            //
+            cmbFormaPago.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbFormaPago.BackColor = Color.FromArgb(15, 42, 79);
+            cmbFormaPago.Font = new Font("Segoe UI", 10F);
+            cmbFormaPago.ForeColor = Color.FromArgb(230, 238, 252);
+            cmbFormaPago.FormattingEnabled = true;
+            cmbFormaPago.Location = new Point(29, 44);
+            cmbFormaPago.Name = "cmbFormaPago";
+            cmbFormaPago.Size = new Size(160, 31);
+            cmbFormaPago.TabIndex = 1;
+            //
             // btnQuitar
             //
             btnQuitar.Enabled = false;
-            btnQuitar.Location = new Point(29, 15);
+            btnQuitar.Location = new Point(205, 43);
             btnQuitar.Name = "btnQuitar";
-            btnQuitar.Size = new Size(126, 43);
-            btnQuitar.TabIndex = 0;
+            btnQuitar.Size = new Size(115, 33);
+            btnQuitar.TabIndex = 2;
             btnQuitar.Text = "Quitar ítem";
             btnQuitar.Click += btnQuitar_Click;
             //
@@ -304,6 +331,8 @@
         private Label lblAviso;
         private GridTema dgvCarrito;
         private Panel panelPie;
+        private Label lblFormaPago;
+        private ComboBox cmbFormaPago;
         private BotonTema btnQuitar;
         private Label lblTotalEtiqueta;
         private Label lblTotalCalculado;

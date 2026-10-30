@@ -12,6 +12,7 @@ namespace Datos.Entities
         public int UsuarioID { get; set; }
         public int? SocioID { get; set; } 
         public decimal Total { get; set; }
+        public string FormaPago { get; set; } = "Efectivo";
         public DateTime FechaVenta { get; set; } = DateTime.Now;
 
         public int? MovimientoID { get; set; }

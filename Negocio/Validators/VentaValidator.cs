@@ -19,6 +19,10 @@ namespace Negocio.Validators
                 .GreaterThan(0).When(x => x.SocioID.HasValue)
                 .WithMessage("El ID del socio no es válido.");
 
+            RuleFor(x => x.FormaPago)
+                .NotEmpty().WithMessage("La forma de pago es obligatoria.")
+                .MaximumLength(30).WithMessage("La forma de pago no puede exceder los 30 caracteres.");
+
             RuleFor(x => x.Total)
                 .GreaterThan(0).WithMessage("El total de la venta debe ser mayor a cero.");
 

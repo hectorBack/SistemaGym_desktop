@@ -30,14 +30,15 @@ namespace Presentacion.Controller
             return await _ventaService.ObtenerPorIdAsync(id);
         }
 
-        public async Task<VentaDto> RegistrarVentaAsync(int usuarioId, int? socioId, decimal total, List<DetalleVentaCreateDto> detalles)
+        public async Task<VentaDto> RegistrarVentaAsync(int usuarioId, int? socioId, decimal total, List<DetalleVentaCreateDto> detalles, string formaPago)
         {
             var createDto = new VentaCreateDto
             {
                 UsuarioID = usuarioId,
                 SocioID = socioId,
                 Total = total,
-                Detalles = detalles
+                Detalles = detalles,
+                FormaPago = formaPago
             };
 
             return await _ventaService.CrearAsync(createDto);
