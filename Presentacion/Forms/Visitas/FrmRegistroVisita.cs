@@ -255,9 +255,27 @@ namespace Presentacion.Forms.Visitas
         }
 
         // Vencimiento; si la membresía vigente vence en 7 días o menos se avisa en ámbar (oportunidad de renovar).
+        // Vencimiento con formato largo (ej. "Viernes, 30 de Octubre del 2026") y aviso en ámbar si vence en 7 días o menos.
         private void MostrarVencimiento(AccesoResultadoViewModel resultado)
         {
-            lblVencimiento.Text = resultado.FechaVencimientoTexto;
+            if (resultado.FechaVencimiento.HasValue)
+            {
+                // Creamos la cultura de español para que devuelva los nombres de días y meses en español correctamente
+                var culture = new System.Globalization.CultureInfo("es-ES");
+
+                // Formato: "dddd, dd 'de' MMMM 'del' yyyy" -> Viernes, 30 de Octubre del 2026
+                string fechaLarga = resultado.FechaVencimiento.Value.ToString("dddd, dd 'de' MMMM 'del' yyyy", culture);
+
+                // Capitalizamos la primera letra del día para que inicie con mayúscula (ej. "viernes" -> "Viernes")
+                fechaLarga = char.ToUpper(fechaLarga[0]) + fechaLarga.Substring(1);
+
+                lblVencimiento.Text = fechaLarga;
+            }
+            else
+            {
+                lblVencimiento.Text = resultado.FechaVencimientoTexto;
+            }
+
             lblVencimiento.ForeColor = Tema.Texto;
 
             if (!resultado.MembresiaVigente || !resultado.FechaVencimiento.HasValue) return;
@@ -266,7 +284,13 @@ namespace Presentacion.Forms.Visitas
             if (dias is < 0 or > 7) return;
 
             string aviso = dias == 0 ? "vence hoy" : dias == 1 ? "vence mañana" : $"vence en {dias} días";
-            lblVencimiento.Text = $"{resultado.FechaVencimientoTexto} · {aviso}";
+
+            // Si está próximo a vencer, agregamos el aviso al lado de la fecha larga
+            if (lblVencimiento.Text.Contains("·") == false)
+            {
+                lblVencimiento.Text = $"{lblVencimiento.Text} · {aviso}";
+            }
+
             lblVencimiento.ForeColor = Tema.Advertencia;
         }
 
