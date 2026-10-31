@@ -35,6 +35,8 @@ namespace Presentacion.Helpers
 
     /// <summary>
     /// Operaciones de caja compartidas por Ventas, Compras, Pagos de membresía, Visitas y Movimientos.
+    /// Los cobros y pagos NUNCA abren un corte: usan el corte abierto del usuario si existe y, si no, el movimiento
+    /// queda sin corte y se enlaza al cerrar el siguiente corte (CorteService.CerrarCorteAsync).
     /// NO guarda cambios: quien la usa llama a SaveChangesAsync UNA sola vez al final, para que el
     /// documento (venta, compra, pago...), su movimiento de caja y el corte recién abierto se confirmen juntos.
     /// </summary>
@@ -60,9 +62,22 @@ namespace Presentacion.Helpers
         }
 
         /// <summary>
+        /// Registra el movimiento financiero de una operación (sin guardar). Si el usuario tiene un corte abierto
+        /// lo usa; si no, el movimiento queda sin corte (CorteID vacío). NUNCA abre un corte.
+        /// </summary>
+        public async Task<Movimiento> RegistrarMovimientoAsync(
+            int usuarioId, int conceptoId, string tipo, decimal total, string? observacion, string? formaPago = null)
+        {
+            var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+            return await AgregarMovimientoAsync(corteAbierto, usuarioId, conceptoId, tipo, total, observacion, formaPago);
+        }
+
+        /// <summary>
         /// Devuelve el corte abierto del usuario o PREPARA uno nuevo con el fondo configurado (sin guardarlo todavía).
+        /// Ya no lo usan los cobros: se conserva solo por compatibilidad.
         /// </summary>
         /// <param name="motivo">Texto para la observación, por ejemplo "venta de productos".</param>
+        [Obsolete("Los cobros ya no abren cortes: use RegistrarMovimientoAsync.")]
         public async Task<Corte> ObtenerOAbrirCorteAsync(int usuarioId, string motivo)
         {
             var corteAbierto = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
@@ -88,9 +103,9 @@ namespace Presentacion.Helpers
             return nuevo;
         }
 
-        /// <summary>Agrega un movimiento de caja al corte indicado (sin guardar).</summary>
+        /// <summary>Agrega un movimiento de caja al corte indicado, o sin corte si es null (sin guardar).</summary>
         public async Task<Movimiento> AgregarMovimientoAsync(
-            Corte corte, int usuarioId, int conceptoId, string tipo, decimal total, string? observacion, string? formaPago = null)
+            Corte? corte, int usuarioId, int conceptoId, string tipo, decimal total, string? observacion, string? formaPago = null)
         {
             var movimiento = new Movimiento
             {
@@ -105,8 +120,11 @@ namespace Presentacion.Helpers
 
             // Corte existente: se usa su ID. Corte recién creado (aún sin ID): se enlaza por navegación
             // y EF asigna el ID al guardar.
-            if (corte.CorteID != 0) movimiento.CorteID = corte.CorteID;
-            else movimiento.Corte = corte;
+            if (corte != null)
+            {
+                if (corte.CorteID != 0) movimiento.CorteID = corte.CorteID;
+                else movimiento.Corte = corte;
+            }
 
             await _unitOfWork.Movimiento.AgregarAsync(movimiento);
             return movimiento;

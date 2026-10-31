@@ -73,9 +73,8 @@ namespace Negocio.Services
         /// <summary>
         /// Efectivo que debería haber ahora en la caja:
         ///  - Con un corte abierto: su fondo inicial + ingresos en efectivo − egresos en efectivo desde que se abrió.
-        ///  - Sin corte abierto: el fondo configurado (lo que se deja en caja después de un corte).
-        /// Antes se sumaba el fondo de la configuración al fondo del corte abierto (se contaba dos veces)
-        /// y no se tomaban en cuenta los movimientos del corte.
+        ///  - Sin corte abierto: el fondo configurado (lo que se deja en caja después de un corte) + los movimientos en
+        ///    efectivo registrados desde el último cierre (los cobros ya no abren cortes, así que quedan sin corte).
         /// </summary>
         public async Task<decimal> ObtenerEfectivoEnCajaAsync()
         {
@@ -83,20 +82,43 @@ namespace Negocio.Services
                 .OrderBy(c => c.FechaApertura)
                 .ToList();
 
-            if (abiertos.Count == 0)
-                return await _caja.ObtenerFondoConfiguradoAsync();
+            decimal fondo;
+            DateTime desde;
 
-            // Con varios cortes abiertos (uno por usuario) la caja es la misma: se cuenta desde el más antiguo.
-            var principal = abiertos[0];
+            if (abiertos.Count > 0)
+            {
+                // Con varios cortes abiertos (uno por usuario) la caja es la misma: se cuenta desde el más antiguo.
+                var principal = abiertos[0];
+                fondo = principal.MontoInicial;
+                desde = principal.FechaApertura;
+            }
+            else
+            {
+                fondo = await _caja.ObtenerFondoConfiguradoAsync();
 
-            var movimientos = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(principal.FechaApertura, DateTime.Now))
+                // Desde el último cierre; si nunca se ha hecho un corte, desde el inicio.
+                desde = await ObtenerFechaUltimoCierreAsync() ?? new DateTime(2000, 1, 1);
+            }
+
+            var movimientos = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(desde, DateTime.Now))
                 .Where(m => m.Activo && EsEfectivo(m))
                 .ToList();
 
             decimal ingresos = movimientos.Where(EsIngreso).Sum(m => m.Total);
             decimal egresos = movimientos.Where(m => !EsIngreso(m)).Sum(m => m.Total);
 
-            return principal.MontoInicial + ingresos - egresos;
+            return fondo + ingresos - egresos;
+        }
+
+        /// <summary>Fecha y hora del último corte cerrado (null si nunca se ha cerrado uno).</summary>
+        public async Task<DateTime?> ObtenerFechaUltimoCierreAsync()
+        {
+            var cierres = (await _unitOfWork.Corte.ObtenerTodosAsync(false))
+                .Where(c => c.Estado == ESTADO_CERRADO && c.FechaCierre.HasValue)
+                .Select(c => c.FechaCierre!.Value)
+                .ToList();
+
+            return cierres.Count == 0 ? null : cierres.Max();
         }
 
         // ───────────── Apertura y cierre ─────────────
@@ -185,6 +207,19 @@ namespace Negocio.Services
                 corte.Observaciones = string.IsNullOrWhiteSpace(corte.Observaciones)
                     ? obsCierre
                     : $"{corte.Observaciones.Trim()} | Cierre: {obsCierre}";
+            }
+
+            // Los cobros ya no abren cortes: los movimientos del periodo que quedaron sin corte
+            // (la caja es compartida, sin importar quién cobró) se enlazan a este corte al cerrarlo.
+            DateTime desdeVinculo = dto.PeriodoInicio ?? corte.FechaApertura;
+            var sinCorte = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(desdeVinculo, ahora))
+                .Where(m => m.CorteID == null)
+                .ToList();
+
+            foreach (var movimiento in sinCorte)
+            {
+                movimiento.CorteID = corte.CorteID;
+                _unitOfWork.Movimiento.Actualizar(movimiento);
             }
 
             _unitOfWork.Corte.Actualizar(corte);

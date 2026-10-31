@@ -98,13 +98,9 @@ namespace Negocio.Services
                 throw new BusinessException("No se encontró una sesión de usuario válida.");
             }
 
-            // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con el movimiento).
-            // Antes este servicio tenía su propia copia de la apertura: usaba una clave de configuración
-            // incorrecta (fondo en 0) y la observación decía "venta de productos".
-            var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "movimiento manual de caja");
-
-            var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
-                corteAbierto, usuarioId, dto.ConceptoID, dto.Tipo.Trim(), dto.Total, dto.Observacion, dto.FormaPago);
+            // Corte abierto del usuario, o sin corte si no tiene uno (no se abre ninguno).
+            var nuevoMovimiento = await _caja.RegistrarMovimientoAsync(
+                usuarioId, dto.ConceptoID, dto.Tipo.Trim(), dto.Total, dto.Observacion, dto.FormaPago);
 
             await _unitOfWork.SaveChangesAsync();
 

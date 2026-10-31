@@ -251,8 +251,21 @@ namespace Presentacion.Forms.Corte
             var corte = CorteSeleccionado;
             if (corte == null) return;
 
+            // Validar que sea estrictamente el corte más reciente
+            if (_vista.Count > 0)
+            {
+                int maxCorteId = _vista.Max(c => c.CorteID);
+                if (corte.CorteID != maxCorteId)
+                {
+                    FormHelper.MostrarAdvertencia(
+                        "Por motivos de seguridad e integridad del historial, solo se permite eliminar el corte más reciente (el último de la lista). No se pueden eliminar cortes anteriores.",
+                        "Eliminación no permitida");
+                    return;
+                }
+            }
+
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar permanentemente el corte de caja del usuario '{corte.Usuario}' registrado el {corte.FechaApertura:dd/MM/yyyy hh:mm tt}?\n\nEsta acción no se puede deshacer.",
+                    $"¿Desea eliminar permanentemente el corte más reciente del usuario '{corte.Usuario}' registrado el {corte.FechaApertura:dd/MM/yyyy HH:mm}?\n\nAl eliminar este último corte, el efectivo en caja regresará a su estado inicial.",
                     "Eliminar corte",
                     destructiva: true))
                 return;

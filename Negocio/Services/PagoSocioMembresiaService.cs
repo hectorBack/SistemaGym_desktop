@@ -85,11 +85,9 @@ namespace Negocio.Services
             // 1. REGISTRAR INGRESO EN CAJA - 'Pago Membresia'
             if (dto.Monto > 0)
             {
-                // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con el pago).
-                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "cobro de Membresía");
-
-                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
-                dto.Monto, string.Empty, nuevoPago.FormaPago);
+                // Corte abierto del usuario, o sin corte si no tiene uno (no se abre ninguno).
+                var nuevoMovimiento = await _caja.RegistrarMovimientoAsync(dto.UsuarioID, CajaConstantes.ConceptoPagoMembresia, CajaConstantes.TipoIngreso,
+                    dto.Monto, string.Empty, nuevoPago.FormaPago);
 
                 // Enlazamos el pago con el movimiento financiero exacto
                 nuevoPago.Movimiento = nuevoMovimiento;
@@ -188,12 +186,9 @@ namespace Negocio.Services
             // 2. REGISTRAR EGRESO EN CAJA - 'Cancelacion Pago Membresia'
             if (pago.Monto > 0)
             {
-                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "anulación de pago de Membresía");
-
-                await _caja.AgregarMovimientoAsync(
-                    corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionPagoMembresia, CajaConstantes.TipoEgreso,
-                  pago.Monto, string.Empty,
-                    pago.FormaPago);
+                await _caja.RegistrarMovimientoAsync(
+                    usuarioId, CajaConstantes.ConceptoCancelacionPagoMembresia, CajaConstantes.TipoEgreso,
+                    pago.Monto, string.Empty, pago.FormaPago);
             }
 
             await _unitOfWork.SaveChangesAsync();

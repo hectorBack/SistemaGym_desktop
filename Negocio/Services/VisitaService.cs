@@ -140,11 +140,10 @@ namespace Negocio.Services
             // La visita y su movimiento de caja se guardan JUNTOS: o entran los dos o ninguno.
             if (montoCobrado > 0)
             {
-                var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion!.Value, "cobro de Visita");
-                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corte, usuarioIdSesion.Value, CONCEPTO_VISITA, TIPO_INGRESO, montoCobrado, string.Empty);
+                var nuevoMovimiento = await _caja.RegistrarMovimientoAsync(usuarioIdSesion!.Value, CONCEPTO_VISITA, TIPO_INGRESO, montoCobrado, string.Empty);
 
-                // Enlazamos la visita con el movimiento financiero exacto
-                nuevaVisita.MovimientoID = nuevoMovimiento.MovimientoID;
+                // Se enlaza por navegación: el movimiento aún no tiene ID (se genera al guardar).
+                nuevaVisita.Movimiento = nuevoMovimiento;
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -211,12 +210,10 @@ namespace Negocio.Services
             visita.Activo = false;
             _unitOfWork.Visita.Actualizar(visita);
 
-            // Antes, sin corte abierto, la visita se cancelaba pero la devolución nunca quedaba registrada.
+            // La devolución siempre queda registrada: en el corte abierto, o sin corte si no hay uno.
             if (montoDevuelto > 0)
             {
-                var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de Visita");
-
-                await _caja.AgregarMovimientoAsync(corte, usuarioId, CONCEPTO_CANCELACION_VISITA, TIPO_EGRESO, montoDevuelto, string.Empty);
+                await _caja.RegistrarMovimientoAsync(usuarioId, CONCEPTO_CANCELACION_VISITA, TIPO_EGRESO, montoDevuelto, string.Empty);
             }
 
             // Cancelación y egreso se guardan juntos.
@@ -264,14 +261,13 @@ namespace Negocio.Services
 
             if (monto > 0)
             {
-                var corte = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion, "cobro de Visita (acceso rápido)");
-                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corte, usuarioIdSesion, CONCEPTO_VISITA, TIPO_INGRESO, monto, string.Empty);
+                var nuevoMovimiento = await _caja.RegistrarMovimientoAsync(usuarioIdSesion, CONCEPTO_VISITA, TIPO_INGRESO, monto, string.Empty);
 
                 // Enlazamos la visita con el movimiento financiero exacto
                 nuevaVisita.Movimiento = nuevoMovimiento;
             }
 
-            // Visita, movimiento (y corte, si hubo que abrirlo) se guardan en un solo paso.
+            // Visita y movimiento se guardan en un solo paso.
             await _unitOfWork.SaveChangesAsync();
 
             return new AccesoResultadoDto

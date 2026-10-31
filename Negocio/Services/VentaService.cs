@@ -107,10 +107,8 @@ namespace Negocio.Services
             // 4. REGISTRAR INGRESO EN CAJA - 'Venta Producto' PRIMERO (si la venta tiene total mayor a 0)
             if (nuevaVenta.Total > 0)
             {
-                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "venta de productos");
-
-                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
-                    corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoVenta, CajaConstantes.TipoIngreso,
+                var nuevoMovimiento = await _caja.RegistrarMovimientoAsync(
+                    dto.UsuarioID, CajaConstantes.ConceptoVenta, CajaConstantes.TipoIngreso,
                     nuevaVenta.Total, string.Empty, dto.FormaPago);
 
                 // Si el movimiento genera un ID temporal, EF lo manejará al hacer SaveChangesAsync conjunto.
@@ -157,13 +155,11 @@ namespace Negocio.Services
             _unitOfWork.Venta.EliminarLogico(venta);
 
             // REGISTRAR EGRESO EN CAJA - 'Cancelacion Venta Producto'
-            // Antes, si el usuario no tenía corte abierto, la venta se anulaba pero la devolución no quedaba registrada.
+            // La devolución siempre queda registrada: en el corte abierto, o sin corte si no hay uno.
             if (montoDevuelto > 0)
             {
-                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de venta");
-
-                await _caja.AgregarMovimientoAsync(
-                    corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionVenta, CajaConstantes.TipoEgreso,
+                await _caja.RegistrarMovimientoAsync(
+                    usuarioId, CajaConstantes.ConceptoCancelacionVenta, CajaConstantes.TipoEgreso,
                     montoDevuelto, string.Empty, formaPagoOriginal);
             }
 

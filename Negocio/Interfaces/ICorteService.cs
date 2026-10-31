@@ -20,5 +20,6 @@ namespace Negocio.Interfaces
         Task<CorteDto?> ObtenerCorteAbiertoPorUsuarioAsync(int usuarioId);
         Task<IEnumerable<CorteDto>> ObtenerPorRangoFechasAsync(DateTime inicio, DateTime fin);
         Task<decimal> ObtenerEfectivoEnCajaAsync();
+        Task<DateTime?> ObtenerFechaUltimoCierreAsync();
     }
 }

@@ -94,6 +94,9 @@ namespace Presentacion.Controller
             return await _corteService.ObtenerEfectivoEnCajaAsync();
         }
 
+        public Task<DateTime?> ObtenerFechaUltimoCierreAsync() 
+            => _corteService.ObtenerFechaUltimoCierreAsync();
+
         private static CorteViewModel MapearAViewModel(CorteDto dto) => new()
         {
             CorteID = dto.CorteID,

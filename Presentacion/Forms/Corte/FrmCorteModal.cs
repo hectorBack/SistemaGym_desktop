@@ -77,8 +77,25 @@ namespace Presentacion.Forms.Corte
 
         private async void FrmCorteModal_Load(object? sender, EventArgs e)
         {
+            // El periodo empieza donde terminó el último corte, para que no queden movimientos sin cortar
+            // (los cobros ya no abren cortes). Si nunca se ha hecho uno, empieza hoy a las 00:00.
+            DateTime inicio = DateTime.Today;
+            try
+            {
+                var ultimoCierre = await _corteController.ObtenerFechaUltimoCierreAsync();
+                if (ultimoCierre.HasValue && ultimoCierre.Value < DateTime.Now)
+                    inicio = ultimoCierre.Value;
+            }
+            catch (Exception ex)
+            {
+                // Si no se puede consultar, se usa el comportamiento anterior (hoy 00:00).
+                System.Diagnostics.Debug.WriteLine($"No se pudo obtener el último cierre: {ex.Message}");
+            }
+
+            if (IsDisposed) return;
+
             _asignandoFechas = true;
-            dtpFechaInicio.Value = DateTime.Today;
+            dtpFechaInicio.Value = inicio;
             dtpFechaFin.Value = DateTime.Now;
             _asignandoFechas = false;
 

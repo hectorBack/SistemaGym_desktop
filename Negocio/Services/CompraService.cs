@@ -125,11 +125,9 @@ namespace Negocio.Services
             // 5. REGISTRAR EGRESO EN CAJA - 'Compra Producto'
             if (totalCompra > 0)
             {
-                // Corte abierto, o uno nuevo con el fondo configurado (se guarda junto con la compra).
-                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(dto.UsuarioID, "movimiento de Compra");
-
-                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(corteAbierto, dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
-                totalCompra, string.Empty, dto.FormaPago);
+                // Corte abierto del usuario, o sin corte si no tiene uno (no se abre ninguno).
+                var nuevoMovimiento = await _caja.RegistrarMovimientoAsync(dto.UsuarioID, CajaConstantes.ConceptoCompra, CajaConstantes.TipoEgreso,
+                    totalCompra, string.Empty, dto.FormaPago);
 
                 // Enlazamos la compra con el movimiento financiero exacto
                 nuevaCompra.Movimiento = nuevoMovimiento;
@@ -187,13 +185,11 @@ namespace Negocio.Services
             _unitOfWork.Compra.Actualizar(compra);
 
             // 3. REGISTRAR INGRESO EN CAJA - 'Cancelacion Compra Producto'
-            if (compra.Total > 0)
+            if (montoDevuelto > 0)
             {
-                var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioId, "cancelación de Compra");
-
-                await _caja.AgregarMovimientoAsync(
-                    corteAbierto, usuarioId, CajaConstantes.ConceptoCancelacionCompra, CajaConstantes.TipoIngreso,
-                    compra.Total, string.Empty, formaPagoOriginal);
+                await _caja.RegistrarMovimientoAsync(
+                    usuarioId, CajaConstantes.ConceptoCancelacionCompra, CajaConstantes.TipoIngreso,
+                    montoDevuelto, string.Empty, formaPagoOriginal);
             }
 
             // 4. Confirmar en la BD
