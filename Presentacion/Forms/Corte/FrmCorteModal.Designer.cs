@@ -17,16 +17,19 @@
 
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panelHeader = new Panel();
             lblTitulo = new Label();
             panelFiltros = new Panel();
+            lblConteo = new Label();
             flowFiltros = new FlowLayoutPanel();
             lblFechaInicio = new Label();
             dtpFechaInicio = new DateTimePicker();
             lblFechaFin = new Label();
             dtpFechaFin = new DateTimePicker();
             btnConsultar = new BotonTema();
-            lblConteo = new Label();
             dgvMovimientos = new GridTema();
             panelPie = new Panel();
             tablaTotales = new TableLayoutPanel();
@@ -49,9 +52,9 @@
             panelPie.SuspendLayout();
             tablaTotales.SuspendLayout();
             SuspendLayout();
-            //
+            // 
             // panelHeader
-            //
+            // 
             panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
@@ -59,9 +62,9 @@
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(940, 67);
             panelHeader.TabIndex = 0;
-            //
+            // 
             // lblTitulo
-            //
+            // 
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
@@ -70,9 +73,9 @@
             lblTitulo.Size = new Size(304, 28);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Corte de Caja / Flujo de Efectivo";
-            //
+            // 
             // panelFiltros
-            //
+            // 
             panelFiltros.BackColor = Color.FromArgb(14, 20, 36);
             panelFiltros.Controls.Add(lblConteo);
             panelFiltros.Controls.Add(flowFiltros);
@@ -81,9 +84,21 @@
             panelFiltros.Name = "panelFiltros";
             panelFiltros.Size = new Size(940, 60);
             panelFiltros.TabIndex = 1;
-            //
+            // 
+            // lblConteo
+            // 
+            lblConteo.Dock = DockStyle.Right;
+            lblConteo.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            lblConteo.ForeColor = Color.FromArgb(45, 212, 255);
+            lblConteo.Location = new Point(760, 0);
+            lblConteo.Name = "lblConteo";
+            lblConteo.Padding = new Padding(0, 0, 20, 0);
+            lblConteo.Size = new Size(180, 60);
+            lblConteo.TabIndex = 1;
+            lblConteo.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // flowFiltros
-            //
+            // 
             flowFiltros.AutoSize = true;
             flowFiltros.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             flowFiltros.Controls.Add(lblFechaInicio);
@@ -95,86 +110,124 @@
             flowFiltros.Location = new Point(0, 0);
             flowFiltros.Name = "flowFiltros";
             flowFiltros.Padding = new Padding(23, 12, 0, 0);
-            flowFiltros.Size = new Size(620, 60);
+            flowFiltros.Size = new Size(595, 60);
             flowFiltros.TabIndex = 0;
             flowFiltros.WrapContents = false;
-            //
+            // 
             // lblFechaInicio
-            //
+            // 
             lblFechaInicio.AutoSize = true;
             lblFechaInicio.Font = new Font("Segoe UI", 9.5F);
             lblFechaInicio.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFechaInicio.Location = new Point(23, 19);
             lblFechaInicio.Margin = new Padding(0, 7, 6, 0);
             lblFechaInicio.Name = "lblFechaInicio";
             lblFechaInicio.Size = new Size(56, 21);
             lblFechaInicio.TabIndex = 0;
             lblFechaInicio.Text = "Desde:";
-            //
+            // 
             // dtpFechaInicio
-            //
+            // 
             dtpFechaInicio.CustomFormat = "dd/MM/yyyy HH:mm";
             dtpFechaInicio.Font = new Font("Segoe UI", 9F);
             dtpFechaInicio.Format = DateTimePickerFormat.Custom;
+            dtpFechaInicio.Location = new Point(85, 16);
             dtpFechaInicio.Margin = new Padding(0, 4, 16, 0);
             dtpFechaInicio.Name = "dtpFechaInicio";
             dtpFechaInicio.Size = new Size(160, 27);
             dtpFechaInicio.TabIndex = 1;
-            //
+            // 
             // lblFechaFin
-            //
+            // 
             lblFechaFin.AutoSize = true;
             lblFechaFin.Font = new Font("Segoe UI", 9.5F);
             lblFechaFin.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFechaFin.Location = new Point(261, 19);
             lblFechaFin.Margin = new Padding(0, 7, 6, 0);
             lblFechaFin.Name = "lblFechaFin";
             lblFechaFin.Size = new Size(52, 21);
             lblFechaFin.TabIndex = 2;
             lblFechaFin.Text = "Hasta:";
-            //
+            // 
             // dtpFechaFin
-            //
+            // 
             dtpFechaFin.CustomFormat = "dd/MM/yyyy HH:mm";
             dtpFechaFin.Font = new Font("Segoe UI", 9F);
             dtpFechaFin.Format = DateTimePickerFormat.Custom;
+            dtpFechaFin.Location = new Point(319, 16);
             dtpFechaFin.Margin = new Padding(0, 4, 16, 0);
             dtpFechaFin.Name = "dtpFechaFin";
             dtpFechaFin.Size = new Size(160, 27);
             dtpFechaFin.TabIndex = 3;
             dtpFechaFin.ValueChanged += dtpFechaFin_ValueChanged;
-            //
+            // 
             // btnConsultar
-            //
+            // 
+            btnConsultar.BackColor = Color.FromArgb(31, 111, 235);
             btnConsultar.Estilo = EstiloBoton.Primario;
+            btnConsultar.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
+            btnConsultar.FlatAppearance.MouseDownBackColor = Color.FromArgb(26, 95, 207);
+            btnConsultar.FlatAppearance.MouseOverBackColor = Color.FromArgb(56, 139, 253);
+            btnConsultar.FlatStyle = FlatStyle.Flat;
+            btnConsultar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            btnConsultar.ForeColor = Color.White;
+            btnConsultar.Location = new Point(495, 13);
             btnConsultar.Margin = new Padding(0, 1, 0, 0);
             btnConsultar.Name = "btnConsultar";
             btnConsultar.Size = new Size(100, 32);
             btnConsultar.TabIndex = 4;
             btnConsultar.Text = "Consultar";
+            btnConsultar.UseVisualStyleBackColor = false;
             btnConsultar.Click += btnConsultar_Click;
-            //
-            // lblConteo
-            //
-            lblConteo.Dock = DockStyle.Right;
-            lblConteo.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
-            lblConteo.ForeColor = Color.FromArgb(45, 212, 255);
-            lblConteo.Location = new Point(760, 0);
-            lblConteo.Name = "lblConteo";
-            lblConteo.Padding = new Padding(0, 0, 20, 0);
-            lblConteo.Size = new Size(180, 60);
-            lblConteo.TabIndex = 1;
-            lblConteo.TextAlign = ContentAlignment.MiddleRight;
-            //
+            // 
             // dgvMovimientos
-            //
+            // 
+            dgvMovimientos.AllowUserToAddRows = false;
+            dgvMovimientos.AllowUserToDeleteRows = false;
+            dgvMovimientos.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(14, 20, 36);
+            dgvMovimientos.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dgvMovimientos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvMovimientos.BackgroundColor = Color.FromArgb(11, 15, 26);
+            dgvMovimientos.BorderStyle = BorderStyle.None;
+            dgvMovimientos.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvMovimientos.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvMovimientos.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvMovimientos.ColumnHeadersHeight = 38;
+            dgvMovimientos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(11, 15, 26);
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(230, 238, 252);
+            dataGridViewCellStyle3.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(31, 111, 235);
+            dataGridViewCellStyle3.SelectionForeColor = Color.White;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgvMovimientos.DefaultCellStyle = dataGridViewCellStyle3;
             dgvMovimientos.Dock = DockStyle.Fill;
+            dgvMovimientos.EnableHeadersVisualStyles = false;
+            dgvMovimientos.GridColor = Color.FromArgb(15, 42, 79);
             dgvMovimientos.Location = new Point(0, 127);
+            dgvMovimientos.MultiSelect = false;
             dgvMovimientos.Name = "dgvMovimientos";
+            dgvMovimientos.ReadOnly = true;
+            dgvMovimientos.RowHeadersVisible = false;
+            dgvMovimientos.RowHeadersWidth = 51;
+            dgvMovimientos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvMovimientos.Size = new Size(940, 313);
             dgvMovimientos.TabIndex = 2;
             dgvMovimientos.CellFormatting += dgvMovimientos_CellFormatting;
-            //
+            // 
             // panelPie
-            //
+            // 
             panelPie.BackColor = Color.FromArgb(14, 20, 36);
             panelPie.Controls.Add(tablaTotales);
             panelPie.Controls.Add(lblObservaciones);
@@ -186,9 +239,9 @@
             panelPie.Name = "panelPie";
             panelPie.Size = new Size(940, 220);
             panelPie.TabIndex = 3;
-            //
+            // 
             // tablaTotales
-            //
+            // 
             tablaTotales.ColumnCount = 4;
             tablaTotales.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tablaTotales.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
@@ -211,89 +264,105 @@
             tablaTotales.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             tablaTotales.Size = new Size(940, 76);
             tablaTotales.TabIndex = 0;
-            //
+            // 
             // lblEfectivoInicialEtiqueta
-            //
+            // 
             lblEfectivoInicialEtiqueta.Dock = DockStyle.Fill;
             lblEfectivoInicialEtiqueta.Font = new Font("Segoe UI", 9F);
             lblEfectivoInicialEtiqueta.ForeColor = Color.FromArgb(124, 138, 165);
+            lblEfectivoInicialEtiqueta.Location = new Point(15, 8);
             lblEfectivoInicialEtiqueta.Name = "lblEfectivoInicialEtiqueta";
+            lblEfectivoInicialEtiqueta.Size = new Size(223, 24);
             lblEfectivoInicialEtiqueta.TabIndex = 0;
             lblEfectivoInicialEtiqueta.Text = "Efectivo inicial";
             lblEfectivoInicialEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblTotalIngresosEtiqueta
-            //
+            // 
             lblTotalIngresosEtiqueta.Dock = DockStyle.Fill;
             lblTotalIngresosEtiqueta.Font = new Font("Segoe UI", 9F);
             lblTotalIngresosEtiqueta.ForeColor = Color.FromArgb(124, 138, 165);
+            lblTotalIngresosEtiqueta.Location = new Point(244, 8);
             lblTotalIngresosEtiqueta.Name = "lblTotalIngresosEtiqueta";
+            lblTotalIngresosEtiqueta.Size = new Size(223, 24);
             lblTotalIngresosEtiqueta.TabIndex = 1;
             lblTotalIngresosEtiqueta.Text = "Total ingresos";
             lblTotalIngresosEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblTotalEgresosEtiqueta
-            //
+            // 
             lblTotalEgresosEtiqueta.Dock = DockStyle.Fill;
             lblTotalEgresosEtiqueta.Font = new Font("Segoe UI", 9F);
             lblTotalEgresosEtiqueta.ForeColor = Color.FromArgb(124, 138, 165);
+            lblTotalEgresosEtiqueta.Location = new Point(473, 8);
             lblTotalEgresosEtiqueta.Name = "lblTotalEgresosEtiqueta";
+            lblTotalEgresosEtiqueta.Size = new Size(223, 24);
             lblTotalEgresosEtiqueta.TabIndex = 2;
             lblTotalEgresosEtiqueta.Text = "Total egresos";
             lblTotalEgresosEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblEfectivoFinalEtiqueta
-            //
+            // 
             lblEfectivoFinalEtiqueta.Dock = DockStyle.Fill;
             lblEfectivoFinalEtiqueta.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblEfectivoFinalEtiqueta.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEfectivoFinalEtiqueta.Location = new Point(702, 8);
             lblEfectivoFinalEtiqueta.Name = "lblEfectivoFinalEtiqueta";
+            lblEfectivoFinalEtiqueta.Size = new Size(223, 24);
             lblEfectivoFinalEtiqueta.TabIndex = 3;
-            lblEfectivoFinalEtiqueta.Text = "TOTAL EN CAJA";
+            lblEfectivoFinalEtiqueta.Text = "TOTAL DEL CORTE";
             lblEfectivoFinalEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblEfectivoInicialValue
-            //
+            // 
             lblEfectivoInicialValue.Dock = DockStyle.Fill;
             lblEfectivoInicialValue.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblEfectivoInicialValue.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEfectivoInicialValue.Location = new Point(15, 32);
             lblEfectivoInicialValue.Name = "lblEfectivoInicialValue";
+            lblEfectivoInicialValue.Size = new Size(223, 44);
             lblEfectivoInicialValue.TabIndex = 4;
             lblEfectivoInicialValue.Text = "$0.00";
             lblEfectivoInicialValue.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblTotalIngresosValue
-            //
+            // 
             lblTotalIngresosValue.Dock = DockStyle.Fill;
             lblTotalIngresosValue.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTotalIngresosValue.ForeColor = Color.FromArgb(52, 211, 153);
+            lblTotalIngresosValue.Location = new Point(244, 32);
             lblTotalIngresosValue.Name = "lblTotalIngresosValue";
+            lblTotalIngresosValue.Size = new Size(223, 44);
             lblTotalIngresosValue.TabIndex = 5;
             lblTotalIngresosValue.Text = "$0.00";
             lblTotalIngresosValue.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblTotalEgresosValue
-            //
+            // 
             lblTotalEgresosValue.Dock = DockStyle.Fill;
             lblTotalEgresosValue.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTotalEgresosValue.ForeColor = Color.FromArgb(248, 113, 113);
+            lblTotalEgresosValue.Location = new Point(473, 32);
             lblTotalEgresosValue.Name = "lblTotalEgresosValue";
+            lblTotalEgresosValue.Size = new Size(223, 44);
             lblTotalEgresosValue.TabIndex = 6;
             lblTotalEgresosValue.Text = "$0.00";
             lblTotalEgresosValue.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblEfectivoFinalValue
-            //
+            // 
             lblEfectivoFinalValue.Dock = DockStyle.Fill;
             lblEfectivoFinalValue.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblEfectivoFinalValue.ForeColor = Color.FromArgb(45, 212, 255);
+            lblEfectivoFinalValue.Location = new Point(702, 32);
             lblEfectivoFinalValue.Name = "lblEfectivoFinalValue";
+            lblEfectivoFinalValue.Size = new Size(223, 44);
             lblEfectivoFinalValue.TabIndex = 7;
             lblEfectivoFinalValue.Text = "$0.00";
             lblEfectivoFinalValue.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblObservaciones
-            //
+            // 
             lblObservaciones.AutoSize = true;
             lblObservaciones.Font = new Font("Segoe UI", 9.5F);
             lblObservaciones.ForeColor = Color.FromArgb(230, 238, 252);
@@ -302,9 +371,9 @@
             lblObservaciones.Size = new Size(115, 21);
             lblObservaciones.TabIndex = 1;
             lblObservaciones.Text = "Observaciones:";
-            //
+            // 
             // txtObservaciones
-            //
+            // 
             txtObservaciones.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtObservaciones.BackColor = Color.FromArgb(15, 42, 79);
             txtObservaciones.BorderStyle = BorderStyle.FixedSingle;
@@ -316,31 +385,43 @@
             txtObservaciones.ScrollBars = ScrollBars.Vertical;
             txtObservaciones.Size = new Size(570, 80);
             txtObservaciones.TabIndex = 2;
-            //
+            // 
             // btnRealizarCorte
-            //
+            // 
             btnRealizarCorte.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnRealizarCorte.BackColor = Color.FromArgb(11, 15, 26);
             btnRealizarCorte.Estilo = EstiloBoton.Exito;
+            btnRealizarCorte.FlatAppearance.BorderColor = Color.FromArgb(52, 211, 153);
+            btnRealizarCorte.FlatAppearance.MouseDownBackColor = Color.FromArgb(15, 46, 36);
+            btnRealizarCorte.FlatAppearance.MouseOverBackColor = Color.FromArgb(15, 46, 36);
+            btnRealizarCorte.FlatStyle = FlatStyle.Flat;
+            btnRealizarCorte.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            btnRealizarCorte.ForeColor = Color.FromArgb(52, 211, 153);
             btnRealizarCorte.Location = new Point(627, 147);
             btnRealizarCorte.Name = "btnRealizarCorte";
             btnRealizarCorte.Size = new Size(150, 47);
             btnRealizarCorte.TabIndex = 3;
             btnRealizarCorte.Text = "Realizar corte";
+            btnRealizarCorte.UseVisualStyleBackColor = false;
             btnRealizarCorte.Click += btnRealizarCorte_Click;
-            //
+            // 
             // btnCancelar
-            //
+            // 
             btnCancelar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnCancelar.BackColor = Color.FromArgb(11, 15, 26);
             btnCancelar.DialogResult = DialogResult.Cancel;
+            btnCancelar.FlatStyle = FlatStyle.Flat;
+            btnCancelar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            btnCancelar.ForeColor = Color.FromArgb(230, 238, 252);
             btnCancelar.Location = new Point(786, 147);
             btnCancelar.Name = "btnCancelar";
             btnCancelar.Size = new Size(125, 47);
             btnCancelar.TabIndex = 4;
             btnCancelar.Text = "Cancelar";
-            //
+            btnCancelar.UseVisualStyleBackColor = false;
+            // 
             // FrmCorteModal
-            //
-            // Sin AcceptButton: las observaciones son multilínea y un Enter accidental no debe cerrar la caja.
+            // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(11, 15, 26);
@@ -350,8 +431,6 @@
             Controls.Add(panelPie);
             Controls.Add(panelFiltros);
             Controls.Add(panelHeader);
-            FormBorderStyle = FormBorderStyle.Sizable;
-            MaximizeBox = true;
             MinimizeBox = false;
             MinimumSize = new Size(900, 640);
             Name = "FrmCorteModal";

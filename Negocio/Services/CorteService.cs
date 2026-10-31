@@ -192,12 +192,12 @@ namespace Negocio.Services
         }
 
         // Recalcula ingresos y egresos del periodo con los mismos criterios que la pantalla del corte
-        // (movimientos activos en efectivo; todo lo que no es "Ingreso" cuenta como egreso) y rechaza el cierre si no coinciden.
+        // (movimientos activos de cualquier forma de pago; todo lo que no es "Ingreso" cuenta como egreso) y rechaza el cierre si no coinciden.
         // Evita guardar cifras viejas (otro usuario cobró mientras el modal estaba abierto) o alteradas.
         private async Task VerificarTotalesAsync(DateTime inicio, DateTime fin, CorteUpdateDto dto)
         {
             var movimientos = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(inicio, fin))
-                .Where(m => m.Activo && EsEfectivo(m))
+                .Where(m => m.Activo)
                 .ToList();
 
             decimal ingresos = movimientos.Where(EsIngreso).Sum(m => m.Total);
@@ -207,7 +207,7 @@ namespace Negocio.Services
             if (Math.Abs(ingresos - dto.TotalIngresos) > tolerancia || Math.Abs(egresos - dto.TotalEgresos) > tolerancia)
             {
                 throw new BusinessException(
-                    "Los movimientos de caja en efectivo cambiaron mientras se realizaba el corte " +
+                    "Los movimientos de caja cambiaron mientras se realizaba el corte " +
                     $"(ingresos {ingresos:C2}, egresos {egresos:C2}). Vuelva a consultar e intente de nuevo.");
             }
         }
@@ -249,7 +249,8 @@ namespace Negocio.Services
 
         private static bool EstaAbierto(Corte c) => c.Estado == ESTADO_ABIERTO && c.FechaCierre == null;
 
-        // Los totales del corte cuentan SOLO movimientos en efectivo (tarjeta, transferencia, etc. no entran a la caja).
+        // Solo para el efectivo físico en caja (ObtenerEfectivoEnCajaAsync).
+        // Los totales de ingresos y egresos de los cortes cuentan todas las formas de pago.
         private static bool EsEfectivo(Movimiento m) => CajaConstantes.EsEfectivo(m.FormaPago);
 
         // Un corte abierto guarda sus totales en 0 hasta cerrarse. Para que el historial no muestre cifras
@@ -266,7 +267,7 @@ namespace Negocio.Services
                 // Una sola consulta desde el corte abierto más antiguo, repartida en memoria.
                 DateTime desde = abiertos.Min(c => c.FechaApertura);
                 movimientos = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(desde, DateTime.Now))
-                    .Where(m => m.Activo && EsEfectivo(m))
+                    .Where(m => m.Activo)
                     .ToList();
             }
 

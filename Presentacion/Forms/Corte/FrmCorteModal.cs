@@ -145,9 +145,9 @@ namespace Presentacion.Forms.Corte
 
                 if (IsDisposed) return;
 
-                // El corte de caja cuenta SOLO efectivo: tarjeta, transferencia, etc. no entran a la caja.
+                // El corte cuenta todos los movimientos activos, sin importar la forma de pago (Efectivo, Tarjeta, Otro...).
                 _movimientos = movimientos
-                    .Where(m => m.Activo && string.Equals(m.FormaPago?.Trim(), "Efectivo", StringComparison.OrdinalIgnoreCase))
+                    .Where(m => m.Activo)
                     .ToList();
                 _efectivoInicial = efectivoInicial;
 

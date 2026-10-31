@@ -17,6 +17,9 @@
 
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panelHeader = new Panel();
             lblTitulo = new Label();
             tablaInfo = new TableLayoutPanel();
@@ -49,9 +52,9 @@
             ((System.ComponentModel.ISupportInitialize)dgvMovimientos).BeginInit();
             panelPie.SuspendLayout();
             SuspendLayout();
-            //
+            // 
             // panelHeader
-            //
+            // 
             panelHeader.BackColor = Color.FromArgb(15, 42, 79);
             panelHeader.Controls.Add(lblTitulo);
             panelHeader.Dock = DockStyle.Top;
@@ -59,20 +62,20 @@
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(760, 67);
             panelHeader.TabIndex = 0;
-            //
+            // 
             // lblTitulo
-            //
+            // 
             lblTitulo.AutoSize = true;
             lblTitulo.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTitulo.ForeColor = Color.FromArgb(45, 212, 255);
             lblTitulo.Location = new Point(23, 19);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(228, 28);
+            lblTitulo.Size = new Size(237, 28);
             lblTitulo.TabIndex = 0;
             lblTitulo.Text = "Detalle del Corte de Caja";
-            //
+            // 
             // tablaInfo
-            //
+            // 
             tablaInfo.AutoSize = true;
             tablaInfo.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tablaInfo.BackColor = Color.FromArgb(14, 20, 36);
@@ -91,7 +94,6 @@
             tablaInfo.Controls.Add(lblFechaFinValor, 3, 1);
             tablaInfo.Controls.Add(lblObservacionEtiqueta, 0, 2);
             tablaInfo.Controls.Add(lblObservacionValor, 1, 2);
-            tablaInfo.SetColumnSpan(lblObservacionValor, 3);
             tablaInfo.Dock = DockStyle.Top;
             tablaInfo.Location = new Point(0, 67);
             tablaInfo.Name = "tablaInfo";
@@ -100,112 +102,133 @@
             tablaInfo.RowStyles.Add(new RowStyle());
             tablaInfo.RowStyles.Add(new RowStyle());
             tablaInfo.RowStyles.Add(new RowStyle());
-            tablaInfo.Size = new Size(760, 120);
+            tablaInfo.Size = new Size(760, 107);
             tablaInfo.TabIndex = 1;
-            //
+            // 
             // lblUsuarioEtiqueta
-            //
+            // 
             lblUsuarioEtiqueta.AutoSize = true;
             lblUsuarioEtiqueta.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblUsuarioEtiqueta.ForeColor = Color.FromArgb(45, 212, 255);
+            lblUsuarioEtiqueta.Location = new Point(18, 14);
             lblUsuarioEtiqueta.Margin = new Padding(0, 4, 12, 4);
             lblUsuarioEtiqueta.Name = "lblUsuarioEtiqueta";
+            lblUsuarioEtiqueta.Size = new Size(73, 21);
             lblUsuarioEtiqueta.TabIndex = 0;
             lblUsuarioEtiqueta.Text = "Usuario:";
-            //
+            // 
             // lblUsuarioValor
-            //
+            // 
             lblUsuarioValor.AutoSize = true;
             lblUsuarioValor.Font = new Font("Segoe UI", 9.5F);
             lblUsuarioValor.ForeColor = Color.FromArgb(230, 238, 252);
+            lblUsuarioValor.Location = new Point(140, 14);
             lblUsuarioValor.Margin = new Padding(0, 4, 12, 4);
             lblUsuarioValor.Name = "lblUsuarioValor";
+            lblUsuarioValor.Size = new Size(38, 21);
             lblUsuarioValor.TabIndex = 1;
             lblUsuarioValor.Text = "N/A";
-            //
+            // 
             // lblEstadoEtiqueta
-            //
+            // 
             lblEstadoEtiqueta.AutoSize = true;
             lblEstadoEtiqueta.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblEstadoEtiqueta.ForeColor = Color.FromArgb(45, 212, 255);
+            lblEstadoEtiqueta.Location = new Point(393, 14);
             lblEstadoEtiqueta.Margin = new Padding(0, 4, 12, 4);
             lblEstadoEtiqueta.Name = "lblEstadoEtiqueta";
+            lblEstadoEtiqueta.Size = new Size(65, 21);
             lblEstadoEtiqueta.TabIndex = 2;
             lblEstadoEtiqueta.Text = "Estado:";
-            //
+            // 
             // lblEstadoValor
-            //
+            // 
             lblEstadoValor.AutoSize = true;
             lblEstadoValor.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblEstadoValor.ForeColor = Color.FromArgb(52, 211, 153);
+            lblEstadoValor.Location = new Point(488, 14);
             lblEstadoValor.Margin = new Padding(0, 4, 0, 4);
             lblEstadoValor.Name = "lblEstadoValor";
+            lblEstadoValor.Size = new Size(70, 21);
             lblEstadoValor.TabIndex = 3;
             lblEstadoValor.Text = "Cerrado";
-            //
+            // 
             // lblFechaInicioEtiqueta
-            //
+            // 
             lblFechaInicioEtiqueta.AutoSize = true;
             lblFechaInicioEtiqueta.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblFechaInicioEtiqueta.ForeColor = Color.FromArgb(45, 212, 255);
+            lblFechaInicioEtiqueta.Location = new Point(18, 43);
             lblFechaInicioEtiqueta.Margin = new Padding(0, 4, 12, 4);
             lblFechaInicioEtiqueta.Name = "lblFechaInicioEtiqueta";
+            lblFechaInicioEtiqueta.Size = new Size(105, 21);
             lblFechaInicioEtiqueta.TabIndex = 4;
             lblFechaInicioEtiqueta.Text = "Fecha inicio:";
-            //
+            // 
             // lblFechaInicioValor
-            //
+            // 
             lblFechaInicioValor.AutoSize = true;
             lblFechaInicioValor.Font = new Font("Segoe UI", 9.5F);
             lblFechaInicioValor.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFechaInicioValor.Location = new Point(140, 43);
             lblFechaInicioValor.Margin = new Padding(0, 4, 12, 4);
             lblFechaInicioValor.Name = "lblFechaInicioValor";
+            lblFechaInicioValor.Size = new Size(101, 21);
             lblFechaInicioValor.TabIndex = 5;
             lblFechaInicioValor.Text = "--/--/---- --:--";
-            //
+            // 
             // lblFechaFinEtiqueta
-            //
+            // 
             lblFechaFinEtiqueta.AutoSize = true;
             lblFechaFinEtiqueta.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblFechaFinEtiqueta.ForeColor = Color.FromArgb(45, 212, 255);
+            lblFechaFinEtiqueta.Location = new Point(393, 43);
             lblFechaFinEtiqueta.Margin = new Padding(0, 4, 12, 4);
             lblFechaFinEtiqueta.Name = "lblFechaFinEtiqueta";
+            lblFechaFinEtiqueta.Size = new Size(83, 21);
             lblFechaFinEtiqueta.TabIndex = 6;
             lblFechaFinEtiqueta.Text = "Fecha fin:";
-            //
+            // 
             // lblFechaFinValor
-            //
+            // 
             lblFechaFinValor.AutoSize = true;
             lblFechaFinValor.Font = new Font("Segoe UI", 9.5F);
             lblFechaFinValor.ForeColor = Color.FromArgb(230, 238, 252);
+            lblFechaFinValor.Location = new Point(488, 43);
             lblFechaFinValor.Margin = new Padding(0, 4, 0, 4);
             lblFechaFinValor.Name = "lblFechaFinValor";
+            lblFechaFinValor.Size = new Size(101, 21);
             lblFechaFinValor.TabIndex = 7;
             lblFechaFinValor.Text = "--/--/---- --:--";
-            //
+            // 
             // lblObservacionEtiqueta
-            //
+            // 
             lblObservacionEtiqueta.AutoSize = true;
             lblObservacionEtiqueta.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblObservacionEtiqueta.ForeColor = Color.FromArgb(45, 212, 255);
+            lblObservacionEtiqueta.Location = new Point(18, 72);
             lblObservacionEtiqueta.Margin = new Padding(0, 4, 12, 4);
             lblObservacionEtiqueta.Name = "lblObservacionEtiqueta";
+            lblObservacionEtiqueta.Size = new Size(110, 21);
             lblObservacionEtiqueta.TabIndex = 8;
             lblObservacionEtiqueta.Text = "Observación:";
-            //
+            // 
             // lblObservacionValor
-            //
+            // 
             lblObservacionValor.AutoSize = true;
+            tablaInfo.SetColumnSpan(lblObservacionValor, 3);
             lblObservacionValor.Font = new Font("Segoe UI", 9.5F);
             lblObservacionValor.ForeColor = Color.FromArgb(230, 238, 252);
+            lblObservacionValor.Location = new Point(140, 72);
             lblObservacionValor.Margin = new Padding(0, 4, 0, 4);
             lblObservacionValor.MaximumSize = new Size(560, 0);
             lblObservacionValor.Name = "lblObservacionValor";
+            lblObservacionValor.Size = new Size(135, 21);
             lblObservacionValor.TabIndex = 9;
             lblObservacionValor.Text = "Sin observaciones";
-            //
+            // 
             // tablaTotales
-            //
+            // 
             tablaTotales.ColumnCount = 4;
             tablaTotales.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tablaTotales.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
@@ -220,7 +243,7 @@
             tablaTotales.Controls.Add(lblTotalEgresosValor, 2, 1);
             tablaTotales.Controls.Add(lblEfectivoFinalValor, 3, 1);
             tablaTotales.Dock = DockStyle.Top;
-            tablaTotales.Location = new Point(0, 187);
+            tablaTotales.Location = new Point(0, 174);
             tablaTotales.Name = "tablaTotales";
             tablaTotales.Padding = new Padding(12, 8, 12, 4);
             tablaTotales.RowCount = 2;
@@ -228,98 +251,151 @@
             tablaTotales.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             tablaTotales.Size = new Size(760, 76);
             tablaTotales.TabIndex = 2;
-            //
+            // 
             // lblEfectivoInicialEtiqueta
-            //
+            // 
             lblEfectivoInicialEtiqueta.Dock = DockStyle.Fill;
             lblEfectivoInicialEtiqueta.Font = new Font("Segoe UI", 9F);
             lblEfectivoInicialEtiqueta.ForeColor = Color.FromArgb(124, 138, 165);
+            lblEfectivoInicialEtiqueta.Location = new Point(15, 8);
             lblEfectivoInicialEtiqueta.Name = "lblEfectivoInicialEtiqueta";
+            lblEfectivoInicialEtiqueta.Size = new Size(178, 24);
             lblEfectivoInicialEtiqueta.TabIndex = 0;
             lblEfectivoInicialEtiqueta.Text = "Efectivo inicial";
             lblEfectivoInicialEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblTotalIngresosEtiqueta
-            //
+            // 
             lblTotalIngresosEtiqueta.Dock = DockStyle.Fill;
             lblTotalIngresosEtiqueta.Font = new Font("Segoe UI", 9F);
             lblTotalIngresosEtiqueta.ForeColor = Color.FromArgb(124, 138, 165);
+            lblTotalIngresosEtiqueta.Location = new Point(199, 8);
             lblTotalIngresosEtiqueta.Name = "lblTotalIngresosEtiqueta";
+            lblTotalIngresosEtiqueta.Size = new Size(178, 24);
             lblTotalIngresosEtiqueta.TabIndex = 1;
             lblTotalIngresosEtiqueta.Text = "Total ingresos";
             lblTotalIngresosEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblTotalEgresosEtiqueta
-            //
+            // 
             lblTotalEgresosEtiqueta.Dock = DockStyle.Fill;
             lblTotalEgresosEtiqueta.Font = new Font("Segoe UI", 9F);
             lblTotalEgresosEtiqueta.ForeColor = Color.FromArgb(124, 138, 165);
+            lblTotalEgresosEtiqueta.Location = new Point(383, 8);
             lblTotalEgresosEtiqueta.Name = "lblTotalEgresosEtiqueta";
+            lblTotalEgresosEtiqueta.Size = new Size(178, 24);
             lblTotalEgresosEtiqueta.TabIndex = 2;
             lblTotalEgresosEtiqueta.Text = "Total egresos";
             lblTotalEgresosEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblEfectivoFinalEtiqueta
-            //
+            // 
             lblEfectivoFinalEtiqueta.Dock = DockStyle.Fill;
             lblEfectivoFinalEtiqueta.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblEfectivoFinalEtiqueta.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEfectivoFinalEtiqueta.Location = new Point(567, 8);
             lblEfectivoFinalEtiqueta.Name = "lblEfectivoFinalEtiqueta";
+            lblEfectivoFinalEtiqueta.Size = new Size(178, 24);
             lblEfectivoFinalEtiqueta.TabIndex = 3;
-            lblEfectivoFinalEtiqueta.Text = "EFECTIVO FINAL";
+            lblEfectivoFinalEtiqueta.Text = "TOTAL DEL CORTE";
             lblEfectivoFinalEtiqueta.TextAlign = ContentAlignment.BottomCenter;
-            //
+            // 
             // lblEfectivoInicialValor
-            //
+            // 
             lblEfectivoInicialValor.Dock = DockStyle.Fill;
             lblEfectivoInicialValor.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblEfectivoInicialValor.ForeColor = Color.FromArgb(230, 238, 252);
+            lblEfectivoInicialValor.Location = new Point(15, 32);
             lblEfectivoInicialValor.Name = "lblEfectivoInicialValor";
+            lblEfectivoInicialValor.Size = new Size(178, 40);
             lblEfectivoInicialValor.TabIndex = 4;
             lblEfectivoInicialValor.Text = "$0.00";
             lblEfectivoInicialValor.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblTotalIngresosValor
-            //
+            // 
             lblTotalIngresosValor.Dock = DockStyle.Fill;
             lblTotalIngresosValor.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTotalIngresosValor.ForeColor = Color.FromArgb(52, 211, 153);
+            lblTotalIngresosValor.Location = new Point(199, 32);
             lblTotalIngresosValor.Name = "lblTotalIngresosValor";
+            lblTotalIngresosValor.Size = new Size(178, 40);
             lblTotalIngresosValor.TabIndex = 5;
             lblTotalIngresosValor.Text = "$0.00";
             lblTotalIngresosValor.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblTotalEgresosValor
-            //
+            // 
             lblTotalEgresosValor.Dock = DockStyle.Fill;
             lblTotalEgresosValor.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
             lblTotalEgresosValor.ForeColor = Color.FromArgb(248, 113, 113);
+            lblTotalEgresosValor.Location = new Point(383, 32);
             lblTotalEgresosValor.Name = "lblTotalEgresosValor";
+            lblTotalEgresosValor.Size = new Size(178, 40);
             lblTotalEgresosValor.TabIndex = 6;
             lblTotalEgresosValor.Text = "$0.00";
             lblTotalEgresosValor.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblEfectivoFinalValor
-            //
+            // 
             lblEfectivoFinalValor.Dock = DockStyle.Fill;
             lblEfectivoFinalValor.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblEfectivoFinalValor.ForeColor = Color.FromArgb(45, 212, 255);
+            lblEfectivoFinalValor.Location = new Point(567, 32);
             lblEfectivoFinalValor.Name = "lblEfectivoFinalValor";
+            lblEfectivoFinalValor.Size = new Size(178, 40);
             lblEfectivoFinalValor.TabIndex = 7;
             lblEfectivoFinalValor.Text = "$0.00";
             lblEfectivoFinalValor.TextAlign = ContentAlignment.MiddleCenter;
-            //
+            // 
             // dgvMovimientos
-            //
+            // 
+            dgvMovimientos.AllowUserToAddRows = false;
+            dgvMovimientos.AllowUserToDeleteRows = false;
+            dgvMovimientos.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(14, 20, 36);
+            dgvMovimientos.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dgvMovimientos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvMovimientos.BackgroundColor = Color.FromArgb(11, 15, 26);
+            dgvMovimientos.BorderStyle = BorderStyle.None;
+            dgvMovimientos.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvMovimientos.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvMovimientos.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvMovimientos.ColumnHeadersHeight = 38;
+            dgvMovimientos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(11, 15, 26);
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(230, 238, 252);
+            dataGridViewCellStyle3.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(31, 111, 235);
+            dataGridViewCellStyle3.SelectionForeColor = Color.White;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgvMovimientos.DefaultCellStyle = dataGridViewCellStyle3;
             dgvMovimientos.Dock = DockStyle.Fill;
-            dgvMovimientos.Location = new Point(0, 263);
+            dgvMovimientos.EnableHeadersVisualStyles = false;
+            dgvMovimientos.GridColor = Color.FromArgb(15, 42, 79);
+            dgvMovimientos.Location = new Point(0, 250);
+            dgvMovimientos.MultiSelect = false;
             dgvMovimientos.Name = "dgvMovimientos";
-            dgvMovimientos.Size = new Size(760, 227);
+            dgvMovimientos.ReadOnly = true;
+            dgvMovimientos.RowHeadersVisible = false;
+            dgvMovimientos.RowHeadersWidth = 51;
+            dgvMovimientos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvMovimientos.Size = new Size(760, 240);
             dgvMovimientos.TabIndex = 3;
             dgvMovimientos.CellFormatting += dgvMovimientos_CellFormatting;
-            //
+            // 
             // panelPie
-            //
+            // 
             panelPie.BackColor = Color.FromArgb(14, 20, 36);
             panelPie.Controls.Add(lblConteo);
             panelPie.Controls.Add(btnCerrar);
@@ -328,31 +404,40 @@
             panelPie.Name = "panelPie";
             panelPie.Size = new Size(760, 70);
             panelPie.TabIndex = 4;
-            //
+            // 
             // lblConteo
-            //
+            // 
             lblConteo.Dock = DockStyle.Left;
             lblConteo.Font = new Font("Segoe UI", 9.5F);
             lblConteo.ForeColor = Color.FromArgb(124, 138, 165);
+            lblConteo.Location = new Point(0, 0);
             lblConteo.Name = "lblConteo";
             lblConteo.Padding = new Padding(29, 0, 0, 0);
             lblConteo.Size = new Size(300, 70);
             lblConteo.TabIndex = 1;
             lblConteo.TextAlign = ContentAlignment.MiddleLeft;
-            //
+            // 
             // btnCerrar
-            //
+            // 
             btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCerrar.BackColor = Color.FromArgb(31, 111, 235);
             btnCerrar.DialogResult = DialogResult.Cancel;
             btnCerrar.Estilo = EstiloBoton.Primario;
+            btnCerrar.FlatAppearance.BorderColor = Color.FromArgb(31, 111, 235);
+            btnCerrar.FlatAppearance.MouseDownBackColor = Color.FromArgb(26, 95, 207);
+            btnCerrar.FlatAppearance.MouseOverBackColor = Color.FromArgb(56, 139, 253);
+            btnCerrar.FlatStyle = FlatStyle.Flat;
+            btnCerrar.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            btnCerrar.ForeColor = Color.White;
             btnCerrar.Location = new Point(617, 14);
             btnCerrar.Name = "btnCerrar";
             btnCerrar.Size = new Size(114, 43);
             btnCerrar.TabIndex = 0;
             btnCerrar.Text = "Cerrar";
-            //
+            btnCerrar.UseVisualStyleBackColor = false;
+            // 
             // FrmCorteDetalleModal
-            //
+            // 
             AcceptButton = btnCerrar;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -364,8 +449,6 @@
             Controls.Add(tablaTotales);
             Controls.Add(tablaInfo);
             Controls.Add(panelHeader);
-            FormBorderStyle = FormBorderStyle.Sizable;
-            MaximizeBox = true;
             MinimizeBox = false;
             MinimumSize = new Size(680, 520);
             Name = "FrmCorteDetalleModal";
