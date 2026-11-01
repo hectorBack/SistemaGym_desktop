@@ -36,8 +36,8 @@ namespace Negocio.Validators
             RuleFor(x => x.TotalEgresos)
                 .GreaterThanOrEqualTo(0m).WithMessage("El total de egresos no puede ser negativo.");
 
-            RuleFor(x => x.MontoFinal)
-                .GreaterThanOrEqualTo(0m).WithMessage("El monto final no puede ser negativo.");
+            // MontoFinal no se valida como >= 0: puede ser negativo cuando los egresos superan
+            // al efectivo inicial más los ingresos, y el corte debe poder cerrarse con ese resultado.
 
             RuleFor(x => x.Estado)
                 .NotEmpty().WithMessage("El estado del corte es obligatorio.")

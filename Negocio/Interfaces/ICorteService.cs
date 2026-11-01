@@ -21,5 +21,7 @@ namespace Negocio.Interfaces
         Task<IEnumerable<CorteDto>> ObtenerPorRangoFechasAsync(DateTime inicio, DateTime fin);
         Task<decimal> ObtenerEfectivoEnCajaAsync();
         Task<DateTime?> ObtenerFechaUltimoCierreAsync();
+
+        Task RealizarCorteAsync(int usuarioId, decimal fondoInicialPredeterminado, decimal totalIngresos, decimal totalEgresos, decimal montoFinal, string? observaciones, DateTime periodoInicio);
     }
 }

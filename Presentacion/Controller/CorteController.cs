@@ -97,6 +97,9 @@ namespace Presentacion.Controller
         public Task<DateTime?> ObtenerFechaUltimoCierreAsync() 
             => _corteService.ObtenerFechaUltimoCierreAsync();
 
+        public Task RealizarCorteAsync(int usuarioId, decimal fondoInicialPredeterminado, decimal totalIngresos, decimal totalEgresos, decimal montoFinal, string? observaciones, DateTime periodoInicio)
+            => _corteService.RealizarCorteAsync(usuarioId, fondoInicialPredeterminado, totalIngresos, totalEgresos, montoFinal, observaciones, periodoInicio);
+
         private static CorteViewModel MapearAViewModel(CorteDto dto) => new()
         {
             CorteID = dto.CorteID,

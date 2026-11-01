@@ -91,6 +91,12 @@ namespace Negocio.Services
                 var principal = abiertos[0];
                 fondo = principal.MontoInicial;
                 desde = principal.FechaApertura;
+
+                // Los cobros hechos entre el último cierre y la apertura de este corte también cuentan
+                // (el corte los enlaza al cerrarse), así que se parte del último cierre si es anterior.
+                var cierreAnterior = await ObtenerFechaUltimoCierreAsync();
+                if (cierreAnterior.HasValue && cierreAnterior.Value < desde)
+                    desde = cierreAnterior.Value;
             }
             else
             {
@@ -159,8 +165,10 @@ namespace Negocio.Services
         {
             await ValidarAsync(_updateValidator, dto);
 
-            if (dto.TotalIngresos < 0 || dto.TotalEgresos < 0 || dto.MontoFinal < 0)
-                throw new BusinessException("Los totales del corte no pueden ser negativos.");
+            // Ingresos y egresos son sumas de importes y no pueden ser negativos. El total final sí puede serlo:
+            // pasa cuando los egresos superan al fondo inicial más los ingresos, y el corte debe registrar esa realidad.
+            if (dto.TotalIngresos < 0 || dto.TotalEgresos < 0)
+                throw new BusinessException("Los ingresos y egresos del corte no pueden ser negativos.");
 
             var corte = await _unitOfWork.Corte.ObtenerPorIdAsync(dto.CorteID);
             if (corte == null)
@@ -183,7 +191,7 @@ namespace Negocio.Services
                     throw new BusinessException("El inicio del periodo no puede ser posterior al momento del cierre.");
 
                 // Los totales se comparan contra los movimientos reales de la base de datos.
-                await VerificarTotalesAsync(inicio, ahora, dto);
+                await VerificarTotalesAsync(inicio, ahora, dto.TotalIngresos, dto.TotalEgresos);
 
                 // Si el corte se abrió automáticamente justo antes de cerrarlo, FechaApertura quedaba casi igual
                 // a FechaCierre y el detalle no mostraba los movimientos. Se amplía al periodo realmente cortado.
@@ -226,10 +234,121 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Realiza el corte en un solo paso: usa el corte abierto del usuario o crea uno, y lo deja cerrado.
+        /// Todas las validaciones ocurren ANTES de guardar, así que si algo falla no queda ningún corte "En proceso".
+        /// El total final puede ser negativo (los egresos superaron al fondo y a los ingresos): es un dato real del periodo.
+        /// </summary>
+        public async Task RealizarCorteAsync(
+            int usuarioId,
+            decimal fondoInicialPredeterminado,
+            decimal totalIngresos,
+            decimal totalEgresos,
+            decimal montoFinal,
+            string? observaciones,
+            DateTime periodoInicio)
+        {
+            if (usuarioId <= 0)
+                throw new BusinessException("No se pudo identificar al usuario que realiza el corte.");
+
+            if (totalIngresos < 0 || totalEgresos < 0)
+                throw new BusinessException("Los ingresos y egresos del corte no pueden ser negativos.");
+
+            DateTime ahora = DateTime.Now;
+            if (periodoInicio > ahora)
+                throw new BusinessException("El inicio del periodo no puede ser posterior al momento del cierre.");
+
+            var corte = await _unitOfWork.Corte.ObtenerCorteAbiertoPorUsuarioAsync(usuarioId);
+
+            decimal fondo = corte?.MontoInicial ?? fondoInicialPredeterminado;
+            if (fondo < 0)
+                throw new BusinessException("El monto inicial no puede ser negativo.");
+
+            // Los totales se comparan contra los movimientos reales de la base de datos.
+            await VerificarTotalesAsync(periodoInicio, ahora, totalIngresos, totalEgresos);
+
+            if (Math.Abs(fondo + totalIngresos - totalEgresos - montoFinal) > 0.01m)
+            {
+                throw new BusinessException(
+                    "El total del corte no coincide con el fondo inicial, los ingresos y los egresos. " +
+                    "Vuelva a consultar e intente de nuevo.");
+            }
+
+            string? obsCierre = observaciones?.Trim();
+
+            // Este método no pasa por los validadores, así que el límite de las observaciones se revisa aquí.
+            if (obsCierre != null && obsCierre.Length > 500)
+                throw new BusinessException("Las observaciones no pueden exceder los 500 caracteres.");
+
+            if (corte == null)
+            {
+                // No había corte abierto: se crea ya cerrado y abarcando todo el periodo.
+                corte = new Corte
+                {
+                    UsuarioID = usuarioId,
+                    FechaApertura = periodoInicio,
+                    MontoInicial = fondo,
+                    Observaciones = string.IsNullOrEmpty(obsCierre) ? null : obsCierre,
+                    Activo = true
+                };
+                AplicarCierre(corte, ahora, totalIngresos, totalEgresos, montoFinal);
+                await _unitOfWork.Corte.AgregarAsync(corte);
+            }
+            else
+            {
+                // Había un corte abierto: se amplía al periodo realmente cortado y se cierra.
+                if (periodoInicio < corte.FechaApertura)
+                    corte.FechaApertura = periodoInicio;
+
+                AplicarCierre(corte, ahora, totalIngresos, totalEgresos, montoFinal);
+
+                if (!string.IsNullOrEmpty(obsCierre))
+                {
+                    corte.Observaciones = string.IsNullOrWhiteSpace(corte.Observaciones)
+                        ? obsCierre
+                        : $"{corte.Observaciones.Trim()} | Cierre: {obsCierre}";
+                }
+
+                _unitOfWork.Corte.Actualizar(corte);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // El enlace de movimientos necesita el ID del corte (en uno nuevo solo existe tras guardar).
+            // Si esto fallara, el corte ya quedó cerrado y correcto: los totales dependen de las fechas, no del enlace.
+            await EnlazarMovimientosSinCorteAsync(corte.CorteID, periodoInicio, ahora);
+        }
+
+        private static void AplicarCierre(Corte corte, DateTime fechaCierre, decimal ingresos, decimal egresos, decimal montoFinal)
+        {
+            corte.FechaCierre = fechaCierre;
+            corte.TotalIngresos = ingresos;
+            corte.TotalEgresos = egresos;
+            corte.MontoFinal = montoFinal;
+            corte.Estado = ESTADO_CERRADO;
+        }
+
+        private async Task EnlazarMovimientosSinCorteAsync(int corteId, DateTime desde, DateTime hasta)
+        {
+            var sinCorte = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(desde, hasta))
+                .Where(m => m.CorteID == null)
+                .ToList();
+
+            if (sinCorte.Count == 0) return;
+
+            foreach (var movimiento in sinCorte)
+            {
+                movimiento.CorteID = corteId;
+                _unitOfWork.Movimiento.Actualizar(movimiento);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         // Recalcula ingresos y egresos del periodo con los mismos criterios que la pantalla del corte
         // (movimientos activos de cualquier forma de pago; todo lo que no es "Ingreso" cuenta como egreso) y rechaza el cierre si no coinciden.
         // Evita guardar cifras viejas (otro usuario cobró mientras el modal estaba abierto) o alteradas.
-        private async Task VerificarTotalesAsync(DateTime inicio, DateTime fin, CorteUpdateDto dto)
+        private async Task VerificarTotalesAsync(DateTime inicio, DateTime fin, decimal totalIngresos, decimal totalEgresos)
         {
             var movimientos = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(inicio, fin))
                 .Where(m => m.Activo)
@@ -239,7 +358,7 @@ namespace Negocio.Services
             decimal egresos = movimientos.Where(m => !EsIngreso(m)).Sum(m => m.Total);
 
             const decimal tolerancia = 0.01m;
-            if (Math.Abs(ingresos - dto.TotalIngresos) > tolerancia || Math.Abs(egresos - dto.TotalEgresos) > tolerancia)
+            if (Math.Abs(ingresos - totalIngresos) > tolerancia || Math.Abs(egresos - totalEgresos) > tolerancia)
             {
                 throw new BusinessException(
                     "Los movimientos de caja cambiaron mientras se realizaba el corte " +

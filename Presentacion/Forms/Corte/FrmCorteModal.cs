@@ -231,11 +231,19 @@ namespace Presentacion.Forms.Corte
                 ? "No hay movimientos activos en este rango.\n\n"
                 : string.Empty;
 
+            // Un total negativo es posible (por ejemplo, una compra grande). Se avisa, pero no se bloquea el corte.
+            string avisoNegativo = _montoFinal < 0
+                ? "\n\nAtención: los egresos superan al efectivo inicial más los ingresos, por eso el total queda en negativo. " +
+                  "El corte se guardará tal cual."
+                : string.Empty;
+
             if (!FormHelper.ConfirmarAccion(
                     $"{aviso}¿Realizar el corte de caja con estos totales?\n\n" +
+                    $"Efectivo inicial:  {_efectivoInicial:C2}\n" +
                     $"Ingresos:  {_totalIngresos:C2}\n" +
                     $"Egresos:  {_totalEgresos:C2}\n" +
-                    $"Total en caja:  {_montoFinal:C2}",
+                    $"Total del corte:  {_montoFinal:C2}" +
+                    avisoNegativo,
                     "Confirmar corte de caja"))
                 return;
 
@@ -249,15 +257,11 @@ namespace Presentacion.Forms.Corte
             _guardando = true;
             bool realizado = await FormHelper.EjecutarAsync(async () =>
             {
-                // Si el usuario no tiene un corte abierto, se abre automáticamente.
-                var corteAbierto = await _corteController.ObtenerCorteAbiertoPorUsuarioAsync(_usuarioIdActual);
-
-                int corteId = corteAbierto != null
-                    ? corteAbierto.CorteID
-                    : (await _corteController.AbrirCorteAsync(_usuarioIdActual, _efectivoInicialPredeterminado)).CorteID;
-
-                await _corteController.CerrarCorteAsync(
-                    corteId: corteId,
+                // Un solo paso en el servicio: valida todo y recién entonces guarda el corte ya cerrado.
+                // Antes se abría el corte y luego se intentaba cerrar; si el cierre fallaba quedaba uno "En proceso".
+                await _corteController.RealizarCorteAsync(
+                    usuarioId: _usuarioIdActual,
+                    fondoInicialPredeterminado: _efectivoInicialPredeterminado,
                     totalIngresos: ingresos,
                     totalEgresos: egresos,
                     montoFinal: montoFinal,

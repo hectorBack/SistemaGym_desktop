@@ -54,15 +54,15 @@ namespace Negocio.Services
         }
 
         public async Task EnviarCorreoCorteCajaAsync(
-            decimal efectivoInicial,
-            decimal totalVentas,
-            decimal totalEntradas,
-            decimal totalSalidas,
-            decimal efectivoEsperado,
-            decimal efectivoReal,
-            decimal diferencia,
-            DateTime fechaCorte,
-            DateTime fechaInicio)
+     decimal efectivoInicial,
+     decimal totalVentas,
+     decimal totalEntradas,
+     decimal totalSalidas,
+     decimal efectivoEsperado,
+     decimal efectivoReal,
+     decimal diferencia,
+     DateTime fechaCorte,
+     DateTime fechaInicio)
         {
             // 1. Obtener el correo configurado para notificaciones de corte de caja
             var cfgEmailDestino = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("Corte_EmailNotificacion");
@@ -73,112 +73,174 @@ namespace Negocio.Services
                 return; // Si no hay un correo configurado, se omite el envío.
             }
 
-            // 2. Obtener el nombre del gimnasio
+            // 2. Obtener el nombre del gimnasio (sin nombre de otro negocio como respaldo)
             var cfgGymNombre = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("Gym_Nombre");
-            string nombreGym = cfgGymNombre?.Valor ?? "Gimnasio Hdeleon 2.0";
+            string nombreGym = string.IsNullOrWhiteSpace(cfgGymNombre?.Valor) ? "Gimnasio" : cfgGymNombre!.Valor!.Trim();
+            string nombreGymHtml = WebUtility.HtmlEncode(nombreGym);
 
             // 3. Consultar los movimientos dentro del rango del corte de caja
             var movimientosDb = await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(fechaInicio, fechaCorte);
             var listaMovimientos = movimientosDb?.Where(m => m.Activo).ToList() ?? new List<Datos.Entities.Movimiento>();
 
-            // Construir dinámicamente las filas de la tabla de movimientos
+            static bool EsIngreso(Datos.Entities.Movimiento m) =>
+                string.Equals(m.Tipo?.Trim(), "Ingreso", StringComparison.OrdinalIgnoreCase);
+
+            static string FormaDe(Datos.Entities.Movimiento m) =>
+                string.IsNullOrWhiteSpace(m.FormaPago) ? "Efectivo" : m.FormaPago.Trim();
+
+            // Filas de la tabla de movimientos
             StringBuilder sbMovimientos = new StringBuilder();
             foreach (var mov in listaMovimientos)
             {
-                bool esIngreso = string.Equals(mov.Tipo?.Trim(), "Ingreso", StringComparison.OrdinalIgnoreCase);
+                bool esIngreso = EsIngreso(mov);
                 string colorTexto = esIngreso ? "#16a34a" : "#dc2626"; // Verde ingreso, Rojo egreso
 
                 sbMovimientos.Append($@"
-                    <tr style='border-bottom: 1px solid #e1e4e8;'>
-                        <td style='padding: 8px; font-size: 12px;'>{mov.Concepto?.Nombre ?? "N/A"}</td>
-                        <td style='padding: 8px; font-size: 12px;'>{mov.CreatedAt:dd/MM/yyyy hh:mm tt}</td>
-                        <td style='padding: 8px; font-size: 12px;'>{mov.Usuario?.NombreUsuario ?? "admin"}</td>
-                        <td style='padding: 8px; font-size: 12px; color: {colorTexto}; font-weight: bold;'>{mov.Tipo}</td>
-                        <td style='padding: 8px; font-size: 12px;'>{mov.FormaPago}</td>
-                        <td style='padding: 8px; font-size: 12px; text-align: right; color: {colorTexto}; font-weight: bold;'>{mov.Total:C2}</td>
-                    </tr>");
+            <tr style='border-bottom: 1px solid #e1e4e8;'>
+                <td style='padding: 8px; font-size: 12px;'>{WebUtility.HtmlEncode(mov.Concepto?.Nombre ?? "N/A")}</td>
+                <td style='padding: 8px; font-size: 12px;'>{mov.CreatedAt:dd/MM/yyyy hh:mm tt}</td>
+                <td style='padding: 8px; font-size: 12px;'>{WebUtility.HtmlEncode(mov.Usuario?.NombreUsuario ?? "admin")}</td>
+                <td style='padding: 8px; font-size: 12px; color: {colorTexto}; font-weight: bold;'>{WebUtility.HtmlEncode(mov.Tipo ?? string.Empty)}</td>
+                <td style='padding: 8px; font-size: 12px;'>{WebUtility.HtmlEncode(FormaDe(mov))}</td>
+                <td style='padding: 8px; font-size: 12px; text-align: right; color: {colorTexto}; font-weight: bold;'>{mov.Total:C2}</td>
+            </tr>");
             }
 
             if (listaMovimientos.Count == 0)
             {
                 sbMovimientos.Append(@"
-                    <tr>
-                        <td colspan='6' style='padding: 12px; text-align: center; color: #666; font-size: 12px;'>No se registraron movimientos en este corte.</td>
-                    </tr>");
+            <tr>
+                <td colspan='6' style='padding: 12px; text-align: center; color: #666; font-size: 12px;'>No se registraron movimientos en este corte.</td>
+            </tr>");
             }
+
+            // Desglose por forma de pago: siempre Efectivo, Tarjeta y Otro, más cualquier otra que se haya usado.
+            var formasBase = new[] { "Efectivo", "Tarjeta", "Otro" };
+            var formasExtra = listaMovimientos
+                .Select(FormaDe)
+                .Where(f => !formasBase.Contains(f, StringComparer.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(f => f, StringComparer.CurrentCultureIgnoreCase);
+            var formas = formasBase.Concat(formasExtra).ToList();
+
+            StringBuilder sbFormasPago = new StringBuilder();
+            decimal ingresoEfectivo = 0m;
+            decimal egresoEfectivo = 0m;
+
+            foreach (var forma in formas)
+            {
+                var deEstaForma = listaMovimientos
+                    .Where(m => string.Equals(FormaDe(m), forma, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                decimal ingresos = deEstaForma.Where(EsIngreso).Sum(m => m.Total);
+                decimal egresos = deEstaForma.Where(m => !EsIngreso(m)).Sum(m => m.Total);
+                decimal neto = ingresos - egresos;
+
+                if (string.Equals(forma, "Efectivo", StringComparison.OrdinalIgnoreCase))
+                {
+                    ingresoEfectivo = ingresos;
+                    egresoEfectivo = egresos;
+                }
+
+                string colorNeto = neto >= 0 ? "#16a34a" : "#dc2626";
+
+                sbFormasPago.Append($@"
+            <tr style='border-bottom: 1px solid #e1e4e8;'>
+                <td style='padding: 6px 8px;'>{WebUtility.HtmlEncode(forma)}</td>
+                <td style='padding: 6px 8px; text-align: right; color: #16a34a;'>{ingresos:C2}</td>
+                <td style='padding: 6px 8px; text-align: right; color: #dc2626;'>{egresos:C2}</td>
+                <td style='padding: 6px 8px; text-align: right; font-weight: bold; color: {colorNeto};'>{neto:C2}</td>
+            </tr>");
+            }
+
+            // El efectivo físico en caja solo cuenta movimientos en efectivo; el total del corte cuenta todas las formas de pago.
+            decimal efectivoFinal = efectivoInicial + ingresoEfectivo - egresoEfectivo;
+            decimal totalDelCorte = efectivoInicial + totalVentas - totalSalidas;
 
             // Asunto
             string asunto = $"Corte de caja del día: {fechaInicio:dd/MM/yyyy hh:mm:ss tt} a {fechaCorte:dd/MM/yyyy hh:mm:ss tt}";
 
-            // Estructura HTML integrada con la tabla de movimientos requerida
+            // Estructura HTML
             string mensaje = $@"
-                <div style='font-family: Arial, sans-serif; color: #111; padding: 15px;'>
-                    <h1 style='font-size: 22px; font-weight: bold; margin-bottom: 5px;'>{nombreGym}</h1>
-                    <h3 style='font-size: 15px; margin-top: 0; margin-bottom: 15px; font-weight: bold;'>Corte de Caja</h3>
-                    
-                    <p style='margin: 4px 0; font-size: 13px;'><strong>Fecha de inicio:</strong> {fechaInicio:dd/MM/yyyy hh:mm:ss tt}</p>
-                    <p style='margin: 4px 0; font-size: 13px;'><strong>Fecha final:</strong> {fechaCorte:dd/MM/yyyy hh:mm:ss tt}</p>
-                    <p style='margin: 4px 0; font-size: 13px;'><strong>Usuario que lo genero:</strong> admin</p>
-                    <p style='margin: 4px 0; font-size: 13px;'><strong>Observación:</strong></p>
-                    
-                    <hr style='border: none; border-top: 1px solid #ccc; margin: 15px 0;' />
-
-                    <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Totales en Caja</h3>
-                    <table style='width: 100%; max-width: 500px; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;'>
-                        <tr>
-                            <td style='padding: 6px 0; font-weight: bold;'>Efectivo en caja INICIAL</td>
-                            <td style='padding: 6px 0; text-align: right; color: #2563eb; font-weight: bold;'>{efectivoInicial:C2}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 6px 0; font-weight: bold;'>Efectivo en caja FINAL</td>
-                            <td style='padding: 6px 0; text-align: right; color: #16a34a; font-weight: bold;'>{efectivoReal:C2}</td>
-                        </tr>
-                    </table>
-
-                    <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Totales detalle</h3>
-                    <table style='width: 100%; max-width: 500px; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;'>
-                        <tr>
-                            <td style='padding: 4px 0;'>Ingreso total</td>
-                            <td style='padding: 4px 0; text-align: right; color: #16a34a; font-weight: bold;'>{totalVentas:C2}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 4px 0;'>Egreso total</td>
-                            <td style='padding: 4px 0; text-align: right; color: #dc2626; font-weight: bold;'>{totalSalidas:C2}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 4px 0;'>Ingreso efectivo</td>
-                            <td style='padding: 4px 0; text-align: right; color: #16a34a; font-weight: bold;'>{totalVentas:C2}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 4px 0;'>Egreso efectivo</td>
-                            <td style='padding: 4px 0; text-align: right; color: #dc2626; font-weight: bold;'>{totalSalidas:C2}</td>
-                        </tr>
-                    </table>
-
-                    <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Conceptos (Movimientos)</h3>
-                    <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;'>
-                        <thead>
-                            <tr style='background-color: #f1f3f5; border-bottom: 2px solid #ccc;'>
-                                <th style='padding: 8px; text-align: left;'>Concepto</th>
-                                <th style='padding: 8px; text-align: left;'>Fecha</th>
-                                <th style='padding: 8px; text-align: left;'>Usuario</th>
-                                <th style='padding: 8px; text-align: left;'>Tipo</th>
-                                <th style='padding: 8px; text-align: left;'>Forma de pago</th>
-                                <th style='padding: 8px; text-align: right;'>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sbMovimientos}
-                        </tbody>
-                    </table>
-
-                    <hr style='border: none; border-top: 1px solid #ccc; margin: 15px 0;' />
-                    
-                    <p style='font-size: 11px; color: #666; text-align: right; margin-top: 30px;'>
-                        {nombreGym} - Creado por sistema automatizado<br/>
-                        <a href='#' style='color: #2563eb; text-decoration: none;'>Adquirir software de gimnasio</a>
-                    </p>
-                </div>";
+        <div style='font-family: Arial, sans-serif; color: #111; padding: 15px;'>
+            <h1 style='font-size: 22px; font-weight: bold; margin-bottom: 5px;'>{nombreGymHtml}</h1>
+            <h3 style='font-size: 15px; margin-top: 0; margin-bottom: 15px; font-weight: bold;'>Corte de Caja</h3>
+ 
+            <p style='margin: 4px 0; font-size: 13px;'><strong>Fecha de inicio:</strong> {fechaInicio:dd/MM/yyyy hh:mm:ss tt}</p>
+            <p style='margin: 4px 0; font-size: 13px;'><strong>Fecha final:</strong> {fechaCorte:dd/MM/yyyy hh:mm:ss tt}</p>
+            <p style='margin: 4px 0; font-size: 13px;'><strong>Usuario que lo genero:</strong> admin</p>
+            <p style='margin: 4px 0; font-size: 13px;'><strong>Observación:</strong></p>
+ 
+            <hr style='border: none; border-top: 1px solid #ccc; margin: 15px 0;' />
+ 
+            <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Totales en Caja</h3>
+            <table style='width: 100%; max-width: 500px; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;'>
+                <tr>
+                    <td style='padding: 6px 0; font-weight: bold;'>Efectivo en caja INICIAL</td>
+                    <td style='padding: 6px 0; text-align: right; color: #2563eb; font-weight: bold;'>{efectivoInicial:C2}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 6px 0; font-weight: bold;'>Efectivo en caja FINAL (solo efectivo)</td>
+                    <td style='padding: 6px 0; text-align: right; color: #16a34a; font-weight: bold;'>{efectivoFinal:C2}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 6px 0; font-weight: bold;'>Total del corte (todas las formas de pago)</td>
+                    <td style='padding: 6px 0; text-align: right; color: #2563eb; font-weight: bold;'>{totalDelCorte:C2}</td>
+                </tr>
+            </table>
+ 
+            <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Totales detalle</h3>
+            <table style='width: 100%; max-width: 500px; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;'>
+                <tr>
+                    <td style='padding: 4px 0;'>Ingreso total</td>
+                    <td style='padding: 4px 0; text-align: right; color: #16a34a; font-weight: bold;'>{totalVentas:C2}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 4px 0;'>Egreso total</td>
+                    <td style='padding: 4px 0; text-align: right; color: #dc2626; font-weight: bold;'>{totalSalidas:C2}</td>
+                </tr>
+            </table>
+ 
+            <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Totales por forma de pago</h3>
+            <table style='width: 100%; max-width: 500px; border-collapse: collapse; margin-bottom: 25px; font-size: 13px;'>
+                <thead>
+                    <tr style='background-color: #f1f3f5; border-bottom: 2px solid #ccc;'>
+                        <th style='padding: 6px 8px; text-align: left;'>Forma de pago</th>
+                        <th style='padding: 6px 8px; text-align: right;'>Ingresos</th>
+                        <th style='padding: 6px 8px; text-align: right;'>Egresos</th>
+                        <th style='padding: 6px 8px; text-align: right;'>Neto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {sbFormasPago}
+                </tbody>
+            </table>
+ 
+            <h3 style='font-size: 14px; font-weight: bold; margin-bottom: 10px;'>Conceptos (Movimientos)</h3>
+            <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;'>
+                <thead>
+                    <tr style='background-color: #f1f3f5; border-bottom: 2px solid #ccc;'>
+                        <th style='padding: 8px; text-align: left;'>Concepto</th>
+                        <th style='padding: 8px; text-align: left;'>Fecha</th>
+                        <th style='padding: 8px; text-align: left;'>Usuario</th>
+                        <th style='padding: 8px; text-align: left;'>Tipo</th>
+                        <th style='padding: 8px; text-align: left;'>Forma de pago</th>
+                        <th style='padding: 8px; text-align: right;'>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {sbMovimientos}
+                </tbody>
+            </table>
+ 
+            <hr style='border: none; border-top: 1px solid #ccc; margin: 15px 0;' />
+ 
+            <p style='font-size: 11px; color: #666; text-align: right; margin-top: 30px;'>
+                {nombreGymHtml} - Creado por sistema automatizado<br/>
+                <a href='#' style='color: #2563eb; text-decoration: none;'>Adquirir software de gimnasio</a>
+            </p>
+        </div>";
 
             // 4. Enviar el correo electrónico
             await EnviarCorreoAsync(emailDestino, asunto, mensaje);
