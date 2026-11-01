@@ -94,7 +94,7 @@ namespace Negocio.Services
                     Concepto = m.Concepto != null ? m.Concepto.Nombre : "Sin Concepto",
                     Total = m.Total,
                     FormaPago = m.FormaPago,
-                    Usuario = m.Usuario != null ? m.Usuario.NombreUsuario : (m.UsuarioID.HasValue ? $"Usuario #{m.UsuarioID.Value}" : "Sistema"),
+                    Usuario = m.Usuario != null ? m.Usuario.NombreCompleto : (m.UsuarioID.HasValue ? $"Usuario #{m.UsuarioID.Value}" : "Sistema"),
                     Observacion = m.Observacion ?? string.Empty,
                     FechaAperturaCorte = m.Corte != null ? m.Corte.FechaApertura : (DateTime?)null,
                     FechaCierreCorte = m.Corte != null ? m.Corte.FechaCierre : (DateTime?)null,

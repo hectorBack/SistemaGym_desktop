@@ -49,7 +49,7 @@ namespace Negocio.Services
                 FechaAperturaCorte = m.Corte?.FechaApertura,
                 FechaCierreCorte = m.Corte?.FechaCierre,
                 UsuarioID = m.UsuarioID,
-                UsuarioNombre = m.Usuario?.NombreUsuario,
+                UsuarioNombre = m.Usuario?.NombreCompleto,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt
@@ -74,7 +74,7 @@ namespace Negocio.Services
                 FechaAperturaCorte = movimiento.Corte?.FechaApertura,
                 FechaCierreCorte = movimiento.Corte?.FechaCierre,
                 UsuarioID = movimiento.UsuarioID,
-                UsuarioNombre = movimiento.Usuario?.NombreUsuario,
+                UsuarioNombre = movimiento.Usuario?.NombreCompleto,
                 Activo = movimiento.Activo,
                 CreatedAt = movimiento.CreatedAt,
                 UpdatedAt = movimiento.UpdatedAt
@@ -266,7 +266,7 @@ namespace Negocio.Services
                 FechaAperturaCorte = m.Corte?.FechaApertura,
                 FechaCierreCorte = m.Corte?.FechaCierre,
                 UsuarioID = m.UsuarioID,
-                UsuarioNombre = m.Usuario?.NombreUsuario,
+                UsuarioNombre = m.Usuario?.NombreCompleto,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt
