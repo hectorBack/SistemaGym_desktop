@@ -279,7 +279,8 @@ namespace Presentacion.Forms.Corte
                         efectivoReal: montoFinal, // O el monto físico contado si aplica
                         diferencia: 0m,
                         fechaCorte: DateTime.Now,
-                        fechaInicio: periodoInicio
+                        fechaInicio: periodoInicio,
+                        usuarioId: _usuarioIdActual
                     );
                 }
                 catch (Exception mailEx)
