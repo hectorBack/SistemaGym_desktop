@@ -59,6 +59,9 @@ namespace Presentacion.Forms
 
         private IServiceScope? _scopeActivo;
 
+        // Ventana de Registro de visitas (independiente del contenedor). Solo puede haber una abierta.
+        private FrmRegistroVisita? _ventanaRegistro;
+
         public bool CerrarSesionSolicitado { get; private set; }
 
         public FrmPrincipal(UsuarioDto usuario, IServiceProvider serviceProvider, IEmailService emailService)
@@ -88,22 +91,22 @@ namespace Presentacion.Forms
             // 🟢 El botón de registro de visitas ya no va dentro de los formularios internos del contenedor
             _modulos.AddRange(new ModuloMenu[]
             {
-        new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
-        new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
-        new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
-        new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
-        new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
-        new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
-        new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
-        new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
-        new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
-        new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
-        new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
-        new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
-        new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
-        new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
-        new(btnRespaldosManuales, Permiso.Respaldos,   null),
-        new(btnRestaurar,       Permiso.Restaurar,     null)
+      new(btnInicio,          Permiso.Inicio,        typeof(FrmInicio)),
+      new(btnVentas,          Permiso.Ventas,        typeof(FrmVentas)),
+      new(btnMembresias,      Permiso.Membresias,    typeof(FrmMembresias)),
+      new(btnSocios,          Permiso.Socios,        typeof(FrmSocios)),
+      new(btnProductos,       Permiso.Productos,     typeof(FrmProductos)),
+      new(btnCategorias,      Permiso.Categorias,    typeof(FrmCategorias)),
+      new(btnCompras,         Permiso.Compras,       typeof(FrmCompras)),
+      new(btnConceptos,       Permiso.Conceptos,     typeof(FrmConceptos)),
+      new(btnMovimientos,     Permiso.Movimientos,   typeof(FrmMovimientos)),
+      new(btnRoles,           Permiso.Roles,         typeof(FrmRoles)),
+      new(btnUsuarios,        Permiso.Usuarios,      typeof(FrmUsuarios)),
+      new(btnReportes,        Permiso.Reportes,      typeof(FrmReportes)),
+      new(btnCorte,           Permiso.CorteDeCaja,   typeof(FrmCortes)),
+      new(btnConfiguracion,   Permiso.Configuracion, typeof(FrmConfiguraciones)),
+      new(btnRespaldosManuales, Permiso.Respaldos,   null),
+      new(btnRestaurar,       Permiso.Restaurar,     null)
             });
 
             var permitidos = new HashSet<string>(
@@ -130,45 +133,112 @@ namespace Presentacion.Forms
             }
         }
 
-        // Método que oculta el menú principal y abre el control de visitas como ventana independiente
-        private void BtnRegistrarVisita_Click_Independiente(object? sender, EventArgs e)
-        {
-            MarcarBotonActivo(btnRegistrarVisita);
+        // ───────────── Ventana de Registro de visitas (independiente) ─────────────
 
+        // Pantalla secundaria (por ejemplo, la televisión por HDMI): la primera que no sea la principal.
+        private static Screen? ObtenerPantallaSecundaria() =>
+            Screen.AllScreens.FirstOrDefault(s => !s.Primary);
+
+        // Devuelve la ventana de registro. Si no estaba abierta la crea: en la pantalla secundaria si hay una
+        // (maximizada) o, si no, maximizada en la principal. Solo existe una a la vez.
+        private FrmRegistroVisita ObtenerVentanaRegistro()
+        {
+            if (_ventanaRegistro != null && !_ventanaRegistro.IsDisposed)
+                return _ventanaRegistro;
+
+            // La ventana tiene su propio scope: vive mientras esté abierta y se libera al cerrarla.
             var scope = _serviceProvider.CreateScope();
             try
             {
                 var frmVisitas = ActivatorUtilities.CreateInstance<FrmRegistroVisita>(scope.ServiceProvider);
 
-                // Opcional: Detectar si hay un segundo monitor conectado y moverlo ahí
-                if (Screen.AllScreens.Length > 1)
+                var secundaria = ObtenerPantallaSecundaria();
+                if (secundaria != null)
                 {
-                    var segundoMonitor = Screen.AllScreens[1]; // El índice 1 es el segundo monitor
                     frmVisitas.StartPosition = FormStartPosition.Manual;
-                    frmVisitas.Location = segundoMonitor.WorkingArea.Location;
-                    frmVisitas.WindowState = FormWindowState.Maximized; // Pantalla completa en el monitor secundario
-                }
-                else
-                {
-                    frmVisitas.WindowState = FormWindowState.Maximized;
+                    frmVisitas.Bounds = secundaria.WorkingArea;
                 }
 
-                // Usamos Show() en lugar de ShowDialog() para que NO bloquee la ventana principal.
-                // Así el recepcionista podrá seguir usando FrmPrincipal en el monitor 1 mientras 
-                // el módulo de visitas opera de forma exclusiva en el monitor 2.
-                frmVisitas.Show();
+                frmVisitas.WindowState = FormWindowState.Maximized;
 
-                // Limpiamos el scope cuando se cierre la ventana de visitas
                 frmVisitas.FormClosed += (s, args) =>
                 {
                     scope.Dispose();
+                    if (ReferenceEquals(_ventanaRegistro, frmVisitas)) _ventanaRegistro = null;
                 };
+
+                _ventanaRegistro = frmVisitas;
+
+                // Show() y no ShowDialog(): no bloquea FrmPrincipal, que sigue usable en el monitor principal.
+                frmVisitas.Show();
+                return frmVisitas;
             }
             catch
             {
+                _ventanaRegistro = null;
                 scope.Dispose();
                 throw;
             }
+        }
+
+        // Trae la ventana de registro al frente; con enfocarClave deja el cursor listo en el campo de la clave.
+        private static void TraerAlFrente(FrmRegistroVisita ventana, bool enfocarClave)
+        {
+            if (ventana.WindowState == FormWindowState.Minimized)
+                ventana.WindowState = FormWindowState.Maximized;
+
+            ventana.BringToFront();
+            ventana.Activate();
+
+            if (enfocarClave && ventana.Controls.Find("txtClave", true).FirstOrDefault() is Control txtClave)
+            {
+                ventana.ActiveControl = txtClave;
+                if (txtClave is TextBoxBase caja) caja.SelectAll();
+            }
+        }
+
+        // Botón "Registrar Visita": abre la ventana, o la trae al frente si ya está abierta.
+        private void BtnRegistrarVisita_Click_Independiente(object? sender, EventArgs e)
+        {
+            bool yaAbierta = _ventanaRegistro != null && !_ventanaRegistro.IsDisposed;
+
+            var ventana = ObtenerVentanaRegistro();
+            if (!yaAbierta) MarcarBotonActivo(btnRegistrarVisita);
+
+            TraerAlFrente(ventana, enfocarClave: false);
+        }
+
+        // Al mostrarse FrmPrincipal: si el usuario puede registrar visitas y hay otra pantalla conectada,
+        // la ventana de registro se abre sola ahí y el foco se queda en la ventana principal.
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            if (!btnRegistrarVisita.Visible || ObtenerPantallaSecundaria() == null) return;
+
+            try
+            {
+                ObtenerVentanaRegistro();
+                Activate();
+            }
+            catch (Exception ex)
+            {
+                // No debe impedir el arranque: el botón "Registrar Visita" mostrará el error si se repite.
+                System.Diagnostics.Debug.WriteLine($"No se pudo abrir el registro de visitas automáticamente: {ex.Message}");
+            }
+        }
+
+        // F2 desde cualquier módulo: lleva el cursor al campo de la clave de la ventana de registro
+        // (la abre si estaba cerrada). Después de registrar, basta un clic en esta ventana para seguir trabajando.
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.F2 && btnRegistrarVisita.Visible)
+            {
+                TraerAlFrente(ObtenerVentanaRegistro(), enfocarClave: true);
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void MarcarBotonActivo(IconButton boton)
@@ -426,6 +496,11 @@ namespace Presentacion.Forms
                 _notifyIconRespaldo.Visible = false;
                 _notifyIconRespaldo.Dispose();
             }
+
+            // La ventana de registro no debe quedar abierta (y con la sesión anterior) al cerrar sesión o salir.
+            if (_ventanaRegistro != null && !_ventanaRegistro.IsDisposed)
+                _ventanaRegistro.Close();
+            _ventanaRegistro = null;
 
             _scopeActivo?.Dispose();
             _scopeActivo = null;

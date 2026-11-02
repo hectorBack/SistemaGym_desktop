@@ -232,7 +232,7 @@ namespace Presentacion.Forms.Corte
 
             if (!leida || IsDisposed) return;
 
-            using var modal = new FrmCorteModal(_corteController, _movimientoController, _emailService, efectivoInicialPredeterminado, _usuarioId);
+            using var modal = new FrmCorteModal(_corteController, _movimientoController, efectivoInicialPredeterminado, _usuarioId);
 
             if (modal.ShowDialog() == DialogResult.OK)
                 await RecargarAsync();

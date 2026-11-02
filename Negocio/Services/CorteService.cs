@@ -24,17 +24,20 @@ namespace Negocio.Services
         private readonly IValidator<CorteCreateDto> _createValidator;
         private readonly IValidator<CorteUpdateDto> _updateValidator;
         private readonly CajaHelper _caja;
+        private readonly IEmailService _email;
 
         public CorteService(
             IUnitOfWork unitOfWork,
             IValidator<CorteCreateDto> createValidator,
             IValidator<CorteUpdateDto> updateValidator,
-            CajaHelper caja)
+            CajaHelper caja,
+            IEmailService email)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
             _caja = caja;
+            _email = email;
         }
 
         // ───────────── Consultas ─────────────
@@ -317,6 +320,40 @@ namespace Negocio.Services
             // El enlace de movimientos necesita el ID del corte (en uno nuevo solo existe tras guardar).
             // Si esto fallara, el corte ya quedó cerrado y correcto: los totales dependen de las fechas, no del enlace.
             await EnlazarMovimientosSinCorteAsync(corte.CorteID, periodoInicio, ahora);
+
+            // El corte ya está guardado: el correo se manda al final y nunca debe impedir ni retrasar el cierre.
+            await NotificarCorteAsync(usuarioId, fondo, totalIngresos, totalEgresos, montoFinal, periodoInicio, ahora);
+        }
+
+        // La parte rápida (leer configuración y movimientos, armar el HTML) se espera aquí, porque usa la misma
+        // base de datos que el resto de la pantalla. El envío SMTP, que es lo lento, sigue en segundo plano en EmailService.
+        private async Task NotificarCorteAsync(
+            int usuarioId,
+            decimal fondo,
+            decimal totalIngresos,
+            decimal totalEgresos,
+            decimal montoFinal,
+            DateTime inicio,
+            DateTime fechaCierre)
+        {
+            try
+            {
+                await _email.EnviarCorreoCorteCajaAsync(
+                    efectivoInicial: fondo,
+                    totalVentas: totalIngresos,
+                    totalEntradas: 0m,
+                    totalSalidas: totalEgresos,
+                    efectivoEsperado: montoFinal,
+                    efectivoReal: montoFinal,
+                    diferencia: 0m,
+                    fechaCorte: fechaCierre,
+                    fechaInicio: inicio,
+                    usuarioId: usuarioId);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"No se pudo enviar el correo de corte de caja: {ex.Message}");
+            }
         }
 
         private static void AplicarCierre(Corte corte, DateTime fechaCierre, decimal ingresos, decimal egresos, decimal montoFinal)

@@ -30,7 +30,6 @@ namespace Presentacion.Forms.Corte
 
         private readonly CorteController _corteController;
         private readonly MovimientoController _movimientoController;
-        private readonly IEmailService _emailService;
         private readonly decimal _efectivoInicialPredeterminado;
         private readonly int _usuarioIdActual;
 
@@ -50,22 +49,19 @@ namespace Presentacion.Forms.Corte
         public FrmCorteModal(
             CorteController corteController,
             MovimientoController movimientoController,
-            IEmailService emailService,
             int usuarioIdActual)
-            : this(corteController, movimientoController, emailService, 0m, usuarioIdActual)
+            : this(corteController, movimientoController, 0m, usuarioIdActual)
         {
         }
 
         public FrmCorteModal(
             CorteController corteController,
             MovimientoController movimientoController,
-            IEmailService emailService,
             decimal efectivoInicialPredeterminado,
             int usuarioIdActual)
         {
             _corteController = corteController ?? throw new ArgumentNullException(nameof(corteController));
             _movimientoController = movimientoController ?? throw new ArgumentNullException(nameof(movimientoController));
-            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
             _efectivoInicialPredeterminado = efectivoInicialPredeterminado;
             _usuarioIdActual = usuarioIdActual > 0 ? usuarioIdActual : SesionUsuario.UsuarioID;
 
@@ -267,28 +263,7 @@ namespace Presentacion.Forms.Corte
                     montoFinal: montoFinal,
                     observaciones: observaciones,
                     periodoInicio: periodoInicio);
-
-                try
-                {
-                    await _emailService.EnviarCorreoCorteCajaAsync(
-                        efectivoInicial: _efectivoInicial,
-                        totalVentas: ingresos,
-                        totalEntradas: 0m, // Ajusta si manejas entradas/salidas desglosadas en tu lógica de negocio
-                        totalSalidas: egresos,
-                        efectivoEsperado: montoFinal,
-                        efectivoReal: montoFinal, // O el monto físico contado si aplica
-                        diferencia: 0m,
-                        fechaCorte: DateTime.Now,
-                        fechaInicio: periodoInicio,
-                        usuarioId: _usuarioIdActual
-                    );
-                }
-                catch (Exception mailEx)
-                {
-                    // Registramos de forma silenciosa o advertimos sin bloquear el éxito del cierre de caja
-                    System.Diagnostics.Debug.WriteLine($"No se pudo enviar el correo de corte de caja: {mailEx.Message}");
-                }
-
+                // El correo de corte lo envía CorteService al terminar el cierre; esta pantalla ya no lo maneja.
             },
             "No se pudo realizar el corte de caja.",
             btnRealizarCorte, btnCancelar, panelFiltros, txtObservaciones);

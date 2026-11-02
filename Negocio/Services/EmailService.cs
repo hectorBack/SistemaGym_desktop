@@ -23,7 +23,13 @@ namespace Negocio.Services
 
         public async Task EnviarCorreoAsync(string destinatario, string asunto, string mensaje)
         {
-            // Obtener credenciales configuradas desde la base de datos
+            var (remitente, password) = await ObtenerCredencialesAsync();
+            await EnviarPorSmtpAsync(remitente, password, destinatario, asunto, mensaje);
+        }
+
+        // Credenciales configuradas en la base de datos (rápido). Falla si no están configuradas.
+        private async Task<(string Remitente, string Password)> ObtenerCredencialesAsync()
+        {
             var cfgEmail = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("Correo_Email");
             var cfgPassword = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("Correo_Password");
 
@@ -35,6 +41,12 @@ namespace Negocio.Services
                 throw new InvalidOperationException("Las credenciales de correo electrónico no están configuradas en el sistema.");
             }
 
+            return (remitente, password);
+        }
+
+        // Envío por SMTP (red): es la parte lenta. No toca la base de datos, por eso puede correr en segundo plano.
+        private static async Task EnviarPorSmtpAsync(string remitente, string password, string destinatario, string asunto, string mensaje)
+        {
             using var clienteSmtp = new SmtpClient("smtp.gmail.com", 587)
             {
                 Credentials = new NetworkCredential(remitente, password),
@@ -54,6 +66,27 @@ namespace Negocio.Services
             await clienteSmtp.SendMailAsync(mailMessage);
         }
 
+        // Lanza el envío sin esperarlo. Si falla (sin internet, credenciales vencidas...) solo se registra:
+        // el cierre de caja ya está guardado y no debe verse afectado.
+        private static void EnviarEnSegundoPlano(string remitente, string password, string destinatario, string asunto, string mensaje)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await EnviarPorSmtpAsync(remitente, password, destinatario, asunto, mensaje);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"No se pudo enviar el correo a {destinatario}: {ex.Message}");
+                }
+            });
+        }
+
+        /// <summary>
+        /// Prepara el correo del corte (configuración, movimientos y HTML) y lo deja enviándose en segundo plano.
+        /// Termina sin esperar a Gmail; las consultas a la base de datos sí se completan antes de volver.
+        /// </summary>
         public async Task EnviarCorreoCorteCajaAsync(
             decimal efectivoInicial,
             decimal totalVentas,
@@ -155,8 +188,9 @@ namespace Negocio.Services
                 FormasPago: formasPago,
                 Movimientos: movimientos));
 
-            // 5. Enviar el correo electrónico
-            await EnviarCorreoAsync(emailDestino, asunto, mensaje);
+            // 5. Enviar el correo: las credenciales se leen aquí (base de datos, rápido) y el envío SMTP sigue sin esperarse.
+            var (remitente, password) = await ObtenerCredencialesAsync();
+            EnviarEnSegundoPlano(remitente, password, emailDestino, asunto, mensaje);
         }
 
         public async Task EnviarFelicitacionesCumpleanosAsync()
