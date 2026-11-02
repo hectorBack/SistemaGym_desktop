@@ -4,6 +4,7 @@ using Negocio.DTOs;
 using Negocio.Exceptions;
 using Negocio.Interfaces;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Negocio.Services
 {
@@ -30,7 +31,8 @@ namespace Negocio.Services
 
             try
             {
-                string rutaArchivo = Path.Combine(dto.RutaDestino, "gym.sql");
+                string nombreArchivo = $"gym_{DateTime.Now.ToString("yyyyMMdd_HHmmss_fff", CultureInfo.InvariantCulture)}_{Guid.NewGuid():N}.sql";
+                string rutaArchivo = Path.Combine(dto.RutaDestino, nombreArchivo);
 
                 var conexionDatos = new Conexion();
                 string connectionString = string.Empty;
@@ -199,25 +201,28 @@ namespace Negocio.Services
                     if (proceso == null)
                         throw new BusinessException("No se pudo iniciar el proceso de restauración de MySQL.");
 
-                    // Leemos el contenido del archivo sql usando ReadAllTextAsync de forma correcta
+                    Task<string> errorOutputTask = proceso.StandardError.ReadToEndAsync();
                     using (var escritor = proceso.StandardInput)
+                    using (var lector = new StreamReader(dto.RutaArchivo))
                     {
-                        if (escritor.BaseStream.CanWrite)
+                        char[] buffer = new char[81920];
+                        int caracteresLeidos;
+                        while ((caracteresLeidos = await lector.ReadAsync(buffer.AsMemory())) > 0)
                         {
-                            string contenidoSql = await File.ReadAllTextAsync(dto.RutaArchivo);
-                            await escritor.WriteAsync(contenidoSql);
+                            await escritor.WriteAsync(buffer.AsMemory(0, caracteresLeidos));
                         }
                     }
 
-                    string errorOutput = await proceso.StandardError.ReadToEndAsync();
-                    proceso.WaitForExit();
+                    await proceso.WaitForExitAsync();
+                    string errorOutput = await errorOutputTask;
 
-                    if (proceso.ExitCode != 0 && !string.IsNullOrWhiteSpace(errorOutput))
+                    if (proceso.ExitCode != 0)
                     {
-                        if (errorOutput.Contains("Error") || errorOutput.Contains("ERROR"))
-                        {
-                            throw new BusinessException($"Error al restaurar la base de datos: {errorOutput}");
-                        }
+                        string detalle = string.IsNullOrWhiteSpace(errorOutput)
+                            ? $"MySQL terminó con el código de salida {proceso.ExitCode}."
+                            : errorOutput.Trim();
+
+                        throw new BusinessException($"Error al restaurar la base de datos: {detalle}");
                     }
                 }
             }
