@@ -6,7 +6,7 @@ CREATE TABLE Usuarios (
     UsuarioID INT AUTO_INCREMENT PRIMARY KEY,
     NombreCompleto VARCHAR(100) NOT NULL,
     Usuario VARCHAR(50) NOT NULL UNIQUE,
-    Password VARCHAR(255) NOT NULL, -- Guardar contraseña encriptada
+    Password VARCHAR(255) NOT NULL, -- Guardar contraseña con hash seguro
     Rol VARCHAR(20) NOT NULL DEFAULT 'Vendedor', -- Ej. Administrador, Vendedor
     Activo BOOLEAN NOT NULL DEFAULT TRUE,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,

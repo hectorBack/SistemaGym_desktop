@@ -7,7 +7,9 @@ using Negocio.Interfaces;
 using Negocio.Validators;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -16,6 +18,13 @@ namespace Negocio.Services
 {
     public class UsuarioService : IUsuarioService
     {
+        private const int PasswordHashIterations = 210_000;
+        private const int PasswordSaltSize = 16;
+        private const int PasswordHashSize = 32;
+        private const int MinSupportedPasswordHashIterations = 100_000;
+        private const int MaxSupportedPasswordHashIterations = 2_000_000;
+        private const string PasswordHashAlgorithm = "PBKDF2-SHA256";
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<UsuarioCreateDto> _createValidator;
         private readonly IValidator<UsuarioUpdateDto> _updateValidator;
@@ -59,7 +68,7 @@ namespace Negocio.Services
             // Si se especificó una nueva contraseña al editar, la actualizamos
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
-                usuario.Password = dto.Password;
+                usuario.Password = CrearHashPassword(dto.Password);
             }
 
             _unitOfWork.Usuarios.Actualizar(usuario);
@@ -84,7 +93,7 @@ namespace Negocio.Services
             {
                 NombreCompleto = dto.NombreCompleto.Trim(),
                 NombreUsuario = dto.NombreUsuario.Trim(),
-                Password = dto.Password, // Nota: Si implementas encriptación (BCrypt/SHA256), aplícala aquí
+                Password = CrearHashPassword(dto.Password),
                 RolID = dto.RolID,
                 Activo = true
             };
@@ -143,14 +152,89 @@ namespace Negocio.Services
                 throw new BusinessException("Debe ingresar el usuario y la contraseña.");
             }
 
-            var usuario = await _unitOfWork.Usuarios.ValidarLoginAsync(loginDto.Usuario.Trim(), loginDto.Password);
-
+            var usuario = await _unitOfWork.Usuarios.ObtenerPorNombreUsuarioAsync(loginDto.Usuario.Trim());
             if (usuario == null)
             {
                 throw new BusinessException("Usuario o contraseña incorrectos.");
             }
 
+            if (!VerificarPassword(loginDto.Password, usuario.Password, out bool necesitaRehash))
+                throw new BusinessException("Usuario o contraseña incorrectos.");
+
+            if (necesitaRehash)
+            {
+                usuario.Password = CrearHashPassword(loginDto.Password);
+                _unitOfWork.Usuarios.Actualizar(usuario);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
             return MapearAUsuarioDto(usuario);
+        }
+
+        private static string CrearHashPassword(string password)
+        {
+            byte[] salt = RandomNumberGenerator.GetBytes(PasswordSaltSize);
+            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                PasswordHashIterations,
+                HashAlgorithmName.SHA256,
+                PasswordHashSize);
+
+            return string.Join(
+                "$",
+                PasswordHashAlgorithm,
+                PasswordHashIterations.ToString(CultureInfo.InvariantCulture),
+                Convert.ToBase64String(salt),
+                Convert.ToBase64String(hash));
+        }
+
+        private static bool VerificarPassword(string password, string passwordGuardado, out bool necesitaRehash)
+        {
+            necesitaRehash = false;
+
+            if (!passwordGuardado.StartsWith(PasswordHashAlgorithm + "$", StringComparison.Ordinal))
+            {
+                if (!string.Equals(password, passwordGuardado, StringComparison.Ordinal))
+                    return false;
+
+                necesitaRehash = true;
+                return true;
+            }
+
+            string[] partes = passwordGuardado.Split('$');
+            if (partes.Length != 4 ||
+                !int.TryParse(partes[1], NumberStyles.None, CultureInfo.InvariantCulture, out int iteraciones) ||
+                iteraciones < MinSupportedPasswordHashIterations ||
+                iteraciones > MaxSupportedPasswordHashIterations)
+            {
+                return false;
+            }
+
+            byte[] salt;
+            byte[] hashGuardado;
+            try
+            {
+                salt = Convert.FromBase64String(partes[2]);
+                hashGuardado = Convert.FromBase64String(partes[3]);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+
+            if (salt.Length != PasswordSaltSize || hashGuardado.Length != PasswordHashSize)
+                return false;
+
+            byte[] hashCalculado = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                iteraciones,
+                HashAlgorithmName.SHA256,
+                PasswordHashSize);
+
+            necesitaRehash = iteraciones < PasswordHashIterations;
+            return CryptographicOperations.FixedTimeEquals(hashCalculado, hashGuardado);
         }
 
         public async Task<UsuarioDto?> ObtenerPorIdAsync(int id)

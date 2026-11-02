@@ -81,13 +81,5 @@ namespace Datos.Repositories
                 .FirstOrDefaultAsync(u => u.NombreUsuario.ToLower() == nombreUsuario.ToLower() && u.Activo);
         }
 
-        public async Task<Usuario?> ValidarLoginAsync(string nombreUsuario, string password)
-        {
-            return await _context.Usuarios
-                .Include(u => u.Rol)
-                .FirstOrDefaultAsync(u => u.NombreUsuario.ToLower() == nombreUsuario.ToLower()
-                                         && u.Password == password
-                                         && u.Activo);
-        }
     }
 }

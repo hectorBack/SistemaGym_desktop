@@ -341,6 +341,11 @@ namespace Negocio.Services
             decimal precio = membresiaActiva.Membresia?.Precio ?? 0m;
             decimal totalPagado = membresiaActiva.Pagos?.Sum(p => p.Monto) ?? 0m;
 
+            if (membresiaActiva.FechaInicio.Date > DateTime.Today)
+                return new ValidacionAcceso(
+                    $"Acceso denegado: La membresía del socio inicia el {membresiaActiva.FechaInicio:dd/MM/yyyy}.",
+                    membresiaActiva, precio, totalPagado);
+
             if (membresiaActiva.FechaFin < DateTime.Today)
                 return new ValidacionAcceso(
                     $"Acceso denegado: La membresía del socio venció el {membresiaActiva.FechaFin:dd/MM/yyyy}.",

@@ -9,7 +9,6 @@ namespace Datos.Interfaces
 {
     public interface IUsuarioRepository
     {
-        Task<Usuario?> ValidarLoginAsync(string nombreUsuario, string password);
         Task<IEnumerable<Usuario>> ObtenerTodosAsync(bool incluirInactivos = false);
         Task<Usuario?> ObtenerPorIdAsync(int id);
         Task AgregarAsync(Usuario usuario);
