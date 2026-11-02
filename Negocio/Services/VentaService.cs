@@ -84,6 +84,11 @@ namespace Negocio.Services
                     throw new BusinessException($"El producto '{producto.Nombre}' se encuentra inactivo y no se puede vender.");
                 }
 
+                if (producto.Precio <= 0)
+                {
+                    throw new BusinessException($"El producto '{producto.Nombre}' no tiene un precio válido para venderse.");
+                }
+
                 if (producto.Stock < detalleDto.Cantidad)
                 {
                     throw new BusinessException($"Stock insuficiente para '{producto.Nombre}'. Stock actual: {producto.Stock}, requerido: {detalleDto.Cantidad}.");
@@ -98,11 +103,14 @@ namespace Negocio.Services
                 {
                     ProductoID = detalleDto.ProductoID,
                     Cantidad = detalleDto.Cantidad,
-                    PrecioUnitario = detalleDto.PrecioUnitario
+                    PrecioUnitario = producto.Precio
                 });
 
-                nuevaVenta.Total += detalleDto.Cantidad * detalleDto.PrecioUnitario;
+                nuevaVenta.Total += detalleDto.Cantidad * producto.Precio;
             }
+
+            if (nuevaVenta.Total <= 0)
+                throw new BusinessException("El total calculado de la venta debe ser mayor a cero.");
 
             // 4. REGISTRAR INGRESO EN CAJA - 'Venta Producto' PRIMERO (si la venta tiene total mayor a 0)
             if (nuevaVenta.Total > 0)

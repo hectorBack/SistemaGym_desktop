@@ -23,9 +23,6 @@ namespace Negocio.Validators
                 .NotEmpty().WithMessage("La forma de pago es obligatoria.")
                 .MaximumLength(30).WithMessage("La forma de pago no puede exceder los 30 caracteres.");
 
-            RuleFor(x => x.Total)
-                .GreaterThan(0).WithMessage("El total de la venta debe ser mayor a cero.");
-
             RuleFor(x => x.Detalles)
                 .NotNull().WithMessage("La venta debe contener una lista de productos.")
                 .Must(d => d != null && d.Count > 0).WithMessage("Debe incluir al menos un producto en la venta.");
@@ -45,8 +42,6 @@ namespace Negocio.Validators
             RuleFor(x => x.Cantidad)
                 .GreaterThan(0).WithMessage("La cantidad vendida debe ser mayor a cero.");
 
-            RuleFor(x => x.PrecioUnitario)
-                .GreaterThan(0).WithMessage("El precio unitario del producto debe ser mayor a cero.");
         }
     }
 }
