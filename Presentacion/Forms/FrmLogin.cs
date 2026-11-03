@@ -24,6 +24,7 @@ namespace Presentacion.Forms
         {
             _usuarioService = usuarioService ?? throw new ArgumentNullException(nameof(usuarioService));
             InitializeComponent();
+            picLogo.Image = LogoHelper.Cargar();
         }
 
         private async void btnLogin_Click(object sender, EventArgs e)
@@ -135,6 +136,12 @@ namespace Presentacion.Forms
                 e.Cancel = true;
 
             base.OnFormClosing(e);
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            picLogo.Image?.Dispose();
+            base.OnFormClosed(e);
         }
 
         private void chkMostrarPassword_CheckedChanged(object sender, EventArgs e)

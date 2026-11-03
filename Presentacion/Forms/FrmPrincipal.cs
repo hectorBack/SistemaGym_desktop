@@ -17,6 +17,7 @@ using Presentacion.Forms.Configuracion;
 using Negocio.Interfaces;
 using Presentacion.Forms.Inicio;
 using Negocio.Helpers;
+using Presentacion.Helpers;
 
 namespace Presentacion.Forms
 {
@@ -71,6 +72,7 @@ namespace Presentacion.Forms
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
 
             InitializeComponent();
+            picLogo.Image = LogoHelper.Cargar();
 
             Text = $"Sistema Gimnasio - Usuario: {_usuarioSesion.NombreCompleto} ({_usuarioSesion.RolNombre})";
             btnUsuarioMenu.Text = $"{_usuarioSesion.NombreCompleto} ▾";
@@ -501,6 +503,8 @@ namespace Presentacion.Forms
             if (_ventanaRegistro != null && !_ventanaRegistro.IsDisposed)
                 _ventanaRegistro.Close();
             _ventanaRegistro = null;
+
+            picLogo.Image?.Dispose();
 
             _scopeActivo?.Dispose();
             _scopeActivo = null;
