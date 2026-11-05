@@ -53,13 +53,27 @@ namespace Presentacion.Forms.Conceptos
         private void ConfigurarColumnas()
         {
             dgvConceptos.AutoGenerateColumns = false;
+            dgvConceptos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvConceptos.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvConceptos.RowTemplate.Height = 24;
+            dgvConceptos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvConceptos.ColumnHeadersHeight = 48;
+            
+            var columnaNombre = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Nombre), "Nombre", 190, 130);
+            var columnaTipo = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Tipo), "Tipo", 75, 90);
+            var columnaObservacion = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Observacion), "Observacion", 150, 110);
+            var columnaFecha = dgvConceptos.AgregarTexto(
+                nameof(SocioViewModel.CreatedAt), "Registro", 110, 90, "dd/MM/yyyy ");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            var columnaEstado = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Estado), "Estado", 888, 70);
 
-            dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Nombre), "Nombre", 150, 100);
-            dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Tipo), "Tipo", 100, 80);
-            dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Observacion), "Observación", 200, 120);
-            dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Estado), "Estado", 80, 70);
-            dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+            columnaNombre.FillWeight = 190;
+            columnaTipo.FillWeight = 75;
+            columnaObservacion.FillWeight = 150;
+            columnaFecha.FillWeight = 110;
+            columnaEstado.FillWeight = 888;
         }
+        
 
         private async Task CargarConceptosAsync(int? idASeleccionar = null)
         {

@@ -17,6 +17,9 @@
 
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             components = new System.ComponentModel.Container();
             panelTop = new Panel();
             lblTitulo = new Label();
@@ -196,9 +199,46 @@
             //
             // dgvSocios
             //
+            dgvSocios.AllowUserToAddRows = false;
+            dgvSocios.AllowUserToDeleteRows = false;
+            dgvSocios.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(14, 20, 36);
+            dgvSocios.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dgvSocios.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            dgvSocios.BackgroundColor = Color.FromArgb(11, 15, 26);
+            dgvSocios.BorderStyle = BorderStyle.None;
+            dgvSocios.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvSocios.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvSocios.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvSocios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(11, 15, 26);
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(230, 238, 252);
+            dataGridViewCellStyle3.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(31, 111, 235);
+            dataGridViewCellStyle3.SelectionForeColor = Color.White;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgvSocios.DefaultCellStyle = dataGridViewCellStyle3;
             dgvSocios.Dock = DockStyle.Fill;
+            dgvSocios.EnableHeadersVisualStyles = false;
+            dgvSocios.GridColor = Color.FromArgb(15, 42, 79);
             dgvSocios.Location = new Point(0, 122);
+            dgvSocios.MultiSelect = false;
             dgvSocios.Name = "dgvSocios";
+            dgvSocios.ReadOnly = true;
+            dgvSocios.RowHeadersVisible = false;
+            dgvSocios.RowHeadersWidth = 51;
+            dgvSocios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvSocios.Size = new Size(914, 646);
             dgvSocios.TabIndex = 2;
             dgvSocios.CellDoubleClick += dgvSocios_CellDoubleClick;

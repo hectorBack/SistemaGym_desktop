@@ -46,12 +46,26 @@ namespace Presentacion.Forms.Roles
         private void ConfigurarColumnas()
         {
             dgvRoles.AutoGenerateColumns = false;
+            dgvRoles.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvRoles.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvRoles.RowTemplate.Height = 24;
+            dgvRoles.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvRoles.ColumnHeadersHeight = 48;
 
-            dgvRoles.AgregarTexto(nameof(RolViewModel.Nombre), "Rol", 100, 100);
-            dgvRoles.AgregarTexto(nameof(RolViewModel.Descripcion), "Descripción", 150, 100);
-            dgvRoles.AgregarTexto(nameof(RolViewModel.ModulosTexto), "Módulos permitidos", 200, 150);
-            dgvRoles.AgregarTexto(nameof(RolViewModel.Estado), "Estado", 70, 65);
-            dgvRoles.AgregarTexto(nameof(RolViewModel.CreatedAt), "Fecha de registro", 100, 95, "dd/MM/yyyy");
+            var columnaRol = dgvRoles.AgregarTexto(nameof(RolViewModel.Nombre), "Rol", 60, 60);
+            var columnaDescripcion = dgvRoles.AgregarTexto(nameof(RolViewModel.Descripcion), "Descripcion", 120, 70);
+            var columnaEstado = dgvRoles.AgregarTexto(nameof(RolViewModel.Estado), "Estado", 50, 45);
+            var columnaFecha = dgvRoles.AgregarTexto(
+                 nameof(RolViewModel.CreatedAt), "Fecha de registro", 110, 90, "dd/MM/yyyy ");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            var columnaPermisos = dgvRoles.AgregarTexto(nameof(RolViewModel.ModulosTexto), "Modulos permitidos", 888, 70);
+
+            columnaRol.FillWeight = 60;
+            columnaDescripcion.FillWeight = 120;
+            columnaEstado.FillWeight = 50;
+            columnaFecha.FillWeight = 110;
+            columnaPermisos.FillWeight = 888;
+           
         }
 
         private async Task CargarRolesAsync(int? idASeleccionar = null)

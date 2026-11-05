@@ -33,11 +33,21 @@ namespace Presentacion.Forms.Reportes
         private void ConfigurarColumnas()
         {
             dgvInventario.AutoGenerateColumns = false;
+            dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvInventario.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvInventario.RowTemplate.Height = 24;
+            dgvInventario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvInventario.ColumnHeadersHeight = 48;
 
-            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.Producto), "Nombre", 220, 150);
-            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.PrecioCompra), "Costo", 90, 80, "C2", alinearDerecha: true);
-            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.PrecioVenta), "Precio", 90, 80, "C2", alinearDerecha: true);
-            dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.StockActual), "Stock", 70, 70, alinearDerecha: true);
+            var columnaNombre = dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.Producto), "Nombre", 190, 130);
+            var columnaPrecioCompra = dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.PrecioCompra), "Costo", 70, 60, "C2");
+            var columnaPrecioVenta = dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.PrecioVenta), "Precio", 70, 60, "C2");
+            var columnaStock = dgvInventario.AgregarTexto(nameof(ReporteInventarioViewModel.StockActual), "Stock", 888, 70);
+
+            columnaNombre.FillWeight = 190;
+            columnaPrecioCompra.FillWeight = 70;
+            columnaPrecioVenta.FillWeight = 70;
+            columnaStock.FillWeight = 888;  
         }
 
         private async Task CargarInventarioAsync()

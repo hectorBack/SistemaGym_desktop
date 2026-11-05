@@ -50,12 +50,24 @@ namespace Presentacion.Forms.Reportes
         private void ConfigurarColumnas()
         {
             dgvVentasProductos.AutoGenerateColumns = false;
+            dgvVentasProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvVentasProductos.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvVentasProductos.RowTemplate.Height = 24;
+            dgvVentasProductos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvVentasProductos.ColumnHeadersHeight = 48;
 
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 120, 120, "dd/MM/yyyy hh:mm tt");
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Producto), "Nombre del producto", 200, 140);
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.CostoUnitario), "Costo Unitario", 90, 90, "C2", alinearDerecha: true);
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.PrecioUnitario), "Precio Unitario", 90, 90, "C2", alinearDerecha: true);
-            dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Ganancia), "Ganancia", 90, 90, "C2", alinearDerecha: true);
+            var columnaFecha = dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.FechaRegistro), "Fecha de Registro", 80, 80, "dd/MM/yyyy hh:mm tt");
+            var columnaProducto = dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Producto), "Nombre del producto", 160, 100);
+            var columnaCosto = dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.CostoUnitario), "Costo Unitario", 50, 50, "C2");
+            var columnaPrecio = dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.PrecioUnitario), "Precio Unitario", 90, 90, "C2");
+            var columnaGanancia = dgvVentasProductos.AgregarTexto(nameof(FilaVentaProducto.Ganancia), "Ganancia", 888, 70, "C2");
+
+            columnaFecha.FillWeight = 80;
+            columnaProducto.FillWeight = 160;
+            columnaCosto.FillWeight = 50;
+            columnaPrecio.FillWeight = 90;
+            columnaGanancia.FillWeight = 888;
+            
         }
 
         private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechasAsync();

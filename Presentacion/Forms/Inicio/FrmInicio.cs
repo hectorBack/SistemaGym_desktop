@@ -17,7 +17,7 @@ namespace Presentacion.Forms.Inicio
     public partial class FrmInicio : Form
     {
         private readonly InicioController _controller;
-        private readonly SocioController _socioController; 
+        private readonly SocioController _socioController;
         private readonly VisitaController _visitaController;
 
         // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
@@ -45,10 +45,24 @@ namespace Presentacion.Forms.Inicio
         private void ConfigurarColumnas()
         {
             dgvVisitantes.AutoGenerateColumns = false;
+            dgvVisitantes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvVisitantes.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvVisitantes.RowTemplate.Height = 24;
+            dgvVisitantes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvVisitantes.ColumnHeadersHeight = 48;
 
-            dgvVisitantes.AgregarTexto(nameof(InicioViewModel.Nombre), "Nombre", 180, 140);
-            dgvVisitantes.AgregarTexto(nameof(InicioViewModel.Apellido), "Apellido", 180, 140);
-            dgvVisitantes.AgregarTexto(nameof(InicioViewModel.CreatedAt), "Fecha", 160, 120, "dd/MM/yyyy hh:mm tt");
+            var columnaNombre = dgvVisitantes.AgregarTexto(nameof(InicioViewModel.Nombre), "Nombre", 320, 140);
+            var columnaApellido = dgvVisitantes.AgregarTexto(nameof(InicioViewModel.Apellido), "Apellido", 320, 140);
+            var columnaFecha = dgvVisitantes.AgregarTexto(
+                nameof(InicioViewModel.CreatedAt), "Fecha", 888, 120, "dd/MM/yyyy hh:mm tt");
+            columnaFecha.MinimumWidth = 130;
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+
+            // En modo Fill, al agregar las columnas el grid puede reemplazar los pesos por los anchos del momento
+            // (por eso se veían casi iguales). Se fijan aquí, con todas las columnas ya agregadas.
+            columnaNombre.FillWeight = 320;
+            columnaApellido.FillWeight = 320;
+            columnaFecha.FillWeight = 888;
         }
 
         private async Task CargarVisitantesAsync()

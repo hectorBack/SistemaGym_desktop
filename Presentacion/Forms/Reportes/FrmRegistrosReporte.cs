@@ -39,9 +39,17 @@ namespace Presentacion.Forms.Reportes
         private void ConfigurarColumnas()
         {
             dgvRegistros.AutoGenerateColumns = false;
+            dgvRegistros.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvRegistros.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvRegistros.RowTemplate.Height = 24;
+            dgvRegistros.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvRegistros.ColumnHeadersHeight = 48;
 
-            dgvRegistros.AgregarTexto(nameof(FilaRegistro.NombreSocio), "Nombre del socio", 200, 130);
-            dgvRegistros.AgregarTexto(nameof(FilaRegistro.FechaRegistro), "Fecha de registro", 120, 120);
+            var columnaNombre = dgvRegistros.AgregarTexto(nameof(FilaRegistro.NombreSocio), "Nombre del Socio", 200, 130);
+            var columnaFecha = dgvRegistros.AgregarTexto(nameof(FilaRegistro.FechaRegistro), "Fecha de registro", 888, 70);
+
+            columnaNombre.FillWeight = 200;
+            columnaFecha.FillWeight = 888;
         }
 
         private async void btnFiltrar_Click(object? sender, EventArgs e) => await BuscarPorFechaAsync();

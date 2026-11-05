@@ -55,14 +55,22 @@ namespace Presentacion.Forms.Productos
         private void ConfigurarColumnas()
         {
             dgvProductos.AutoGenerateColumns = false;
+            dgvProductos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvProductos.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvProductos.RowTemplate.Height = 24;
+            dgvProductos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvProductos.ColumnHeadersHeight = 48;
 
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CodigoBarras), "Código de barras", 100, 110);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Nombre), "Producto", 175, 110);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CategoriaNombre), "Categoría", 120, 110);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Costo), "Costo", 80, 70, "C2", alinearDerecha: true);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Precio), "Precio", 80, 70, "C2", alinearDerecha: true);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Estado), "Estado", 80, 70);
-            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy hh:mm tt");
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CodigoBarras), "Código", 93, 70);
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Nombre), "Nombre", 98, 75);
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.CategoriaNombre), "Categoría", 125, 80);
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Costo), "Costo", 83, 60, "C2", alinearDerecha: true);
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Precio), "Precio", 87, 60, "C2", alinearDerecha: true);
+            var columnaFecha = dgvProductos.AgregarTexto(
+                nameof(ProductoViewModel.CreatedAt), "Fecha de creación", 161, 130, "dd/MM/yyyy hh:mm tt");
+            columnaFecha.MinimumWidth = 130;
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            dgvProductos.AgregarTexto(nameof(ProductoViewModel.Estado), "Estado", 888, 70);
         }
 
         private async Task CargarProductosAsync(int? idASeleccionar = null)

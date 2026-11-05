@@ -52,11 +52,21 @@ namespace Presentacion.Forms.Reportes
         private void ConfigurarColumnas()
         {
             dgvSocios.AutoGenerateColumns = false;
+            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvSocios.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvSocios.RowTemplate.Height = 24;
+            dgvSocios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvSocios.ColumnHeadersHeight = 48;
 
-            dgvSocios.AgregarTexto(nameof(FilaSocio.Clave), "Clave", 80, 70);
-            dgvSocios.AgregarTexto(nameof(FilaSocio.NombreSocio), "Nombre del Socio", 200, 130);
-            dgvSocios.AgregarTexto(nameof(FilaSocio.FechaVencimiento), "Fecha de Vencimiento", 110, 110);
-            dgvSocios.AgregarTexto(nameof(FilaSocio.Estatus), "Estatus", 100, 100);
+            var columnaClave = dgvSocios.AgregarTexto(nameof(FilaSocio.Clave), "Clave", 50, 40);
+            var columnaNombreSocio = dgvSocios.AgregarTexto(nameof(FilaSocio.NombreSocio), "Nombre del Socio", 200, 130);
+            var columnaFechaVencimiento = dgvSocios.AgregarTexto(nameof(FilaSocio.FechaVencimiento), "Fecha de Vencimiento", 110, 110);
+            var columnaEstatus = dgvSocios.AgregarTexto(nameof(FilaSocio.Estatus), "Estatus", 888, 70);
+
+            columnaClave.FillWeight = 50;
+            columnaNombreSocio.FillWeight = 200;
+            columnaFechaVencimiento.FillWeight = 110;
+            columnaEstatus.FillWeight = 888;
         }
 
         // Filtrar solo vuelve a filtrar lo que ya está en memoria (no consulta al servidor).

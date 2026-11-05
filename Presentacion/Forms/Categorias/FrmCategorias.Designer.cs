@@ -17,6 +17,9 @@
 
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             panelTop = new Panel();
             lblTitulo = new Label();
             flowAcciones = new FlowLayoutPanel();
@@ -112,9 +115,46 @@
             //
             // dgvCategorias
             //
+            dgvCategorias.AllowUserToAddRows = false;
+            dgvCategorias.AllowUserToDeleteRows = false;
+            dgvCategorias.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(14, 20, 36);
+            dgvCategorias.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dgvCategorias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dgvCategorias.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            dgvCategorias.BackgroundColor = Color.FromArgb(11, 15, 26);
+            dgvCategorias.BorderStyle = BorderStyle.None;
+            dgvCategorias.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvCategorias.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(15, 42, 79);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(45, 212, 255);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvCategorias.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvCategorias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(11, 15, 26);
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(230, 238, 252);
+            dataGridViewCellStyle3.Padding = new Padding(12, 0, 12, 0);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(31, 111, 235);
+            dataGridViewCellStyle3.SelectionForeColor = Color.White;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgvCategorias.DefaultCellStyle = dataGridViewCellStyle3;
             dgvCategorias.Dock = DockStyle.Fill;
+            dgvCategorias.EnableHeadersVisualStyles = false;
+            dgvCategorias.GridColor = Color.FromArgb(15, 42, 79);
             dgvCategorias.Location = new Point(0, 70);
+            dgvCategorias.MultiSelect = false;
             dgvCategorias.Name = "dgvCategorias";
+            dgvCategorias.ReadOnly = true;
+            dgvCategorias.RowHeadersVisible = false;
+            dgvCategorias.RowHeadersWidth = 51;
+            dgvCategorias.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvCategorias.Size = new Size(914, 730);
             dgvCategorias.TabIndex = 1;
             dgvCategorias.CellDoubleClick += dgvCategorias_CellDoubleClick;

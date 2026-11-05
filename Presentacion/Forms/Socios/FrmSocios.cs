@@ -62,13 +62,27 @@ namespace Presentacion.Forms.Socios
         private void ConfigurarColumnas()
         {
             dgvSocios.AutoGenerateColumns = false;
+            dgvSocios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvSocios.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvSocios.RowTemplate.Height = 24;
+            dgvSocios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvSocios.ColumnHeadersHeight = 48;
 
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.Clave), "Clave", 75, 70);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 190, 130);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.Telefono), "Teléfono", 100, 90);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.Email), "Correo", 140, 110);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.Estado), "Estado", 80, 70);
-            dgvSocios.AgregarTexto(nameof(SocioViewModel.CreatedAt), "Registro", 110, 90, "dd/MM/yyyy hh:mm tt");
+            var columnaClave = dgvSocios.AgregarTexto(nameof(SocioViewModel.Clave), "Clave", 75, 70);
+            var columnaNombre = dgvSocios.AgregarTexto(nameof(SocioViewModel.NombreCompleto), "Nombre completo", 190, 130);
+            var columnaCorreo = dgvSocios.AgregarTexto(nameof(SocioViewModel.Email), "Correo", 140, 110);
+            var columnaFecha = dgvSocios.AgregarTexto(
+                nameof(SocioViewModel.CreatedAt), "Registro", 110, 90, "dd/MM/yyyy hh:mm tt");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            var columnaEstado = dgvSocios.AgregarTexto(nameof(SocioViewModel.Estado), "Estado", 888, 70);
+
+            // En modo Fill el grid puede reemplazar los pesos por los anchos del momento al agregar las columnas;
+            // se fijan aquí, ya con todas agregadas. "Estado" es la que absorbe el espacio sobrante.
+            columnaClave.FillWeight = 75;
+            columnaNombre.FillWeight = 190;
+            columnaCorreo.FillWeight = 140;
+            columnaFecha.FillWeight = 110;
+            columnaEstado.FillWeight = 888;
         }
 
         private async Task CargarSociosAsync(int? idASeleccionar = null)

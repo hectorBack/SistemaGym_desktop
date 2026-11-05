@@ -64,16 +64,32 @@ namespace Presentacion.Forms.Movimientos
         private void ConfigurarColumnas()
         {
             dgvMovimientos.AutoGenerateColumns = false;
+            dgvMovimientos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvMovimientos.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvMovimientos.RowTemplate.Height = 24;
+            dgvMovimientos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvMovimientos.ColumnHeadersHeight = 48;
 
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Tipo), "Tipo", 70, 60);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.ConceptoNombre), "Concepto", 140, 100);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FormaPago), "Forma de pago", 90, 80);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Total), "Total", 85, 80, "C2", alinearDerecha: true);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Observacion), "Observaciones", 150, 100);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.RangoCorteTexto), "Corte", 280, 180);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.UsuarioNombre), "Usuario", 100, 90);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Estado), "Estado", 70, 65);
-            dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.CreatedAt), "Fecha de registro", 120, 110, "dd/MM/yyyy hh:mm tt");
+            var columnaTipo = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Tipo), "Tipo", 50, 40);
+            var columnaConcepto = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.ConceptoNombre), "Concepto", 260, 220);
+            var columnaPago = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.FormaPago), "Forma de pago", 30, 20);
+            var columnaTotal = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Total), "Total", 85, 80, "C2", alinearDerecha: true);
+            var columnaCorte = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.RangoCorteTexto), "Corte", 400, 300);
+            var columnaUsuario = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.UsuarioNombre), "Usuario", 140, 130);
+            var columnaFecha = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.CreatedAt), "Fecha de registro", 120, 110, "dd/MM/yyyy hh:mm tt");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            var columnaEstado = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Estado), "Estado", 60, 55);
+            var columnaObservaciones = dgvMovimientos.AgregarTexto(nameof(MovimientoViewModel.Observacion), "Observacion", 688, 70);
+
+            columnaTipo.FillWeight = 50;
+            columnaConcepto.FillWeight = 220;
+            columnaPago.FillWeight = 30;
+            columnaTotal.FillWeight = 85;
+            columnaCorte.FillWeight = 350;
+            columnaUsuario.FillWeight = 140;
+            columnaFecha.FillWeight = 120;
+            columnaEstado.FillWeight = 60;
+            columnaObservaciones.FillWeight = 688;
         }
 
         // Lee y valida el rango de los selectores; si es válido lo aplica y busca.

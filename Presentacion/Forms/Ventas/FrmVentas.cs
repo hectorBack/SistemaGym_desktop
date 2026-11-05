@@ -54,10 +54,23 @@ namespace Presentacion.Forms.Ventas
         private void ConfigurarColumnas()
         {
             dgvVentas.AutoGenerateColumns = false;
+            dgvVentas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvVentas.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvVentas.RowTemplate.Height = 24;
+            dgvVentas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvVentas.ColumnHeadersHeight = 48;
 
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.Total), "Total", peso: 60, anchoMinimo: 80, formato: "C2", alinearDerecha: true);
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.FechaVenta), "Fecha de registro", peso: 120, anchoMinimo: 130, formato: "dd/MM/yyyy hh:mm tt");
-            dgvVentas.AgregarTexto(nameof(VentaViewModel.Estado), "Estado", peso: 60, anchoMinimo: 80);
+            var columnaTotal = dgvVentas.AgregarTexto(nameof(VentaViewModel.Total), "Total", peso: 90, anchoMinimo: 80, formato: "C2", alinearDerecha: true);
+            var columnaFecha = dgvVentas.AgregarTexto(
+                nameof(VentaViewModel.FechaVenta), "Fecha de registro", peso: 160, anchoMinimo: 130, formato: "dd/MM/yyyy hh:mm tt");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            var columnaEstado = dgvVentas.AgregarTexto(nameof(VentaViewModel.Estado), "Estado", peso: 888, anchoMinimo: 80);
+
+            // En modo Fill el grid puede reemplazar los pesos por los anchos del momento al agregar las columnas;
+            // se fijan aquí, ya con todas agregadas. "Estado" es la que absorbe el espacio sobrante.
+            columnaTotal.FillWeight = 90;
+            columnaFecha.FillWeight = 160;
+            columnaEstado.FillWeight = 888;
         }
 
         private async Task CargarVentasAsync(int? idASeleccionar = null)

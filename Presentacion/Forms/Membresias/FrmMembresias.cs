@@ -48,15 +48,33 @@ namespace Presentacion.Forms.Membresias
         private void ConfigurarColumnas()
         {
             dgvMembresias.AutoGenerateColumns = false;
+            dgvMembresias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvMembresias.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvMembresias.RowTemplate.Height = 24;
+            dgvMembresias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvMembresias.ColumnHeadersHeight = 48;
 
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Nombre), "Nombre", 160, 110);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Precio), "Precio", 90, 80, "C2", alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Tipo), "Tipo", 90, 80);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Meses), "Meses", 70, 60, alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Semanas), "Semanas", 80, 70, alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Dias), "Dias", 70, 60, alinearDerecha: true);
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.CreatedAt), "Fecha de creación", 130, 110, "dd/MM/yyyy hh:mm tt");
-            dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Estado), "Estado", 90, 80);
+            var columnaNombre = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Nombre), "Nombre", 160, 110);
+            var columnaPrecio = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Precio), "Precio", 90, 80, "C2", alinearDerecha: true);
+            var columnaTipo = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Tipo), "Tipo", 90, 80);
+            var columnaMeses = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Meses), "Meses", 70, 60, alinearDerecha: true);
+            var columnaSemanas = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Semanas), "Semanas", 80, 70, alinearDerecha: true);
+            var columnaDias = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Dias), "Dias", 70, 60, alinearDerecha: true);
+            var columnaFecha = dgvMembresias.AgregarTexto(
+                nameof(MembresiaViewModel.CreatedAt), "Fecha de creación", 130, 110, "dd/MM/yyyy hh:mm tt");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            var columnaEstado = dgvMembresias.AgregarTexto(nameof(MembresiaViewModel.Estado), "Estado", 888, 80);
+
+            // En modo Fill el grid puede reemplazar los pesos por los anchos del momento al agregar las columnas;
+            // se fijan aquí, ya con todas agregadas. "Estado" es la que absorbe el espacio sobrante.
+            columnaNombre.FillWeight = 160;
+            columnaPrecio.FillWeight = 90;
+            columnaTipo.FillWeight = 90;
+            columnaMeses.FillWeight = 70;
+            columnaSemanas.FillWeight = 80;
+            columnaDias.FillWeight = 70;
+            columnaFecha.FillWeight = 130;
+            columnaEstado.FillWeight = 888;
         }
 
         private async Task CargarMembresiasAsync(int? idASeleccionar = null)

@@ -48,10 +48,23 @@ namespace Presentacion.Forms
         private void ConfigurarColumnas()
         {
             dgvCategorias.AutoGenerateColumns = false;
+            dgvCategorias.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvCategorias.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvCategorias.RowTemplate.Height = 24;
+            dgvCategorias.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvCategorias.ColumnHeadersHeight = 48;
 
-            dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Nombre), "Categoría", 200, 120);
-            dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Estado), "Estado", 80, 70);
-            dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy hh:mm tt");
+            var columnaNombre = dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Nombre), "Categoría", 200, 120);
+            var columnaEstado = dgvCategorias.AgregarTexto(nameof(CategoriaViewModel.Estado), "Estado", 80, 70);
+            var columnaFecha = dgvCategorias.AgregarTexto(
+                nameof(CategoriaViewModel.CreatedAt), "Fecha de registro", 888, 100, "dd/MM/yyyy hh:mm tt");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+
+            // En modo Fill el grid puede reemplazar los pesos por los anchos del momento al agregar las columnas;
+            // se fijan aquí, ya con todas agregadas. "Fecha de registro" es la que absorbe el espacio sobrante.
+            columnaNombre.FillWeight = 200;
+            columnaEstado.FillWeight = 80;
+            columnaFecha.FillWeight = 888;
         }
 
         private async Task CargarCategoriasAsync(int? idASeleccionar = null)

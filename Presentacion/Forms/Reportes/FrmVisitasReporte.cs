@@ -55,11 +55,20 @@ namespace Presentacion.Forms.Reportes
         private void ConfigurarColumnas()
         {
             dgvVisitas.AutoGenerateColumns = false;
+            dgvVisitas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvVisitas.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvVisitas.RowTemplate.Height = 24;
+            dgvVisitas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvVisitas.ColumnHeadersHeight = 48;
 
-            dgvVisitas.AgregarTexto(nameof(FilaVisita.Nombre), "Nombre", 200, 140);
-            dgvVisitas.AgregarTexto(nameof(FilaVisita.FechaRegistro), "Fecha de Registro", 140, 120);
-            dgvVisitas.AgregarTexto(nameof(FilaVisita.Monto), "Precio Visita", 90, 90, "C2", alinearDerecha: true);
+            var columnaNombre = dgvVisitas.AgregarTexto(nameof(FilaVisita.Nombre), "Nombre", 100, 40);
+            var columnaMonto = dgvVisitas.AgregarTexto(nameof(FilaVisita.Monto), "Precio Visita", 60, 60, "C2");
+            var columnaFecha = dgvVisitas.AgregarTexto(nameof(FilaVisita.FechaRegistro), "Fecha de Registro", 888, 70);
 
+            columnaNombre.FillWeight = 100;
+            columnaMonto.FillWeight = 60;
+            columnaFecha.FillWeight = 888;
+            
             // La fecha llega como texto del reporte: ordenarla alfabéticamente daría un orden engañoso.
             foreach (DataGridViewColumn c in dgvVisitas.Columns)
                 if (c.DataPropertyName == nameof(FilaVisita.FechaRegistro))

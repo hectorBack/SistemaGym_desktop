@@ -51,12 +51,25 @@ namespace Presentacion.Forms.Usuarios
         private void ConfigurarColumnas()
         {
             dgvUsuarios.AutoGenerateColumns = false;
+            dgvUsuarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvUsuarios.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dgvUsuarios.RowTemplate.Height = 24;
+            dgvUsuarios.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvUsuarios.ColumnHeadersHeight = 48;
 
-            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreUsuario), "Usuario", 110, 90);
-            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreCompleto), "Nombre", 180, 130);
-            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.RolNombre), "Rol", 110, 90);
-            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.Estado), "Estado", 80, 70);
-            dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.CreatedAt), "Fecha de registro", 120, 100, "dd/MM/yyyy");
+            var columnaNombre = dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreUsuario), "Usuario", 80, 70);
+            var columnaNombreCompleto = dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.NombreCompleto), "Nombre", 120, 70);
+            var columnaRolNombre = dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.RolNombre), "Rol", 50, 45);
+            var columnaEstado = dgvUsuarios.AgregarTexto(nameof(UsuarioViewModel.Estado), "Estado", 50, 45);
+            var columnaFecha = dgvUsuarios.AgregarTexto(
+                 nameof(UsuarioViewModel.CreatedAt), "Fecha de registro", 888, 70, "dd/MM/yyyy");
+            columnaFecha.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+
+            columnaNombre.FillWeight = 80;
+            columnaNombreCompleto.FillWeight = 120;
+            columnaRolNombre.FillWeight = 50;
+            columnaEstado.FillWeight = 50;
+            columnaFecha.FillWeight = 888;
         }
 
         private async Task CargarUsuariosAsync(int? idASeleccionar = null)
