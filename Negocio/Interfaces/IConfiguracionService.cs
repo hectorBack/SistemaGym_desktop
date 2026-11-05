@@ -17,5 +17,9 @@ namespace Negocio.Interfaces
         Task GuardarConfigRespaldosAsync(RespaldosConfiguracionDto dto);
 
         Task EnviarCorreoPruebaAsync(string destinatario);
+
+        Task<MasConfiguracionesDto> ObtenerConfigMasConfiguracionesAsync();
+
+        Task GuardarConfigMasConfiguracionesAsync(MasConfiguracionesDto dto);
     }
 }

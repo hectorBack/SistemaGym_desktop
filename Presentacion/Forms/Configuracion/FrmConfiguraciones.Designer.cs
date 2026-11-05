@@ -26,6 +26,7 @@ namespace Presentacion.Forms.Configuracion
             tabDatosGimnasio = new TabPage();
             tabCorreos = new TabPage();
             tabRespaldos = new TabPage();
+            tabMasConfiguraciones = new TabPage();
             panelTop.SuspendLayout();
             tabControlConfiguraciones.SuspendLayout();
             SuspendLayout();
@@ -58,6 +59,7 @@ namespace Presentacion.Forms.Configuracion
             tabControlConfiguraciones.Controls.Add(tabCorteCaja);
             tabControlConfiguraciones.Controls.Add(tabCorreos);
             tabControlConfiguraciones.Controls.Add(tabRespaldos);
+            tabControlConfiguraciones.Controls.Add(tabMasConfiguraciones);
             tabControlConfiguraciones.Dock = DockStyle.Fill;
             tabControlConfiguraciones.DrawMode = TabDrawMode.OwnerDrawFixed;
             tabControlConfiguraciones.Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold);
@@ -97,6 +99,13 @@ namespace Presentacion.Forms.Configuracion
             tabRespaldos.Size = new Size(906, 701);
             tabRespaldos.TabIndex = 3;
             // 
+            // tabMasConfiguraciones
+            // 
+            tabRespaldos.Location = new Point(4, 35);
+            tabRespaldos.Name = "tabMasConfiguraciones";
+            tabRespaldos.Size = new Size(906, 701);
+            tabRespaldos.TabIndex = 4;
+            // 
             // FrmConfiguraciones
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -127,5 +136,6 @@ namespace Presentacion.Forms.Configuracion
         private TabPage tabDatosGimnasio;
         private TabPage tabCorreos;
         private TabPage tabRespaldos;
+        private TabPage tabMasConfiguraciones;
     }
 }

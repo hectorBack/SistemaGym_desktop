@@ -20,6 +20,7 @@ namespace Negocio.Services
         private readonly IValidator<GimnasioConfiguracionDto> _gimnasioConfigValidator;
         private readonly IValidator<CorreosConfiguracionDto> _correosConfigValidator;
         private readonly IValidator<RespaldosConfiguracionDto> _respaldosConfigValidator;
+        private readonly IValidator<MasConfiguracionesDto> _masConfigValidator;
         private readonly IEmailService _emailService;
 
         // Claves constantes para el Corte de Caja
@@ -43,12 +44,17 @@ namespace Negocio.Services
         // Claves constantes para la Configuracion de Respaldos
         public const string CLAVE_RESPALDO_RUTA = "Respaldo_RutaDestino";
 
+        // Claves constantes para Mas Configuraciones
+        public const string CLAVE_MAS_MONEDA = "Mas_Moneda";
+        public const string CLAVE_MAS_ENVIAR_PAGO_POR_CORREO = "Mas_EnviarPagoPorCorreo";
+
         public ConfiguracionService(
             IUnitOfWork unitOfWork,
             IValidator<CorteConfiguracionDto> corteConfigValidator,
             IValidator<GimnasioConfiguracionDto> gimnasioConfigValidator,
             IValidator<CorreosConfiguracionDto> correosConfigValidator,
             IValidator<RespaldosConfiguracionDto> respaldosConfigValidator,
+            IValidator<MasConfiguracionesDto> masConfigValidator,
             IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
@@ -56,6 +62,7 @@ namespace Negocio.Services
             _gimnasioConfigValidator = gimnasioConfigValidator;
             _correosConfigValidator = correosConfigValidator;
             _respaldosConfigValidator = respaldosConfigValidator;
+            _masConfigValidator = masConfigValidator;
             _emailService = emailService;
         }
 
@@ -245,6 +252,39 @@ namespace Negocio.Services
                 CLAVE_RESPALDO_RUTA,
                 (dto.RutaRespaldo ?? string.Empty).Trim(),
                 "Ruta o directorio seleccionado para almacenar los respaldos de la base de datos");
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<MasConfiguracionesDto> ObtenerConfigMasConfiguracionesAsync()
+        {
+            var cfgMoneda = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_MAS_MONEDA);
+            var cfgEnviarPago = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_MAS_ENVIAR_PAGO_POR_CORREO);
+
+            bool.TryParse(cfgEnviarPago?.Valor, out bool enviarPagoPorCorreo);
+
+            return new MasConfiguracionesDto
+            {
+                Moneda = cfgMoneda?.Valor ?? "MXN",
+                EnviarPagoPorCorreo = enviarPagoPorCorreo
+            };
+        }
+
+        public async Task GuardarConfigMasConfiguracionesAsync(MasConfiguracionesDto dto)
+        {
+            var validationResult = await _masConfigValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+                throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_MAS_MONEDA,
+                (dto.Moneda ?? string.Empty).Trim().Trim(),
+                "Moneda utilizada por el sistema para mostrar montos y realizar cobros");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_MAS_ENVIAR_PAGO_POR_CORREO,
+                dto.EnviarPagoPorCorreo ? "True" : "False",
+                "Indica si se envía el comprobante o recibo de pago por correo electrónico");
 
             await _unitOfWork.SaveChangesAsync();
         }

@@ -20,6 +20,7 @@ namespace Presentacion.Forms.Configuracion
         private FrmConfiguracionCorteCaja? _frmConfiguracionCorteCaja;
         private FrmConfiguracionCorreos? _frmConfiguracionCorreos;
         private FrmConfiguracionRespaldos? _frmConfiguracionRespaldos;
+        private FrmConfiguracionMasConfiguraciones? _frmConfiguracionMasConfiguraciones;
 
         public FrmConfiguraciones(ConfiguracionController configuracionController)
         {
@@ -35,6 +36,7 @@ namespace Presentacion.Forms.Configuracion
             ConfigurarTabPage(tabCorteCaja, "tabCorteCaja", "Corte de Caja");
             ConfigurarTabPage(tabCorreos, "tabCorreos", "Configuración de Correos");
             ConfigurarTabPage(tabRespaldos, "tabRespaldos", "Respaldos");
+            ConfigurarTabPage(tabMasConfiguraciones, "tabMasConfiguraciones", "Mas Configuraciones");
         }
 
         private void ConfigurarTabPage(TabPage page, string name, string text)
@@ -83,6 +85,10 @@ namespace Presentacion.Forms.Configuracion
 
                     case "tabRespaldos":
                         CargarFormularioRespaldos();
+                        break;
+
+                    case "tabMasConfiguraciones":
+                        CargarFormularioMasConfiguraciones();
                         break;
                 }
             }
@@ -184,6 +190,27 @@ namespace Presentacion.Forms.Configuracion
 
             tabRespaldos.Controls.Add(_frmConfiguracionRespaldos);
             _frmConfiguracionRespaldos.Show();
+        }
+
+        private void CargarFormularioMasConfiguraciones()
+        {
+            if (_frmConfiguracionMasConfiguraciones != null && !_frmConfiguracionMasConfiguraciones.IsDisposed)
+            {
+                return;
+            }
+
+            tabMasConfiguraciones.Controls.Clear();
+
+            _frmConfiguracionMasConfiguraciones = new FrmConfiguracionMasConfiguraciones(_configuracionController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabMasConfiguraciones.Controls.Add(_frmConfiguracionMasConfiguraciones);
+            _frmConfiguracionMasConfiguraciones.Show();
         }
 
         protected override void OnControlAdded(ControlEventArgs e)

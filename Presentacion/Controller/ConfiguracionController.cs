@@ -151,5 +151,31 @@ namespace Presentacion.Controller
         }
 
         #endregion
+
+        #region Pestaña: Mas Configuraciones
+
+        public async Task<MasConfiguracionesViewModel> ObtenerConfigMasConfiguracionesAsync()
+        {
+            var dto = await _configuracionService.ObtenerConfigMasConfiguracionesAsync();
+
+            return new MasConfiguracionesViewModel
+            {
+                Moneda = dto.Moneda,
+                EnviarPagoPorCorreo = dto.EnviarPagoPorCorreo
+            };
+        }
+
+        public async Task GuardarConfigMasConfiguracionesAsync(MasConfiguracionesViewModel model)
+        {
+            var dto = new MasConfiguracionesDto
+            {
+                Moneda = model.Moneda,
+                EnviarPagoPorCorreo = model.EnviarPagoPorCorreo
+            };
+
+            await _configuracionService.GuardarConfigMasConfiguracionesAsync(dto);
+        }
+
+        #endregion
     }
 }

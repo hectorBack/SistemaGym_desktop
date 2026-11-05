@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Negocio.DTOs
+{
+    public class MasConfiguracionesDto
+    {
+        public string Moneda { get; set; } = string.Empty;
+
+        public bool EnviarPagoPorCorreo { get; set; }
+    }
+}
