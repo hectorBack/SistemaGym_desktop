@@ -16,8 +16,8 @@ namespace Presentacion.Forms.Configuracion
         private readonly ConfiguracionController _configuracionController;
 
         // Subformularios incrustados en las pestañas
-        private FrmConfiguracionCorteCaja? _frmConfiguracionCorteCaja;
         private FrmConfiguracionDatosGimnasio? _frmConfiguracionGimnasioDatos;
+        private FrmConfiguracionCorteCaja? _frmConfiguracionCorteCaja;
         private FrmConfiguracionCorreos? _frmConfiguracionCorreos;
         private FrmConfiguracionRespaldos? _frmConfiguracionRespaldos;
 
@@ -30,8 +30,9 @@ namespace Presentacion.Forms.Configuracion
 
         private void InicializarEstilosPestañas()
         {
-            ConfigurarTabPage(tabCorteCaja, "tabCorteCaja", "Corte de Caja");
+            
             ConfigurarTabPage(tabDatosGimnasio, "tabDatosGimnasio", "Datos del Gimnasio");
+            ConfigurarTabPage(tabCorteCaja, "tabCorteCaja", "Corte de Caja");
             ConfigurarTabPage(tabCorreos, "tabCorreos", "Configuración de Correos");
             ConfigurarTabPage(tabRespaldos, "tabRespaldos", "Respaldos");
         }
@@ -68,12 +69,12 @@ namespace Presentacion.Forms.Configuracion
 
                 switch (tabControlConfiguraciones.SelectedTab?.Name)
                 {
-                    case "tabCorteCaja":
-                        CargarFormularioCorteCaja();
-                        break;
-
                     case "tabDatosGimnasio":
                         CargarFormularioDatosGimnasio();
+                        break;
+
+                    case "tabCorteCaja":
+                        CargarFormularioCorteCaja();
                         break;
 
                     case "tabCorreos":
