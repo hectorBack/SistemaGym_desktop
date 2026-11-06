@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Presentacion.Helpers;
+
 namespace Presentacion.ViewModels
 {
     public class PagoSocioMembresiaViewModel
@@ -20,7 +22,7 @@ namespace Presentacion.ViewModels
         public DateTime? CreatedAt { get; set; }
 
         // Propiedades de formato conveniente para el DataGridView
-        public string MontoFormateado => Monto.ToString("C2");
+        public string MontoFormateado => MonedaHelper.Formatear(Monto);
         public string FechaFormateada => CreatedAt.HasValue ? CreatedAt.Value.ToString("dd/MM/yyyy hh:mm tt") : string.Empty;
     }
 }

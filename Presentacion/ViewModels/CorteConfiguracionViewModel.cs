@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Presentacion.Helpers;
+
 namespace Presentacion.ViewModels
 {
     public class CorteConfiguracionViewModel
@@ -12,6 +14,6 @@ namespace Presentacion.ViewModels
         public string EmailNotificacion { get; set; } = string.Empty;
 
         // Propiedades de formato para bindings o etiquetas en UI
-        public string EfectivoInicialFormateado => EfectivoInicial.ToString("C2");
+        public string EfectivoInicialFormateado => MonedaHelper.Formatear(EfectivoInicial);
     }
 }

@@ -17,14 +17,18 @@ namespace Presentacion.Forms.Ventas
     {
         private readonly VentaController _ventaController;
         private readonly ProductoController _productoController;
+        private readonly ConfiguracionController _configuracionController;
+
+        private string _simboloMoneda = "$";
 
         // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
         private ListaOrdenable<VentaViewModel> _vista = new();
 
-        public FrmVentas(VentaController ventaController, ProductoController productoController)
+        public FrmVentas(VentaController ventaController, ProductoController productoController, ConfiguracionController configuracionController)
         {
             _ventaController = ventaController ?? throw new ArgumentNullException(nameof(ventaController));
             _productoController = productoController ?? throw new ArgumentNullException(nameof(productoController));
+            _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
 
             InitializeComponent();
             ConfigurarColumnas();
@@ -46,6 +50,7 @@ namespace Presentacion.Forms.Ventas
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
+            await CargarSimboloMonedaAsync();
             await CargarVentasAsync();
         }
 
@@ -71,6 +76,37 @@ namespace Presentacion.Forms.Ventas
             columnaTotal.FillWeight = 90;
             columnaFecha.FillWeight = 160;
             columnaEstado.FillWeight = 888;
+        }
+
+        private async Task CargarSimboloMonedaAsync()
+        {
+            try
+            {
+                var simbolo = await _configuracionController.ObtenerSimboloMonedaAsync();
+
+                MonedaHelper.ConfigurarSimbolo(simbolo);
+                _simboloMoneda = MonedaHelper.SimboloActual;
+
+                AplicarFormatoMoneda();
+            }
+            catch (Exception ex)
+            {
+                _simboloMoneda = MonedaHelper.SimboloActual;
+                AplicarFormatoMoneda();
+                MessageBox.Show(
+                    $"No se pudo cargar la moneda configurada. Se utilizará {_simboloMoneda}.{Environment.NewLine}{ex.Message}",
+                    "Configuración de moneda",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AplicarFormatoMoneda()
+        {
+            var columnaTotal = dgvVentas.Columns["col" + nameof(VentaViewModel.Total)];
+
+            if (columnaTotal != null)
+                columnaTotal.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView(_simboloMoneda);
         }
 
         private async Task CargarVentasAsync(int? idASeleccionar = null)
@@ -126,7 +162,7 @@ namespace Presentacion.Forms.Ventas
             var vigentes = _vista.Where(v => v.Activo).ToList();
             int anuladas = _vista.Count - vigentes.Count;
 
-            string texto = $"{vigentes.Count} venta(s)  ·  Total {vigentes.Sum(v => v.Total):C2}";
+            string texto = $"{vigentes.Count} venta(s)  ·  Total {MonedaHelper.Formatear(vigentes.Sum(v => v.Total), _simboloMoneda)}";
             if (anuladas > 0)
                 texto += $"  ·  {anuladas} anulada(s)";
 
@@ -206,7 +242,7 @@ namespace Presentacion.Forms.Ventas
 
         private async void btnNuevaVenta_Click(object? sender, EventArgs e)
         {
-            using var modal = new FrmVentaModal(_ventaController, _productoController);
+            using var modal = new FrmVentaModal(_ventaController, _productoController, _configuracionController);
 
             if (modal.ShowDialog() == DialogResult.OK)
                 await CargarVentasAsync();
@@ -233,7 +269,7 @@ namespace Presentacion.Forms.Ventas
 
                 abrirDetalle = () =>
                 {
-                    using var modal = new FrmVentaDetalleModal(ventaDto);
+                    using var modal = new FrmVentaDetalleModal(ventaDto, _simboloMoneda);
                     modal.ShowDialog();
                 };
             },
@@ -260,7 +296,7 @@ namespace Presentacion.Forms.Ventas
             }
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Está seguro de anular la venta N° {venta.VentaID} por un total de {venta.Total:C2}?\n\nSe reajustará el stock de los productos vendidos.",
+                   $"¿Está seguro de anular la venta N° {venta.VentaID} por un total de {MonedaHelper.Formatear(venta.Total, _simboloMoneda)}?\n\nSe reajustará el stock de los productos vendidos.",
                     "Confirmar anulación",
                     destructiva: true))
                 return;

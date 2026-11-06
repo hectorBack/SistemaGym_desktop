@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,7 @@ namespace Presentacion.Forms.Configuracion
                 };
 
                 await _configuracionController.GuardarConfigMasConfiguracionesAsync(model);
+                MonedaHelper.ConfigurarSimbolo(model.Moneda);
 
                 MessageBox.Show(
                     "Configuración adicional guardada correctamente.",

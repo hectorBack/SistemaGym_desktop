@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Presentacion.Helpers;
 
 namespace Presentacion.Forms
 {
@@ -93,7 +94,9 @@ namespace Presentacion.Forms
             };
 
             if (formato != null)
-                columna.DefaultCellStyle.Format = formato;
+                columna.DefaultCellStyle.Format = formato == "C2"
+                    ? MonedaHelper.ObtenerFormatoDataGridView()
+                    : formato;
 
             if (alinearDerecha)
             {

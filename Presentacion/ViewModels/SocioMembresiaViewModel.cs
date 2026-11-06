@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Presentacion.Helpers;
 
 namespace Presentacion.ViewModels
 {
@@ -22,7 +23,7 @@ namespace Presentacion.ViewModels
             public string FechaFinTexto => FechaFin.ToString("dd/MM/yyyy");
 
             public decimal Precio { get; set; }
-            public string PrecioTexto => Precio.ToString("C2"); // Formato de moneda local ($)
+            public string PrecioTexto => MonedaHelper.Formatear(Precio);
 
             public decimal TotalPagado { get; set; }
             public string EstadoMembresia

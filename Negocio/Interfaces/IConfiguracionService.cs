@@ -21,5 +21,7 @@ namespace Negocio.Interfaces
         Task<MasConfiguracionesDto> ObtenerConfigMasConfiguracionesAsync();
 
         Task GuardarConfigMasConfiguracionesAsync(MasConfiguracionesDto dto);
+
+        Task<string> ObtenerSimboloMonedaAsync();
     }
 }

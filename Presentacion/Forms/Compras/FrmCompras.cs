@@ -129,7 +129,7 @@ namespace Presentacion.Forms.Compras
             var vigentes = _vista.Where(EstaVigente).ToList();
             int canceladas = _vista.Count - vigentes.Count;
 
-            string texto = $"{vigentes.Count} compra(s)  ·  Total {vigentes.Sum(c => c.Total):C2}";
+            string texto = $"{vigentes.Count} compra(s)  ·  Total {MonedaHelper.Formatear(vigentes.Sum(c => c.Total))}";
             if (canceladas > 0)
                 texto += $"  ·  {canceladas} cancelada(s)";
 
@@ -263,7 +263,7 @@ namespace Presentacion.Forms.Compras
             }
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Está seguro de cancelar la compra con folio '{compra.Codigo}' por {compra.Total:C2}?\n\n" +
+                    $"¿Está seguro de cancelar la compra con folio '{compra.Codigo}' por {MonedaHelper.Formatear(compra.Total)}?\n\n" +
                     "Se reajustará el stock y se registrará la devolución del importe en el corte de caja.",
                     "Confirmar cancelación",
                     destructiva: true))

@@ -67,6 +67,10 @@ namespace Presentacion.Forms.Corte
 
             InitializeComponent();
             ConfigurarColumnas();
+            lblEfectivoInicialValue.Text = MonedaHelper.Formatear(0m);
+            lblTotalIngresosValue.Text = MonedaHelper.Formatear(0m);
+            lblTotalEgresosValue.Text = MonedaHelper.Formatear(0m);
+            lblEfectivoFinalValue.Text = MonedaHelper.Formatear(0m);
         }
 
         // ───────────── Carga ─────────────
@@ -200,10 +204,10 @@ namespace Presentacion.Forms.Corte
             _totalEgresos = _movimientos.Where(m => !TipoMovimiento.EsIngreso(m.Tipo)).Sum(m => m.Total);
             _montoFinal = _efectivoInicial + _totalIngresos - _totalEgresos;
 
-            lblEfectivoInicialValue.Text = _efectivoInicial.ToString("C2");
-            lblTotalIngresosValue.Text = _totalIngresos.ToString("C2");
-            lblTotalEgresosValue.Text = _totalEgresos.ToString("C2");
-            lblEfectivoFinalValue.Text = _montoFinal.ToString("C2");
+            lblEfectivoInicialValue.Text = MonedaHelper.Formatear(_efectivoInicial);
+            lblTotalIngresosValue.Text = MonedaHelper.Formatear(_totalIngresos);
+            lblTotalEgresosValue.Text = MonedaHelper.Formatear(_totalEgresos);
+            lblEfectivoFinalValue.Text = MonedaHelper.Formatear(_montoFinal);
         }
 
         // ───────────── Realizar el corte ─────────────
@@ -235,10 +239,10 @@ namespace Presentacion.Forms.Corte
 
             if (!FormHelper.ConfirmarAccion(
                     $"{aviso}¿Realizar el corte de caja con estos totales?\n\n" +
-                    $"Efectivo inicial:  {_efectivoInicial:C2}\n" +
-                    $"Ingresos:  {_totalIngresos:C2}\n" +
-                    $"Egresos:  {_totalEgresos:C2}\n" +
-                    $"Total del corte:  {_montoFinal:C2}" +
+                    $"Efectivo inicial:  {MonedaHelper.Formatear(_efectivoInicial)}\n" +
+                    $"Ingresos:  {MonedaHelper.Formatear(_totalIngresos)}\n" +
+                    $"Egresos:  {MonedaHelper.Formatear(_totalEgresos)}\n" +
+                    $"Total del corte:  {MonedaHelper.Formatear(_montoFinal)}" +
                     avisoNegativo,
                     "Confirmar corte de caja"))
                 return;

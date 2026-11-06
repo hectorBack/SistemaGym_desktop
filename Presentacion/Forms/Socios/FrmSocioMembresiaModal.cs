@@ -247,7 +247,7 @@ namespace Presentacion.Forms.Socios
                     : $"{membresia.DuracionDias} días";
 
                 // Mostrar precio y el desglose dinámico en la etiqueta
-                lblPrecioValor.Text = $"{membresia.Precio:C2}  ·  {textoDuracion}";
+                lblPrecioValor.Text = $"{MonedaHelper.Formatear(membresia.Precio)}  ·  {textoDuracion}";
                 btnAgregarMembresia.Enabled = true;
             }
             else
@@ -269,7 +269,7 @@ namespace Presentacion.Forms.Socios
 
             // Asignar genera un cobro pendiente: se confirma para evitar asignaciones por error.
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Asignar la membresía '{membresia.Nombre}' ({membresia.Precio:C2}) a {_socio.NombreCompleto} a partir del {fechaInicio:dd/MM/yyyy}?",
+                    $"¿Asignar la membresía '{membresia.Nombre}' ({MonedaHelper.Formatear(membresia.Precio)}) a {_socio.NombreCompleto} a partir del {fechaInicio:dd/MM/yyyy}?",
                     "Asignar membresía"))
                 return;
 

@@ -128,7 +128,7 @@ namespace Presentacion.Forms.Compras
         private void cmbProductos_SelectedIndexChanged(object? sender, EventArgs e)
         {
             lblInfoProducto.Text = cmbProductos.SelectedItem is ProductoViewModel p
-                ? $"Costo registrado: {p.Costo:C2}   ·   Precio de venta: {p.Precio:C2}"
+                ? $"Costo registrado: {MonedaHelper.Formatear(p.Costo)}   ·   Precio de venta: {MonedaHelper.Formatear(p.Precio)}"
                 : string.Empty;
         }
 
@@ -292,7 +292,7 @@ namespace Presentacion.Forms.Compras
         // Total, y botones que solo tienen sentido con algo en la lista / seleccionado.
         private void ActualizarResumen()
         {
-            lblTotalCalculado.Text = _lineas.Sum(l => l.Subtotal).ToString("C2");
+            lblTotalCalculado.Text = MonedaHelper.Formatear(_lineas.Sum(l => l.Subtotal));
             btnQuitar.Enabled = LineaSeleccionada != null;
             btnGuardar.Enabled = _lineas.Count > 0;
         }

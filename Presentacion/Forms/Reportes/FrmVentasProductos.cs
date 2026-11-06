@@ -128,7 +128,7 @@ namespace Presentacion.Forms.Reportes
 
         private void ActualizarResumen()
         {
-            lblTotal.Text = $"{_vista.Count} registro(s)  ·  Total Ganancia {_vista.Sum(f => f.Ganancia):C2}";
+            lblTotal.Text = $"{_vista.Count} registro(s)  ·  Total Ganancia {MonedaHelper.Formatear(_vista.Sum(f => f.Ganancia))}";
             btnExportarExcel.Enabled = _vista.Count > 0;
         }
 

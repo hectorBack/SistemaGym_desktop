@@ -65,6 +65,7 @@ namespace Presentacion.Forms.Visitas
 
             InitializeComponent();
             ConfigurarAsistencias();
+            lblDeuda.Text = $"Deuda: {MonedaHelper.Formatear(0m)}";
 
             _timerLimpieza.Tick += (_, _) =>
             {
@@ -239,7 +240,7 @@ namespace Presentacion.Forms.Visitas
             MostrarVencimiento(resultado);
             PonerFoto(resultado.ObtenerImagenFoto());
 
-            lblDeuda.Text = $"Deuda: {resultado.Deuda:C2}";
+            lblDeuda.Text = $"Deuda: {MonedaHelper.Formatear(resultado.Deuda)}";
             lblDeuda.ForeColor = resultado.Deuda > 0 ? Tema.Peligro : Tema.Exito;
 
             bool permitido = resultado.MembresiaVigente || resultado.EsVisitaCasual;
@@ -326,7 +327,7 @@ namespace Presentacion.Forms.Visitas
             lblMembresia.Text = "N/A";
             lblVencimiento.Text = "N/A";
             lblVencimiento.ForeColor = Tema.Texto;
-            lblDeuda.Text = "Deuda: $0.00";
+            lblDeuda.Text = $"Deuda: {MonedaHelper.Formatear(0m)}";
             lblDeuda.ForeColor = Tema.Texto;
             AplicarEstado(estado, colorEstado);
 

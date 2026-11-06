@@ -1,4 +1,5 @@
 ﻿using Negocio.DTOs;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,10 +18,12 @@ namespace Presentacion.Forms.Ventas
         private sealed record FilaDetalle(string Producto, int Cantidad, decimal PrecioUnitario, decimal Subtotal);
 
         private readonly VentaDto _venta;
+        private readonly string _simboloMoneda;
 
-        public FrmVentaDetalleModal(VentaDto venta)
+        public FrmVentaDetalleModal(VentaDto venta, string simboloMoneda = "$")
         {
             _venta = venta ?? throw new ArgumentNullException(nameof(venta));
+            _simboloMoneda = string.IsNullOrWhiteSpace(simboloMoneda) ? "$" : simboloMoneda.Trim();
 
             InitializeComponent();
             ConfigurarColumnas();
@@ -35,7 +38,9 @@ namespace Presentacion.Forms.Ventas
             dgvDetalles.AgregarTexto(nameof(FilaDetalle.Producto), "Producto", 220, 120);
             dgvDetalles.AgregarTexto(nameof(FilaDetalle.Cantidad), "Cantidad", 70, 70, alinearDerecha: true);
             dgvDetalles.AgregarTexto(nameof(FilaDetalle.PrecioUnitario), "Precio unitario", 90, 90, "C2", alinearDerecha: true);
+            dgvDetalles.Columns["col" + nameof(FilaDetalle.PrecioUnitario)].DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView(_simboloMoneda);
             dgvDetalles.AgregarTexto(nameof(FilaDetalle.Subtotal), "Subtotal", 90, 90, "C2", alinearDerecha: true);
+            dgvDetalles.Columns["col" + nameof(FilaDetalle.Subtotal)].DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView(_simboloMoneda);
         }
 
         private void CargarDatosVenta()
@@ -46,7 +51,7 @@ namespace Presentacion.Forms.Ventas
 
             // Cabecera
             lblFechaValor.Text = _venta.FechaVenta.ToString("dd/MM/yyyy hh:mm tt");
-            lblTotalCalculado.Text = _venta.Total.ToString("C2");
+            lblTotalCalculado.Text = MonedaHelper.Formatear(_venta.Total, _simboloMoneda);
 
             int articulos = filas.Sum(f => f.Cantidad);
             lblArticulos.Text = $"{articulos} artículo(s) en {filas.Count} producto(s)";

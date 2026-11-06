@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Presentacion.Helpers;
 
 namespace Presentacion.Forms.Reportes
 {
@@ -31,7 +32,7 @@ namespace Presentacion.Forms.Reportes
                                   || minuscula == "id";
 
                     if (dinero)
-                        col.DefaultCellStyle.Format = "C2";
+                        col.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView();
 
                     if (dinero || numero)
                     {

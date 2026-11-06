@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Presentacion.Helpers;
+
 namespace Presentacion.ViewModels
 {
     public class SocioDetalleViewModel
@@ -55,7 +57,7 @@ namespace Presentacion.ViewModels
         public string FechaInicioTexto => FechaInicio.ToString("dd/MM/yyyy");
         public string FechaFinTexto => FechaFin.ToString("dd/MM/yyyy");
         public decimal Precio { get; set; }
-        public string PrecioTexto => Precio.ToString("C2"); // Formato moneda: $0.00
+        public string PrecioTexto => MonedaHelper.Formatear(Precio);
         public string Estado { get; set; } = string.Empty;
     }
 

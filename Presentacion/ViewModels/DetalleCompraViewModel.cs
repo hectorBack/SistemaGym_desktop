@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Presentacion.Helpers;
+
 namespace Presentacion.ViewModels
 {
     public class DetalleCompraViewModel
@@ -18,7 +20,7 @@ namespace Presentacion.ViewModels
         public decimal Subtotal => Cantidad * CostoUnitario;
 
         // Propiedades auxiliares formateadas para DataGridView
-        public string CostoUnitarioTexto => CostoUnitario.ToString("C2");
-        public string SubtotalTexto => Subtotal.ToString("C2");
+        public string CostoUnitarioTexto => MonedaHelper.Formatear(CostoUnitario);
+        public string SubtotalTexto => MonedaHelper.Formatear(Subtotal);
     }
 }

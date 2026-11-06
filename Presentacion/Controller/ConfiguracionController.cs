@@ -176,6 +176,11 @@ namespace Presentacion.Controller
             await _configuracionService.GuardarConfigMasConfiguracionesAsync(dto);
         }
 
+        public async Task<string> ObtenerSimboloMonedaAsync()
+        {
+            return await _configuracionService.ObtenerSimboloMonedaAsync();
+        }
+
         #endregion
     }
 }

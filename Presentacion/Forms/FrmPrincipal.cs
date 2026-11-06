@@ -18,6 +18,7 @@ using Negocio.Interfaces;
 using Presentacion.Forms.Inicio;
 using Negocio.Helpers;
 using Presentacion.Helpers;
+using Presentacion.Controller;
 
 namespace Presentacion.Forms
 {
@@ -57,6 +58,7 @@ namespace Presentacion.Forms
         private IconButton _botonActivo;
         private System.Windows.Forms.Timer? _timerRespaldo;
         private NotifyIcon? _notifyIconRespaldo;
+        private Task _cargaMonedaTask = Task.CompletedTask;
 
         private IServiceScope? _scopeActivo;
 
@@ -81,9 +83,37 @@ namespace Presentacion.Forms
             _ = VerYEnviarFelicitacionesAsync();
 
             InicializarSistemaRespaldo();
+        }
 
-            // Abrir el inicio por defecto al arrancar
+        protected override async void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Enabled = false;
+
+            _cargaMonedaTask = CargarMonedaAsync();
+            await _cargaMonedaTask;
+
+            Enabled = true;
+            if (IsDisposed) return;
             AbrirFormulario(typeof(FrmInicio), btnInicio);
+        }
+
+        private async Task CargarMonedaAsync()
+        {
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var configuracionController = scope.ServiceProvider.GetRequiredService<ConfiguracionController>();
+                MonedaHelper.ConfigurarSimbolo(await configuracionController.ObtenerSimboloMonedaAsync());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"No se pudo cargar la moneda configurada. Se utilizará el símbolo predeterminado ($).{Environment.NewLine}{ex.Message}",
+                    "Configuración de moneda",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
         }
 
         // ───────────── Menú lateral ordenado ─────────────
@@ -212,9 +242,10 @@ namespace Presentacion.Forms
 
         // Al mostrarse FrmPrincipal: si el usuario puede registrar visitas y hay otra pantalla conectada,
         // la ventana de registro se abre sola ahí y el foco se queda en la ventana principal.
-        protected override void OnShown(EventArgs e)
+        protected override async void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            await _cargaMonedaTask;
 
             if (!btnRegistrarVisita.Visible || ObtenerPantallaSecundaria() == null) return;
 
@@ -512,4 +543,3 @@ namespace Presentacion.Forms
         }
     }
 }
-

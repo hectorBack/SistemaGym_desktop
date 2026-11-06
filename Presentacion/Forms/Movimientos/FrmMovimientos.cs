@@ -33,6 +33,9 @@ namespace Presentacion.Forms.Movimientos
 
             InitializeComponent();
             ConfigurarColumnas();
+            lblIngresos.Text = $"Ingresos: {MonedaHelper.Formatear(0m)}";
+            lblEgresos.Text = $"Egresos: {MonedaHelper.Formatear(0m)}";
+            lblBalance.Text = $"Balance: {MonedaHelper.Formatear(0m)}";
         }
 
         /// <summary>Movimiento de la fila seleccionada, o null si no hay ninguna seleccionada.</summary>
@@ -45,7 +48,7 @@ namespace Presentacion.Forms.Movimientos
             string.Equals(m.Tipo?.Trim(), "Egreso", StringComparison.OrdinalIgnoreCase);
 
         // Texto para identificar un movimiento en los mensajes (antes se mostraba solo el ID interno).
-        private static string Describir(MovimientoViewModel m) => $"{m.Tipo} de {m.Total:C2} ({m.ConceptoNombre})";
+        private static string Describir(MovimientoViewModel m) => $"{m.Tipo} de {MonedaHelper.Formatear(m.Total)} ({m.ConceptoNombre})";
 
         // ───────────── Carga y columnas ─────────────
 
@@ -150,9 +153,9 @@ namespace Presentacion.Forms.Movimientos
             decimal egresos = activos.Where(EsEgreso).Sum(m => m.Total);
             decimal balance = ingresos - egresos;
 
-            lblIngresos.Text = $"Ingresos: {ingresos:C2}";
-            lblEgresos.Text = $"Egresos: {egresos:C2}";
-            lblBalance.Text = $"Balance: {balance:C2}";
+            lblIngresos.Text = $"Ingresos: {MonedaHelper.Formatear(ingresos)}";
+            lblEgresos.Text = $"Egresos: {MonedaHelper.Formatear(egresos)}";
+            lblBalance.Text = $"Balance: {MonedaHelper.Formatear(balance)}";
             lblBalance.ForeColor = balance >= 0 ? Tema.Exito : Tema.Peligro;
             lblCantidad.Text = $"{_vista.Count} movimiento(s)";
         }

@@ -38,7 +38,8 @@ namespace Presentacion.Forms.Socios
             ConfigurarColumnas();
 
             lblFechaInicio.Text = _socioMembresia.FechaInicioTexto;
-            lblPrecioMembresia.Text = _socioMembresia.Precio.ToString("C2");
+            lblPrecioMembresia.Text = MonedaHelper.Formatear(_socioMembresia.Precio);
+            lblTotalPagado.Text = MonedaHelper.Formatear(0m);
             cmbTipoPago.SelectedIndex = 0;
         }
 
@@ -94,7 +95,7 @@ namespace Presentacion.Forms.Socios
             decimal totalPagado = _vista.Where(p => p.Activo).Sum(p => p.Monto);
             _saldoPendiente = Math.Max(0, _socioMembresia.Precio - totalPagado);
 
-            lblTotalPagado.Text = totalPagado.ToString("C2");
+            lblTotalPagado.Text = MonedaHelper.Formatear(totalPagado);
 
             if (_saldoPendiente == 0)
             {
@@ -104,8 +105,8 @@ namespace Presentacion.Forms.Socios
             else
             {
                 lblEstadoPago.Text = totalPagado > 0
-                    ? $"PARCIAL · Saldo {_saldoPendiente:C2}"
-                    : $"PENDIENTE · Saldo {_saldoPendiente:C2}";
+                    ? $"PARCIAL · Saldo {MonedaHelper.Formatear(_saldoPendiente)}"
+                    : $"PENDIENTE · Saldo {MonedaHelper.Formatear(_saldoPendiente)}";
                 lblEstadoPago.ForeColor = Tema.Advertencia;
             }
 
@@ -173,7 +174,7 @@ namespace Presentacion.Forms.Socios
             if (monto > _saldoPendiente)
             {
                 FormHelper.MostrarAdvertencia(
-                    $"El monto no puede ser mayor al saldo pendiente ({_saldoPendiente:C2}).", "Validación");
+                    $"El monto no puede ser mayor al saldo pendiente ({MonedaHelper.Formatear(_saldoPendiente)}).", "Validación");
                 nudMonto.Focus();
                 return;
             }
@@ -188,7 +189,7 @@ namespace Presentacion.Forms.Socios
 
             // Un pago afecta la caja: se confirma antes de registrarlo.
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Registrar un pago de {monto:C2} en {formaPago}?", "Registrar pago"))
+                    $"¿Registrar un pago de {MonedaHelper.Formatear(monto)} en {formaPago}?", "Registrar pago"))
                 return;
 
             string folio = txtFolio.Text.Trim();
@@ -232,7 +233,7 @@ namespace Presentacion.Forms.Socios
             if (pago == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea anular el pago de {pago.Monto:C2} del {pago.FechaFormateada}?\n\nEl monto dejará de contar como pagado.",
+                    $"¿Desea anular el pago de {MonedaHelper.Formatear(pago.Monto)} del {pago.FechaFormateada}?\n\nEl monto dejará de contar como pagado.",
                     "Anular pago",
                     destructiva: true))
                 return;

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Presentacion.Helpers;
+
 namespace Presentacion.ViewModels
 {
     public class CompraViewModel
@@ -20,7 +22,7 @@ namespace Presentacion.ViewModels
 
         // Propiedades calculadas para visualización en DataGridView / UI
         public string EstadoTexto => Activo ? Estado : "Inactivo";
-        public string TotalTexto => Total.ToString("C2");
+        public string TotalTexto => MonedaHelper.Formatear(Total);
         public string FechaTexto => CreatedAt.HasValue ? CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "-";
 
         // Lista de detalles asociada

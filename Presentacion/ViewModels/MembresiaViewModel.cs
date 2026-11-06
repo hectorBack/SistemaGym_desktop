@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Presentacion.Helpers;
+
 namespace Presentacion.ViewModels
 {
     public class MembresiaViewModel
@@ -11,7 +13,7 @@ namespace Presentacion.ViewModels
         public int MembresiaID { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public decimal Precio { get; set; }
-        public string PrecioFormateado => Precio.ToString("C2");
+        public string PrecioFormateado => MonedaHelper.Formatear(Precio);
 
         // Nuevos atributos visuales
         public string Tipo { get; set; } = string.Empty;

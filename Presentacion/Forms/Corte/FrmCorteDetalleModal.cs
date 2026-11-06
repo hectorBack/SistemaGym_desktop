@@ -68,10 +68,10 @@ namespace Presentacion.Forms.Corte
                 ? "Sin observaciones"
                 : _corte.Observaciones;
 
-            lblEfectivoInicialValor.Text = _corte.MontoInicial.ToString("C2");
-            lblTotalIngresosValor.Text = _corte.TotalIngresos.ToString("C2");
-            lblTotalEgresosValor.Text = _corte.TotalEgresos.ToString("C2");
-            lblEfectivoFinalValor.Text = _corte.MontoFinal.ToString("C2");
+            lblEfectivoInicialValor.Text = MonedaHelper.Formatear(_corte.MontoInicial);
+            lblTotalIngresosValor.Text = MonedaHelper.Formatear(_corte.TotalIngresos);
+            lblTotalEgresosValor.Text = MonedaHelper.Formatear(_corte.TotalEgresos);
+            lblEfectivoFinalValor.Text = MonedaHelper.Formatear(_corte.MontoFinal);
         }
 
         // Los importes en cero se dejan en blanco para que se lea mejor qué es ingreso y qué es egreso.

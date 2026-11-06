@@ -149,8 +149,8 @@ namespace Presentacion.Forms.Reportes
             decimal totalEgresos = _vista.Where(f => f.Tipo.Equals("Egreso", StringComparison.OrdinalIgnoreCase)).Sum(f => f.Total);
 
             // Asume que tienes labels en tu diseño para mostrar estos valores (ej. lblTotalIngresos, lblTotalEgresos)
-            if (lblTotalIngresos != null) lblTotalIngresos.Text = $"Ingresos: {totalIngresos:C2}";
-            if (lblTotalEgresos != null) lblTotalEgresos.Text = $"Egresos: {totalEgresos:C2}";
+            if (lblTotalIngresos != null) lblTotalIngresos.Text = $"Ingresos: {MonedaHelper.Formatear(totalIngresos)}";
+            if (lblTotalEgresos != null) lblTotalEgresos.Text = $"Egresos: {MonedaHelper.Formatear(totalEgresos)}";
             if (lblTotal != null) lblTotal.Text = $"{_vista.Count} movimiento(s)";
 
             btnExportarExcel.Enabled = _vista.Count > 0;

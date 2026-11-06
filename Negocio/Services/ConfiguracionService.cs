@@ -288,5 +288,14 @@ namespace Negocio.Services
 
             await _unitOfWork.SaveChangesAsync();
         }
+
+        public async Task<string> ObtenerSimboloMonedaAsync()
+        {
+            var valor = await ObtenerValorPorClaveAsync(CLAVE_MAS_MONEDA);
+
+            return string.IsNullOrWhiteSpace(valor)
+                ? "MXN"
+                : valor.Trim();
+        }
     }
 }

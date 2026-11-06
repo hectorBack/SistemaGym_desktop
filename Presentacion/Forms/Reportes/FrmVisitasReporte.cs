@@ -154,7 +154,7 @@ namespace Presentacion.Forms.Reportes
 
         private void ActualizarResumen()
         {
-            lblTotal.Text = $"{_vista.Count} visita(s)  ·  Total {_vista.Sum(f => f.Monto):C2}";
+            lblTotal.Text = $"{_vista.Count} visita(s)  ·  Total {MonedaHelper.Formatear(_vista.Sum(f => f.Monto))}";
             ActualizarEstadoBotones();
         }
 

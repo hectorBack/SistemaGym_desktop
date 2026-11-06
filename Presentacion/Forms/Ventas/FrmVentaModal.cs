@@ -32,6 +32,9 @@ namespace Presentacion.Forms.Ventas
 
         private readonly VentaController _ventaController;
         private readonly ProductoController _productoController;
+        private readonly ConfiguracionController _configuracionController;
+
+        private string _simboloMoneda = "$";
 
         private readonly BindingList<LineaCarrito> _carrito = new();
         private List<ProductoViewModel> _productos = new();
@@ -42,10 +45,11 @@ namespace Presentacion.Forms.Ventas
 
         private bool _guardando;
 
-        public FrmVentaModal(VentaController ventaController, ProductoController productoController)
+        public FrmVentaModal(VentaController ventaController, ProductoController productoController, ConfiguracionController configuracionController)
         {
             _ventaController = ventaController ?? throw new ArgumentNullException(nameof(ventaController));
             _productoController = productoController ?? throw new ArgumentNullException(nameof(productoController));
+            _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
 
             InitializeComponent();
             ConfigurarColumnas();
@@ -72,6 +76,8 @@ namespace Presentacion.Forms.Ventas
 
         private async void FrmVentaModal_Load(object? sender, EventArgs e)
         {
+            await CargarSimboloMonedaAsync();
+
             bool cargado = await FormHelper.EjecutarAsync(async () =>
             {
                 var productos = await _productoController.ObtenerProductosAsync(incluirInactivos: false);
@@ -106,6 +112,29 @@ namespace Presentacion.Forms.Ventas
             txtCodigoBarras.Focus();
         }
 
+        private async Task CargarSimboloMonedaAsync()
+        {
+            try
+            {
+                var simbolo = await _configuracionController.ObtenerSimboloMonedaAsync();
+
+                MonedaHelper.ConfigurarSimbolo(simbolo);
+                _simboloMoneda = MonedaHelper.SimboloActual;
+
+                AplicarFormatoMoneda();
+            }
+            catch (Exception ex)
+            {
+                _simboloMoneda = MonedaHelper.SimboloActual;
+                AplicarFormatoMoneda();
+                MessageBox.Show(
+                    $"No se pudo cargar la moneda configurada. Se utilizará {_simboloMoneda}.{Environment.NewLine}{ex.Message}",
+                    "Configuración de moneda",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+        }
+
         private void ConfigurarColumnas()
         {
             dgvCarrito.AutoGenerateColumns = false;
@@ -114,6 +143,18 @@ namespace Presentacion.Forms.Ventas
             dgvCarrito.AgregarTexto(nameof(LineaCarrito.Cantidad), "Cant.", 55, 55, alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
             dgvCarrito.AgregarTexto(nameof(LineaCarrito.PrecioUnitario), "Precio", 80, 75, "C2", alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
             dgvCarrito.AgregarTexto(nameof(LineaCarrito.Subtotal), "Subtotal", 85, 80, "C2", alinearDerecha: true).SortMode = DataGridViewColumnSortMode.NotSortable;
+        }
+
+        private void AplicarFormatoMoneda()
+        {
+            var columnaPrecio = dgvCarrito.Columns["col" + nameof(LineaCarrito.PrecioUnitario)];
+            var columnaSubtotal = dgvCarrito.Columns["col" + nameof(LineaCarrito.Subtotal)];
+
+            if (columnaPrecio != null)
+                columnaPrecio.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView(_simboloMoneda);
+
+            if (columnaSubtotal != null)
+                columnaSubtotal.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView(_simboloMoneda);
         }
 
         // ───────────── Agregar productos ─────────────
@@ -279,7 +320,7 @@ namespace Presentacion.Forms.Ventas
         // Total, y botones que solo tienen sentido con algo en el carrito / seleccionado.
         private void ActualizarResumen()
         {
-            lblTotalCalculado.Text = _carrito.Sum(l => l.Subtotal).ToString("C2");
+            lblTotalCalculado.Text = MonedaHelper.Formatear(_carrito.Sum(l => l.Subtotal), _simboloMoneda);
             btnQuitar.Enabled = LineaSeleccionada != null;
             btnGuardar.Enabled = _carrito.Count > 0;
         }

@@ -122,7 +122,7 @@ namespace Presentacion.Forms.Reportes
         // Suma el valor total contratado de las membresías vendidas en el periodo.
         private void ActualizarResumen()
         {
-            lblTotal.Text = $"{_vista.Count} membresía(s)  ·  Total {_vista.Sum(f => f.Precio):C2}";
+            lblTotal.Text = $"{_vista.Count} membresía(s)  ·  Total {MonedaHelper.Formatear(_vista.Sum(f => f.Precio))}";
             btnExportarExcel.Enabled = _vista.Count > 0;
         }
 

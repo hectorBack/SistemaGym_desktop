@@ -130,7 +130,7 @@ namespace Presentacion.Forms.Reportes
         // En esta pestaña se suma el dinero REAL ingresado a caja (importe de cada abono).
         private void ActualizarResumen()
         {
-            lblTotal.Text = $"{_vista.Count} pago(s)  ·  Total {_vista.Sum(f => f.Importe):C2}";
+            lblTotal.Text = $"{_vista.Count} pago(s)  ·  Total {MonedaHelper.Formatear(_vista.Sum(f => f.Importe))}";
             btnExportarExcel.Enabled = _vista.Count > 0;
         }
 

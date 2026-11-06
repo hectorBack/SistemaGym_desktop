@@ -16,13 +16,15 @@ namespace Presentacion.Forms.Membresias
     public partial class FrmMembresias : Form
     {
         private readonly MembresiaController _controller;
+        private readonly ConfiguracionController _configuracionController;
 
         // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
         private ListaOrdenable<MembresiaViewModel> _vista = new();
 
-        public FrmMembresias(MembresiaController controller)
+        public FrmMembresias(MembresiaController controller, ConfiguracionController configuracionController)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+            _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
 
             InitializeComponent();
             ConfigurarColumnas();
@@ -39,12 +41,28 @@ namespace Presentacion.Forms.Membresias
         private async void FrmMembresias_Load(object? sender, EventArgs e)
         {
             btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
+            try
+            {
+                MonedaHelper.ConfigurarSimbolo(await _configuracionController.ObtenerSimboloMonedaAsync());
+                var columnaPrecio = dgvMembresias.Columns["col" + nameof(MembresiaViewModel.Precio)];
+                if (columnaPrecio != null)
+                    columnaPrecio.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"No se pudo cargar la moneda configurada. Se utilizará el símbolo disponible.{Environment.NewLine}{ex.Message}",
+                    "Configuración de moneda",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+
             await CargarMembresiasAsync();
         }
 
         // Las columnas se definen una sola vez (no en cada recarga).
         // Precio y duración se enlazan a los valores numéricos (no a texto ya formateado),
-        // así ordenan correctamente: 7 días antes que 30, $99 antes que $1,200.
+        // así ordenan correctamente.
         private void ConfigurarColumnas()
         {
             dgvMembresias.AutoGenerateColumns = false;

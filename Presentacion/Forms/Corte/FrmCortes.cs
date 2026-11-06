@@ -42,6 +42,7 @@ namespace Presentacion.Forms.Corte
 
             InitializeComponent();
             ConfigurarColumnas();
+            lblEfectivoCaja.Text = $"Efectivo en Caja: {MonedaHelper.Formatear(0m)}";
         }
 
         /// <summary>Corte de la fila seleccionada, o null si no hay ninguno seleccionado.</summary>
@@ -144,7 +145,7 @@ namespace Presentacion.Forms.Corte
                 // Antes aquí se le sumaba otra vez el efectivo inicial de la configuración.
                 decimal efectivo = await _corteController.ObtenerEfectivoEnCajaAsync();
 
-                texto = $"Efectivo en Caja: {efectivo:C2}";
+                texto = $"Efectivo en Caja: {MonedaHelper.Formatear(efectivo)}";
             },
             "No se pudo consultar el efectivo en caja.");
 
