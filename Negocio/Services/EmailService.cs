@@ -117,9 +117,9 @@ namespace Negocio.Services
             if (usuarioId > 0)
             {
                 var usuario = await _unitOfWork.Usuarios.ObtenerPorIdAsync(usuarioId);
-                usuarioGenerador = string.IsNullOrWhiteSpace(usuario?.NombreUsuario)
+                usuarioGenerador = string.IsNullOrWhiteSpace(usuario?.NombreCompleto)
                     ? $"Usuario {usuarioId}"
-                    : usuario!.NombreUsuario;
+                    : usuario!.NombreCompleto;
             }
 
             // 3. Consultar los movimientos dentro del rango del corte de caja
@@ -137,7 +137,7 @@ namespace Negocio.Services
                 .Select(m => new MovimientoCorreo(
                     m.Concepto?.Nombre ?? "N/A",
                     m.CreatedAt,
-                    m.Usuario?.NombreUsuario ?? "admin",
+                    m.Usuario?.NombreCompleto ?? "admin",
                     m.Tipo ?? string.Empty,
                     FormaDe(m),
                     m.Total,

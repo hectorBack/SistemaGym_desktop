@@ -46,7 +46,7 @@ namespace Presentacion.Controller
 
         public async Task AnularVentaAsync(int id, int usuarioId, string? motivo = null)
         {
-            await _ventaService.EliminarLogicoAsync(id, usuarioId, motivo);
+            await _ventaService.CancelarVentaAsync(id, usuarioId, motivo);
         }
 
         public async Task EliminarFisicoAsync(int id)

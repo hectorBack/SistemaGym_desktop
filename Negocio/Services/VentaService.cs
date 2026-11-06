@@ -133,7 +133,7 @@ namespace Negocio.Services
             return MapToDto(nuevaVenta);
         }
 
-        public async Task EliminarLogicoAsync(int id, int usuarioId, string? motivo = null)
+        public async Task CancelarVentaAsync(int id, int usuarioId, string? motivo = null)
         {
             var venta = await _unitOfWork.Venta.ObtenerPorIdAsync(id);
             if (venta == null)
