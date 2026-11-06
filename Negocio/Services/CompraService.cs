@@ -216,6 +216,41 @@ namespace Negocio.Services
                 throw new BusinessException("La compra a eliminar no existe.");
             }
 
+            // Si la compra sigue vigente, se deshace su efecto: stock y movimiento de caja.
+            // Si ya estaba cancelada, el egreso y su cancelación se compensan y el stock ya se revirtió.
+            if (compra.Activo)
+            {
+                var movimiento = compra.MovimientoID.HasValue
+                    ? await _unitOfWork.Movimiento.ObtenerPorIdAsync(compra.MovimientoID.Value)
+                    : null;
+
+                if (movimiento?.CorteID != null)
+                {
+                    throw new BusinessException("Esta compra ya forma parte de un corte de caja y no se puede eliminar. Para corregirla usa 'Cancelar'.");
+                }
+
+                // Restar el stock que sumó la compra
+                foreach (var detalle in compra.Detalles)
+                {
+                    var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(detalle.ProductoID);
+                    if (producto != null)
+                    {
+                        if (producto.Stock < detalle.Cantidad)
+                        {
+                            throw new BusinessException($"No se puede eliminar la compra porque el producto '{producto.Nombre}' no cuenta con stock suficiente para descontar.");
+                        }
+
+                        producto.Stock -= detalle.Cantidad;
+                        _unitOfWork.Producto.Actualizar(producto);
+                    }
+                }
+
+                if (movimiento != null)
+                {
+                    _unitOfWork.Movimiento.EliminarFisico(movimiento);
+                }
+            }
+
             _unitOfWork.Compra.EliminarFisico(compra);
             await _unitOfWork.SaveChangesAsync();
         }

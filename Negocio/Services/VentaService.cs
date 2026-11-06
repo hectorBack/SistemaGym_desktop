@@ -182,8 +182,34 @@ namespace Negocio.Services
                 throw new BusinessException("La venta a eliminar no existe.");
             }
 
+            // Una venta vigente se deshace por completo: vuelve el stock y desaparece su ingreso de caja.
+            // (Si ya estaba anulada, el stock se devolvió al anular y su ingreso y su cancelación se compensan: se dejan.)
+            if (venta.Activo)
+            {
+                var movimiento = venta.MovimientoID.HasValue
+                    ? await _unitOfWork.Movimiento.ObtenerPorIdAsync(venta.MovimientoID.Value)
+                    : null;
+
+                // Un movimiento que ya entró a un corte no se toca: cambiaría un corte hecho.
+                if (movimiento?.CorteID != null)
+                    throw new BusinessException("Esta venta ya forma parte de un corte de caja y no se puede eliminar. Para corregirla usa 'Anular'.");
+
+                foreach (var detalle in venta.Detalles)
+                {
+                    var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(detalle.ProductoID);
+                    if (producto != null)
+                    {
+                        producto.Stock += detalle.Cantidad;
+                        _unitOfWork.Producto.Actualizar(producto);
+                    }
+                }
+
+                if (movimiento != null)
+                    _unitOfWork.Movimiento.EliminarFisico(movimiento);
+            }
+
             _unitOfWork.Venta.EliminarFisico(venta);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(); // todo en una sola transacción
         }
 
         public async Task<IEnumerable<VentaDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
