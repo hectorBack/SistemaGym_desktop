@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Negocio.Helpers;
+using Negocio.DTOs;
 
 namespace Negocio.Services
 {
@@ -202,7 +203,7 @@ namespace Negocio.Services
         /// Envía al socio el comprobante de su pago. No hace nada si la opción "Enviar pago por correo" está apagada
         /// o si el socio no tiene correo. Nunca lanza error: el pago ya está guardado y no debe verse afectado.
         /// </summary>
-        public async Task EnviarCorreoPagoAsync(string emailSocio, PagoCorreo datos)
+        public async Task EnviarCorreoPagoAsync(string emailSocio, PagoCorreo datos, TicketConfiguracionDto configTicket)
         {
             try
             {
@@ -232,23 +233,24 @@ namespace Negocio.Services
                     cfgTelefono?.Valor?.Trim() ?? string.Empty,
                     cfgRfc?.Valor?.Trim() ?? string.Empty,
                     cfgMensaje?.Valor?.Trim() ?? string.Empty,
-                    CargarLogo(cfgLogo?.Valor));
+                    LogoGimnasioHelper.CargarBytes(cfgLogo?.Valor));
 
                 string asunto = $"Comprobante de pago - {nombreGym}";
                 string mensaje = PlantillasCorreoHelper.PagoRecibido(nombreGym, datos);
 
-                // Ticket en PDF. Si falla (por ejemplo, un logo en formato no soportado) se reintenta sin logo;
+                // Ticket en PDF con la configuración de la pestaña Ticket. Si falla (por ejemplo, un logo en formato
+                // no soportado o una fuente que no existe) se reintenta sin logo y con los valores predeterminados;
                 // si vuelve a fallar, el correo sale igual, solo con el resumen en el cuerpo.
                 byte[]? pdf = null;
                 try
                 {
-                    pdf = ComprobantePdfHelper.PagoRecibido(gym, datos);
+                    pdf = ComprobantePdfHelper.PagoRecibido(configTicket, gym, datos);
                 }
                 catch
                 {
                     try
                     {
-                        pdf = ComprobantePdfHelper.PagoRecibido(gym with { Logo = null }, datos);
+                        pdf = ComprobantePdfHelper.PagoRecibido(new TicketConfiguracionDto(), gym with { Logo = null }, datos);
                     }
                     catch (Exception exPdf)
                     {
@@ -265,27 +267,6 @@ namespace Negocio.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"No se pudo enviar el comprobante de pago a {emailSocio}: {ex.Message}");
-            }
-        }
-
-        // Gym_Logo puede guardar la ruta de un archivo o la imagen en Base64. Si no se puede leer, el ticket sale sin logo.
-        private static byte[]? CargarLogo(string? valor)
-        {
-            if (string.IsNullOrWhiteSpace(valor)) return null;
-
-            try
-            {
-                string v = valor.Trim();
-                if (File.Exists(v)) return File.ReadAllBytes(v);
-
-                int marca = v.IndexOf("base64,", StringComparison.OrdinalIgnoreCase);
-                if (marca >= 0) v = v[(marca + 7)..];
-
-                return Convert.FromBase64String(v);
-            }
-            catch
-            {
-                return null;
             }
         }
 

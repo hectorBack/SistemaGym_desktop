@@ -12,10 +12,12 @@ namespace Presentacion.Controller
     public class PagoSocioMembresiaController
     {
         private readonly IPagoSocioMembresiaService _pagoSocioMembresiaService;
+        private readonly ITicketService _ticketService;
 
-        public PagoSocioMembresiaController(IPagoSocioMembresiaService pagoSocioMembresiaService)
+        public PagoSocioMembresiaController(IPagoSocioMembresiaService pagoSocioMembresiaService, ITicketService ticketService)
         {
             _pagoSocioMembresiaService = pagoSocioMembresiaService;
+            _ticketService = ticketService;
         }
 
         public async Task<IEnumerable<PagoSocioMembresiaViewModel>> ObtenerPagosAsync(bool incluirInactivos = true)
@@ -42,7 +44,8 @@ namespace Presentacion.Controller
             return await _pagoSocioMembresiaService.ObtenerTotalPagadoPorSocioMembresiaIdAsync(socioMembresiaId);
         }
 
-        public async Task GuardarPagoAsync(int? pagoId, int socioMembresiaId, int usuarioId, decimal monto, string? folio, string formaPago, string? observacion)
+        // Devuelve el pago creado (para poder imprimir su ticket); null cuando solo se actualizó uno existente.
+        public async Task<PagoSocioMembresiaDto?> GuardarPagoAsync(int? pagoId, int socioMembresiaId, int usuarioId, decimal monto, string? folio, string formaPago, string? observacion)
         {
             if (pagoId.HasValue && pagoId.Value > 0)
             {
@@ -56,6 +59,7 @@ namespace Presentacion.Controller
                     Activo = true
                 };
                 await _pagoSocioMembresiaService.ActualizarAsync(updateDto);
+                return null;
             }
             else
             {
@@ -68,8 +72,17 @@ namespace Presentacion.Controller
                     FormaPago = formaPago,
                     Observacion = observacion
                 };
-                await _pagoSocioMembresiaService.CrearAsync(createDto);
+                return await _pagoSocioMembresiaService.CrearAsync(createDto);
             }
+        }
+
+        /// <summary>
+        /// Imprime el comprobante de un pago. Devuelve false si la impresora está
+        /// deshabilitada en la configuración del ticket.
+        /// </summary>
+        public async Task<bool> ImprimirTicketAsync(int pagoId)
+        {
+            return await _ticketService.ImprimirTicketPagoMembresiaAsync(pagoId);
         }
 
         public async Task CambiarEstadoLogicoAsync(int id)

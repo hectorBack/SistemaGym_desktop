@@ -135,6 +135,7 @@ namespace Presentacion
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<CajaHelper>(); // apertura de cortes y movimientos de caja compartidos
             services.AddScoped<IRespaldoService, RespaldoService>(); // apertura de cortes y movimientos de caja compartidos
+            services.AddScoped<ITicketService, TicketService>();
 
 
             // 4. Controladores de Presentación

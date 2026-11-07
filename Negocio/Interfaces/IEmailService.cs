@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Net;
 using Negocio.Helpers;
+using Negocio.DTOs;
 
 namespace Negocio.Interfaces
 {
@@ -15,10 +16,10 @@ namespace Negocio.Interfaces
         //Nuevo método para enviar recordatorios de vencimiento (1 día antes)
         Task EnviarRecordatorioVencimientoAsync();
 
-        Task EnviarCorreoCorteCajaAsync(decimal efectivoInicial, decimal totalVentas, decimal totalEntradas, decimal totalSalidas, decimal efectivoEsperado, decimal efectivoReal, decimal diferencia, DateTime fechaCorte, DateTime fechaInicio, int usuarioId);
+        // Envía el comprobante de un pago al socio (solo si "Mas_EnviarPagoPorCorreo" está activo y el socio tiene correo)
+        Task EnviarCorreoPagoAsync(string emailSocio, PagoCorreo datos, TicketConfiguracionDto configTicket);
 
-        // Envía el comprobante de un pago al socio (solo si "Correo_EnviarPago" está activo y el socio tiene correo)
-        Task EnviarCorreoPagoAsync(string emailSocio, PagoCorreo datos);
+        Task EnviarCorreoCorteCajaAsync(decimal efectivoInicial, decimal totalVentas, decimal totalEntradas, decimal totalSalidas, decimal efectivoEsperado, decimal efectivoReal, decimal diferencia, DateTime fechaCorte, DateTime fechaInicio, int usuarioId);
     }
 
 }

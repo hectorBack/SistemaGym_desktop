@@ -233,6 +233,7 @@ namespace Negocio.Services
                 UsuarioID = v.UsuarioID,
                 SocioID = v.SocioID,
                 Total = v.Total,
+                FormaPago = v.FormaPago,
                 FechaVenta = v.FechaVenta,
                 Activo = v.Activo,
                 CreatedAt = v.CreatedAt,

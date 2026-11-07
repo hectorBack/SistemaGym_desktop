@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Presentacion.Helpers;
+using Negocio.DTOs;
 
 namespace Presentacion.Forms.Socios
 {
@@ -199,17 +200,26 @@ namespace Presentacion.Forms.Socios
             bool guardado;
             try
             {
+                PagoSocioMembresiaDto? pagoRegistrado = null;
+
                 guardado = await FormHelper.EjecutarAsync(
-                    () => _controller.GuardarPagoAsync(
-                        pagoId: null,
-                        socioMembresiaId: _socioMembresia.SocioMembresiaID,
-                        usuarioId: _usuarioId,
-                        monto: monto,
-                        folio: folio,
-                        formaPago: formaPago,
-                        observacion: observacion),
+                    async () =>
+                    {
+                        pagoRegistrado = await _controller.GuardarPagoAsync(
+                            pagoId: null,
+                            socioMembresiaId: _socioMembresia.SocioMembresiaID,
+                            usuarioId: _usuarioId,
+                            monto: monto,
+                            folio: folio,
+                            formaPago: formaPago,
+                            observacion: observacion);
+                    },
                     "No se pudo registrar el pago.",
                     grpRegistrarPago);
+
+                // Se imprime con el pago ya guardado; el modal sigue bloqueado hasta terminar de mandar el ticket.
+                if (guardado && pagoRegistrado != null && !IsDisposed)
+                    await ImprimirTicketAsync(pagoRegistrado.PagoID);
             }
             finally
             {
@@ -221,6 +231,26 @@ namespace Presentacion.Forms.Socios
             txtFolio.Clear();
             txtObservacion.Clear();
             await CargarPagosAsync();
+        }
+
+        // Un fallo de impresión (sin impresora, papel, etc.) no deshace el pago: solo se avisa.
+        private async Task ImprimirTicketAsync(int pagoId)
+        {
+            try
+            {
+                Cursor = Cursors.WaitCursor;
+                await _controller.ImprimirTicketAsync(pagoId);
+            }
+            catch (Exception ex)
+            {
+                FormHelper.MostrarAdvertencia(
+                    $"El pago se registró correctamente, pero no se pudo imprimir el ticket.\n\n{ex.Message}",
+                    "Impresión de ticket");
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
 
         // ───────────── Anular ─────────────

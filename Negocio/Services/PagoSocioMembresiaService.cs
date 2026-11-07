@@ -21,19 +21,22 @@ namespace Negocio.Services
         private readonly IValidator<PagoSocioMembresiaUpdateDto> _updateValidator;
         private readonly CajaHelper _caja;
         private readonly IEmailService _emailService;
+        private readonly IConfiguracionService _configuracionService;
 
         public PagoSocioMembresiaService(
             IUnitOfWork unitOfWork,
             IValidator<PagoSocioMembresiaCreateDto> createValidator,
             IValidator<PagoSocioMembresiaUpdateDto> updateValidator,
             CajaHelper caja,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguracionService configuracionService)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
             _caja = caja;
             _emailService = emailService;
+            _configuracionService = configuracionService;
         }
 
         public async Task<IEnumerable<PagoSocioMembresiaDto>> ObtenerTodasAsync(bool incluirInactivas = false)
@@ -111,6 +114,8 @@ namespace Negocio.Services
                     decimal totalPagado = await _unitOfWork.PagoSocioMembresia.ObtenerTotalPagadoPorSocioMembresiaIdAsync(dto.SocioMembresiaID);
                     decimal saldo = Math.Max(0, precio - totalPagado);
 
+                    var configTicket = await _configuracionService.ObtenerConfigTicketAsync();
+
                     await _emailService.EnviarCorreoPagoAsync(socio.Email, new PagoCorreo(
                         ClaveSocio: socio.Clave,
                         NombreSocio: socio.Nombre,
@@ -125,7 +130,8 @@ namespace Negocio.Services
                         Folio: nuevoPago.Folio,
                         Observacion: nuevoPago.Observacion,
                         Usuario: string.IsNullOrWhiteSpace(usuario?.NombreCompleto) ? "N/A" : usuario!.NombreCompleto,
-                        Fecha: DateTime.Now));
+                        Fecha: DateTime.Now),
+                        configTicket);
                 }
             }
             catch (Exception ex)
@@ -135,7 +141,6 @@ namespace Negocio.Services
 
             return MapToDto(nuevoPago);
         }
-
 
         public async Task ActualizarAsync(PagoSocioMembresiaUpdateDto dto)
         {

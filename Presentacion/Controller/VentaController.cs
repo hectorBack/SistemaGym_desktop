@@ -12,10 +12,12 @@ namespace Presentacion.Controller
     public class VentaController
     {
         private readonly IVentaService _ventaService;
+        private readonly ITicketService _ticketService;
 
-        public VentaController(IVentaService ventaService)
+        public VentaController(IVentaService ventaService, ITicketService ticketService)
         {
             _ventaService = ventaService;
+            _ticketService = ticketService;
         }
 
         public async Task<IEnumerable<VentaViewModel>> ObtenerVentasAsync(bool incluirInactivas = true)
@@ -42,6 +44,15 @@ namespace Presentacion.Controller
             };
 
             return await _ventaService.CrearAsync(createDto);
+        }
+
+        /// <summary>
+        /// Imprime el ticket de una venta (nueva o reimpresión). Devuelve false si la impresora
+        /// está deshabilitada en la configuración del ticket.
+        /// </summary>
+        public async Task<bool> ImprimirTicketAsync(int ventaId)
+        {
+            return await _ticketService.ImprimirTicketVentaAsync(ventaId);
         }
 
         public async Task AnularVentaAsync(int id, int usuarioId, string? motivo = null)

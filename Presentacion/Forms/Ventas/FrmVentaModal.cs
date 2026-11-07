@@ -388,14 +388,40 @@ namespace Presentacion.Forms.Ventas
             string formaPago = cmbFormaPago.SelectedItem?.ToString() ?? "Efectivo";
 
             _guardando = true;
+            VentaDto? ventaRegistrada = null;
             bool registrada = await FormHelper.EjecutarAsync(
-                () => _ventaController.RegistrarVentaAsync(usuarioId, socioId, total, detalles, formaPago),
+                async () => { ventaRegistrada = await _ventaController.RegistrarVentaAsync(usuarioId, socioId, total, detalles, formaPago); },
                 "No se pudo registrar la venta.",
                 btnGuardar, btnCancelar, btnAgregar, btnQuitar, dgvCarrito, cmbFormaPago);
+
+            // Se imprime con la venta ya guardada; el diálogo sigue bloqueado hasta terminar de mandar el ticket.
+            if (registrada && ventaRegistrada != null && !IsDisposed)
+                await ImprimirTicketAsync(ventaRegistrada.VentaID);
+
             _guardando = false;
 
             if (registrada && !IsDisposed)
                 DialogResult = DialogResult.OK; // cierra el diálogo; el historial se recarga solo
+        }
+
+        // Un fallo de impresión (sin impresora, papel, etc.) no deshace la venta: solo se avisa.
+        private async Task ImprimirTicketAsync(int ventaId)
+        {
+            try
+            {
+                Cursor = Cursors.WaitCursor;
+                await _ventaController.ImprimirTicketAsync(ventaId);
+            }
+            catch (Exception ex)
+            {
+                FormHelper.MostrarAdvertencia(
+                    $"La venta se registró correctamente, pero no se pudo imprimir el ticket.\n\n{ex.Message}",
+                    "Impresión de ticket");
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

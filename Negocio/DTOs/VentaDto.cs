@@ -14,6 +14,7 @@ namespace Negocio.DTOs
         public int? SocioID { get; set; }
         public string? SocioNombre { get; set; }   // Nombre del socio (null si es cliente casual)
         public decimal Total { get; set; }
+        public string FormaPago { get; set; } = "Efectivo";
         public DateTime FechaVenta { get; set; }
         public bool Activo { get; set; }
         public DateTime? CreatedAt { get; set; }
