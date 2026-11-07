@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace Presentacion.Forms.Configuracion
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al cargar la configuración: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al cargar la configuración: {ex.Message}");
             }
             finally
             {
@@ -56,7 +57,7 @@ namespace Presentacion.Forms.Configuracion
 
                 if (!decimal.TryParse(txtEfectivoInicial.Text.Trim(), out decimal efectivoInicial))
                 {
-                    MessageBox.Show("Por favor ingresa un monto válido para el efectivo inicial.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    FormHelper.MostrarAdvertencia("Por favor ingresa un monto válido para el efectivo inicial.", "Validación");
                     return;
                 }
 
@@ -68,11 +69,11 @@ namespace Presentacion.Forms.Configuracion
 
                 await _configuracionController.GuardarConfigCorteCajaAsync(model);
 
-                MessageBox.Show("Configuración de Corte de Caja guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("Configuración de Corte de Caja guardada correctamente.", "Éxito");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al guardar los cambios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al guardar los cambios: {ex.Message}");
             }
             finally
             {

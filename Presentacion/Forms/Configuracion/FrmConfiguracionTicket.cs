@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace Presentacion.Forms.Configuracion
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al cargar la configuración del ticket: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al cargar la configuración del ticket: {ex.Message}");
             }
             finally
             {
@@ -94,11 +95,11 @@ namespace Presentacion.Forms.Configuracion
 
                 await _configuracionController.GuardarConfigTicketAsync(LeerFormulario());
 
-                MessageBox.Show("Configuración del ticket guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("Configuración del ticket guardada correctamente.", "Éxito");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al guardar los cambios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al guardar los cambios: {ex.Message}");
             }
             finally
             {
@@ -112,7 +113,7 @@ namespace Presentacion.Forms.Configuracion
         {
             if (!chkHabilitarImpresora.Checked)
             {
-                MessageBox.Show("Para imprimir, primero marca \"Habilitar impresora\".", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia("Para imprimir, primero marca \"Habilitar impresora\".", "Validación");
                 chkHabilitarImpresora.Focus();
                 return;
             }
@@ -132,11 +133,11 @@ namespace Presentacion.Forms.Configuracion
 
                 ImprimirTicketPrueba(model, string.IsNullOrWhiteSpace(gimnasio.Nombre) ? "Gimnasio" : gimnasio.Nombre, logo);
 
-                MessageBox.Show("Configuración guardada. El ticket de prueba se envió a la impresora.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("Configuración guardada. El ticket de prueba se envió a la impresora.", "Éxito");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"No se pudo completar la operación: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"No se pudo completar la operación: {ex.Message}");
             }
             finally
             {

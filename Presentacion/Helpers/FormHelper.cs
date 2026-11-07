@@ -11,30 +11,26 @@ namespace Presentacion.Helpers
     public static class FormHelper
     {
         /// <summary>
-        /// Muestra un cuadro de confirmación (Sí/No).
+        /// Muestra un cuadro de confirmación (Sí/No) con el estilo de la aplicación.
         /// Con destructiva = true usa un icono de advertencia y deja "No" como botón por defecto,
         /// para que un Enter apresurado no borre nada.
         /// </summary>
         public static bool ConfirmarAccion(string mensaje, string titulo = "Confirmación", bool destructiva = false)
         {
-            DialogResult resultado = MessageBox.Show(
-                mensaje,
-                titulo,
-                MessageBoxButtons.YesNo,
-                destructiva ? MessageBoxIcon.Warning : MessageBoxIcon.Question,
-                destructiva ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1);
+            DialogResult resultado = FrmMensaje.Mostrar(
+                mensaje, titulo, TipoMensaje.Pregunta, confirmar: true, destructiva: destructiva);
 
             return resultado == DialogResult.Yes;
         }
 
         public static void MostrarAviso(string mensaje, string titulo = "Aviso")
-            => MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            => FrmMensaje.Mostrar(mensaje, titulo, TipoMensaje.Aviso);
 
         public static void MostrarAdvertencia(string mensaje, string titulo = "Atención")
-            => MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            => FrmMensaje.Mostrar(mensaje, titulo, TipoMensaje.Advertencia);
 
         public static void MostrarError(string mensaje, string titulo = "Error del sistema")
-            => MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            => FrmMensaje.Mostrar(mensaje, titulo, TipoMensaje.Error);
 
         /// <summary>
         /// Ejecuta una operación asíncrona con el manejo de errores estándar de la aplicación:

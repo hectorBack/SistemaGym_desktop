@@ -41,11 +41,7 @@ namespace Presentacion.Forms.Configuracion
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Ocurrió un error al cargar la configuración adicional: {ex.Message}",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al cargar la configuración adicional: {ex.Message}");
             }
             finally
             {
@@ -68,19 +64,11 @@ namespace Presentacion.Forms.Configuracion
                 await _configuracionController.GuardarConfigMasConfiguracionesAsync(model);
                 MonedaHelper.ConfigurarSimbolo(model.Moneda);
 
-                MessageBox.Show(
-                    "Configuración adicional guardada correctamente.",
-                    "Éxito",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("Configuración adicional guardada correctamente.", "Éxito");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Ocurrió un error al guardar los cambios: {ex.Message}",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al guardar los cambios: {ex.Message}");
             }
             finally
             {

@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace Presentacion.Forms.Configuracion
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al cargar la configuración de correos: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al cargar la configuración de correos: {ex.Message}");
             }
             finally
             {
@@ -66,11 +67,11 @@ namespace Presentacion.Forms.Configuracion
 
                 await _configuracionController.GuardarConfigCorreosAsync(model);
 
-                MessageBox.Show("Configuración de correos guardada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("Configuración de correos guardada correctamente.", "Éxito");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al guardar los cambios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al guardar los cambios: {ex.Message}");
             }
             finally
             {
@@ -90,18 +91,18 @@ namespace Presentacion.Forms.Configuracion
 
                 if (string.IsNullOrWhiteSpace(emailDestino))
                 {
-                    MessageBox.Show("Por favor ingresa un correo electrónico en el campo superior antes de realizar la prueba.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    FormHelper.MostrarAdvertencia("Por favor ingresa un correo electrónico en el campo superior antes de realizar la prueba.", "Validación");
                     txtEmail.Focus();
                     return;
                 }
 
                 await _configuracionController.EnviarCorreoPruebaAsync(emailDestino);
 
-                MessageBox.Show($"Correo de prueba enviado exitosamente a: {emailDestino}\nRevisa tu bandeja de entrada o spam.", "Prueba Exitosa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso($"Correo de prueba enviado exitosamente a: {emailDestino}\nRevisa tu bandeja de entrada o spam.", "Prueba Exitosa");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"No se pudo enviar el correo de prueba. Asegúrate de guardar los cambios primero, que la contraseña de aplicación de 16 caracteres de Gmail sea correcta y tengas conexión a internet.\n\nDetalle: {ex.Message}", "Error de Envío", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"No se pudo enviar el correo de prueba. Asegúrate de guardar los cambios primero, que la contraseña de aplicación de 16 caracteres de Gmail sea correcta y tengas conexión a internet.\n\nDetalle: {ex.Message}", "Error de Envío");
             }
             finally
             {

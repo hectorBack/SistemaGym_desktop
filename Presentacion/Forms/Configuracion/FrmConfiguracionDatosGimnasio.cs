@@ -49,7 +49,7 @@ namespace Presentacion.Forms.Configuracion
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al cargar la configuración del gimnasio: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al cargar la configuración del gimnasio: {ex.Message}");
             }
             finally
             {
@@ -80,7 +80,7 @@ namespace Presentacion.Forms.Configuracion
 
                 if (string.IsNullOrWhiteSpace(txtNombre.Text))
                 {
-                    MessageBox.Show("Por favor ingresa el nombre del gimnasio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    FormHelper.MostrarAdvertencia("Por favor ingresa el nombre del gimnasio.", "Validación");
                     txtNombre.Focus();
                     return;
                 }
@@ -97,11 +97,11 @@ namespace Presentacion.Forms.Configuracion
 
                 await _configuracionController.GuardarConfigGimnasioAsync(model);
 
-                MessageBox.Show("Datos del gimnasio guardados correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                FormHelper.MostrarAviso("Datos del gimnasio guardados correctamente.", "Éxito");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error al guardar los cambios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Ocurrió un error al guardar los cambios: {ex.Message}");
             }
             finally
             {
