@@ -45,7 +45,7 @@ namespace Negocio.Services
         }
 
         // Envío por SMTP (red): es la parte lenta. No toca la base de datos, por eso puede correr en segundo plano.
-        private static async Task EnviarPorSmtpAsync(string remitente, string password, string destinatario, string asunto, string mensaje)
+        private static async Task EnviarPorSmtpAsync(string remitente, string password, string destinatario, string asunto, string mensaje, byte[]? adjuntoPdf = null, string? nombreAdjunto = null)
         {
             using var clienteSmtp = new SmtpClient("smtp.gmail.com", 587)
             {
@@ -63,18 +63,23 @@ namespace Negocio.Services
 
             mailMessage.To.Add(destinatario);
 
+            if (adjuntoPdf != null)
+            {
+                mailMessage.Attachments.Add(new Attachment(new MemoryStream(adjuntoPdf), nombreAdjunto ?? "comprobante.pdf", "application/pdf"));
+            }
+
             await clienteSmtp.SendMailAsync(mailMessage);
         }
 
         // Lanza el envío sin esperarlo. Si falla (sin internet, credenciales vencidas...) solo se registra:
         // el cierre de caja ya está guardado y no debe verse afectado.
-        private static void EnviarEnSegundoPlano(string remitente, string password, string destinatario, string asunto, string mensaje)
+        private static void EnviarEnSegundoPlano(string remitente, string password, string destinatario, string asunto, string mensaje, byte[]? adjuntoPdf = null, string? nombreAdjunto = null)
         {
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    await EnviarPorSmtpAsync(remitente, password, destinatario, asunto, mensaje);
+                    await EnviarPorSmtpAsync(remitente, password, destinatario, asunto, mensaje, adjuntoPdf, nombreAdjunto);
                 }
                 catch (Exception ex)
                 {
@@ -191,6 +196,97 @@ namespace Negocio.Services
             // 5. Enviar el correo: las credenciales se leen aquí (base de datos, rápido) y el envío SMTP sigue sin esperarse.
             var (remitente, password) = await ObtenerCredencialesAsync();
             EnviarEnSegundoPlano(remitente, password, emailDestino, asunto, mensaje);
+        }
+
+        /// <summary>
+        /// Envía al socio el comprobante de su pago. No hace nada si la opción "Enviar pago por correo" está apagada
+        /// o si el socio no tiene correo. Nunca lanza error: el pago ya está guardado y no debe verse afectado.
+        /// </summary>
+        public async Task EnviarCorreoPagoAsync(string emailSocio, PagoCorreo datos)
+        {
+            try
+            {
+                var cfgActivo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_MAS_ENVIAR_PAGO_POR_CORREO);
+                if (cfgActivo == null || !bool.TryParse(cfgActivo.Valor, out bool enviarPago) || !enviarPago)
+                {
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(emailSocio))
+                {
+                    return;
+                }
+
+                var cfgGymNombre = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_GYM_NOMBRE);
+                var cfgDomicilio = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_GYM_DOMICILIO);
+                var cfgTelefono = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_GYM_TELEFONO);
+                var cfgRfc = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_GYM_RFC);
+                var cfgMensaje = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_GYM_MENSAJE);
+                var cfgLogo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(ConfiguracionService.CLAVE_GYM_LOGO);
+
+                string nombreGym = string.IsNullOrWhiteSpace(cfgGymNombre?.Valor) ? "Gimnasio" : cfgGymNombre!.Valor!.Trim();
+
+                var gym = new ComprobanteGimnasio(
+                    nombreGym,
+                    cfgDomicilio?.Valor?.Trim() ?? string.Empty,
+                    cfgTelefono?.Valor?.Trim() ?? string.Empty,
+                    cfgRfc?.Valor?.Trim() ?? string.Empty,
+                    cfgMensaje?.Valor?.Trim() ?? string.Empty,
+                    CargarLogo(cfgLogo?.Valor));
+
+                string asunto = $"Comprobante de pago - {nombreGym}";
+                string mensaje = PlantillasCorreoHelper.PagoRecibido(nombreGym, datos);
+
+                // Ticket en PDF. Si falla (por ejemplo, un logo en formato no soportado) se reintenta sin logo;
+                // si vuelve a fallar, el correo sale igual, solo con el resumen en el cuerpo.
+                byte[]? pdf = null;
+                try
+                {
+                    pdf = ComprobantePdfHelper.PagoRecibido(gym, datos);
+                }
+                catch
+                {
+                    try
+                    {
+                        pdf = ComprobantePdfHelper.PagoRecibido(gym with { Logo = null }, datos);
+                    }
+                    catch (Exception exPdf)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"No se pudo generar el PDF del comprobante: {exPdf.Message}");
+                    }
+                }
+
+                string nombrePdf = $"Comprobante-{datos.ClaveSocio}-{datos.Fecha:yyyyMMdd-HHmm}.pdf";
+                foreach (char c in Path.GetInvalidFileNameChars()) nombrePdf = nombrePdf.Replace(c, '_');
+
+                var (remitente, password) = await ObtenerCredencialesAsync();
+                EnviarEnSegundoPlano(remitente, password, emailSocio.Trim(), asunto, mensaje, pdf, nombrePdf);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"No se pudo enviar el comprobante de pago a {emailSocio}: {ex.Message}");
+            }
+        }
+
+        // Gym_Logo puede guardar la ruta de un archivo o la imagen en Base64. Si no se puede leer, el ticket sale sin logo.
+        private static byte[]? CargarLogo(string? valor)
+        {
+            if (string.IsNullOrWhiteSpace(valor)) return null;
+
+            try
+            {
+                string v = valor.Trim();
+                if (File.Exists(v)) return File.ReadAllBytes(v);
+
+                int marca = v.IndexOf("base64,", StringComparison.OrdinalIgnoreCase);
+                if (marca >= 0) v = v[(marca + 7)..];
+
+                return Convert.FromBase64String(v);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task EnviarFelicitacionesCumpleanosAsync()

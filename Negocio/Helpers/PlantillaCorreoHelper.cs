@@ -23,6 +23,22 @@ namespace Negocio.Helpers
         public decimal Neto => Ingresos - Egresos;
     }
 
+    public sealed record PagoCorreo(
+        string ClaveSocio,
+        string NombreSocio,
+        string Membresia,
+        DateTime FechaInicio,
+        DateTime FechaVencimiento,
+        decimal Precio,
+        decimal TotalPagado,
+        string EstadoPago,
+        decimal Monto,
+        string FormaPago,
+        string? Folio,
+        string? Observacion,
+        string Usuario,
+        DateTime Fecha);
+
     public sealed record CorteCajaCorreo(
         string NombreGimnasio,
         DateTime FechaInicio,
@@ -221,6 +237,41 @@ namespace Negocio.Helpers
                         <br>
                         <p>¡Te esperamos pronto!<br><strong>El equipo de {gym}</strong></p>
                     </div>";
+        }
+
+        // ───────────── Comprobante de pago ─────────────
+
+        public static string PagoRecibido(string nombreGimnasio, PagoCorreo p)
+        {
+            string gym = H(nombreGimnasio);
+            string colorEstado = p.EstadoPago.StartsWith("Pagada", StringComparison.OrdinalIgnoreCase) ? Verde : "#d97706";
+
+            return $@"
+            <div style='font-family: Arial, sans-serif; color: #333; padding: 15px;'>
+                <h2 style='color: {Azul}; margin-bottom: 5px;'>¡Gracias por tu pago, {H(p.NombreSocio)}!</h2>
+                <p style='margin-top: 0;'>Registramos tu pago en <strong>{gym}</strong>.</p>
+
+                <table style='width: 100%; max-width: 450px; border-collapse: collapse; font-size: 14px; margin: 15px 0;'>
+                    {FilaPago("Membresía", H(p.Membresia))}
+                    {FilaPago("Monto", p.Monto.ToString("C2"), Verde)}
+                    {FilaPago("Estado del pago", H(p.EstadoPago), colorEstado)}
+                    {FilaPago("Vence", p.FechaVencimiento.ToString("dd/MM/yyyy"))}
+                </table>
+
+                <p>Adjuntamos tu comprobante en PDF con el detalle completo.</p>
+                <p>¡Te esperamos pronto!<br><strong>El equipo de {gym}</strong></p>
+            </div>";
+        }
+
+        // Fila etiqueta + valor. El valor ya debe venir codificado (H) o ser un dato propio (fecha, importe).
+        private static string FilaPago(string etiqueta, string valorHtml, string? color = null)
+        {
+            string estilo = color == null ? string.Empty : $" color: {color}; font-weight: bold;";
+
+            return $@"<tr style='border-bottom: 1px solid #e1e4e8;'>
+                <td style='padding: 6px 0; font-weight: bold;'>{H(etiqueta)}</td>
+                <td style='padding: 6px 0; text-align: right;{estilo}'>{valorHtml}</td>
+            </tr>";
         }
     }
 }

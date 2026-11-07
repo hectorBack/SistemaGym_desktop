@@ -3,6 +3,7 @@ using Datos.Interfaces;
 using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
+using Negocio.Helpers;
 using Negocio.Interfaces;
 using Presentacion.Helpers;
 using System;
@@ -19,17 +20,20 @@ namespace Negocio.Services
         private readonly IValidator<PagoSocioMembresiaCreateDto> _createValidator;
         private readonly IValidator<PagoSocioMembresiaUpdateDto> _updateValidator;
         private readonly CajaHelper _caja;
+        private readonly IEmailService _emailService;
 
         public PagoSocioMembresiaService(
             IUnitOfWork unitOfWork,
             IValidator<PagoSocioMembresiaCreateDto> createValidator,
             IValidator<PagoSocioMembresiaUpdateDto> updateValidator,
-            CajaHelper caja)
+            CajaHelper caja,
+            IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
             _caja = caja;
+            _emailService = emailService;
         }
 
         public async Task<IEnumerable<PagoSocioMembresiaDto>> ObtenerTodasAsync(bool incluirInactivas = false)
@@ -95,8 +99,43 @@ namespace Negocio.Services
 
             await _unitOfWork.SaveChangesAsync();
 
+            // 2. Comprobante por correo (solo si la opción está activa y el socio tiene correo).
+            // Va después de guardar: si algo falla aquí, el pago ya quedó registrado.
+            try
+            {
+                var socio = await _unitOfWork.Socio.ObtenerPorIdAsync(socioMembresia.SocioID);
+                if (socio != null && !string.IsNullOrWhiteSpace(socio.Email))
+                {
+                    var usuario = await _unitOfWork.Usuarios.ObtenerPorIdAsync(dto.UsuarioID);
+                    decimal precio = socioMembresia.Membresia?.Precio ?? 0m;
+                    decimal totalPagado = await _unitOfWork.PagoSocioMembresia.ObtenerTotalPagadoPorSocioMembresiaIdAsync(dto.SocioMembresiaID);
+                    decimal saldo = Math.Max(0, precio - totalPagado);
+
+                    await _emailService.EnviarCorreoPagoAsync(socio.Email, new PagoCorreo(
+                        ClaveSocio: socio.Clave,
+                        NombreSocio: socio.Nombre,
+                        Membresia: socioMembresia.Membresia?.Nombre ?? "Membresía",
+                        FechaInicio: socioMembresia.FechaInicio,
+                        FechaVencimiento: socioMembresia.FechaFin,
+                        Precio: precio,
+                        TotalPagado: totalPagado,
+                        EstadoPago: saldo == 0 ? "Pagada" : $"Parcial (saldo {saldo:C2})",
+                        Monto: nuevoPago.Monto,
+                        FormaPago: nuevoPago.FormaPago,
+                        Folio: nuevoPago.Folio,
+                        Observacion: nuevoPago.Observacion,
+                        Usuario: string.IsNullOrWhiteSpace(usuario?.NombreCompleto) ? "N/A" : usuario!.NombreCompleto,
+                        Fecha: DateTime.Now));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"No se pudo preparar el comprobante de pago: {ex.Message}");
+            }
+
             return MapToDto(nuevoPago);
         }
+
 
         public async Task ActualizarAsync(PagoSocioMembresiaUpdateDto dto)
         {

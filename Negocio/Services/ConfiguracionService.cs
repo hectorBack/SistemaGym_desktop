@@ -278,7 +278,7 @@ namespace Negocio.Services
 
             await _unitOfWork.Configuracion.GuardarOActualizarAsync(
                 CLAVE_MAS_MONEDA,
-                (dto.Moneda ?? string.Empty).Trim().Trim(),
+                (dto.Moneda ?? string.Empty).Trim(),
                 "Moneda utilizada por el sistema para mostrar montos y realizar cobros");
 
             await _unitOfWork.Configuracion.GuardarOActualizarAsync(
