@@ -22,11 +22,12 @@ namespace Presentacion.Forms.Configuracion
             panelTop = new Panel();
             lblTitulo = new Label();
             tabControlConfiguraciones = new FlatTabControl();
-            tabCorteCaja = new TabPage();
             tabDatosGimnasio = new TabPage();
+            tabCorteCaja = new TabPage();
             tabCorreos = new TabPage();
             tabRespaldos = new TabPage();
             tabMasConfiguraciones = new TabPage();
+            tabTicket = new TabPage();
             panelTop.SuspendLayout();
             tabControlConfiguraciones.SuspendLayout();
             SuspendLayout();
@@ -59,6 +60,7 @@ namespace Presentacion.Forms.Configuracion
             tabControlConfiguraciones.Controls.Add(tabCorteCaja);
             tabControlConfiguraciones.Controls.Add(tabCorreos);
             tabControlConfiguraciones.Controls.Add(tabRespaldos);
+            tabControlConfiguraciones.Controls.Add(tabTicket);
             tabControlConfiguraciones.Controls.Add(tabMasConfiguraciones);
             tabControlConfiguraciones.Dock = DockStyle.Fill;
             tabControlConfiguraciones.DrawMode = TabDrawMode.OwnerDrawFixed;
@@ -71,19 +73,19 @@ namespace Presentacion.Forms.Configuracion
             tabControlConfiguraciones.TabIndex = 1;
             tabControlConfiguraciones.SelectedIndexChanged += tabControlConfiguraciones_SelectedIndexChanged;
             // 
-            // tabCorteCaja
-            // 
-            tabCorteCaja.Location = new Point(4, 35);
-            tabCorteCaja.Name = "tabCorteCaja";
-            tabCorteCaja.Size = new Size(906, 701);
-            tabCorteCaja.TabIndex = 0;
-            // 
             // tabDatosGimnasio
             // 
             tabDatosGimnasio.Location = new Point(4, 35);
             tabDatosGimnasio.Name = "tabDatosGimnasio";
             tabDatosGimnasio.Size = new Size(906, 701);
             tabDatosGimnasio.TabIndex = 1;
+            // 
+            // tabCorteCaja
+            // 
+            tabCorteCaja.Location = new Point(4, 35);
+            tabCorteCaja.Name = "tabCorteCaja";
+            tabCorteCaja.Size = new Size(906, 701);
+            tabCorteCaja.TabIndex = 0;
             // 
             // tabCorreos
             // 
@@ -97,14 +99,22 @@ namespace Presentacion.Forms.Configuracion
             tabRespaldos.Location = new Point(4, 35);
             tabRespaldos.Name = "tabRespaldos";
             tabRespaldos.Size = new Size(906, 701);
-            tabRespaldos.TabIndex = 3;
+            tabRespaldos.TabIndex = 4;
             // 
             // tabMasConfiguraciones
             // 
-            tabRespaldos.Location = new Point(4, 35);
-            tabRespaldos.Name = "tabMasConfiguraciones";
-            tabRespaldos.Size = new Size(906, 701);
-            tabRespaldos.TabIndex = 4;
+            tabMasConfiguraciones.Location = new Point(4, 35);
+            tabMasConfiguraciones.Name = "tabMasConfiguraciones";
+            tabMasConfiguraciones.Size = new Size(906, 701);
+            tabMasConfiguraciones.TabIndex = 5;
+            // 
+            // tabTicket
+            // 
+            tabTicket.Location = new Point(4, 35);
+            tabTicket.Name = "tabTicket";
+            tabTicket.Size = new Size(906, 701);
+            tabTicket.TabIndex = 6;
+            tabTicket.UseVisualStyleBackColor = true;
             // 
             // FrmConfiguraciones
             // 
@@ -137,5 +147,6 @@ namespace Presentacion.Forms.Configuracion
         private TabPage tabCorreos;
         private TabPage tabRespaldos;
         private TabPage tabMasConfiguraciones;
+        private TabPage tabTicket;
     }
 }

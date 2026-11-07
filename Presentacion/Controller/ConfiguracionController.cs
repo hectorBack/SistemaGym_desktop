@@ -182,5 +182,47 @@ namespace Presentacion.Controller
         }
 
         #endregion
+
+        #region Pestaña: Ticket
+
+        public async Task<TicketConfiguracionViewModel> ObtenerConfigTicketAsync()
+        {
+            var dto = await _configuracionService.ObtenerConfigTicketAsync();
+
+            return new TicketConfiguracionViewModel
+            {
+                HabilitarImpresora = dto.HabilitarImpresora,
+                TextoInferior = dto.TextoInferior,
+                AnchoTicket = dto.AnchoTicket,
+                AnchoImagenPorcentaje = dto.AnchoImagenPorcentaje,
+                NombreFuente = dto.NombreFuente,
+                TamanoTexto = dto.TamanoTexto,
+                TamanoRenglon = dto.TamanoRenglon,
+                TamanoTextoEncabezado = dto.TamanoTextoEncabezado,
+                TamanoRenglonEncabezado = dto.TamanoRenglonEncabezado,
+                TamanoEntreSecciones = dto.TamanoEntreSecciones
+            };
+        }
+
+        public async Task GuardarConfigTicketAsync(TicketConfiguracionViewModel model)
+        {
+            var dto = new TicketConfiguracionDto
+            {
+                HabilitarImpresora = model.HabilitarImpresora,
+                TextoInferior = model.TextoInferior,
+                AnchoTicket = model.AnchoTicket,
+                AnchoImagenPorcentaje = model.AnchoImagenPorcentaje,
+                NombreFuente = model.NombreFuente,
+                TamanoTexto = model.TamanoTexto,
+                TamanoRenglon = model.TamanoRenglon,
+                TamanoTextoEncabezado = model.TamanoTextoEncabezado,
+                TamanoRenglonEncabezado = model.TamanoRenglonEncabezado,
+                TamanoEntreSecciones = model.TamanoEntreSecciones
+            };
+
+            await _configuracionService.GuardarConfigTicketAsync(dto);
+        }
+
+        #endregion
     }
 }

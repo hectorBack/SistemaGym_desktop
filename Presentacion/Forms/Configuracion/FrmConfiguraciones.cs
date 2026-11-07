@@ -21,6 +21,7 @@ namespace Presentacion.Forms.Configuracion
         private FrmConfiguracionCorreos? _frmConfiguracionCorreos;
         private FrmConfiguracionRespaldos? _frmConfiguracionRespaldos;
         private FrmConfiguracionMasConfiguraciones? _frmConfiguracionMasConfiguraciones;
+        private FrmConfiguracionTicket? _frmConfiguracionTicket;
 
         public FrmConfiguraciones(ConfiguracionController configuracionController)
         {
@@ -35,6 +36,7 @@ namespace Presentacion.Forms.Configuracion
             ConfigurarTabPage(tabDatosGimnasio, "tabDatosGimnasio", "Datos del Gimnasio");
             ConfigurarTabPage(tabCorteCaja, "tabCorteCaja", "Corte de Caja");
             ConfigurarTabPage(tabCorreos, "tabCorreos", "Configuración de Correos");
+            ConfigurarTabPage(tabTicket, "tabTicket", "Ticket");
             ConfigurarTabPage(tabRespaldos, "tabRespaldos", "Respaldos");
             ConfigurarTabPage(tabMasConfiguraciones, "tabMasConfiguraciones", "Mas Configuraciones");
         }
@@ -85,6 +87,10 @@ namespace Presentacion.Forms.Configuracion
 
                     case "tabRespaldos":
                         CargarFormularioRespaldos();
+                        break;
+
+                    case "tabTicket":
+                        CargarFormularioTicket();
                         break;
 
                     case "tabMasConfiguraciones":
@@ -190,6 +196,27 @@ namespace Presentacion.Forms.Configuracion
 
             tabRespaldos.Controls.Add(_frmConfiguracionRespaldos);
             _frmConfiguracionRespaldos.Show();
+        }
+
+        private void CargarFormularioTicket()
+        {
+            if (_frmConfiguracionTicket != null && !_frmConfiguracionTicket.IsDisposed)
+            {
+                return;
+            }
+
+            tabTicket.Controls.Clear();
+
+            _frmConfiguracionTicket = new FrmConfiguracionTicket(_configuracionController)
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill,
+                BackColor = ColorTranslator.FromHtml("#0b0f1a")
+            };
+
+            tabTicket.Controls.Add(_frmConfiguracionTicket);
+            _frmConfiguracionTicket.Show();
         }
 
         private void CargarFormularioMasConfiguraciones()

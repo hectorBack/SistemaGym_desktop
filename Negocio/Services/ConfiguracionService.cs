@@ -21,6 +21,7 @@ namespace Negocio.Services
         private readonly IValidator<CorreosConfiguracionDto> _correosConfigValidator;
         private readonly IValidator<RespaldosConfiguracionDto> _respaldosConfigValidator;
         private readonly IValidator<MasConfiguracionesDto> _masConfigValidator;
+        private readonly IValidator<TicketConfiguracionDto> _ticketConfigValidator;
         private readonly IEmailService _emailService;
 
         // Claves constantes para el Corte de Caja
@@ -48,6 +49,18 @@ namespace Negocio.Services
         public const string CLAVE_MAS_MONEDA = "Mas_Moneda";
         public const string CLAVE_MAS_ENVIAR_PAGO_POR_CORREO = "Mas_EnviarPagoPorCorreo";
 
+        // Claves constantes para la configuración del Ticket
+        public const string CLAVE_TICKET_IMPRESORA = "Ticket_HabilitarImpresora";
+        public const string CLAVE_TICKET_TEXTO_INFERIOR = "Ticket_TextoInferior";
+        public const string CLAVE_TICKET_ANCHO = "Ticket_Ancho";
+        public const string CLAVE_TICKET_ANCHO_IMAGEN = "Ticket_AnchoImagen";
+        public const string CLAVE_TICKET_FUENTE = "Ticket_Fuente";
+        public const string CLAVE_TICKET_TAMANO_TEXTO = "Ticket_TamanoTexto";
+        public const string CLAVE_TICKET_TAMANO_RENGLON = "Ticket_TamanoRenglon";
+        public const string CLAVE_TICKET_TAMANO_TEXTO_ENC = "Ticket_TamanoTextoEncabezado";
+        public const string CLAVE_TICKET_TAMANO_RENGLON_ENC = "Ticket_TamanoRenglonEncabezado";
+        public const string CLAVE_TICKET_ENTRE_SECCIONES = "Ticket_TamanoEntreSecciones";
+
         public ConfiguracionService(
             IUnitOfWork unitOfWork,
             IValidator<CorteConfiguracionDto> corteConfigValidator,
@@ -55,6 +68,7 @@ namespace Negocio.Services
             IValidator<CorreosConfiguracionDto> correosConfigValidator,
             IValidator<RespaldosConfiguracionDto> respaldosConfigValidator,
             IValidator<MasConfiguracionesDto> masConfigValidator,
+            IValidator<TicketConfiguracionDto> ticketConfigValidator,
             IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
@@ -63,6 +77,7 @@ namespace Negocio.Services
             _correosConfigValidator = correosConfigValidator;
             _respaldosConfigValidator = respaldosConfigValidator;
             _masConfigValidator = masConfigValidator;
+            _ticketConfigValidator = ticketConfigValidator;
             _emailService = emailService;
         }
 
@@ -296,6 +311,98 @@ namespace Negocio.Services
             return string.IsNullOrWhiteSpace(valor)
                 ? "MXN"
                 : valor.Trim();
+        }
+
+        // Pestaña Ticket: lo que no esté guardado todavía toma los valores predeterminados del DTO.
+        public async Task<TicketConfiguracionDto> ObtenerConfigTicketAsync()
+        {
+            var dto = new TicketConfiguracionDto();
+
+            bool.TryParse(await ObtenerValorPorClaveAsync(CLAVE_TICKET_IMPRESORA), out bool impresora);
+            dto.HabilitarImpresora = impresora;
+
+            dto.TextoInferior = await ObtenerValorPorClaveAsync(CLAVE_TICKET_TEXTO_INFERIOR) ?? string.Empty;
+
+            string? fuente = await ObtenerValorPorClaveAsync(CLAVE_TICKET_FUENTE);
+            if (!string.IsNullOrWhiteSpace(fuente)) dto.NombreFuente = fuente.Trim();
+
+            dto.AnchoTicket = await LeerEnteroAsync(CLAVE_TICKET_ANCHO, dto.AnchoTicket);
+            dto.AnchoImagenPorcentaje = await LeerEnteroAsync(CLAVE_TICKET_ANCHO_IMAGEN, dto.AnchoImagenPorcentaje);
+            dto.TamanoTexto = await LeerEnteroAsync(CLAVE_TICKET_TAMANO_TEXTO, dto.TamanoTexto);
+            dto.TamanoRenglon = await LeerEnteroAsync(CLAVE_TICKET_TAMANO_RENGLON, dto.TamanoRenglon);
+            dto.TamanoTextoEncabezado = await LeerEnteroAsync(CLAVE_TICKET_TAMANO_TEXTO_ENC, dto.TamanoTextoEncabezado);
+            dto.TamanoRenglonEncabezado = await LeerEnteroAsync(CLAVE_TICKET_TAMANO_RENGLON_ENC, dto.TamanoRenglonEncabezado);
+            dto.TamanoEntreSecciones = await LeerEnteroAsync(CLAVE_TICKET_ENTRE_SECCIONES, dto.TamanoEntreSecciones);
+
+            return dto;
+        }
+
+        public async Task GuardarConfigTicketAsync(TicketConfiguracionDto dto)
+        {
+            var validationResult = await _ticketConfigValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+                throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_IMPRESORA,
+                dto.HabilitarImpresora ? "True" : "False",
+                "Indica si la impresora de tickets está habilitada");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_TEXTO_INFERIOR,
+                (dto.TextoInferior ?? string.Empty).Trim(),
+                "Texto que aparece al final del ticket");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_ANCHO,
+                dto.AnchoTicket.ToString(CultureInfo.InvariantCulture),
+                "Ancho del ticket en milímetros");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_ANCHO_IMAGEN,
+                dto.AnchoImagenPorcentaje.ToString(CultureInfo.InvariantCulture),
+                "Porcentaje del ancho del ticket que ocupa el logotipo");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_FUENTE,
+                dto.NombreFuente.Trim(),
+                "Nombre de la fuente del ticket");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_TAMANO_TEXTO,
+                dto.TamanoTexto.ToString(CultureInfo.InvariantCulture),
+                "Tamaño del texto del ticket");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_TAMANO_RENGLON,
+                dto.TamanoRenglon.ToString(CultureInfo.InvariantCulture),
+                "Alto de cada renglón del ticket");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_TAMANO_TEXTO_ENC,
+                dto.TamanoTextoEncabezado.ToString(CultureInfo.InvariantCulture),
+                "Tamaño del texto del encabezado del ticket");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_TAMANO_RENGLON_ENC,
+                dto.TamanoRenglonEncabezado.ToString(CultureInfo.InvariantCulture),
+                "Alto de cada renglón del encabezado del ticket");
+
+            await _unitOfWork.Configuracion.GuardarOActualizarAsync(
+                CLAVE_TICKET_ENTRE_SECCIONES,
+                dto.TamanoEntreSecciones.ToString(CultureInfo.InvariantCulture),
+                "Espacio entre las secciones del ticket");
+
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        private async Task<int> LeerEnteroAsync(string clave, int predeterminado)
+        {
+            var valor = await ObtenerValorPorClaveAsync(clave);
+
+            return int.TryParse(valor, NumberStyles.Integer, CultureInfo.InvariantCulture, out int numero)
+                ? numero
+                : predeterminado;
         }
     }
 }
