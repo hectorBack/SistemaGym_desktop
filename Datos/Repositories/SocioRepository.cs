@@ -78,15 +78,16 @@ namespace Datos.Repositories
 
         public async Task<int> ObtenerSiguienteNumeroClaveAsync()
         {
-            bool existenSocios = await _context.Socios.AnyAsync();
+            // Se toma el mayor número entre las CLAVES reales (activos e inactivos),
+            // no el SocioID. Las claves no numéricas se ignoran.
+            var claves = await _context.Socios.Select(s => s.Clave).ToListAsync();
 
-            if (!existenSocios)
-            {
-                return 1;
-            }
+            int mayor = claves
+                .Select(c => int.TryParse(c?.Trim(), out var n) ? n : 0)
+                .DefaultIfEmpty(0)
+                .Max();
 
-            int ultimoId = await _context.Socios.MaxAsync(s => s.SocioID);
-            return ultimoId + 1;
+            return mayor + 1;
         }
 
         public async Task<Socio?> ObtenerDetalleCompletoAsync(int socioId)
