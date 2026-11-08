@@ -108,11 +108,7 @@ namespace Presentacion.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"No se pudo cargar la moneda configurada. Se utilizará el símbolo predeterminado ($).{Environment.NewLine}{ex.Message}",
-                    "Configuración de moneda",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia($"No se pudo cargar la moneda configurada. Se utilizará el símbolo predeterminado ($).{Environment.NewLine}{ex.Message}", "Configuración de moneda");
             }
         }
 
@@ -342,13 +338,10 @@ namespace Presentacion.Forms
 
         private void itemCerrarSesion_Click(object sender, EventArgs e)
         {
-            var resultado = MessageBox.Show(
-                "¿Está seguro de que desea cerrar la sesión actual?",
-                "Confirmar cierre de sesión",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (resultado != DialogResult.Yes) return;
+            if (!FormHelper.ConfirmarAccion(
+                    "¿Está seguro de que desea cerrar la sesión actual?",
+                    "Confirmar cierre de sesión"))
+                return;
 
             CerrarSesionSolicitado = true;
             Close();
@@ -440,19 +433,11 @@ namespace Presentacion.Forms
 
                         await respaldoService.GenerarRespaldoManualAsync(dto);
 
-                        MessageBox.Show(
-                            $"El respaldo de la base de datos se generó exitosamente como 'gym.sql' en:\n{rutaSeleccionada}",
-                            "Respaldo Exitoso",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
+                        FormHelper.MostrarAviso($"El respaldo de la base de datos se generó exitosamente como 'gym.sql' en:\n{rutaSeleccionada}", "Respaldo Exitoso");
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(
-                            $"No se pudo completar el respaldo: {ex.Message}",
-                            "Error de Respaldo",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        FormHelper.MostrarError($"No se pudo completar el respaldo: {ex.Message}", "Error de Respaldo");
                     }
                     finally
                     {
@@ -464,13 +449,11 @@ namespace Presentacion.Forms
 
         private async void btnRestaurar_Click(object? sender, EventArgs e)
         {
-            var confirmacion = MessageBox.Show(
-                "ADVERTENCIA: Restaurar una base de datos reemplazará toda la información actual con los datos del respaldo seleccionado.\n\n¿Desea continuar?",
-                "Confirmar Restauración",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (confirmacion != DialogResult.Yes) return;
+            if (!FormHelper.ConfirmarAccion(
+                    "ADVERTENCIA: Restaurar una base de datos reemplazará toda la información actual con los datos del respaldo seleccionado.\n\n¿Desea continuar?",
+                    "Confirmar Restauración",
+                    destructiva: true))
+                return;
 
             using (var openFileDialog = new OpenFileDialog())
             {
@@ -497,19 +480,11 @@ namespace Presentacion.Forms
 
                         await respaldoService.RestaurarBaseDatosAsync(dto);
 
-                        MessageBox.Show(
-                            "La base de datos se ha restaurado exitosamente.",
-                            "Restauración Exitosa",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
+                        FormHelper.MostrarAviso("La base de datos se ha restaurado exitosamente.", "Restauración Exitosa");
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(
-                            $"No se pudo completar la restauración: {ex.Message}",
-                            "Error de Restauración",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                        FormHelper.MostrarError($"No se pudo completar la restauración: {ex.Message}", "Error de Restauración");
                     }
                     finally
                     {

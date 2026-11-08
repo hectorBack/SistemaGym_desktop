@@ -60,8 +60,7 @@ namespace Presentacion.Forms
             catch (BusinessException ex)
             {
                 // Errores controlados de regla de negocio (credenciales incorrectas, usuario inactivo...)
-                MessageBox.Show(ex.Message, "No se pudo iniciar sesión",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                FormHelper.MostrarAdvertencia(ex.Message, "No se pudo iniciar sesión");
                 LimpiarPassword();
                 return;
             }
@@ -74,9 +73,7 @@ namespace Presentacion.Forms
 #if DEBUG
                 detalle = $"\n\nDetalle técnico: {ex.Message}"; // solo visible mientras desarrollas
 #endif
-                MessageBox.Show(
-                    "Ocurrió un error inesperado al iniciar sesión. Verifica la conexión e inténtalo de nuevo." + detalle,
-                    "Error del sistema", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError("Ocurrió un error inesperado al iniciar sesión. Verifica la conexión e inténtalo de nuevo." + detalle);
                 return;
             }
             finally
@@ -119,7 +116,7 @@ namespace Presentacion.Forms
 
         private void MostrarAviso(string mensaje, Control campoAEnfocar)
         {
-            MessageBox.Show(mensaje, "Datos incompletos", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            FormHelper.MostrarAviso(mensaje, "Datos incompletos");
             campoAEnfocar.Focus();
         }
 
