@@ -408,3 +408,5 @@ INSERT INTO Configuraciones (Clave, Valor, Descripcion) VALUES
 ('Gym_Rfc', '', 'RFC del establecimiento'),
 ('Gym_Mensaje', '¡Bienvenidos a su entrenamiento!', 'Mensaje de bienvenida para los socios'),
 ('Gym_Logo', '', 'Ruta o identificador del logotipo del gimnasio');
+
+ALTER TABLE Configuraciones MODIFY Valor LONGTEXT NULL;

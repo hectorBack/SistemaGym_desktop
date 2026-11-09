@@ -224,6 +224,12 @@ namespace Negocio.Services
             return ventas.Select(MapToDto);
         }
 
+        public async Task<IEnumerable<VentaDto>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var ventas = await _unitOfWork.Venta.ObtenerResumenPorRangoFechasAsync(fechaInicio, fechaFin);
+            return ventas.Select(MapToDto);
+        }
+
         // Método privado helper para mapear Entidad a DTO
         private static VentaDto MapToDto(Venta v)
         {
@@ -249,5 +255,7 @@ namespace Negocio.Services
                 }).ToList() ?? new List<DetalleVentaDto>()
             };
         }
+
+       
     }
 }

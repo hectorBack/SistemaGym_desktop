@@ -36,7 +36,8 @@ namespace Presentacion.Controller
 
         public async Task<IEnumerable<CompraViewModel>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-            var dtos = await _compraService.ObtenerPorRangoFechasAsync(fechaInicio, fechaFin);
+            // Consulta ligera para el listado (sin líneas de detalle).
+            var dtos = await _compraService.ObtenerResumenPorRangoFechasAsync(fechaInicio, fechaFin);
             return dtos.Select(MapearAViewModel);
         }
 

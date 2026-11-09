@@ -9,7 +9,7 @@ namespace Datos.Interfaces
 {
     public interface ISocioRepository
     {
-        Task<IEnumerable<Socio>> ObtenerTodosAsync(bool incluirInactivos = false);
+        Task<IEnumerable<Socio>> ObtenerTodosAsync(bool incluirInactivos = false, bool incluirFoto = true);
         Task<Socio?> ObtenerPorIdAsync(int id);
         Task AgregarAsync(Socio socio);
         void Actualizar(Socio socio);
@@ -20,5 +20,7 @@ namespace Datos.Interfaces
         Task<int> ObtenerSiguienteNumeroClaveAsync();
         Task<Socio?> ObtenerDetalleCompletoAsync(int socioId);
         Task<IEnumerable<Socio>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
+        Task<bool> TieneMembresiasAsync(int socioId);
+        Task<bool> TieneVisitasAsync(int socioId);
     }
 }

@@ -90,6 +90,14 @@ namespace Datos.Repositories
                 .ToListAsync();
         }
 
+        // Fecha del último corte cerrado: una sola consulta de MAX en vez de cargar todos los cortes.
+        public async Task<DateTime?> ObtenerFechaUltimoCierreAsync()
+        {
+            return await _context.Cortes
+                .Where(c => c.Activo && c.Estado == "Cerrado" && c.FechaCierre != null)
+                .MaxAsync(c => c.FechaCierre);
+        }
+
         // OBSOLETO: lo reemplaza CorteService.ObtenerEfectivoEnCajaAsync (fondo + movimientos reales).
         // Tomaba el primer corte abierto de cualquier usuario y usaba sus totales, que no se actualizan hasta cerrar.
         public async Task<decimal> ObtenerEfectivoEnCajaAsync()

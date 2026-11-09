@@ -122,12 +122,7 @@ namespace Negocio.Services
         /// <summary>Fecha y hora del último corte cerrado (null si nunca se ha cerrado uno).</summary>
         public async Task<DateTime?> ObtenerFechaUltimoCierreAsync()
         {
-            var cierres = (await _unitOfWork.Corte.ObtenerTodosAsync(false))
-                .Where(c => c.Estado == ESTADO_CERRADO && c.FechaCierre.HasValue)
-                .Select(c => c.FechaCierre!.Value)
-                .ToList();
-
-            return cierres.Count == 0 ? null : cierres.Max();
+            return await _unitOfWork.Corte.ObtenerFechaUltimoCierreAsync();
         }
 
         // ───────────── Apertura y cierre ─────────────

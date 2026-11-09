@@ -16,15 +16,13 @@ namespace Presentacion.Forms.Membresias
     public partial class FrmMembresias : Form
     {
         private readonly MembresiaController _controller;
-        private readonly ConfiguracionController _configuracionController;
 
         // Lo que muestra el grid (ordenable al hacer clic en los encabezados).
         private ListaOrdenable<MembresiaViewModel> _vista = new();
 
-        public FrmMembresias(MembresiaController controller, ConfiguracionController configuracionController)
+        public FrmMembresias(MembresiaController controller)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
-            _configuracionController = configuracionController ?? throw new ArgumentNullException(nameof(configuracionController));
 
             InitializeComponent();
             ConfigurarColumnas();
@@ -41,21 +39,11 @@ namespace Presentacion.Forms.Membresias
         private async void FrmMembresias_Load(object? sender, EventArgs e)
         {
             btnEliminarFisico.Visible = SesionUsuario.TienePermiso("Eliminar");
-            try
-            {
-                MonedaHelper.ConfigurarSimbolo(await _configuracionController.ObtenerSimboloMonedaAsync());
-                var columnaPrecio = dgvMembresias.Columns["col" + nameof(MembresiaViewModel.Precio)];
-                if (columnaPrecio != null)
-                    columnaPrecio.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"No se pudo cargar la moneda configurada. Se utilizará el símbolo disponible.{Environment.NewLine}{ex.Message}",
-                    "Configuración de moneda",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
+
+            // La moneda ya la cargó FrmPrincipal al iniciar (y MonedaHelper se actualiza al guardar la configuración).
+            var columnaPrecio = dgvMembresias.Columns["col" + nameof(MembresiaViewModel.Precio)];
+            if (columnaPrecio != null)
+                columnaPrecio.DefaultCellStyle.Format = MonedaHelper.ObtenerFormatoDataGridView();
 
             await CargarMembresiasAsync();
         }

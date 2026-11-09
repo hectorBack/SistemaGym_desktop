@@ -78,6 +78,20 @@ namespace Datos.Repositories
                 .SumAsync(p => p.Monto);
         }
 
+        // Total pagado (pagos activos) de varias membresías en una sola consulta, para los reportes.
+        public async Task<Dictionary<int, decimal>> ObtenerTotalesPagadosAsync(IEnumerable<int> socioMembresiaIds)
+        {
+            var ids = socioMembresiaIds.Distinct().ToList();
+            if (ids.Count == 0) return new Dictionary<int, decimal>();
+
+            return await _context.PagoSocioMembresias
+                .AsNoTracking()
+                .Where(p => p.Activo && ids.Contains(p.SocioMembresiaID))
+                .GroupBy(p => p.SocioMembresiaID)
+                .Select(g => new { Id = g.Key, Total = g.Sum(p => p.Monto) })
+                .ToDictionaryAsync(x => x.Id, x => x.Total);
+        }
+
         public async Task<bool> ExisteFolioAsync(string folio, int? idExcluir = null)
         {
             if (string.IsNullOrWhiteSpace(folio)) return false;

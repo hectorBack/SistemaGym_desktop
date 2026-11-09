@@ -137,17 +137,12 @@ namespace Negocio.Services
 
             // Un movimiento de un corte ya cerrado no se modifica: cambiaría las cifras de un corte que ya se entregó.
             await ValidarCorteEditableAsync(movimiento.CorteID);
-            if (dto.CorteID != movimiento.CorteID)
-                await ValidarCorteEditableAsync(dto.CorteID);
 
             movimiento.Tipo = dto.Tipo.Trim();
             movimiento.ConceptoID = dto.ConceptoID;
             movimiento.FormaPago = dto.FormaPago.Trim();
             movimiento.Total = dto.Total;
             movimiento.Observacion = dto.Observacion?.Trim();
-            movimiento.CorteID = dto.CorteID;
-            movimiento.UsuarioID = dto.UsuarioID;
-            movimiento.Activo = dto.Activo;
 
             _unitOfWork.Movimiento.Actualizar(movimiento);
             await _unitOfWork.SaveChangesAsync();
@@ -194,7 +189,7 @@ namespace Negocio.Services
                 var ventaAsociada = ventas.FirstOrDefault(v => v.MovimientoID == movimiento.MovimientoID);
                 if (ventaAsociada != null)
                 {
-                    if (ventaAsociada.Detalles != null)
+                    if (ventaAsociada.Activo && ventaAsociada.Detalles != null) // si la venta ya estaba anulada, su stock ya se devolvió
                     {
                         foreach (var detalle in ventaAsociada.Detalles)
                         {
@@ -216,7 +211,7 @@ namespace Negocio.Services
                 var compraAsociada = compras.FirstOrDefault(c => c.MovimientoID == movimiento.MovimientoID);
                 if (compraAsociada != null)
                 {
-                    if (compraAsociada.Detalles != null)
+                    if (compraAsociada.Activo && compraAsociada.Detalles != null) // si la compra ya estaba anulada, su stock ya se revirtió
                     {
                         foreach (var detalle in compraAsociada.Detalles)
                         {

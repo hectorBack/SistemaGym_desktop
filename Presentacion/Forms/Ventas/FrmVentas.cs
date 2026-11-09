@@ -50,7 +50,10 @@ namespace Presentacion.Forms.Ventas
             dtpFechaInicio.Value = DateTime.Today;
             dtpFechaFin.Value = DateTime.Today;
 
-            await CargarSimboloMonedaAsync();
+            // La moneda ya la cargó FrmPrincipal al iniciar (y MonedaHelper se actualiza al guardar la configuración).
+            _simboloMoneda = MonedaHelper.SimboloActual;
+            AplicarFormatoMoneda();
+
             await CargarVentasAsync();
         }
 
@@ -76,29 +79,6 @@ namespace Presentacion.Forms.Ventas
             columnaTotal.FillWeight = 90;
             columnaFecha.FillWeight = 160;
             columnaEstado.FillWeight = 888;
-        }
-
-        private async Task CargarSimboloMonedaAsync()
-        {
-            try
-            {
-                var simbolo = await _configuracionController.ObtenerSimboloMonedaAsync();
-
-                MonedaHelper.ConfigurarSimbolo(simbolo);
-                _simboloMoneda = MonedaHelper.SimboloActual;
-
-                AplicarFormatoMoneda();
-            }
-            catch (Exception ex)
-            {
-                _simboloMoneda = MonedaHelper.SimboloActual;
-                AplicarFormatoMoneda();
-                MessageBox.Show(
-                    $"No se pudo cargar la moneda configurada. Se utilizará {_simboloMoneda}.{Environment.NewLine}{ex.Message}",
-                    "Configuración de moneda",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
         }
 
         private void AplicarFormatoMoneda()

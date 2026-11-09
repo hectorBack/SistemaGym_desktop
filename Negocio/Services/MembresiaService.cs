@@ -37,9 +37,9 @@ namespace Negocio.Services
                 MembresiaID = m.MembresiaID,
                 Nombre = m.Nombre,
                 Precio = m.Precio,
-                Tipo = m.Tipo,         
-                Meses = m.Meses,      
-                Semanas = m.Semanas, 
+                Tipo = m.Tipo,
+                Meses = m.Meses,
+                Semanas = m.Semanas,
                 Dias = m.Dias,
                 DuracionDias = m.DuracionDias,
                 Activo = m.Activo,
@@ -58,8 +58,8 @@ namespace Negocio.Services
                 MembresiaID = membresia.MembresiaID,
                 Nombre = membresia.Nombre,
                 Precio = membresia.Precio,
-                Tipo = membresia.Tipo,        
-                Meses = membresia.Meses, 
+                Tipo = membresia.Tipo,
+                Meses = membresia.Meses,
                 Semanas = membresia.Semanas,
                 Dias = membresia.Dias,
                 DuracionDias = membresia.DuracionDias,
@@ -134,12 +134,11 @@ namespace Negocio.Services
 
             membresia.Nombre = dto.Nombre.Trim();
             membresia.Precio = dto.Precio;
-            membresia.Tipo = dto.Tipo;
+            membresia.Tipo = dto.Tipo.Trim();
             membresia.Meses = dto.Meses;
             membresia.Semanas = dto.Semanas;
             membresia.Dias = dto.Dias;
-            membresia.DuracionDias = dto.Dias;
-            membresia.Activo = dto.Activo;
+            // DuracionDias y Activo no se tocan al editar: la duración se calcula sola y el estado se cambia con Activar/Desactivar.
 
             _unitOfWork.Membresia.Actualizar(membresia);
             await _unitOfWork.SaveChangesAsync();

@@ -68,13 +68,13 @@ namespace Datos.Repositories
 
         public async Task<IEnumerable<Movimiento>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-           return await _context.Movimientos
-                .Include(m => m.Concepto)
-                .Include(m => m.Corte)
-                .Include(m => m.Usuario)
-                .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
-                .OrderByDescending(v => v.CreatedAt)
-                .ToListAsync();
+            return await _context.Movimientos
+                 .Include(m => m.Concepto)
+                 .Include(m => m.Corte)
+                 .Include(m => m.Usuario)
+                 .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
+                 .OrderByDescending(v => v.CreatedAt)
+                 .ToListAsync();
         }
     }
 }

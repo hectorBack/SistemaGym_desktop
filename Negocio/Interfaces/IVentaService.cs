@@ -17,6 +17,8 @@ namespace Negocio.Interfaces
 
         // --- MÉTODOS ADICIONALES DE NEGOCIO PARA VENTAS ---
         Task<IEnumerable<VentaDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
+
+        Task<IEnumerable<VentaDto>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
         Task<IEnumerable<VentaDto>> ObtenerPorSocioIdAsync(int socioId);
     }
 }

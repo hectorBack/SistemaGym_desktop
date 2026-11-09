@@ -58,6 +58,20 @@ namespace Datos.Repositories
                 .ToListAsync();
         }
 
+        // Listado: sin detalles y sin rastreo. Mismo criterio de días completos que ObtenerPorRangoFechasAsync,
+        // pero comparando la columna directamente (sin .Date) para que MySQL pueda usar un índice.
+        public async Task<IEnumerable<Compra>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            DateTime desde = fechaInicio.Date;
+            DateTime hasta = fechaFin.Date.AddDays(1);
+
+            return await _context.Compras
+                .AsNoTracking()
+                .Where(c => c.CreatedAt >= desde && c.CreatedAt < hasta)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task AgregarAsync(Compra compra)
         {
             await _context.Compras.AddAsync(compra);

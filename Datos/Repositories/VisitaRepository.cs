@@ -97,5 +97,15 @@ namespace Datos.Repositories
             _context.Visitas.Remove(visita);
             return true;
         }
+
+        // Solo lo que muestra Inicio: sin Include (no necesita Socio ni Membresia) y sin rastreo.
+        public async Task<IEnumerable<Visita>> ObtenerActivasPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _context.Visitas
+                .AsNoTracking()
+                .Where(v => v.Activo && v.CreatedAt >= fechaInicio && v.CreatedAt <= fechaFin)
+                .OrderByDescending(v => v.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

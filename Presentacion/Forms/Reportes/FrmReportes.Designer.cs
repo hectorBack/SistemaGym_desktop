@@ -30,25 +30,9 @@
             tabPagos = new TabPage();
             tabMovimientos = new TabPage();
 
-            dgvInventario = new GridTema();
-            dgvMembresias = new GridTema();
-            dgvSocios = new GridTema();
-            dgvRegistro = new GridTema();
-            dgvVentas = new GridTema();
-            dgvVisitas = new GridTema();
-            dgvPagos = new GridTema();
-            dgvMovimientos = new GridTema();
 
             panelTop.SuspendLayout();
             tabControlReportes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvInventario).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvMembresias).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvSocios).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvRegistro).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvVentas).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvVisitas).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvPagos).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dgvMovimientos).BeginInit();
             SuspendLayout();
 
             // 
@@ -114,14 +98,6 @@
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
             tabControlReportes.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvInventario).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvMembresias).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvSocios).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvRegistro).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvVentas).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvVisitas).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvPagos).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dgvMovimientos).EndInit();
             ResumeLayout(false);
         }
 
@@ -140,13 +116,5 @@
         private TabPage tabPagos;
         private TabPage tabMovimientos;
 
-        private GridTema dgvInventario;
-        private GridTema dgvMembresias;
-        private GridTema dgvSocios;
-        private GridTema dgvRegistro;
-        private GridTema dgvVentas;
-        private GridTema dgvVisitas;
-        private GridTema dgvPagos;
-        private GridTema dgvMovimientos;
     }
 }

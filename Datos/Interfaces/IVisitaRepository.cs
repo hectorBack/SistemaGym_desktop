@@ -20,6 +20,8 @@ namespace Datos.Interfaces
         Task<IEnumerable<Visita>> ObtenerPorSocioYFechasAsync(int socioId, DateTime inicioSemana, DateTime finSemana);
 
         Task<List<Visita>> ObtenerVisitasPorSocioYFechasAsync(int socioId, DateTime desde, DateTime hasta);
+
+        Task<IEnumerable<Visita>> ObtenerActivasPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
         Task<bool> EliminarPorIdAsync(int id);
     }
 }

@@ -31,9 +31,9 @@ namespace Negocio.Services
             _updateValidator = updateValidator;
         }
 
-        public async Task<IEnumerable<SocioDto>> ObtenerTodosAsync(bool incluirInactivos = false)
+        public async Task<IEnumerable<SocioDto>> ObtenerTodosAsync(bool incluirInactivos = false, bool incluirFoto = true)
         {
-            var socios = await _unitOfWork.Socio.ObtenerTodosAsync(incluirInactivos);
+            var socios = await _unitOfWork.Socio.ObtenerTodosAsync(incluirInactivos, incluirFoto);
             return socios.Select(MapearADto).ToList();
         }
 
@@ -111,15 +111,15 @@ namespace Negocio.Services
 
         public async Task EliminarFisicoAsync(int id)
         {
-            // Se usa el detalle completo para revisar también las visitas, no solo las membresías.
-            var socio = await _unitOfWork.Socio.ObtenerDetalleCompletoAsync(id);
+            var socio = await _unitOfWork.Socio.ObtenerPorIdAsync(id);
             if (socio == null)
                 throw new BusinessException("El socio a eliminar no existe.");
 
-            if (socio.SocioMembresias != null && socio.SocioMembresias.Any())
+            // Solo se pregunta si existe algún registro; no se carga todo el historial del socio.
+            if (await _unitOfWork.Socio.TieneMembresiasAsync(id))
                 throw new BusinessException("No se puede eliminar el socio porque tiene historial de membresías registradas. Desactívelo en su lugar.");
 
-            if (socio.Visitas != null && socio.Visitas.Any())
+            if (await _unitOfWork.Socio.TieneVisitasAsync(id))
                 throw new BusinessException("No se puede eliminar el socio porque tiene visitas registradas. Desactívelo en su lugar.");
 
             _unitOfWork.Socio.EliminarFisico(socio);

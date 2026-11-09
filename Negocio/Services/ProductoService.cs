@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Negocio.Services
 {
+
     public class ProductoService : IProductoService
     {
 
@@ -197,10 +198,11 @@ namespace Negocio.Services
             if (string.IsNullOrWhiteSpace(codigoBarras))
                 return null;
 
-            var productos = await _unitOfWork.Producto.ObtenerTodasAsync(incluirInactivas: false);
-            var producto = productos.FirstOrDefault(p => p.CodigoBarras == codigoBarras.Trim());
+            // Consulta directa por código: antes se cargaban todos los productos y se buscaba en memoria.
+            var producto = await _unitOfWork.Producto.ObtenerPorCodigoBarrasAsync(codigoBarras.Trim());
 
-            if (producto == null) return null;
+            // Igual que antes: un producto inactivo no se encuentra con el lector.
+            if (producto == null || !producto.Activo) return null;
 
             return new ProductoDto
             {

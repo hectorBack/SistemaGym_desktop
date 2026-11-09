@@ -1,4 +1,5 @@
 ﻿using Presentacion.Controller;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +33,7 @@ namespace Presentacion.Forms.Configuracion
 
         private void InicializarEstilosPestañas()
         {
-            
+
             ConfigurarTabPage(tabDatosGimnasio, "tabDatosGimnasio", "Datos del Gimnasio");
             ConfigurarTabPage(tabCorteCaja, "tabCorteCaja", "Corte de Caja");
             ConfigurarTabPage(tabCorreos, "tabCorreos", "Configuración de Correos");
@@ -100,7 +101,7 @@ namespace Presentacion.Forms.Configuracion
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar la pestaña de configuración: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Error al cargar la pestaña de configuración: {ex.Message}");
             }
             finally
             {

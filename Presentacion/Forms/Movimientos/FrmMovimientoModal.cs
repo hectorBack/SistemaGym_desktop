@@ -41,7 +41,7 @@ namespace Presentacion.Forms.Movimientos
             InitializeComponent();
 
             cmbTipo.Items.AddRange(new object[] { "Ingreso", "Egreso" });
-            cmbFormaPago.Items.AddRange(new object[] { "Efectivo", "Tarjeta", "Transferencia" });
+            cmbFormaPago.Items.AddRange(new object[] { "Efectivo", "Tarjeta", "Otro" });
             cmbTipo.SelectedIndex = 0;
             cmbFormaPago.SelectedIndex = 0;
 

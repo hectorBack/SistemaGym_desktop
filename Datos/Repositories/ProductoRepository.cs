@@ -22,6 +22,7 @@ namespace Datos.Repositories
         public async Task<IEnumerable<Producto>> ObtenerTodasAsync(bool incluirInactivas = false)
         {
             var query = _context.Productos
+                .AsNoTracking()
                 .Include(p => p.Categoria)
                 .AsQueryable();
 

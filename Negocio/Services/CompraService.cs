@@ -62,6 +62,26 @@ namespace Negocio.Services
             return dtos;
         }
 
+        // Listado del módulo: no carga las líneas ni consulta productos (el detalle se pide aparte al abrir una compra).
+        public async Task<IEnumerable<CompraDto>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var compras = await _unitOfWork.Compra.ObtenerResumenPorRangoFechasAsync(fechaInicio, fechaFin);
+
+            return compras.Select(c => new CompraDto
+            {
+                CompraID = c.CompraID,
+                Codigo = c.Codigo,
+                Total = c.Total,
+                Estado = c.Estado,
+                Observacion = c.Observacion,
+                UsuarioID = c.UsuarioID,
+                Activo = c.Activo,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt,
+                Detalles = new List<DetalleCompraDto>()
+            }).ToList();
+        }
+
         public async Task<CompraDto> CrearAsync(CompraCreateDto dto)
         {
             // 1. Validar DTO con FluentValidation

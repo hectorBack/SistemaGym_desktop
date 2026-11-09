@@ -52,6 +52,7 @@ namespace Datos.Repositories
         {
             return await _context.Ventas
                 .Include(v => v.Detalles)
+                    .ThenInclude(d => d.Producto)   // para mostrar el nombre del producto en el detalle y el ticket
                 .FirstOrDefaultAsync(v => v.VentaID == id);
         }
 
@@ -70,6 +71,18 @@ namespace Datos.Repositories
             return await _context.Ventas
                 .Include(v => v.Detalles)
                 .Where(v => v.Activo && v.SocioID == socioId)
+                .OrderByDescending(v => v.FechaVenta)
+                .ToListAsync();
+        }
+
+        // Listado: sin ThenInclude(Producto) y sin rastreo. Solo cargan las líneas (para contar productos).
+        // Incluye las ventas anuladas (el formulario las muestra en gris y no las suma al total).
+        public async Task<IEnumerable<Venta>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _context.Ventas
+                .AsNoTracking()
+                .Include(v => v.Detalles)
+                .Where(v => v.FechaVenta >= fechaInicio && v.FechaVenta <= fechaFin)
                 .OrderByDescending(v => v.FechaVenta)
                 .ToListAsync();
         }

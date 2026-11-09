@@ -1,5 +1,6 @@
 ﻿using Presentacion.Controller;
 using Presentacion.Forms.Membresias;
+using Presentacion.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -35,29 +36,22 @@ namespace Presentacion.Forms.Reportes
 
         private void InicializarEstilosPestañas()
         {
-            ConfigurarTabPage(tabInventario, "tabInventario", "Inventario", dgvInventario);
-            ConfigurarTabPage(tabMembresias, "tabMembresias", "Membresías", dgvMembresias);
-            ConfigurarTabPage(tabSocios, "tabSocios", "Socios", dgvSocios);
-            ConfigurarTabPage(tabRegistro, "tabRegistro", "Registro", dgvRegistro);
-            ConfigurarTabPage(tabVentas, "tabVentas", "Venta Productos", dgvVentas);
-            ConfigurarTabPage(tabVisitas, "tabVisitas", "Visitas", dgvVisitas);
-            ConfigurarTabPage(tabPagos, "tabPagos", "Pagos Membresías", dgvPagos);
-            ConfigurarTabPage(tabMovimientos, "tabMovimientos", "Movimientos", dgvMovimientos);
+            ConfigurarTabPage(tabInventario, "tabInventario", "Inventario");
+            ConfigurarTabPage(tabMembresias, "tabMembresias", "Membresías");
+            ConfigurarTabPage(tabSocios, "tabSocios", "Socios");
+            ConfigurarTabPage(tabRegistro, "tabRegistro", "Registro");
+            ConfigurarTabPage(tabVentas, "tabVentas", "Venta Productos");
+            ConfigurarTabPage(tabVisitas, "tabVisitas", "Visitas");
+            ConfigurarTabPage(tabPagos, "tabPagos", "Pagos Membresías");
+            ConfigurarTabPage(tabMovimientos, "tabMovimientos", "Movimientos");
         }
 
-        // Solo estilo: el aspecto del grid ya viene de GridTema; aquí se nombra la pestaña y se le da el fondo del tema.
-        private void ConfigurarTabPage(TabPage page, string name, string text, GridTema dgv)
+        // Solo estilo: se nombra la pestaña y se le da el fondo del tema. El contenido es un formulario que se incrusta al abrirla.
+        private void ConfigurarTabPage(TabPage page, string name, string text)
         {
             page.Name = name;
             page.Text = text;
             page.BackColor = Tema.Fondo;
-
-            dgv.Dock = DockStyle.Fill;
-
-            // Alineación y formato (dinero, cantidades) según el nombre de la columna: ver GridTemaExtensiones.cs
-            dgv.FormatoAutomatico();
-
-            page.Controls.Add(dgv);
         }
 
         private async void FrmReportes_Load(object sender, EventArgs e)
@@ -77,9 +71,6 @@ namespace Presentacion.Forms.Reportes
             try
             {
                 Cursor = Cursors.WaitCursor;
-
-                DateTime inicio = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                DateTime fin = DateTime.Now;
 
                 switch (tabControlReportes.SelectedTab?.Name)
                 {
@@ -118,7 +109,7 @@ namespace Presentacion.Forms.Reportes
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar el reporte: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FormHelper.MostrarError($"Error al cargar el reporte: {ex.Message}");
             }
             finally
             {
@@ -137,7 +128,7 @@ namespace Presentacion.Forms.Reportes
                 return;
             }
 
-            // Limpiar controles previos (como dgvInventario si existía en la pestaña)
+            // Limpiar controles previos de la pestaña
             tabInventario.Controls.Clear();
 
             // Instanciar el formulario pasando el controlador

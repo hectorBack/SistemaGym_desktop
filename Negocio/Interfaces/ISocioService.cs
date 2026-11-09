@@ -9,7 +9,7 @@ namespace Negocio.Interfaces
 {
     public interface ISocioService
     {
-        Task<IEnumerable<SocioDto>> ObtenerTodosAsync(bool incluirInactivos = false);
+        Task<IEnumerable<SocioDto>> ObtenerTodosAsync(bool incluirInactivos = false, bool incluirFoto = true);
         Task<SocioDto?> ObtenerPorIdAsync(int id);
         Task<SocioDto> CrearAsync(SocioCreateDto dto);
         Task ActualizarAsync(SocioUpdateDto dto);

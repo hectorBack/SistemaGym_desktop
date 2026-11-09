@@ -74,6 +74,17 @@ namespace Datos.Repositories
                 .ToListAsync();
         }
 
+        // Último vencimiento de cada socio (membresías activas y no canceladas), en una sola consulta agrupada.
+        public async Task<Dictionary<int, DateTime>> ObtenerUltimoVencimientoPorSocioAsync()
+        {
+            return await _context.SocioMembresia
+                .AsNoTracking()
+                .Where(sm => sm.Activo && sm.Estado != "Cancelada")
+                .GroupBy(sm => sm.SocioID)
+                .Select(g => new { Id = g.Key, Vencimiento = g.Max(sm => sm.FechaFin) })
+                .ToDictionaryAsync(x => x.Id, x => x.Vencimiento);
+        }
+
         public async Task<IEnumerable<SocioMembresia>> ObtenerTodasAsync(bool incluirInactivos = false)
         {
             var query = _context.SocioMembresia

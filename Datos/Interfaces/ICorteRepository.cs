@@ -26,5 +26,7 @@ namespace Datos.Interfaces
 
         /// <summary>OBSOLETO: el servicio ya no lo usa (sumaba el fondo dos veces y no tomaba en cuenta los movimientos).</summary>
         Task<decimal> ObtenerEfectivoEnCajaAsync();
+
+        Task<DateTime?> ObtenerFechaUltimoCierreAsync();
     }
 }

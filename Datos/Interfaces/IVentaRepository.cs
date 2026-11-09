@@ -55,6 +55,8 @@ namespace Datos.Interfaces
         /// Obtiene el historial de compras realizadas por un socio en particular.
         /// </summary>
         Task<IEnumerable<Venta>> ObtenerPorSocioIdAsync(int socioId);
+
+        Task<IEnumerable<Venta>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 
 }

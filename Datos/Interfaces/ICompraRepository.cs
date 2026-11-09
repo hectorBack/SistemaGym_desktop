@@ -19,5 +19,7 @@ namespace Datos.Interfaces
         void EliminarLogico(Compra compra);
         Task<bool> ExisteCodigoAsync(string codigo, int? idExcluir = null);
         Task<string> GenerarSiguienteCodigoAsync();
+
+        Task<IEnumerable<Compra>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

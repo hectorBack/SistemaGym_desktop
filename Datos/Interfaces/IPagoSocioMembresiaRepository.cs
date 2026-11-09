@@ -19,6 +19,7 @@ namespace Datos.Interfaces
         // Métodos específicos para la gestión de pagos de membresía
         Task<IEnumerable<PagoSocioMembresia>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = false);
         Task<decimal> ObtenerTotalPagadoPorSocioMembresiaIdAsync(int socioMembresiaId);
+        Task<Dictionary<int, decimal>> ObtenerTotalesPagadosAsync(IEnumerable<int> socioMembresiaIds);
         Task<bool> ExisteFolioAsync(string folio, int? idExcluir = null);
         Task<IEnumerable<PagoSocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }

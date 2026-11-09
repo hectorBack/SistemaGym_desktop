@@ -23,10 +23,11 @@ namespace Presentacion.Controller
         public async Task<IEnumerable<InicioViewModel>> ObtenerVisitantesDelDiaAsync()
         {
             DateTime hoy = DateTime.Today;
-            var visitas = await _visitaService.ObtenerPorRangoFechasAsync(hoy, hoy.AddDays(1).AddTicks(-1));
 
-            // 🟢 Filtramos estrictamente solo las visitas que estén activas (excluyendo las canceladas)
-            return visitas.Where(v => v.Activo).Select(v =>
+            // Consulta ligera: ya devuelve solo las visitas activas (excluye las canceladas), sin cargar socio ni membresía.
+            var visitas = await _visitaService.ObtenerActivasPorRangoFechasAsync(hoy, hoy.AddDays(1).AddTicks(-1));
+
+            return visitas.Select(v =>
             {
                 bool esVisitaCasual = string.Equals(v.Clave?.Trim(), "100", StringComparison.OrdinalIgnoreCase) ||
                                       string.Equals(v.TipoAcceso?.Trim(), "Visita Casual", StringComparison.OrdinalIgnoreCase);
@@ -42,11 +43,10 @@ namespace Presentacion.Controller
             }).ToList();
         }
 
-        // Método nuevo para obtener la ruta del logotipo guardado en Configuración de Gimnasio
+        // Solo consulta el logotipo guardado (antes se leían los 6 datos del gimnasio para usar uno)
         public async Task<string> ObtenerLogoGimnasioAsync()
         {
-            var configGym = await _configuracionService.ObtenerConfigGimnasioAsync();
-            return configGym?.Logo ?? string.Empty;
+            return await _configuracionService.ObtenerLogoGimnasioAsync();
         }
     }
 }

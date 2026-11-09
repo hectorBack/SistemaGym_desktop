@@ -19,7 +19,7 @@ namespace Datos.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Socio>> ObtenerTodosAsync(bool incluirInactivos = false)
+        public async Task<IEnumerable<Socio>> ObtenerTodosAsync(bool incluirInactivos = false, bool incluirFoto = true)
         {
             var query = _context.Socios.AsQueryable();
 
@@ -28,7 +28,27 @@ namespace Datos.Repositories
                 query = query.Where(s => s.Activo);
             }
 
-            return await query.ToListAsync();
+            if (incluirFoto)
+                return await query.ToListAsync();
+
+            // Para listados: sin la columna Foto (puede ser pesada) y sin rastreo de cambios.
+            return await query
+                .AsNoTracking()
+                .Select(s => new Socio
+                {
+                    SocioID = s.SocioID,
+                    Clave = s.Clave,
+                    Nombre = s.Nombre,
+                    Apellido = s.Apellido,
+                    Telefono = s.Telefono,
+                    Email = s.Email,
+                    FechaNacimiento = s.FechaNacimiento,
+                    Observaciones = s.Observaciones,
+                    Activo = s.Activo,
+                    CreatedAt = s.CreatedAt,
+                    UpdatedAt = s.UpdatedAt
+                })
+                .ToListAsync();
         }
 
         public async Task<Socio?> ObtenerPorIdAsync(int id)
@@ -88,6 +108,16 @@ namespace Datos.Repositories
                 .Max();
 
             return mayor + 1;
+        }
+
+        public async Task<bool> TieneMembresiasAsync(int socioId)
+        {
+            return await _context.Set<SocioMembresia>().AnyAsync(sm => sm.SocioID == socioId);
+        }
+
+        public async Task<bool> TieneVisitasAsync(int socioId)
+        {
+            return await _context.Set<Visita>().AnyAsync(v => v.SocioID == socioId);
         }
 
         public async Task<Socio?> ObtenerDetalleCompletoAsync(int socioId)

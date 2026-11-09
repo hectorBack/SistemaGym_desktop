@@ -131,7 +131,8 @@ namespace Presentacion.Forms.Configuracion
                 var gimnasio = await _configuracionController.ObtenerConfigGimnasioAsync();
                 logo = CargarLogo(gimnasio.Logo);
 
-                ImprimirTicketPrueba(model, string.IsNullOrWhiteSpace(gimnasio.Nombre) ? "Gimnasio" : gimnasio.Nombre, logo);
+                // Imprimir bloquea hasta que el spooler recibe el trabajo: se hace fuera del hilo de la pantalla.
+                await Task.Run(() => ImprimirTicketPrueba(model, string.IsNullOrWhiteSpace(gimnasio.Nombre) ? "Gimnasio" : gimnasio.Nombre, logo));
 
                 FormHelper.MostrarAviso("Configuración guardada. El ticket de prueba se envió a la impresora.", "Éxito");
             }

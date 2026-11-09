@@ -35,7 +35,7 @@ namespace Negocio.Services
             var cfgPassword = await _unitOfWork.Configuracion.ObtenerPorClaveAsync("Correo_Password");
 
             string remitente = cfgEmail?.Valor ?? string.Empty;
-            string password = cfgPassword?.Valor ?? string.Empty;
+            string password = SecretoHelper.Desproteger(cfgPassword?.Valor);
 
             if (string.IsNullOrWhiteSpace(remitente) || string.IsNullOrWhiteSpace(password))
             {

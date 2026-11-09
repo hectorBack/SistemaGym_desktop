@@ -124,9 +124,9 @@ namespace Negocio.Services
                     Membresia = p.SocioMembresia?.Membresia != null
                         ? p.SocioMembresia.Membresia.Nombre
                         : "N/A",
-                    FechaInicio = p.SocioMembresia?.FechaInicio ?? DateTime.MinValue, 
-                    Folio = p.Folio,                                                  
-                    Observaciones = p.Observacion,                                 
+                    FechaInicio = p.SocioMembresia?.FechaInicio ?? DateTime.MinValue,
+                    Folio = p.Folio,
+                    Observaciones = p.Observacion,
                     Monto = p.Monto,
                     TotalPagado = acumuladoPagado,
                     PrecioMembresia = p.SocioMembresia?.Membresia != null
@@ -162,7 +162,7 @@ namespace Negocio.Services
         public async Task<IEnumerable<ReporteSocioDto>> ObtenerSociosAsync()
         {
             // 1. Obtener socios
-            var socios = await _unitOfWork.Socio.ObtenerTodosAsync(incluirInactivos: true);
+            var socios = await _unitOfWork.Socio.ObtenerTodosAsync(incluirInactivos: true, incluirFoto: false); // el reporte no usa la foto
 
             // 2. Obtener las asignaciones de membresías (ObtenerTodasAsync ya excluye las inactivas)
             var membresiasSocios = await _unitOfWork.SocioMembresia.ObtenerTodasAsync();

@@ -18,9 +18,9 @@ namespace Presentacion.Controller
             _socioService = socioService;
         }
 
-        public async Task<IEnumerable<SocioViewModel>> ObtenerSociosAsync(bool incluirInactivos = true)
+        public async Task<IEnumerable<SocioViewModel>> ObtenerSociosAsync(bool incluirInactivos = true, bool incluirFoto = true)
         {
-            var dtos = await _socioService.ObtenerTodosAsync(incluirInactivos);
+            var dtos = await _socioService.ObtenerTodosAsync(incluirInactivos, incluirFoto);
 
             return dtos.Select(s => new SocioViewModel
             {

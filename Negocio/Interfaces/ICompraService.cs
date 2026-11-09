@@ -18,5 +18,6 @@ namespace Negocio.Interfaces
         Task EliminarLogicoAsync(int id);
         Task EliminarFisicoAsync(int id);
         Task<string> ObtenerSiguienteCodigoAsync();
+        Task<IEnumerable<CompraDto>> ObtenerResumenPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

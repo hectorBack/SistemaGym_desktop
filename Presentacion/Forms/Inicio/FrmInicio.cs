@@ -35,10 +35,25 @@ namespace Presentacion.Forms.Inicio
 
         // ───────────── Carga y columnas ─────────────
 
+        // El logo no cambia entre visitas: se decodifica una sola vez y se reutiliza.
+        // Es compartido, por eso nunca se libera ni se pasa por ImagenHelper.MostrarEn (que lo liberaría).
+        private static Bitmap? _logoCache;
+        private static bool _logoCargado;
+
+        /// <summary>Llamar al guardar los datos del gimnasio para que Inicio vuelva a leer el logo.</summary>
+        public static void InvalidarLogo()
+        {
+            _logoCache = null;
+            _logoCargado = false;
+        }
+
         private async void FrmInicio_Load(object? sender, EventArgs e)
         {
+            // Si ya está en caché el logo aparece al instante, antes de consultar las visitas.
+            if (_logoCargado) picBanner.Image = _logoCache;
+
             await CargarVisitantesAsync();
-            await CargarLogotipoAsync();
+            if (!_logoCargado) await CargarLogotipoAsync();
         }
 
         // Las columnas se definen una sola vez (se omitió la columna Identificador).
@@ -95,11 +110,19 @@ namespace Presentacion.Forms.Inicio
             try
             {
                 string rutaLogo = await _controller.ObtenerLogoGimnasioAsync();
-                if (!string.IsNullOrWhiteSpace(rutaLogo))
+
+                // La decodificación de la imagen se hace fuera del hilo de la interfaz.
+                var logo = await Task.Run(() => ImagenHelper.CargarFoto(rutaLogo));
+
+                if (IsDisposed)
                 {
-                    // Carga la imagen de forma segura utilizando el helper existente en el sistema
-                    ImagenHelper.MostrarEn(picBanner, ImagenHelper.CargarFoto(rutaLogo));
+                    logo?.Dispose();
+                    return;
                 }
+
+                _logoCache = logo;
+                _logoCargado = true;
+                picBanner.Image = logo;
             }
             catch (Exception ex)
             {

@@ -79,6 +79,12 @@ namespace Negocio.Services
             return visitas.Select(v => ADto(v)).ToList();
         }
 
+        public async Task<IEnumerable<VisitaDto>> ObtenerActivasPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
+        {
+            var visitas = await _unitOfWork.Visita.ObtenerActivasPorRangoFechasAsync(fechaInicio, fechaFin);
+            return visitas.Select(v => ADto(v)).ToList();
+        }
+
         // ───────────── Registro manual ─────────────
 
         public async Task<VisitaDto> RegistrarVisitaAsync(VisitaCreateDto dto, int? usuarioIdSesion = null)
@@ -445,6 +451,8 @@ namespace Negocio.Services
             Exitoso = false,
             MensajeError = mensaje
         };
+
+      
     }
 
 }

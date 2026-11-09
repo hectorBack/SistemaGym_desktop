@@ -2,6 +2,7 @@
 using FluentValidation;
 using Negocio.DTOs;
 using Negocio.Exceptions;
+using Negocio.Helpers;
 using Negocio.Interfaces;
 using Presentacion.Helpers;
 using System;
@@ -196,7 +197,7 @@ namespace Negocio.Services
             return new CorreosConfiguracionDto
             {
                 Email = cfgEmail?.Valor ?? string.Empty,
-                Password = cfgPassword?.Valor ?? string.Empty,
+                Password = SecretoHelper.Desproteger(cfgPassword?.Valor),
                 EnviarRecordatorioVencimiento = recordatorio,
                 EnviarFelicitaciones = felicitaciones
             };
@@ -215,7 +216,7 @@ namespace Negocio.Services
 
             await _unitOfWork.Configuracion.GuardarOActualizarAsync(
                 CLAVE_CORREO_PASSWORD,
-                dto.Password ?? string.Empty,
+                SecretoHelper.Proteger(dto.Password), // se guarda cifrada
                 "Contraseña o token de aplicación para el correo");
 
             await _unitOfWork.Configuracion.GuardarOActualizarAsync(
@@ -403,6 +404,12 @@ namespace Negocio.Services
             return int.TryParse(valor, NumberStyles.Integer, CultureInfo.InvariantCulture, out int numero)
                 ? numero
                 : predeterminado;
+        }
+
+        public async Task<string> ObtenerLogoGimnasioAsync()
+        {
+            var cfgLogo = await _unitOfWork.Configuracion.ObtenerPorClaveAsync(CLAVE_GYM_LOGO);
+            return cfgLogo?.Valor ?? string.Empty;
         }
     }
 }

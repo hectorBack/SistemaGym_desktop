@@ -27,5 +27,7 @@ namespace Negocio.Interfaces
         Task<TicketConfiguracionDto> ObtenerConfigTicketAsync();
 
         Task GuardarConfigTicketAsync(TicketConfiguracionDto dto);
+
+        Task<string> ObtenerLogoGimnasioAsync();
     }
 }

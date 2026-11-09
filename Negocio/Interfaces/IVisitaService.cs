@@ -22,5 +22,7 @@ namespace Negocio.Interfaces
         Task<IEnumerable<VisitaDto>> ObtenerPorSocioYFechasAsync(int socioId, DateTime desde, DateTime hasta);
 
         Task CancelarVisitaAsync(int id, int usuarioId, string? motivo = null);
+
+        Task<IEnumerable<VisitaDto>> ObtenerActivasPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

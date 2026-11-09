@@ -55,9 +55,9 @@ namespace Presentacion.Forms.Configuracion
             {
                 btnGuardar.Enabled = false;
 
-                if (!decimal.TryParse(txtEfectivoInicial.Text.Trim(), out decimal efectivoInicial))
+                if (!decimal.TryParse(txtEfectivoInicial.Text.Trim(), out decimal efectivoInicial) || efectivoInicial < 0)
                 {
-                    FormHelper.MostrarAdvertencia("Por favor ingresa un monto válido para el efectivo inicial.", "Validación");
+                    FormHelper.MostrarAdvertencia("Por favor ingresa un monto válido (cero o mayor) para el efectivo inicial.", "Validación");
                     return;
                 }
 
