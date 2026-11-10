@@ -187,13 +187,58 @@ namespace Presentacion.Forms.Movimientos
             var movimiento = MovimientoSeleccionado;
             bool haySeleccion = movimiento != null;
 
-            btnEditar.Enabled = haySeleccion;
-            btnDesactivar.Enabled = haySeleccion;
-            btnEliminarFisico.Enabled = haySeleccion;
+            if (!haySeleccion)
+            {
+                btnEditar.Enabled = false;
+                btnDesactivar.Enabled = false;
+                btnEliminarFisico.Enabled = false;
+                return;
+            }
 
-            bool inactivo = movimiento is { Activo: false };
-            btnDesactivar.Text = inactivo ? "Activar" : "Desactivar";
-            btnDesactivar.Estilo = inactivo ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+            // Validar si es un concepto generado por el sistema
+            bool esDelSistema = EsConceptoDelSistema(movimiento);
+
+            // Si es del sistema, se inhabilitan la edición, desactivación y eliminación directa
+            btnEditar.Enabled = !esDelSistema;
+            btnDesactivar.Enabled = !esDelSistema;
+            btnEliminarFisico.Enabled = !esDelSistema;
+
+            // Si no es del sistema (es un movimiento manual libre), permitimos operar normalmente
+            if (!esDelSistema)
+            {
+                bool inactivo = movimiento is { Activo: false };
+                btnDesactivar.Text = inactivo ? "Activar" : "Desactivar";
+                btnDesactivar.Estilo = inactivo ? EstiloBoton.Exito : EstiloBoton.Advertencia;
+            }
+            else
+            {
+                // Apariencia neutral o texto por defecto cuando está bloqueado por ser del sistema
+                btnDesactivar.Text = "Desactivar";
+                btnDesactivar.Estilo = EstiloBoton.Advertencia;
+            }
+        }
+
+        private static bool EsConceptoDelSistema(MovimientoViewModel m)
+        {
+            if (m == null || string.IsNullOrWhiteSpace(m.ConceptoNombre)) return false;
+
+            string concepto = m.ConceptoNombre.Trim();
+
+            // Lista exacta de conceptos del sistema que no deben modificarse/eliminarse manualmente
+            string[] conceptosProtegidos = new[]
+            {
+                "Venta Producto",
+                "Compra producto",
+                "Pago Membresia",
+                "Cancelacion pago membresia",
+                "cancelacion venta producto",
+                "cancelacion compra producto",
+                "Visita",
+                "Cancelacion Visita"
+            };
+
+            // Comparamos ignorando mayúsculas/minúsculas para mayor seguridad
+            return Array.Exists(conceptosProtegidos, c => string.Equals(c, concepto, StringComparison.OrdinalIgnoreCase));
         }
 
         private void dgvMovimientos_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
