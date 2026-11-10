@@ -65,7 +65,7 @@ namespace Presentacion.Forms.Roles
             columnaEstado.FillWeight = 50;
             columnaFecha.FillWeight = 110;
             columnaPermisos.FillWeight = 888;
-           
+
         }
 
         private async Task CargarRolesAsync(int? idASeleccionar = null)
@@ -213,14 +213,14 @@ namespace Presentacion.Forms.Roles
             if (rol == null || RolesSistema.EsAdministrador(rol.Nombre)) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE el rol '{rol.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar el rol '{rol.Nombre}'?\n\nDejará de mostrarse y de ofrecerse.",
+                    "Eliminar rol",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(rol.RolID),
-                "No se pudo eliminar el rol. Si ya tiene usuarios asignados, reasígnelos o desactive el rol en su lugar.",
+                () => _controller.EliminarAsync(rol.RolID),
+                "No se pudo eliminar el rol.",
                 panelTop);
 
             if (correcto)

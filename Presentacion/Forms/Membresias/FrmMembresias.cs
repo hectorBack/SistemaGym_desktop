@@ -222,14 +222,14 @@ namespace Presentacion.Forms.Membresias
             if (membresia == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE la membresía '{membresia.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar la membresía '{membresia.Nombre}'?\n\nDejará de mostrarse y de ofrecerse. Los socios que ya la tienen conservan su registro.",
+                    "Eliminar membresía",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(membresia.MembresiaID),
-                "No se pudo eliminar la membresía. Si ya tiene socios asociados, desactívala en su lugar.",
+                () => _controller.EliminarAsync(membresia.MembresiaID),
+                "No se pudo eliminar la membresía.",
                 panelTop);
 
             if (correcto)

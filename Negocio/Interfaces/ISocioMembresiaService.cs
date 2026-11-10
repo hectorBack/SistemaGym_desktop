@@ -14,6 +14,6 @@ namespace Negocio.Interfaces
         Task<SocioMembresiaDto?> ObtenerMembresiaActivaPorSocioIdAsync(int socioId);
         Task<SocioMembresiaDto> AsignarMembresiaAsync(AsignarMembresiaDto dto);
         Task CancelarMembresiaAsync(int socioMembresiaId);
-        Task EliminarAsync(int id);
+        Task EliminarLogicoAsync(int id);
     }
 }

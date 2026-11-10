@@ -14,6 +14,6 @@ namespace Negocio.Interfaces
         Task<CategoriaDto> CrearAsync(CategoriaCreateDto dto);
         Task ActualizarAsync(CategoriaUpdateDto dto);
         Task EliminarLogicoAsync(int id);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
     }
 }

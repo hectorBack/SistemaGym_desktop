@@ -21,12 +21,9 @@ namespace Datos.Repositories
 
         public async Task<IEnumerable<Rol>> ObtenerTodasAsync(bool incluirInactivos = false)
         {
-            var query = _context.Roles.AsQueryable();
-
-            if (!incluirInactivos)
-            {
-                query = query.Where(r => r.Activo);
-            }
+            var query = incluirInactivos
+                ? _context.Roles.Where(r => r.Estado != "Eliminado")
+                : _context.Roles.Where(r => r.Activo);
 
             return await query.ToListAsync();
         }
@@ -50,17 +47,26 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             rol.Activo = !rol.Activo;
+            rol.Estado = rol.Activo ? "Activo" : "Inactivo";
             _context.Roles.Update(rol);
         }
 
-        public void EliminarFisico(Rol rol)
+        public void MarcarComoEliminado(Rol rol)
         {
-            _context.Roles.Remove(rol);
+            rol.Activo = false;
+            rol.Estado = "Eliminado";
+            _context.Roles.Update(rol);
+        }
+
+        public async Task<bool> TieneUsuariosAsync(int rolId)
+        {
+            return await _context.Set<Usuario>().AnyAsync(u => u.RolID == rolId && u.Estado != "Eliminado");
         }
 
         public async Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null)
         {
-            var query = _context.Roles.AsQueryable();
+            // Un rol eliminado libera su nombre.
+            var query = _context.Roles.Where(r => r.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {

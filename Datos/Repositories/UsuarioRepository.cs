@@ -26,10 +26,9 @@ namespace Datos.Repositories
                 .Include(u => u.Rol)
                 .AsQueryable();
 
-            if (!incluirInactivos)
-            {
-                query = query.Where(u => u.Activo);
-            }
+            query = incluirInactivos
+                ? query.Where(u => u.Estado != "Eliminado")
+                : query.Where(u => u.Activo);
 
             return await query.ToListAsync();
         }
@@ -54,17 +53,21 @@ namespace Datos.Repositories
         public void EliminarLogico(Usuario usuario)
         {
             usuario.Activo = !usuario.Activo;
+            usuario.Estado = usuario.Activo ? "Activo" : "Inactivo";
             _context.Usuarios.Update(usuario);
         }
 
-        public void EliminarFisico(Usuario usuario)
+        public void MarcarComoEliminado(Usuario usuario)
         {
-            _context.Usuarios.Remove(usuario);
+            usuario.Activo = false;
+            usuario.Estado = "Eliminado";
+            _context.Usuarios.Update(usuario);
         }
 
         public async Task<bool> ExisteNombreUsuarioAsync(string nombreUsuario, int? idExcluir = null)
         {
-            var query = _context.Usuarios.AsQueryable();
+            // Un usuario eliminado libera su nombre de usuario.
+            var query = _context.Usuarios.Where(u => u.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {

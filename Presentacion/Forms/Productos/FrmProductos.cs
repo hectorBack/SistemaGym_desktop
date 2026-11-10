@@ -241,14 +241,14 @@ namespace Presentacion.Forms.Productos
             if (producto == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE el producto '{producto.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar el producto '{producto.Nombre}'?\n\nDejará de mostrarse y de venderse. Su historial de ventas y compras se conserva.",
+                    "Eliminar producto",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _productoController.EliminarFisicoAsync(producto.ProductoID),
-                "No se pudo eliminar el producto. Si ya tiene ventas o compras registradas, desactívalo en su lugar.",
+                () => _productoController.EliminarAsync(producto.ProductoID),
+                "No se pudo eliminar el producto.",
                 panelTop);
 
             if (correcto)

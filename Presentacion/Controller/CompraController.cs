@@ -1,5 +1,6 @@
 ﻿using Negocio.DTOs;
 using Negocio.Interfaces;
+using Negocio.Services;
 using Presentacion.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -18,9 +19,9 @@ namespace Presentacion.Controller
             _compraService = compraService;
         }
 
-        public async Task<IEnumerable<CompraViewModel>> ObtenerComprasAsync(bool incluirInactivas = true)
+        public async Task<IEnumerable<CompraViewModel>> ObtenerComprasAsync(string? estadoFiltro = "Activo")
         {
-            var dtos = await _compraService.ObtenerTodasAsync(incluirInactivas);
+            var dtos = await _compraService.ObtenerTodasAsync(estadoFiltro);
             return dtos.Select(MapearAViewModel);
         }
 
@@ -51,14 +52,9 @@ namespace Presentacion.Controller
             await _compraService.CancelarCompraAsync(id, usuarioId, observacion);
         }
 
-        public async Task CambiarEstadoLogicoAsync(int id)
+        public async Task EliminarLogicoAsync(int id, int usuarioId)
         {
-            await _compraService.EliminarLogicoAsync(id);
-        }
-
-        public async Task EliminarFisicoAsync(int id)
-        {
-            await _compraService.EliminarFisicoAsync(id);
+            await _compraService.EliminarLogicoAsync(id, usuarioId);
         }
 
         public async Task<string> ObtenerSiguienteCodigoAsync()
@@ -74,7 +70,6 @@ namespace Presentacion.Controller
                 CompraID = c.CompraID,
                 Codigo = c.Codigo,
                 Total = c.Total,
-                Estado = c.Estado,
                 Observacion = c.Observacion,
                 UsuarioID = c.UsuarioID,
                 UsuarioNombre = c.UsuarioNombre,

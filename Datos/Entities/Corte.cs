@@ -28,5 +28,8 @@ namespace Datos.Entities
         /// Indica si la caja está 'Abierto' o 'Cerrado'
         /// </summary>
         public string Estado { get; set; } = "Abierto";
+
+        /// <summary>Borrado lógico: el corte ya no se muestra ni cuenta (Activo y Eliminado = false → Activo; Activo = false → Inactivo; Eliminado = true → Eliminado).</summary>
+        public bool Eliminado { get; set; } = false;
     }
 }

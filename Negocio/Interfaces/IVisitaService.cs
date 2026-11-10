@@ -15,7 +15,7 @@ namespace Negocio.Interfaces
         Task<IEnumerable<VisitaDto>> ObtenerPorSocioIdAsync(int socioId);
         Task<VisitaDto> RegistrarVisitaAsync(VisitaCreateDto dto, int? usuarioIdSesion = null);
         Task ActualizarAsync(VisitaUpdateDto dto);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
 
         Task<AccesoResultadoDto> ProcesarAccesoRapidoAsync(string clave, int usuarioIdSesion);
 

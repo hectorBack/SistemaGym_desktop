@@ -15,6 +15,7 @@ namespace Datos.Entities
         public decimal Costo { get; set; }
         public decimal Precio { get; set; }
         public int Stock { get; set; }
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
 
         // Propiedad de navegación (opcional si usas EF Core)
         public Categoria? Categoria { get; set; }

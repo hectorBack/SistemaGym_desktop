@@ -69,9 +69,9 @@ namespace Presentacion.Controller
             await _rolService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _rolService.EliminarFisicoAsync(id);
+            await _rolService.EliminarAsync(id);
         }
     }
 }

@@ -18,6 +18,8 @@ namespace Datos.Entities
         public string? Foto { get; set; }
         public string? Observaciones { get; set; }
 
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
+
         public virtual ICollection<SocioMembresia> SocioMembresias { get; set; } = new List<SocioMembresia>();
         public virtual ICollection<Visita> Visitas { get; set; } = new List<Visita>();
     }

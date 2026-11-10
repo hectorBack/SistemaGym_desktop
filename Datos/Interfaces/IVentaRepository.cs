@@ -12,7 +12,7 @@ namespace Datos.Interfaces
         /// <summary>
         /// Obtiene el historial de ventas con opción de incluir anuladas/inactivas.
         /// </summary>
-        Task<IEnumerable<Venta>> ObtenerTodasAsync(bool incluirInactivas = false);
+        Task<IEnumerable<Venta>> ObtenerTodasAsync(string? estadoFiltro = "Activo");
 
         /// <summary>
         /// Obtiene una venta por su ID incluyendo sus detalles, usuario y socio asociados.
@@ -29,15 +29,11 @@ namespace Datos.Interfaces
         /// </summary>
         void Actualizar(Venta venta);
 
-        /// <summary>
-        /// Anula lógicamente una venta (Activo = false).
-        /// </summary>
-        void EliminarLogico(Venta venta);
+        // Cambiar EliminarFisico por un Soft Delete que marque como "Eliminado"
+        void MarcarComoEliminado(Venta venta);
 
-        /// <summary>
-        /// Elimina físicamente el registro de la venta.
-        /// </summary>
-        void EliminarFisico(Venta venta);
+        // Mantener o ajustar anulación lógica si "Inactivo" representa una venta anulada
+        void MarcarComoInactivo(Venta venta);
 
         // --- MÉTODOS ESPECÍFICOS DE VENTAS ---
 

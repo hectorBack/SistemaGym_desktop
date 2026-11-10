@@ -21,6 +21,8 @@ namespace Datos.Entities
         public string FormaPago { get; set; } = "Efectivo";
         public string? Observacion { get; set; }
         public int? MovimientoID { get; set; }
+
+        public string Estado { get; set; } = "Activo";
         public virtual Movimiento? Movimiento { get; set; }
 
         // Propiedad de navegación (Relación 1 a N)

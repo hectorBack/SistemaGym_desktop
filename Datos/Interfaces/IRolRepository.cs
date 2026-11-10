@@ -14,7 +14,8 @@ namespace Datos.Interfaces
         Task AgregarAsync(Rol rol);
         void Actualizar(Rol rol);
         void EliminarLogico(Rol rol);
-        void EliminarFisico(Rol rol);
+        void MarcarComoEliminado(Rol rol);
+        Task<bool> TieneUsuariosAsync(int rolId);
         Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null);
     }
 }

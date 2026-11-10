@@ -20,6 +20,13 @@ namespace Negocio.Services
         private readonly IValidator<MovimientoUpdateDto> _updateValidator;
         private readonly CajaHelper _caja;
 
+        // Movimientos que generan otros módulos: su estado lo controla ese módulo, no Movimientos.
+        private static readonly int[] ConceptosDeOtrosModulos =
+        {
+            CajaConstantes.ConceptoVisita, CajaConstantes.ConceptoVenta,
+            CajaConstantes.ConceptoCompra, CajaConstantes.ConceptoPagoMembresia
+        };
+
         public MovimientoService(
             IUnitOfWork unitOfWork,
             IValidator<MovimientoCreateDto> createValidator,
@@ -158,11 +165,16 @@ namespace Negocio.Services
 
             await ValidarCorteEditableAsync(movimiento.CorteID);
 
+            if (ConceptosDeOtrosModulos.Contains(movimiento.ConceptoID))
+            {
+                throw new BusinessException("Este movimiento lo generó una visita, venta, compra o pago de membresía. Su estado se cambia desde su módulo.");
+            }
+
             _unitOfWork.Movimiento.EliminarLogico(movimiento);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var movimiento = await _unitOfWork.Movimiento.ObtenerPorIdAsync(id);
             if (movimiento == null)
@@ -172,74 +184,13 @@ namespace Negocio.Services
 
             await ValidarCorteEditableAsync(movimiento.CorteID);
 
-            // 1. Si es un movimiento de Visita, buscamos directamente por la relación exacta
-            if (movimiento.ConceptoID == CajaConstantes.ConceptoVisita)
+            // Un movimiento vigente de otro módulo se elimina desde ese módulo (ahí se revierte stock, vigencia, etc.).
+            if (movimiento.Activo && ConceptosDeOtrosModulos.Contains(movimiento.ConceptoID))
             {
-                var visitas = await _unitOfWork.Visita.ObtenerTodasAsync();
-                var visitaAsociada = visitas.FirstOrDefault(v => v.MovimientoID == movimiento.MovimientoID);
-                if (visitaAsociada != null)
-                {
-                    _unitOfWork.Visita.EliminarFisico(visitaAsociada);
-                }
-            }
-            // 2. Si es una Venta de Producto
-            else if (movimiento.ConceptoID == CajaConstantes.ConceptoVenta)
-            {
-                var ventas = await _unitOfWork.Venta.ObtenerTodasAsync(); // O un método específico por MovimientoID si lo creas en el repositorio
-                var ventaAsociada = ventas.FirstOrDefault(v => v.MovimientoID == movimiento.MovimientoID);
-                if (ventaAsociada != null)
-                {
-                    if (ventaAsociada.Activo && ventaAsociada.Detalles != null) // si la venta ya estaba anulada, su stock ya se devolvió
-                    {
-                        foreach (var detalle in ventaAsociada.Detalles)
-                        {
-                            var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(detalle.ProductoID);
-                            if (producto != null)
-                            {
-                                producto.Stock += detalle.Cantidad; // Devolvemos stock
-                                _unitOfWork.Producto.Actualizar(producto);
-                            }
-                        }
-                    }
-                    _unitOfWork.Venta.EliminarFisico(ventaAsociada);
-                }
-            }
-            // 3. Si es una Compra de Producto
-            else if (movimiento.ConceptoID == CajaConstantes.ConceptoCompra)
-            {
-                var compras = await _unitOfWork.Compra.ObtenerTodasAsync();
-                var compraAsociada = compras.FirstOrDefault(c => c.MovimientoID == movimiento.MovimientoID);
-                if (compraAsociada != null)
-                {
-                    if (compraAsociada.Activo && compraAsociada.Detalles != null) // si la compra ya estaba anulada, su stock ya se revirtió
-                    {
-                        foreach (var detalle in compraAsociada.Detalles)
-                        {
-                            var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(detalle.ProductoID);
-                            if (producto != null)
-                            {
-                                producto.Stock -= detalle.Cantidad; // Restamos stock
-                                _unitOfWork.Producto.Actualizar(producto);
-                            }
-                        }
-                    }
-                    _unitOfWork.Compra.EliminarFisico(compraAsociada);
-                }
+                throw new BusinessException("Este movimiento lo generó una visita, venta, compra o pago de membresía. Cancélelo o elimínelo desde su módulo.");
             }
 
-            // 4. Si el movimiento corresponde a un Pago de Membresía
-            else if (movimiento.ConceptoID == CajaConstantes.ConceptoPagoMembresia)
-            {
-                var pagos = await _unitOfWork.PagoSocioMembresia.ObtenerTodasAsync(true);
-                var pagoAsociado = pagos.FirstOrDefault(p => p.MovimientoID == movimiento.MovimientoID);
-                if (pagoAsociado != null)
-                {
-                    _unitOfWork.PagoSocioMembresia.EliminarFisico(pagoAsociado);
-                }
-            }
-
-            // Finalmente eliminamos el movimiento de caja
-            _unitOfWork.Movimiento.EliminarFisico(movimiento);
+            _unitOfWork.Movimiento.MarcarComoEliminado(movimiento);
             await _unitOfWork.SaveChangesAsync();
         }
 

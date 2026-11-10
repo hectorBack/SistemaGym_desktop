@@ -14,7 +14,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(Movimiento movimiento);
         void Actualizar(Movimiento movimiento);
         void EliminarLogico(Movimiento movimiento);
-        void EliminarFisico(Movimiento movimiento);
+        void MarcarComoEliminado(Movimiento movimiento);
 
         Task<IEnumerable<Movimiento>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }

@@ -40,7 +40,7 @@ namespace Negocio.Services
             }
 
             var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(dto.ProductoID);
-            if (producto == null)
+            if (producto == null || producto.Estado == "Eliminado")
             {
                 throw new BusinessException("El producto que intenta actualizar no existe.");
             }
@@ -74,6 +74,7 @@ namespace Negocio.Services
             producto.Precio = dto.Precio;
             producto.Stock = dto.Stock;
             producto.Activo = dto.Activo;
+            producto.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.Producto.Actualizar(producto);
             await _unitOfWork.SaveChangesAsync();
@@ -161,29 +162,23 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(id);
-            if (producto == null)
+            if (producto == null || producto.Estado == "Eliminado")
             {
                 throw new BusinessException("El producto a eliminar no existe.");
             }
 
-            // Validar en la tabla de DetalleVentas antes de borrar físicamente
-            bool tieneVentasAsociadas = await _unitOfWork.Venta.ExisteProductoEnVentasAsync(id);
-            if (tieneVentasAsociadas)
-            {
-                throw new BusinessException("No se puede eliminar físicamente este producto porque cuenta con historial de ventas. Utilice la desactivación (eliminación lógica).");
-            }
-
-            _unitOfWork.Producto.EliminarFisico(producto);
+            // Ya no se borra de la base de datos: las ventas y compras anteriores conservan su producto.
+            _unitOfWork.Producto.MarcarComoEliminado(producto);
             await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task EliminarLogicoAsync(int id)
         {
             var producto = await _unitOfWork.Producto.ObtenerPorIdAsync(id);
-            if (producto == null)
+            if (producto == null || producto.Estado == "Eliminado")
             {
                 throw new BusinessException("El Producto a desactivar no existe.");
             }

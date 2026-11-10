@@ -29,10 +29,9 @@ namespace Negocio.Services
             _caja = caja;
         }
 
-        public async Task<IEnumerable<VentaDto>> ObtenerTodasAsync(bool incluirInactivas = false)
+        public async Task<IEnumerable<VentaDto>> ObtenerTodasAsync(string? estadoFiltro = "Activo")
         {
-            var ventas = await _unitOfWork.Venta.ObtenerTodasAsync(incluirInactivas);
-
+            var ventas = await _unitOfWork.Venta.ObtenerTodasAsync(estadoFiltro);
             return ventas.Select(MapToDto);
         }
 
@@ -67,6 +66,7 @@ namespace Negocio.Services
                 SocioID = dto.SocioID,
                 FechaVenta = DateTime.Now,
                 Activo = true,
+                Estado = "Activo",
                 Total = 0,
                 FormaPago = dto.FormaPago,
             };
@@ -160,7 +160,7 @@ namespace Negocio.Services
                 }
             }
 
-            _unitOfWork.Venta.EliminarLogico(venta);
+            _unitOfWork.Venta.MarcarComoInactivo(venta);
 
             // REGISTRAR EGRESO EN CAJA - 'Cancelacion Venta Producto'
             // La devolución siempre queda registrada: en el corte abierto, o sin corte si no hay uno.
@@ -174,7 +174,7 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarLogicoAsync(int id, int usuarioId)
         {
             var venta = await _unitOfWork.Venta.ObtenerPorIdAsync(id);
             if (venta == null)
@@ -182,15 +182,14 @@ namespace Negocio.Services
                 throw new BusinessException("La venta a eliminar no existe.");
             }
 
-            // Una venta vigente se deshace por completo: vuelve el stock y desaparece su ingreso de caja.
-            // (Si ya estaba anulada, el stock se devolvió al anular y su ingreso y su cancelación se compensan: se dejan.)
-            if (venta.Activo)
+            // Si la venta estaba activa (vigente), se revierte el stock y se valida el movimiento de caja
+            if (venta.Activo && venta.Estado != "Inactivo")
             {
                 var movimiento = venta.MovimientoID.HasValue
                     ? await _unitOfWork.Movimiento.ObtenerPorIdAsync(venta.MovimientoID.Value)
                     : null;
 
-                // Un movimiento que ya entró a un corte no se toca: cambiaría un corte hecho.
+                // Un movimiento que ya entró a un corte no se toca
                 if (movimiento?.CorteID != null)
                     throw new BusinessException("Esta venta ya forma parte de un corte de caja y no se puede eliminar. Para corregirla usa 'Anular'.");
 
@@ -205,11 +204,12 @@ namespace Negocio.Services
                 }
 
                 if (movimiento != null)
-                    _unitOfWork.Movimiento.EliminarFisico(movimiento);
+                    _unitOfWork.Movimiento.EliminarLogico(movimiento); // se desactiva (no se borra): deja de contar en caja
             }
 
-            _unitOfWork.Venta.EliminarFisico(venta);
-            await _unitOfWork.SaveChangesAsync(); // todo en una sola transacción
+            // Aplicar el Soft Delete definitivo (estado "Eliminado")
+            _unitOfWork.Venta.MarcarComoEliminado(venta);
+            await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<VentaDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
@@ -255,7 +255,5 @@ namespace Negocio.Services
                 }).ToList() ?? new List<DetalleVentaDto>()
             };
         }
-
-       
     }
 }

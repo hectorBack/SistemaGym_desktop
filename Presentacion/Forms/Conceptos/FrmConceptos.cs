@@ -58,7 +58,7 @@ namespace Presentacion.Forms.Conceptos
             dgvConceptos.RowTemplate.Height = 24;
             dgvConceptos.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgvConceptos.ColumnHeadersHeight = 48;
-            
+
             var columnaNombre = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Nombre), "Nombre", 190, 130);
             var columnaTipo = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Tipo), "Tipo", 75, 90);
             var columnaObservacion = dgvConceptos.AgregarTexto(nameof(ConceptoViewModel.Observacion), "Observacion", 150, 110);
@@ -73,7 +73,7 @@ namespace Presentacion.Forms.Conceptos
             columnaFecha.FillWeight = 110;
             columnaEstado.FillWeight = 888;
         }
-        
+
 
         private async Task CargarConceptosAsync(int? idASeleccionar = null)
         {
@@ -234,14 +234,14 @@ namespace Presentacion.Forms.Conceptos
             if (concepto == null || EsConceptoDeSistema(concepto)) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE el concepto '{concepto.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar el concepto '{concepto.Nombre}'?\n\nDejará de mostrarse y de ofrecerse. Los movimientos que ya lo usan lo conservan.",
+                    "Eliminar concepto",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(concepto.ConceptoID),
-                "No se pudo eliminar el concepto. Si ya tiene movimientos asociados, desactívalo en su lugar.",
+                () => _controller.EliminarAsync(concepto.ConceptoID),
+                "No se pudo eliminar el concepto.",
                 panelTop);
 
             if (correcto)

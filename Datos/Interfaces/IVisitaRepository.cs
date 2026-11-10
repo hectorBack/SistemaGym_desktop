@@ -15,13 +15,12 @@ namespace Datos.Interfaces
         Task<IEnumerable<Visita>> ObtenerPorSocioIdAsync(int socioId);
         Task AgregarAsync(Visita visita);
         void Actualizar(Visita visita);
-        void EliminarFisico(Visita visita);
+        void MarcarComoEliminada(Visita visita);
 
         Task<IEnumerable<Visita>> ObtenerPorSocioYFechasAsync(int socioId, DateTime inicioSemana, DateTime finSemana);
 
         Task<List<Visita>> ObtenerVisitasPorSocioYFechasAsync(int socioId, DateTime desde, DateTime hasta);
 
         Task<IEnumerable<Visita>> ObtenerActivasPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
-        Task<bool> EliminarPorIdAsync(int id);
     }
 }

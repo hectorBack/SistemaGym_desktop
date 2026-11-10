@@ -14,7 +14,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(Concepto concepto);
         void Actualizar(Concepto concepto);
         void EliminarLogico(Concepto concepto);
-        void EliminarFisico(Concepto concepto);
+        void MarcarComoEliminado(Concepto concepto);
         Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null);
 
         Task<Concepto?> ObtenerPorNombreAsync(string nombre);

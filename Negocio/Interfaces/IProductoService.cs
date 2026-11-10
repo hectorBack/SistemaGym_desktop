@@ -14,7 +14,7 @@ namespace Negocio.Interfaces
         Task<ProductoDto> CrearAsync(ProductoCreateDto dto);
         Task ActualizarAsync(ProductoUpdateDto dto);
         Task EliminarLogicoAsync(int id);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
 
         /// <summary>
         /// Descuenta stock de un producto al realizar una venta en la recepción.

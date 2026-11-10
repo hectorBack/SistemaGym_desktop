@@ -205,14 +205,14 @@ namespace Presentacion.Forms
             if (categoria == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE la categoría '{categoria.Nombre}' de la base de datos?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar la categoría '{categoria.Nombre}'?\n\nDejará de mostrarse y de ofrecerse.",
+                    "Eliminar categoría",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(categoria.CategoriaID),
-                "No se pudo eliminar la categoría. Si ya tiene productos asociados, desactívala en su lugar.",
+                () => _controller.EliminarAsync(categoria.CategoriaID),
+                "No se pudo eliminar la categoría.",
                 panelTop);
 
             if (correcto)

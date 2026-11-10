@@ -21,7 +21,10 @@ namespace Datos.Repositories
 
         public async Task<IEnumerable<PagoSocioMembresia>> ObtenerTodasAsync(bool incluirInactivas = false)
         {
-            var query = _context.PagoSocioMembresias.AsQueryable();
+            var query = _context.PagoSocioMembresias
+                .AsNoTracking()
+                .Where(p => p.Estado != "Eliminado")
+                .AsQueryable();
 
             if (!incluirInactivas)
             {
@@ -33,7 +36,9 @@ namespace Datos.Repositories
 
         public async Task<PagoSocioMembresia?> ObtenerPorIdAsync(int id)
         {
-            return await _context.PagoSocioMembresias.FindAsync(id);
+            // para evitar que devuelva un pago con estado Eliminado
+            return await _context.PagoSocioMembresias
+                .FirstOrDefaultAsync(p => p.PagoID == id && p.Estado != "Eliminado");
         }
 
         public async Task AgregarAsync(PagoSocioMembresia pago)
@@ -50,18 +55,21 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             pago.Activo = !pago.Activo;
+            pago.Estado = pago.Activo ? "Activo" : "Inactivo";
             _context.PagoSocioMembresias.Update(pago);
         }
 
-        public void EliminarFisico(PagoSocioMembresia pago)
+        public void MarcarComoEliminado(PagoSocioMembresia pago)
         {
-            _context.PagoSocioMembresias.Remove(pago);
+            pago.Activo = false;
+            pago.Estado = "Eliminado";
+            _context.PagoSocioMembresias.Update(pago);
         }
 
         public async Task<IEnumerable<PagoSocioMembresia>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = false)
         {
             var query = _context.PagoSocioMembresias
-                .Where(p => p.SocioMembresiaID == socioMembresiaId);
+                .Where(p => p.SocioMembresiaID == socioMembresiaId && p.Estado != "Eliminado");
 
             if (!incluirInactivos)
             {
@@ -74,7 +82,7 @@ namespace Datos.Repositories
         public async Task<decimal> ObtenerTotalPagadoPorSocioMembresiaIdAsync(int socioMembresiaId)
         {
             return await _context.PagoSocioMembresias
-                .Where(p => p.SocioMembresiaID == socioMembresiaId && p.Activo)
+                .Where(p => p.SocioMembresiaID == socioMembresiaId && p.Activo && p.Estado != "Eliminado")
                 .SumAsync(p => p.Monto);
         }
 
@@ -86,7 +94,7 @@ namespace Datos.Repositories
 
             return await _context.PagoSocioMembresias
                 .AsNoTracking()
-                .Where(p => p.Activo && ids.Contains(p.SocioMembresiaID))
+                .Where(p => p.Activo && p.Estado != "Eliminado" && ids.Contains(p.SocioMembresiaID))
                 .GroupBy(p => p.SocioMembresiaID)
                 .Select(g => new { Id = g.Key, Total = g.Sum(p => p.Monto) })
                 .ToDictionaryAsync(x => x.Id, x => x.Total);
@@ -96,7 +104,7 @@ namespace Datos.Repositories
         {
             if (string.IsNullOrWhiteSpace(folio)) return false;
 
-            var query = _context.PagoSocioMembresias.AsQueryable();
+            var query = _context.PagoSocioMembresias.Where(p => p.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {
@@ -110,12 +118,12 @@ namespace Datos.Repositories
         {
             return await _context.PagoSocioMembresias
                 .Include(p => p.SocioMembresia)
-                    .ThenInclude(sm => sm.Socio)       // Carga la información del Socio
+                    .ThenInclude(sm => sm.Socio)
                 .Include(p => p.SocioMembresia)
-                    .ThenInclude(sm => sm.Membresia)   // Carga la información de la Membresía
-                .Where(p => p.CreatedAt >= fechaInicio && p.CreatedAt <= fechaFin)
+                    .ThenInclude(sm => sm.Membresia)
+                .Where(p => p.Estado != "Eliminado" && p.CreatedAt >= fechaInicio && p.CreatedAt <= fechaFin) // <-- Filtro agregado
                 .OrderByDescending(p => p.CreatedAt)
-                .AsNoTracking()                        // Funciona sin problemas al remover la relación cíclica
+                .AsNoTracking()
                 .ToListAsync();
         }
     }

@@ -110,7 +110,7 @@ namespace Negocio.Services
             }
 
             var concepto = await _unitOfWork.Concepto.ObtenerPorIdAsync(dto.ConceptoID);
-            if (concepto == null)
+            if (concepto == null || concepto.Estado == "Eliminado")
             {
                 throw new BusinessException("El concepto que intenta actualizar no existe.");
             }
@@ -124,6 +124,7 @@ namespace Negocio.Services
             concepto.Tipo = dto.Tipo.Trim();
             concepto.Observacion = string.IsNullOrWhiteSpace(dto.Observacion) ? null : dto.Observacion.Trim();
             concepto.Activo = dto.Activo;
+            concepto.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.Concepto.Actualizar(concepto);
             await _unitOfWork.SaveChangesAsync();
@@ -132,7 +133,7 @@ namespace Negocio.Services
         public async Task EliminarLogicoAsync(int id)
         {
             var concepto = await _unitOfWork.Concepto.ObtenerPorIdAsync(id);
-            if (concepto == null)
+            if (concepto == null || concepto.Estado == "Eliminado")
             {
                 throw new BusinessException("El concepto a desactivar no existe.");
             }
@@ -141,15 +142,22 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var concepto = await _unitOfWork.Concepto.ObtenerPorIdAsync(id);
-            if (concepto == null)
+            if (concepto == null || concepto.Estado == "Eliminado")
             {
                 throw new BusinessException("El concepto a eliminar no existe.");
             }
 
-            _unitOfWork.Concepto.EliminarFisico(concepto);
+            // Los conceptos del sistema los usa la caja (ventas, compras, visitas...) y no se eliminan.
+            if (concepto.EsSistema)
+            {
+                throw new BusinessException("Los conceptos del sistema no se pueden eliminar.");
+            }
+
+            // Los movimientos anteriores conservan su concepto: solo deja de ofrecerse.
+            _unitOfWork.Concepto.MarcarComoEliminado(concepto);
             await _unitOfWork.SaveChangesAsync();
         }
     }

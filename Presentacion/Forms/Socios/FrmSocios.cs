@@ -319,15 +319,15 @@ namespace Presentacion.Forms.Socios
             if (socio == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE al socio '{socio.NombreCompleto}' de la base de datos?\n\n" +
-                    "Esta acción no se puede deshacer. Si el socio ya tiene visitas, pagos o membresías, lo normal es desactivarlo en su lugar.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar al socio '{socio.NombreCompleto}'?\n\n" +
+                    "Dejará de mostrarse y ya no podrá registrar visitas. Su historial de visitas, pagos y membresías se conserva.",
+                    "Eliminar socio",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(socio.SocioID),
-                "No se pudo eliminar al socio. Si tiene historial asociado, desactívalo en su lugar.",
+                () => _controller.EliminarAsync(socio.SocioID),
+                "No se pudo eliminar al socio.",
                 flowAcciones);
 
             if (correcto)

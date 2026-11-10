@@ -18,6 +18,7 @@ namespace Datos.Entities
         public decimal MontoPagado { get; set; } = 0.00m;
         public string TipoAcceso { get; set; } = "Visita Casual";
         public string? Observaciones { get; set; }
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo (cancelada) / Eliminado
         public int? MovimientoID { get; set; }
         public virtual Movimiento? Movimiento { get; set; }
 

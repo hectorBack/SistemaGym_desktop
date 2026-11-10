@@ -13,6 +13,8 @@ CREATE TABLE Usuarios (
     UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+ALTER TABLE usuarios ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
+
 -- 2. TABLA SOCIOS (Clientes del gimnasio)
 CREATE TABLE Socios (
     SocioID INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,6 +31,7 @@ CREATE TABLE Socios (
 );
 
 ALTER TABLE Socios ADD COLUMN FechaNacimiento DATE NULL AFTER Email;
+ALTER TABLE Socios ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
 
 -- 3. TABLA MEMBRESÍAS (Tipos de suscripciones)
 CREATE TABLE Membresias (
@@ -47,6 +50,8 @@ ADD COLUMN Meses INT NOT NULL DEFAULT 0,
 ADD COLUMN Semanas INT NOT NULL DEFAULT 0,
 ADD COLUMN Dias INT NOT NULL DEFAULT 0;
 
+ALTER TABLE membresias ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
+
 -- 4. TABLA CATEGORÍAS (Para los productos de la tienda)
 CREATE TABLE Categorias (
     CategoriaID INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,6 +60,8 @@ CREATE TABLE Categorias (
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+ALTER TABLE categorias ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
 
 -- 5. TABLA PRODUCTOS (Suplementos, bebidas, accesorios)
 CREATE TABLE Productos (
@@ -73,6 +80,8 @@ CREATE TABLE Productos (
 ALTER TABLE Productos 
 ADD COLUMN Costo DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER Nombre;
 
+ALTER TABLE productos ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
+
 -- 6. TABLA SOCIO_MEMBRESIA (Asignación y vencimiento de pases)
 CREATE TABLE SocioMembresia (
     SocioMembresiaID INT AUTO_INCREMENT PRIMARY KEY,
@@ -87,6 +96,8 @@ CREATE TABLE SocioMembresia (
     FOREIGN KEY (SocioID) REFERENCES Socios(SocioID),
     FOREIGN KEY (MembresiaID) REFERENCES Membresias(MembresiaID)
 );
+
+ALTER TABLE SocioMembresia ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
 
 -- 7. TABLA CABECERA VENTAS
 CREATE TABLE Ventas (
@@ -110,6 +121,9 @@ ON DELETE SET NULL;
 
 ALTER TABLE Ventas 
 ADD COLUMN FormaPago VARCHAR(50) NOT NULL DEFAULT 'Efectivo' AFTER Total;
+
+ALTER TABLE Ventas 
+ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
 
 -- 8. TABLA DETALLE VENTAS
 CREATE TABLE DetalleVentas (
@@ -152,6 +166,8 @@ ADD CONSTRAINT FK_Visitas_Movimientos
 FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
 ON DELETE SET NULL;
 
+ALTER TABLE Visitas ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
+
 CREATE TABLE pagos_sociomembresia (
     PagoID INT AUTO_INCREMENT PRIMARY KEY,
     SocioMembresiaID INT NOT NULL,
@@ -182,6 +198,8 @@ ADD COLUMN MovimientoID INT NULL AFTER UsuarioID,
 ADD CONSTRAINT FK_PagosMembresia_Movimientos 
 FOREIGN KEY (MovimientoID) REFERENCES Movimientos(MovimientoID) 
 ON DELETE SET NULL;
+
+ALTER TABLE pagos_sociomembresia ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
 
 CREATE TABLE Conceptos (
     ConceptoID INT AUTO_INCREMENT PRIMARY KEY,
@@ -239,6 +257,8 @@ END //
 -- 2. Restauramos el delimitador original
 DELIMITER ;
 
+ALTER TABLE conceptos ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
+
 CREATE TABLE IF NOT EXISTS Movimientos (
     MovimientoID INT AUTO_INCREMENT PRIMARY KEY,
     Tipo VARCHAR(20) NOT NULL,
@@ -274,6 +294,8 @@ ALTER TABLE Movimientos
     ADD CONSTRAINT FK_Movimientos_Cortes 
         FOREIGN KEY (CorteID) REFERENCES Cortes(CorteID)
         ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE Movimientos ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
         
 CREATE TABLE Roles (
     RolID INT AUTO_INCREMENT PRIMARY KEY,
@@ -305,6 +327,8 @@ VALUES (
     'Atención a socios y ventas diarias', 
     '["Socios", "Membresias", "Clases", "Ventas", "Registro", "Corte de Caja", "Movimientos"]'
 );
+
+ALTER TABLE roles ADD COLUMN Estado VARCHAR(50) NOT NULL DEFAULT 'Activo';
 
 -- Insertar usuario administrador por defecto (Password: admin123 de prueba)
 INSERT INTO Usuarios (NombreCompleto, Usuario, Password, Rol) 
@@ -385,6 +409,8 @@ CREATE TABLE Cortes (
         ON DELETE RESTRICT 
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE Cortes ADD COLUMN Eliminado TINYINT(1) NOT NULL DEFAULT 0;
 
 CREATE TABLE Configuraciones (
     ConfiguracionID INT AUTO_INCREMENT PRIMARY KEY,

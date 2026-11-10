@@ -18,6 +18,8 @@ namespace Datos.Entities
         public int Semanas { get; set; }
         public int Dias { get; set; }
 
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
+
         // Propiedad calculada para saber cuántos días exactos dura la membresía
         public int DuracionDias
         {

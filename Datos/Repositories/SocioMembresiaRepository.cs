@@ -24,7 +24,7 @@ namespace Datos.Repositories
             return await _context.SocioMembresia
                 .Include(sm => sm.Membresia)
                 .Include(sm => sm.Pagos)
-                .Where(sm => sm.SocioID == socioId && sm.Activo)
+                .Where(sm => sm.SocioID == socioId && sm.Estado != "Eliminado" && sm.Activo)
                 .OrderByDescending(sm => sm.FechaInicio)
                 .ToListAsync();
         }
@@ -35,7 +35,7 @@ namespace Datos.Repositories
                 .Include(sm => sm.Socio)
                 .Include(sm => sm.Membresia)
                 .Include(sm => sm.Pagos)
-                .FirstOrDefaultAsync(sm => sm.SocioMembresiaID == id);
+                .FirstOrDefaultAsync(sm => sm.SocioMembresiaID == id && sm.Estado != "Eliminado");
         }
 
         public async Task<SocioMembresia?> ObtenerMembresiaActivaPorSocioIdAsync(int socioId)
@@ -58,9 +58,19 @@ namespace Datos.Repositories
             _context.SocioMembresia.Update(socioMembresia);
         }
 
-        public void Eliminar(SocioMembresia socioMembresia)
+        // Reemplazo del borrado físico por Soft Delete
+        public void MarcarComoEliminado(SocioMembresia socioMembresia)
         {
-            _context.SocioMembresia.Remove(socioMembresia);
+            socioMembresia.Activo = false;
+            socioMembresia.Estado = "Eliminado";
+            _context.SocioMembresia.Update(socioMembresia);
+        }
+
+        public void EliminarLogico(SocioMembresia socioMembresia)
+        {
+            socioMembresia.Activo = false;
+            socioMembresia.Estado = "Inactivo";
+            _context.SocioMembresia.Update(socioMembresia);
         }
 
         public async Task<IEnumerable<SocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
@@ -97,5 +107,7 @@ namespace Datos.Repositories
             }
             return await query.ToListAsync();
         }
+
+       
     }
 }

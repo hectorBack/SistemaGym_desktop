@@ -418,7 +418,7 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var corte = await _unitOfWork.Corte.ObtenerPorIdAsync(id);
             if (corte == null)
@@ -427,7 +427,17 @@ namespace Negocio.Services
             if (corte.Estado == ESTADO_ABIERTO)
                 throw new BusinessException("No se puede eliminar un corte abierto. Ciérrelo primero.");
 
-            _unitOfWork.Corte.EliminarFisico(corte);
+            // Sus movimientos quedan sin corte: así el siguiente corte los vuelve a enlazar y no se pierden del historial.
+            var movimientos = (await _unitOfWork.Movimiento.ObtenerPorRangoFechasAsync(corte.FechaApertura, corte.FechaCierre ?? DateTime.Now))
+                .Where(m => m.CorteID == corte.CorteID);
+
+            foreach (var movimiento in movimientos)
+            {
+                movimiento.CorteID = null;
+                _unitOfWork.Movimiento.Actualizar(movimiento);
+            }
+
+            _unitOfWork.Corte.MarcarComoEliminado(corte);
             await _unitOfWork.SaveChangesAsync();
         }
 

@@ -27,10 +27,10 @@ namespace Presentacion.Controller
                 MembresiaID = m.MembresiaID,
                 Nombre = m.Nombre,
                 Precio = m.Precio,
-                Tipo = m.Tipo,         
-                Meses = m.Meses,       
-                Semanas = m.Semanas,   
-                Dias = m.Dias,        
+                Tipo = m.Tipo,
+                Meses = m.Meses,
+                Semanas = m.Semanas,
+                Dias = m.Dias,
                 DuracionDias = m.DuracionDias,
                 Activo = m.Activo,
                 CreatedAt = m.CreatedAt
@@ -80,9 +80,9 @@ namespace Presentacion.Controller
             await _membresiaService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _membresiaService.EliminarFisicoAsync(id);
+            await _membresiaService.EliminarAsync(id);
         }
     }
 }

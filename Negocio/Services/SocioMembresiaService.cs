@@ -41,7 +41,9 @@ namespace Negocio.Services
         public async Task<SocioMembresiaDto?> ObtenerPorIdAsync(int id)
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerPorIdAsync(id);
-            return registro == null ? null : MapearADto(registro);
+            if (registro == null || registro.Estado == "Eliminado") return null;
+
+            return MapearADto(registro);
         }
 
         public async Task<SocioMembresiaDto?> ObtenerMembresiaActivaPorSocioIdAsync(int socioId)
@@ -67,7 +69,7 @@ namespace Negocio.Services
             if (membresia == null || !membresia.Activo)
                 throw new BusinessException("La membresía seleccionada no existe o no se encuentra activa.");
 
-            // 🟢 NUEVA VALIDACIÓN: Verificar si el socio tiene alguna membresía en estado "Parcial" (con pagos pendientes)
+            // Verificar si el socio tiene alguna membresía en estado "Parcial" (con pagos pendientes)
             var historialesSocio = await _unitOfWork.SocioMembresia.ObtenerPorSocioIdAsync(dto.SocioID);
 
             foreach (var hist in historialesSocio)
@@ -136,7 +138,7 @@ namespace Negocio.Services
         public async Task CancelarMembresiaAsync(int socioMembresiaId)
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerPorIdAsync(socioMembresiaId);
-            if (registro == null)
+            if (registro == null || registro.Estado == "Eliminado")
                 throw new BusinessException("El registro de membresía del socio no existe.");
 
             if (registro.Estado == EstadoCancelada)
@@ -148,10 +150,10 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarAsync(int id)
+        public async Task EliminarLogicoAsync(int id)
         {
             var registro = await _unitOfWork.SocioMembresia.ObtenerPorIdAsync(id);
-            if (registro == null)
+            if (registro == null || registro.Estado == "Eliminado")
                 throw new BusinessException("La membresía que intenta eliminar no existe.");
 
             var pagosAsociados = await _unitOfWork.PagoSocioMembresia.ObtenerPorSocioMembresiaIdAsync(id);
@@ -163,33 +165,31 @@ namespace Negocio.Services
 
             if (montoTotalPagado > 0)
             {
-                // 1. Obtener o abrir el corte de caja vigente
                 var corteAbierto = await _caja.ObtenerOAbrirCorteAsync(usuarioIdSesion, "cancelación de membresía y devolución");
 
-                // 2. Registrar el egreso en la tabla Movimientos de forma explícita
-                var nuevoMovimiento = await _caja.AgregarMovimientoAsync(
+                await _caja.AgregarMovimientoAsync(
                     corteAbierto,
                     usuarioIdSesion,
                     CajaConstantes.ConceptoCancelacionPagoMembresia,
                     CajaConstantes.TipoEgreso,
                     montoTotalPagado,
                     string.Empty,
-                    formaPagoOriginal // Pasamos la forma de pago para que no quede vacía
+                    formaPagoOriginal
                 );
 
-                // 3. Desactivar lógicamente los pagos asociados y asignarles el MovimientoID de la cancelación si aplica
                 foreach (var pago in pagosActivos)
                 {
                     pago.Activo = false;
-                    // Opcional: si tu entidad PagoSocioMembresia tiene MovimientoID, puedes enlazarlo aquí también
                     _unitOfWork.PagoSocioMembresia.Actualizar(pago);
                 }
             }
 
-            // 4. Eliminar la membresía y confirmar los cambios en la base de datos
-            _unitOfWork.SocioMembresia.Eliminar(registro);
+            // Cambiamos el borrado físico por el método de Soft Delete del repositorio
+            _unitOfWork.SocioMembresia.MarcarComoEliminado(registro);
             await _unitOfWork.SaveChangesAsync();
         }
+
+
 
         // ───────── Helpers ─────────
 
@@ -207,5 +207,7 @@ namespace Negocio.Services
             // Solo pagos activos, igual que el reporte y el repositorio de pagos
             TotalPagado = sm.Pagos?.Where(p => p.Activo).Sum(p => p.Monto) ?? 0
         };
+
+        
     }
 }

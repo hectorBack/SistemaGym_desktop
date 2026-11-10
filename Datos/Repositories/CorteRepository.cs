@@ -20,10 +20,9 @@ namespace Datos.Repositories
                 .Include(c => c.Usuario)
                 .AsQueryable();
 
-            if (!incluirInactivos)
-            {
-                query = query.Where(c => c.Activo);
-            }
+            query = incluirInactivos
+                ? query.Where(c => !c.Eliminado)
+                : query.Where(c => c.Activo);
 
             return await query
                 .OrderByDescending(c => c.FechaApertura)
@@ -54,9 +53,11 @@ namespace Datos.Repositories
             _context.Cortes.Update(corte);
         }
 
-        public void EliminarFisico(Corte corte)
+        public void MarcarComoEliminado(Corte corte)
         {
-            _context.Cortes.Remove(corte);
+            corte.Activo = false;
+            corte.Eliminado = true;
+            _context.Cortes.Update(corte);
         }
 
         public async Task<Corte?> ObtenerCorteAbiertoPorUsuarioAsync(int usuarioId)

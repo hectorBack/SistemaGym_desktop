@@ -49,7 +49,7 @@ namespace Negocio.Services
         public async Task<PagoSocioMembresiaDto?> ObtenerPorIdAsync(int id)
         {
             var pago = await _unitOfWork.PagoSocioMembresia.ObtenerPorIdAsync(id);
-            if (pago == null) return null;
+            if (pago == null || pago.Estado == "Eliminado") return null;
 
             return MapToDto(pago);
         }
@@ -84,7 +84,8 @@ namespace Negocio.Services
                 FormaPago = string.IsNullOrWhiteSpace(dto.FormaPago) ? "Efectivo" : dto.FormaPago.Trim(),
                 Observacion = dto.Observacion?.Trim(),
                 UsuarioID = dto.UsuarioID,
-                Activo = true
+                Activo = true,
+                Estado = "Activo"
             };
 
             await _unitOfWork.PagoSocioMembresia.AgregarAsync(nuevoPago);
@@ -152,7 +153,7 @@ namespace Negocio.Services
             }
 
             var pago = await _unitOfWork.PagoSocioMembresia.ObtenerPorIdAsync(dto.PagoID);
-            if (pago == null)
+            if (pago == null || pago.Estado == "Eliminado")
             {
                 throw new BusinessException("El pago que intenta actualizar no existe.");
             }
@@ -168,6 +169,7 @@ namespace Negocio.Services
             pago.FormaPago = string.IsNullOrWhiteSpace(dto.FormaPago) ? "Efectivo" : dto.FormaPago.Trim();
             pago.Observacion = dto.Observacion?.Trim();
             pago.Activo = dto.Activo;
+            pago.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.PagoSocioMembresia.Actualizar(pago);
             await _unitOfWork.SaveChangesAsync();
@@ -176,24 +178,12 @@ namespace Negocio.Services
         public async Task EliminarLogicoAsync(int id)
         {
             var pago = await _unitOfWork.PagoSocioMembresia.ObtenerPorIdAsync(id);
-            if (pago == null)
-            {
-                throw new BusinessException("El pago a desactivar no existe.");
-            }
-
-            _unitOfWork.PagoSocioMembresia.EliminarLogico(pago);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task EliminarFisicoAsync(int id)
-        {
-            var pago = await _unitOfWork.PagoSocioMembresia.ObtenerPorIdAsync(id);
-            if (pago == null)
+            if (pago == null || pago.Estado == "Eliminado")
             {
                 throw new BusinessException("El pago a eliminar no existe.");
             }
 
-            _unitOfWork.PagoSocioMembresia.EliminarFisico(pago);
+            _unitOfWork.PagoSocioMembresia.MarcarComoEliminado(pago);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -212,20 +202,17 @@ namespace Negocio.Services
         public async Task AnularPagoAsync(int pagoId, int usuarioId, string? motivo = null)
         {
             var pago = await _unitOfWork.PagoSocioMembresia.ObtenerPorIdAsync(pagoId);
-            if (pago == null)
+            if (pago == null || pago.Estado == "Eliminado")
             {
                 throw new BusinessException("El pago que intenta anular no existe.");
             }
 
-            if (!pago.Activo)
+            if (!pago.Activo || pago.Estado == "Inactivo")
             {
                 throw new BusinessException("El pago seleccionado ya se encuentra anulado o inactivo.");
             }
 
-            // 1. Desactivar el pago
-            pago.Activo = false;
-
-            _unitOfWork.PagoSocioMembresia.Actualizar(pago);
+            _unitOfWork.PagoSocioMembresia.EliminarLogico(pago);
 
             // 2. REGISTRAR EGRESO EN CAJA - 'Cancelacion Pago Membresia'
             if (pago.Monto > 0)

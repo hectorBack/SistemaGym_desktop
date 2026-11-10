@@ -14,7 +14,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(Producto producto);
         void Actualizar(Producto producto);
         void EliminarLogico(Producto producto);
-        void EliminarFisico(Producto producto);
+        void MarcarComoEliminado(Producto producto);
         Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null);
         Task<bool> ExisteCodigoBarrasAsync(string codigoBarras, int? idExcluir = null);
         Task<Producto?> ObtenerPorCodigoBarrasAsync(string codigoBarras);

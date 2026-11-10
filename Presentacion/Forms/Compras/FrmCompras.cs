@@ -288,14 +288,19 @@ namespace Presentacion.Forms.Compras
             if (compra == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE la compra '{compra.Codigo}' de la base de datos?\n\n" +
-                    "Esta acción no se puede deshacer. Para corregir una compra normalmente conviene usar 'Cancelar compra', que sí reajusta el stock y la caja.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar la compra '{compra.Codigo}'?\n\n" +
+                    "Dejará de mostrarse en el historial. " +
+                    (EstaVigente(compra)
+                        ? "Se revertirá el stock y se quitará su egreso de caja."
+                        : "El stock y la caja no cambian (ya se ajustaron al cancelar)."),
+                    "Eliminar compra",
                     destructiva: true))
                 return;
 
+            int usuarioId = SesionUsuario.UsuarioID;
+
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(compra.CompraID),
+                () => _controller.EliminarLogicoAsync(compra.CompraID, usuarioId),
                 "No se pudo eliminar la compra.",
                 panelTop, panelFiltros);
 

@@ -285,18 +285,18 @@ namespace Presentacion.Forms.Movimientos
             if (movimiento == null) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE el movimiento: {Describir(movimiento)}?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar el movimiento: {Describir(movimiento)}?\n\nDejará de mostrarse en la lista y no contará en la caja.",
+                    "Eliminar movimiento",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(movimiento.MovimientoID),
+                () => _controller.EliminarAsync(movimiento.MovimientoID),
                 "No se pudo eliminar el movimiento.",
                 panelTop);
 
             if (correcto)
                 await CargarMovimientosAsync();
         }
-    }
+    } 
 }

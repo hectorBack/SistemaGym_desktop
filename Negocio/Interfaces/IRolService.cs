@@ -14,6 +14,6 @@ namespace Negocio.Interfaces
         Task<RolDto> CrearAsync(RolCreateDto dto);
         Task ActualizarAsync(RolUpdateDto dto);
         Task EliminarLogicoAsync(int id);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
     }
 }

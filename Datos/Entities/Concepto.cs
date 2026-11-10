@@ -13,5 +13,6 @@ namespace Datos.Entities
         public string Tipo { get; set; } = string.Empty;
         public string? Observacion { get; set; }
         public bool EsSistema { get; set; }
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
     }
 }

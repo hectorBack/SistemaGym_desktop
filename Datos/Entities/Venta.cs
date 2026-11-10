@@ -14,7 +14,7 @@ namespace Datos.Entities
         public decimal Total { get; set; }
         public string FormaPago { get; set; } = "Efectivo";
         public DateTime FechaVenta { get; set; } = DateTime.Now;
-
+        public string Estado { get; set; } = "Activo";
         public int? MovimientoID { get; set; }
         public virtual Movimiento? Movimiento { get; set; }
 

@@ -112,14 +112,14 @@ namespace Negocio.Services
 
             var rol = await _unitOfWork.Rol.ObtenerPorIdAsync(dto.RolID);
 
-            if (rol.Nombre != null &&
+            if (rol != null && rol.Nombre != null &&
                 (rol.Nombre.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
                     rol.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase)))
             {
                 throw new BusinessException("No es posible actualizar el rol Administrador.");
             }
 
-            if (rol == null)
+            if (rol == null || rol.Estado == "Eliminado")
             {
                 throw new BusinessException("El rol que intenta actualizar no existe.");
             }
@@ -133,6 +133,7 @@ namespace Negocio.Services
             rol.Descripcion = dto.Descripcion?.Trim();
             rol.ModulosPermitidos = JsonSerializer.Serialize(dto.ModulosPermitidos ?? new List<string>());
             rol.Activo = dto.Activo;
+            rol.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.Rol.Actualizar(rol);
             await _unitOfWork.SaveChangesAsync();
@@ -141,7 +142,7 @@ namespace Negocio.Services
         public async Task EliminarLogicoAsync(int id)
         {
             var rol = await _unitOfWork.Rol.ObtenerPorIdAsync(id);
-            if (rol == null)
+            if (rol == null || rol.Estado == "Eliminado")
             {
                 throw new BusinessException("El rol a desactivar no existe.");
             }
@@ -157,10 +158,10 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var rol = await _unitOfWork.Rol.ObtenerPorIdAsync(id);
-            if (rol == null)
+            if (rol == null || rol.Estado == "Eliminado")
             {
                 throw new BusinessException("El rol a eliminar no existe.");
             }
@@ -172,10 +173,13 @@ namespace Negocio.Services
                 throw new BusinessException("No es posible eliminar el rol Administrador.");
             }
 
-            // Nota: Aquí se puede añadir una validación previa para verificar
-            // si existen usuarios asignados a este rol antes de realizar el borrado físico.
+            // Un usuario con un rol eliminado se quedaría sin permisos: primero hay que reasignarlo.
+            if (await _unitOfWork.Rol.TieneUsuariosAsync(id))
+            {
+                throw new BusinessException("No se puede eliminar el rol porque tiene usuarios asignados. Reasígnelos a otro rol primero.");
+            }
 
-            _unitOfWork.Rol.EliminarFisico(rol);
+            _unitOfWork.Rol.MarcarComoEliminado(rol);
             await _unitOfWork.SaveChangesAsync();
         }
 

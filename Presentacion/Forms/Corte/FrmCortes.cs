@@ -266,13 +266,13 @@ namespace Presentacion.Forms.Corte
             }
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar permanentemente el corte más reciente del usuario '{corte.Usuario}' registrado el {corte.FechaApertura:dd/MM/yyyy HH:mm}?\n\nAl eliminar este último corte, el efectivo en caja regresará a su estado inicial.",
+                    $"¿Desea eliminar el corte más reciente del usuario '{corte.Usuario}' registrado el {corte.FechaApertura:dd/MM/yyyy HH:mm}?\n\nEl corte dejará de mostrarse y el efectivo en caja regresará a su estado anterior.",
                     "Eliminar corte",
                     destructiva: true))
                 return;
 
             bool eliminado = await FormHelper.EjecutarAsync(
-                () => _corteController.EliminarFisicoAsync(corte.CorteID),
+                () => _corteController.EliminarAsync(corte.CorteID),
                 "No se pudo eliminar el corte de caja.",
                 panelTop, panelFiltros);
 

@@ -1,4 +1,5 @@
-﻿using Presentacion.Controller;
+﻿using Datos.Entities;
+using Presentacion.Controller;
 using Presentacion.Helpers;
 using Presentacion.ViewModels;
 using System;
@@ -299,15 +300,19 @@ namespace Presentacion.Forms.Ventas
             var venta = VentaSeleccionada;
             if (venta == null) return;
 
-            if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE la venta N° {venta.VentaID} de la base de datos?\n\n" +
-                    "Esta acción no se puede deshacer. Para corregir una venta normalmente conviene usar 'Anular', que sí reajusta el stock.",
-                    "Eliminación definitiva",
-                    destructiva: true))
+            if (!FormHelper.ConfirmarAccion($"¿Desea enviar la venta N° {venta.VentaID} a la papelera (Eliminado)?\n\n" +
+            "El registro ya no aparecerá en el listado principal. " +
+            (venta.Activo
+                ? "Se devolverá el stock y se quitará su ingreso de caja."
+                : "El stock y la caja no cambian (ya se ajustaron al anular)."),
+            "Confirmar eliminación",
+            destructiva: true))
                 return;
 
+            int usuarioId = SesionUsuario.UsuarioID;
+
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _ventaController.EliminarFisicoAsync(venta.VentaID),
+                () => _ventaController.EliminarLogicoAsync(venta.VentaID, usuarioId),
                 "No se pudo eliminar la venta.",
                 panelTop, panelFiltros);
 

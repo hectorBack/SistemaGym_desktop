@@ -15,7 +15,8 @@ namespace Datos.Interfaces
         Task<SocioMembresia?> ObtenerMembresiaActivaPorSocioIdAsync(int socioId);
         Task AgregarAsync(SocioMembresia socioMembresia);
         void Actualizar(SocioMembresia socioMembresia);
-        void Eliminar(SocioMembresia socioMembresia);
+        void EliminarLogico(SocioMembresia socioMembresia);
+        void MarcarComoEliminado(SocioMembresia socioMembresia);
         Task<IEnumerable<SocioMembresia>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
         Task<Dictionary<int, DateTime>> ObtenerUltimoVencimientoPorSocioAsync();
     }

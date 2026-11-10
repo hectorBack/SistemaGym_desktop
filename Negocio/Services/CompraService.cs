@@ -24,9 +24,9 @@ namespace Negocio.Services
             _caja = caja;
         }
 
-        public async Task<IEnumerable<CompraDto>> ObtenerTodasAsync(bool incluirInactivas = false)
+        public async Task<IEnumerable<CompraDto>> ObtenerTodasAsync(string? estadoFiltro = "Activo")
         {
-            var compras = await _unitOfWork.Compra.ObtenerTodasAsync(incluirInactivas);
+            var compras = await _unitOfWork.Compra.ObtenerTodasAsync(estadoFiltro);
             var dtos = new List<CompraDto>();
 
             foreach (var compra in compras)
@@ -72,7 +72,6 @@ namespace Negocio.Services
                 CompraID = c.CompraID,
                 Codigo = c.Codigo,
                 Total = c.Total,
-                Estado = c.Estado,
                 Observacion = c.Observacion,
                 UsuarioID = c.UsuarioID,
                 Activo = c.Activo,
@@ -106,8 +105,8 @@ namespace Negocio.Services
                 Observacion = dto.Observacion?.Trim(),
                 UsuarioID = dto.UsuarioID,
                 FormaPago = dto.FormaPago,
-                Estado = "Completada",
-                Activo = true
+                Estado = "Activo",
+                Activo = true,
             };
 
             foreach (var item in dto.Detalles)
@@ -159,7 +158,7 @@ namespace Negocio.Services
             return await MapearACompraDtoAsync(nuevaCompra);
         }
 
-        public async Task CancelarCompraAsync(int id, int usuarioId, string? observacion = null)
+        public async Task CancelarCompraAsync(int id, int usuarioId, string? motivo = null)
         {
             var compra = await _unitOfWork.Compra.ObtenerPorIdAsync(id);
             if (compra == null)
@@ -167,9 +166,9 @@ namespace Negocio.Services
                 throw new BusinessException("La compra que intenta cancelar no existe.");
             }
 
-            if (compra.Estado == "Cancelada")
+            if (!compra.Activo)
             {
-                throw new BusinessException("La compra ya se encuentra cancelada.");
+                throw new BusinessException("La compra ya se encuentra anulada.");
             }
 
             // Se guardan antes de modificar la compra, igual que en la venta.
@@ -192,17 +191,7 @@ namespace Negocio.Services
                 }
             }
 
-            // 2. Cambiar estado de la compra
-            compra.Estado = "Cancelada";
-            compra.Activo = false;
-            if (!string.IsNullOrWhiteSpace(observacion))
-            {
-                compra.Observacion = string.IsNullOrEmpty(compra.Observacion)
-                    ? $"[CANCELADA]: {observacion}"
-                    : $"{compra.Observacion} | [CANCELADA]: {observacion}";
-            }
-
-            _unitOfWork.Compra.Actualizar(compra);
+            _unitOfWork.Compra.MarcarComoInactivo(compra);
 
             // 3. REGISTRAR INGRESO EN CAJA - 'Cancelacion Compra Producto'
             if (montoDevuelto > 0)
@@ -216,19 +205,7 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarLogicoAsync(int id)
-        {
-            var compra = await _unitOfWork.Compra.ObtenerPorIdAsync(id);
-            if (compra == null)
-            {
-                throw new BusinessException("La compra a desactivar no existe.");
-            }
-
-            _unitOfWork.Compra.EliminarLogico(compra);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarLogicoAsync(int id, int usuarioId)
         {
             var compra = await _unitOfWork.Compra.ObtenerPorIdAsync(id);
             if (compra == null)
@@ -238,7 +215,7 @@ namespace Negocio.Services
 
             // Si la compra sigue vigente, se deshace su efecto: stock y movimiento de caja.
             // Si ya estaba cancelada, el egreso y su cancelación se compensan y el stock ya se revirtió.
-            if (compra.Activo)
+            if (compra.Activo && compra.Estado != "Inactivo")
             {
                 var movimiento = compra.MovimientoID.HasValue
                     ? await _unitOfWork.Movimiento.ObtenerPorIdAsync(compra.MovimientoID.Value)
@@ -267,11 +244,12 @@ namespace Negocio.Services
 
                 if (movimiento != null)
                 {
-                    _unitOfWork.Movimiento.EliminarFisico(movimiento);
+                    _unitOfWork.Movimiento.EliminarLogico(movimiento); // se desactiva (no se borra): deja de contar en caja
                 }
             }
 
-            _unitOfWork.Compra.EliminarFisico(compra);
+            // Aplicar el Soft Delete definitivo (estado "Eliminado")
+            _unitOfWork.Compra.MarcarComoEliminado(compra);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -317,7 +295,6 @@ namespace Negocio.Services
                 CompraID = c.CompraID,
                 Codigo = c.Codigo,
                 Total = c.Total,
-                Estado = c.Estado,
                 Observacion = c.Observacion,
                 UsuarioID = c.UsuarioID,
                 Activo = c.Activo,

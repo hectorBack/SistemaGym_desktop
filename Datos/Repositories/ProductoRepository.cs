@@ -26,10 +26,9 @@ namespace Datos.Repositories
                 .Include(p => p.Categoria)
                 .AsQueryable();
 
-            if (!incluirInactivas)
-            {
-                query = query.Where(p => p.Activo);
-            }
+            query = incluirInactivas
+                ? query.Where(p => p.Estado != "Eliminado")
+                : query.Where(p => p.Activo);
 
             return await query.ToListAsync();
         }
@@ -38,7 +37,7 @@ namespace Datos.Repositories
         {
             return await _context.Productos
                 .Include(p => p.Categoria)
-                .FirstOrDefaultAsync(p => p.ProductoID == id);
+               .FirstOrDefaultAsync(p => p.ProductoID == id && p.Estado != "Eliminado");
         }
 
         public async Task AgregarAsync(Producto producto)
@@ -55,17 +54,20 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             producto.Activo = !producto.Activo;
+            producto.Estado = producto.Activo ? "Activo" : "Inactivo";
             _context.Productos.Update(producto);
         }
 
-        public void EliminarFisico(Producto producto)
+        public void MarcarComoEliminado(Producto producto)
         {
-            _context.Productos.Remove(producto);
+            producto.Activo = false;
+            producto.Estado = "Eliminado";
+            _context.Productos.Update(producto);
         }
 
         public async Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null)
         {
-            var query = _context.Productos.AsQueryable();
+            var query = _context.Productos.Where(p => p.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {
@@ -79,7 +81,7 @@ namespace Datos.Repositories
         {
             if (string.IsNullOrWhiteSpace(codigoBarras)) return false;
 
-            var query = _context.Productos.AsQueryable();
+            var query = _context.Productos.Where(p => p.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {
@@ -95,7 +97,7 @@ namespace Datos.Repositories
 
             return await _context.Productos
                 .Include(p => p.Categoria)
-                .FirstOrDefaultAsync(p => p.CodigoBarras == codigoBarras);
+                .FirstOrDefaultAsync(p => p.Estado != "Eliminado" && p.CodigoBarras == codigoBarras);
         }
     }
 }

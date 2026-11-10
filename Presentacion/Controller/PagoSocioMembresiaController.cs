@@ -90,11 +90,6 @@ namespace Presentacion.Controller
             await _pagoSocioMembresiaService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
-        {
-            await _pagoSocioMembresiaService.EliminarFisicoAsync(id);
-        }
-
         public async Task AnularPagoAsync(int pagoId, int usuarioId, string? motivo = null)
         {
             await _pagoSocioMembresiaService.AnularPagoAsync(pagoId, usuarioId, motivo);

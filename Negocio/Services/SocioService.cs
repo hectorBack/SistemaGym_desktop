@@ -75,7 +75,7 @@ namespace Negocio.Services
             ValidarResultado(await _updateValidator.ValidateAsync(dto));
 
             var socio = await _unitOfWork.Socio.ObtenerPorIdAsync(dto.SocioID);
-            if (socio == null)
+            if (socio == null || socio.Estado == "Eliminado")
                 throw new BusinessException("El socio que intenta actualizar no existe.");
 
             var clave = dto.Clave.Trim();
@@ -91,6 +91,7 @@ namespace Negocio.Services
             socio.Foto = dto.Foto;
             socio.Observaciones = LimpiarOpcional(dto.Observaciones);
             socio.Activo = dto.Activo;
+            socio.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.Socio.Actualizar(socio);
             await _unitOfWork.SaveChangesAsync();
@@ -99,30 +100,20 @@ namespace Negocio.Services
         public async Task EliminarLogicoAsync(int id)
         {
             var socio = await _unitOfWork.Socio.ObtenerPorIdAsync(id);
-            if (socio == null)
-                throw new BusinessException("El socio a desactivar no existe.");
-
-            if (!socio.Activo)
-                throw new BusinessException("El socio ya se encuentra desactivado.");
+            if (socio == null || socio.Estado == "Eliminado")
+                throw new BusinessException("El socio a cambiar de estado no existe.");
 
             _unitOfWork.Socio.EliminarLogico(socio);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var socio = await _unitOfWork.Socio.ObtenerPorIdAsync(id);
-            if (socio == null)
+            if (socio == null || socio.Estado == "Eliminado")
                 throw new BusinessException("El socio a eliminar no existe.");
 
-            // Solo se pregunta si existe algún registro; no se carga todo el historial del socio.
-            if (await _unitOfWork.Socio.TieneMembresiasAsync(id))
-                throw new BusinessException("No se puede eliminar el socio porque tiene historial de membresías registradas. Desactívelo en su lugar.");
-
-            if (await _unitOfWork.Socio.TieneVisitasAsync(id))
-                throw new BusinessException("No se puede eliminar el socio porque tiene visitas registradas. Desactívelo en su lugar.");
-
-            _unitOfWork.Socio.EliminarFisico(socio);
+            _unitOfWork.Socio.MarcarComoEliminado(socio);
             await _unitOfWork.SaveChangesAsync();
         }
 

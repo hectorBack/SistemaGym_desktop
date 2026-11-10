@@ -94,9 +94,9 @@ namespace Presentacion.Controller
             await _socioService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _socioService.EliminarFisicoAsync(id);
+            await _socioService.EliminarAsync(id);
         }
 
         public async Task<string> ObtenerSiguienteClaveAsync()

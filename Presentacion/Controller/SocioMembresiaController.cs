@@ -88,7 +88,7 @@ namespace Presentacion.Controller
 
         public async Task EliminarMembresiaAsync(int socioMembresiaId)
         {
-            await _socioMembresiaService.EliminarAsync(socioMembresiaId);
+            await _socioMembresiaService.EliminarLogicoAsync(socioMembresiaId);
         }
 
     }

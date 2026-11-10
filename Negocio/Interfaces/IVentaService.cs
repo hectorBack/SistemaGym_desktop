@@ -9,11 +9,11 @@ namespace Negocio.Interfaces
 {
     public interface IVentaService
     {
-        Task<IEnumerable<VentaDto>> ObtenerTodasAsync(bool incluirInactivas = false);
+        Task<IEnumerable<VentaDto>> ObtenerTodasAsync(string? estadoFiltro = "Activo");
         Task<VentaDto?> ObtenerPorIdAsync(int id);
         Task<VentaDto> CrearAsync(VentaCreateDto dto);
         Task CancelarVentaAsync(int id, int usuarioId, string? motivo = null); // Anular venta
-        Task EliminarFisicoAsync(int id);
+        Task EliminarLogicoAsync(int id, int usuarioId);
 
         // --- MÉTODOS ADICIONALES DE NEGOCIO PARA VENTAS ---
         Task<IEnumerable<VentaDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);

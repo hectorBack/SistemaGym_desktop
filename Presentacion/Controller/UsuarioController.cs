@@ -89,9 +89,9 @@ namespace Presentacion.Controller
             await _usuarioService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _usuarioService.EliminarFisicoAsync(id);
+            await _usuarioService.EliminarAsync(id);
         }
     }
 }

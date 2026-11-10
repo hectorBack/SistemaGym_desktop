@@ -14,7 +14,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(Membresia membresia);
         void Actualizar(Membresia membresia);
         void EliminarLogico(Membresia membresia);
-        void EliminarFisico(Membresia membresia);
+        void MarcarComoEliminada(Membresia membresia);
         Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null);
-    }
+    } 
 }

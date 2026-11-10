@@ -14,7 +14,7 @@ namespace Negocio.Interfaces
         Task<MovimientoDto> CrearAsync(MovimientoCreateDto dto);
         Task ActualizarAsync(MovimientoUpdateDto dto);
         Task EliminarLogicoAsync(int id);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
         Task<IEnumerable<MovimientoDto>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
     }
 }

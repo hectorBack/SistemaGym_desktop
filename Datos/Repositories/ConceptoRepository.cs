@@ -21,12 +21,9 @@ namespace Datos.Repositories
 
         public async Task<IEnumerable<Concepto>> ObtenerTodosAsync(bool incluirInactivos = false)
         {
-            var query = _context.Conceptos.AsQueryable();
-
-            if (!incluirInactivos)
-            {
-                query = query.Where(c => c.Activo);
-            }
+            var query = incluirInactivos
+                ? _context.Conceptos.Where(c => c.Estado != "Eliminado")
+                : _context.Conceptos.Where(c => c.Activo);
 
             return await query.ToListAsync();
         }
@@ -50,17 +47,21 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             concepto.Activo = !concepto.Activo;
+            concepto.Estado = concepto.Activo ? "Activo" : "Inactivo";
             _context.Conceptos.Update(concepto);
         }
 
-        public void EliminarFisico(Concepto concepto)
+        public void MarcarComoEliminado(Concepto concepto)
         {
-            _context.Conceptos.Remove(concepto);
+            concepto.Activo = false;
+            concepto.Estado = "Eliminado";
+            _context.Conceptos.Update(concepto);
         }
 
         public async Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null)
         {
-            var query = _context.Conceptos.AsQueryable();
+            // Un concepto eliminado libera su nombre.
+            var query = _context.Conceptos.Where(c => c.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {
@@ -72,7 +73,7 @@ namespace Datos.Repositories
 
         public async Task<Concepto?> ObtenerPorNombreAsync(string nombre)
         {
-            return await _context.Conceptos.FirstOrDefaultAsync(c => c.Nombre.ToLower() == nombre.ToLower());
+            return await _context.Conceptos.FirstOrDefaultAsync(c => c.Estado != "Eliminado" && c.Nombre.ToLower() == nombre.ToLower());
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Negocio.Services
             }
 
             var usuario = await _unitOfWork.Usuarios.ObtenerPorIdAsync(dto.UsuarioID);
-            if (usuario == null)
+            if (usuario == null || usuario.Estado == "Eliminado")
             {
                 throw new BusinessException("El usuario que intenta actualizar no existe.");
             }
@@ -64,6 +64,7 @@ namespace Negocio.Services
             usuario.NombreUsuario = dto.NombreUsuario.Trim();
             usuario.RolID = dto.RolID;
             usuario.Activo = dto.Activo;
+            usuario.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             // Si se especificó una nueva contraseña al editar, la actualizamos
             if (!string.IsNullOrWhiteSpace(dto.Password))
@@ -107,10 +108,10 @@ namespace Negocio.Services
             return MapearAUsuarioDto(usuarioCreado ?? nuevoUsuario);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var usuario = await _unitOfWork.Usuarios.ObtenerPorIdAsync(id);
-            if (usuario == null)
+            if (usuario == null || usuario.Estado == "Eliminado")
             {
                 throw new BusinessException("El usuario a eliminar no existe.");
             }
@@ -121,15 +122,22 @@ namespace Negocio.Services
             {
                 throw new BusinessException("No es posible eliminar un usuario Administrador.");
             }
-            
-            _unitOfWork.Usuarios.EliminarFisico(usuario);
+
+            // Un corte abierto de un usuario eliminado quedaría sin dueño.
+            if (await _unitOfWork.Corte.TieneCorteAbiertoAsync(id))
+            {
+                throw new BusinessException("El usuario tiene un corte de caja abierto. Ciérrelo antes de eliminarlo.");
+            }
+
+            // Sus ventas, movimientos y cortes conservan su nombre: solo deja de poder iniciar sesión.
+            _unitOfWork.Usuarios.MarcarComoEliminado(usuario);
             await _unitOfWork.SaveChangesAsync();
         }
 
         public async Task EliminarLogicoAsync(int id)
         {
             var usuario = await _unitOfWork.Usuarios.ObtenerPorIdAsync(id);
-            if (usuario == null)
+            if (usuario == null || usuario.Estado == "Eliminado")
             {
                 throw new BusinessException("El usuario a desactivar no existe.");
             }
@@ -297,5 +305,7 @@ namespace Negocio.Services
                 return new List<string>();
             }
         }
+
+
     }
 }

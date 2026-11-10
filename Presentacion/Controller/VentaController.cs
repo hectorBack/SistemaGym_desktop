@@ -20,9 +20,9 @@ namespace Presentacion.Controller
             _ticketService = ticketService;
         }
 
-        public async Task<IEnumerable<VentaViewModel>> ObtenerVentasAsync(bool incluirInactivas = true)
+        public async Task<IEnumerable<VentaViewModel>> ObtenerVentasAsync(string? estadoFiltro = "Activo")
         {
-            var dtos = await _ventaService.ObtenerTodasAsync(incluirInactivas);
+            var dtos = await _ventaService.ObtenerTodasAsync(estadoFiltro);
 
             return dtos.Select(MapToViewModel);
         }
@@ -60,9 +60,9 @@ namespace Presentacion.Controller
             await _ventaService.CancelarVentaAsync(id, usuarioId, motivo);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarLogicoAsync(int id, int usuarioId)
         {
-            await _ventaService.EliminarFisicoAsync(id);
+            await _ventaService.EliminarLogicoAsync(id, usuarioId);
         }
 
         public async Task<IEnumerable<VentaViewModel>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)

@@ -116,9 +116,9 @@ namespace Presentacion.Controller
             await _visitaService.ActualizarAsync(updateDto);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _visitaService.EliminarFisicoAsync(id);
+            await _visitaService.EliminarAsync(id);
         }
 
         public async Task<AccesoResultadoViewModel> ProcesarAccesoRapidoAsync(string clave, int usuarioIdSesion)

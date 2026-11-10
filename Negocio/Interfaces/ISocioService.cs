@@ -14,7 +14,7 @@ namespace Negocio.Interfaces
         Task<SocioDto> CrearAsync(SocioCreateDto dto);
         Task ActualizarAsync(SocioUpdateDto dto);
         Task EliminarLogicoAsync(int id);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
         Task<string> ObtenerSiguienteClaveFormateadaAsync();
         Task<SocioDetalleDto?> ObtenerDetalleCompletoAsync(int socioId);
 

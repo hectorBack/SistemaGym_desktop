@@ -14,7 +14,7 @@ namespace Datos.Entities
         public decimal Total { get; set; }
 
         public string FormaPago { get; set; } = "Efectivo";
-        public string Estado { get; set; } = "Completada"; // "Completada", "Cancelada"
+        public string Estado { get; set; } = "Activo"; // "Activo", "Inactivo"
         public string? Observacion { get; set; }
         public int UsuarioID { get; set; }
 

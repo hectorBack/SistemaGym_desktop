@@ -80,9 +80,9 @@ namespace Presentacion.Controller
             await _productoService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _productoService.EliminarFisicoAsync(id);
+            await _productoService.EliminarAsync(id);
         }
 
         public async Task<ProductoDto?> ObtenerPorCodigoBarrasAsync(string codigoBarras)

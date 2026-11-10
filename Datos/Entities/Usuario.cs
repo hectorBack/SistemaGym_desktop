@@ -13,6 +13,7 @@ namespace Datos.Entities
         public string NombreUsuario { get; set; } = string.Empty; // Mapea a 'Usuario' en SQL
         public string Password { get; set; } = string.Empty;
         public int RolID { get; set; }
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
         public virtual Rol Rol { get; set; } = null!;
     }
 }

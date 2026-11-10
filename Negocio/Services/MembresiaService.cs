@@ -156,7 +156,7 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var membresia = await _unitOfWork.Membresia.ObtenerPorIdAsync(id);
             if (membresia == null)
@@ -164,7 +164,7 @@ namespace Negocio.Services
                 throw new BusinessException("La membresía a eliminar no existe.");
             }
 
-            _unitOfWork.Membresia.EliminarFisico(membresia);
+            _unitOfWork.Membresia.MarcarComoEliminada(membresia);
             await _unitOfWork.SaveChangesAsync();
         }
     }

@@ -100,7 +100,7 @@ namespace Negocio.Services
             }
 
             var categoria = await _unitOfWork.Categorias.ObtenerPorIdAsync(dto.CategoriaID);
-            if (categoria == null)
+            if (categoria == null || categoria.Estado == "Eliminado")
             {
                 throw new BusinessException("La categoría que intenta actualizar no existe.");
             }
@@ -112,6 +112,7 @@ namespace Negocio.Services
 
             categoria.Nombre = dto.Nombre.Trim();
             categoria.Activo = dto.Activo;
+            categoria.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.Categorias.Actualizar(categoria);
             await _unitOfWork.SaveChangesAsync();
@@ -120,7 +121,7 @@ namespace Negocio.Services
         public async Task EliminarLogicoAsync(int id)
         {
             var categoria = await _unitOfWork.Categorias.ObtenerPorIdAsync(id);
-            if (categoria == null)
+            if (categoria == null || categoria.Estado == "Eliminado")
             {
                 throw new BusinessException("La categoría a desactivar no existe.");
             }
@@ -129,17 +130,21 @@ namespace Negocio.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var categoria = await _unitOfWork.Categorias.ObtenerPorIdAsync(id);
-            if (categoria == null)
+            if (categoria == null || categoria.Estado == "Eliminado")
             {
                 throw new BusinessException("La categoría a eliminar no existe.");
             }
 
-            // Aquí se puede añadir validación si la categoría contiene productos vinculados antes de eliminar físicamente
+            // Una categoría eliminada no se puede elegir, así que no debe quedar con productos asignados.
+            if (await _unitOfWork.Categorias.TieneProductosAsync(id))
+            {
+                throw new BusinessException("No se puede eliminar la categoría porque tiene productos asignados. Cámbieles la categoría o elimínelos primero.");
+            }
 
-            _unitOfWork.Categorias.EliminarFisico(categoria);
+            _unitOfWork.Categorias.MarcarComoEliminada(categoria);
             await _unitOfWork.SaveChangesAsync();
         }
     }

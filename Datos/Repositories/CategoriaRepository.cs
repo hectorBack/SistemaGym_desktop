@@ -21,12 +21,9 @@ namespace Datos.Repositories
 
         public async Task<IEnumerable<Categoria>> ObtenerTodasAsync(bool incluirInactivas = false)
         {
-            var query = _context.Categorias.AsQueryable();
-
-            if (!incluirInactivas)
-            {
-                query = query.Where(c => c.Activo);
-            }
+            var query = incluirInactivas
+                ? _context.Categorias.Where(c => c.Estado != "Eliminado")
+                : _context.Categorias.Where(c => c.Activo);
 
             return await query.ToListAsync();
         }
@@ -50,18 +47,26 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             categoria.Activo = !categoria.Activo;
+            categoria.Estado = categoria.Activo ? "Activo" : "Inactivo";
             _context.Categorias.Update(categoria);
         }
 
-        public void EliminarFisico(Categoria categoria)
+        public void MarcarComoEliminada(Categoria categoria)
         {
-            _context.Categorias.Remove(categoria);
+            categoria.Activo = false;
+            categoria.Estado = "Eliminado";
+            _context.Categorias.Update(categoria);
+        }
 
+        public async Task<bool> TieneProductosAsync(int categoriaId)
+        {
+            return await _context.Productos.AnyAsync(p => p.CategoriaID == categoriaId && p.Estado != "Eliminado");
         }
 
         public async Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null)
         {
-            var query = _context.Categorias.AsQueryable();
+            // Una categoría eliminada libera su nombre.
+            var query = _context.Categorias.Where(c => c.Estado != "Eliminado");
 
             if (idExcluir.HasValue)
             {

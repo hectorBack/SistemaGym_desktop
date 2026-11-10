@@ -27,10 +27,9 @@ namespace Datos.Repositories
                 .Include(m => m.Usuario)
                 .AsQueryable();
 
-            if (!incluirInactivos)
-            {
-                query = query.Where(m => m.Activo);
-            }
+            query = incluirInactivos
+                ? query.Where(m => m.Estado != "Eliminado")
+                : query.Where(m => m.Activo);
 
             return await query.ToListAsync();
         }
@@ -58,12 +57,15 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             movimiento.Activo = !movimiento.Activo;
+            movimiento.Estado = movimiento.Activo ? "Activo" : "Inactivo";
             _context.Movimientos.Update(movimiento);
         }
 
-        public void EliminarFisico(Movimiento movimiento)
+        public void MarcarComoEliminado(Movimiento movimiento)
         {
-            _context.Movimientos.Remove(movimiento);
+            movimiento.Activo = false;
+            movimiento.Estado = "Eliminado";
+            _context.Movimientos.Update(movimiento);
         }
 
         public async Task<IEnumerable<Movimiento>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
@@ -72,7 +74,7 @@ namespace Datos.Repositories
                  .Include(m => m.Concepto)
                  .Include(m => m.Corte)
                  .Include(m => m.Usuario)
-                 .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
+                 .Where(m => m.Estado != "Eliminado" && m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
                  .OrderByDescending(v => v.CreatedAt)
                  .ToListAsync();
         }

@@ -14,7 +14,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(Corte corte);
         void Actualizar(Corte corte);
         void EliminarLogico(Corte corte);
-        void EliminarFisico(Corte corte);
+        void MarcarComoEliminado(Corte corte);
 
         // Métodos específicos para la gestión de cortes de caja
         Task<Corte?> ObtenerCorteAbiertoPorUsuarioAsync(int usuarioId);

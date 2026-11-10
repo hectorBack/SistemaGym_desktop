@@ -11,7 +11,6 @@ namespace Negocio.DTOs
         public int CompraID { get; set; }
         public string Codigo { get; set; } = string.Empty;
         public decimal Total { get; set; }
-        public string Estado { get; set; } = "Completada";
         public string? Observacion { get; set; }
         public int UsuarioID { get; set; }
         public string UsuarioNombre { get; set; } = string.Empty; // Para mostrar qué usuario registró la compra
@@ -37,7 +36,6 @@ namespace Negocio.DTOs
     public class CompraUpdateDto
     {
         public int CompraID { get; set; }
-        public string Estado { get; set; } = "Cancelada";
         public string? Observacion { get; set; }
         public bool Activo { get; set; }
     }

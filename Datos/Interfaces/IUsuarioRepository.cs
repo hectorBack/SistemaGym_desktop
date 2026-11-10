@@ -14,9 +14,9 @@ namespace Datos.Interfaces
         Task AgregarAsync(Usuario usuario);
         void Actualizar(Usuario usuario);
         void EliminarLogico(Usuario usuario);
-        void EliminarFisico(Usuario usuario);
+        void MarcarComoEliminado(Usuario usuario);
         Task<bool> ExisteNombreUsuarioAsync(string nombreUsuario, int? idExcluir = null);
         Task<Usuario?> ObtenerPorNombreUsuarioAsync(string nombreUsuario);
-       
+
     }
 }

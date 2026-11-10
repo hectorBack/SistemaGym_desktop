@@ -30,22 +30,25 @@ namespace Datos.Repositories
             await _context.Ventas.AddAsync(venta);
         }
 
-        public void EliminarFisico(Venta venta)
-        {
-            _context.Ventas.Remove(venta);
-        }
-
-        public void EliminarLogico(Venta venta)
-        {
-            // Cambia el estado al opuesto (Activar/Desactivar)
-            venta.Activo = !venta.Activo;
-            _context.Ventas.Update(venta);
-        }
-
         public async Task<bool> ExisteProductoEnVentasAsync(int productoId)
         {
             return await _context.Set<DetalleVenta>()
                 .AnyAsync(dv => dv.ProductoID == productoId);
+        }
+
+        public void MarcarComoEliminado(Venta venta)
+        {
+            venta.Activo = false;
+            venta.Estado = "Eliminado"; // O el campo que utilices para distinguir el estado
+            _context.Ventas.Update(venta);
+        }
+
+        // Cambia el estado a Inactivo (Anulado)
+        public void MarcarComoInactivo(Venta venta)
+        {
+            venta.Activo = false;
+            venta.Estado = "Inactivo";
+            _context.Ventas.Update(venta);
         }
 
         public async Task<Venta?> ObtenerPorIdAsync(int id)
@@ -53,7 +56,7 @@ namespace Datos.Repositories
             return await _context.Ventas
                 .Include(v => v.Detalles)
                     .ThenInclude(d => d.Producto)   // para mostrar el nombre del producto en el detalle y el ticket
-                .FirstOrDefaultAsync(v => v.VentaID == id);
+               .FirstOrDefaultAsync(v => v.VentaID == id && v.Estado != "Eliminado");
         }
 
         public async Task<IEnumerable<Venta>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)
@@ -82,20 +85,26 @@ namespace Datos.Repositories
             return await _context.Ventas
                 .AsNoTracking()
                 .Include(v => v.Detalles)
-                .Where(v => v.FechaVenta >= fechaInicio && v.FechaVenta <= fechaFin)
+               .Where(v => v.Estado != "Eliminado" && v.FechaVenta >= fechaInicio && v.FechaVenta <= fechaFin)
                 .OrderByDescending(v => v.FechaVenta)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Venta>> ObtenerTodasAsync(bool incluirInactivas = false)
+        public async Task<IEnumerable<Venta>> ObtenerTodasAsync(string? estadoFiltro = "Activo")
         {
             var query = _context.Ventas
                 .Include(v => v.Detalles)
                 .AsQueryable();
 
-            if (!incluirInactivas)
+            // Con un estado ("Activo", "Inactivo" o "Eliminado") se devuelven solo las ventas en ese estado;
+            // sin estado (null o vacío) se devuelven todas menos las eliminadas.
+            if (!string.IsNullOrEmpty(estadoFiltro))
             {
-                query = query.Where(v => v.Activo);
+                query = query.Where(v => v.Estado == estadoFiltro);
+            }
+            else
+            {
+                query = query.Where(v => v.Estado != "Eliminado");
             }
 
             return await query.OrderByDescending(v => v.FechaVenta).ToListAsync();

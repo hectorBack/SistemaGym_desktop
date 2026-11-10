@@ -84,9 +84,9 @@ namespace Presentacion.Controller
             await _corteService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _corteService.EliminarFisicoAsync(id);
+            await _corteService.EliminarAsync(id);
         }
 
         public async Task<decimal> ObtenerEfectivoEnCajaAsync()
@@ -94,7 +94,7 @@ namespace Presentacion.Controller
             return await _corteService.ObtenerEfectivoEnCajaAsync();
         }
 
-        public Task<DateTime?> ObtenerFechaUltimoCierreAsync() 
+        public Task<DateTime?> ObtenerFechaUltimoCierreAsync()
             => _corteService.ObtenerFechaUltimoCierreAsync();
 
         public Task RealizarCorteAsync(int usuarioId, decimal fondoInicialPredeterminado, decimal totalIngresos, decimal totalEgresos, decimal montoFinal, string? observaciones, DateTime periodoInicio)

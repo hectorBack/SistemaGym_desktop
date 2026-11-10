@@ -17,6 +17,7 @@ namespace Datos.Entities
         public int? CorteID { get; set; }
         public int? UsuarioID { get; set; }
         public bool Activo { get; set; } = true;
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
 
         // Propiedad de navegación (opcional según el uso en tu capa de dominio)
         public virtual Concepto? Concepto { get; set; }

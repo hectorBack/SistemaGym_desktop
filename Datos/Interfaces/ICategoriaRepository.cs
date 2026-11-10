@@ -14,7 +14,8 @@ namespace Datos.Interfaces
         Task AgregarAsync(Categoria categoria);
         void Actualizar(Categoria categoria);
         void EliminarLogico(Categoria categoria);
-        void EliminarFisico(Categoria categoria);
+        void MarcarComoEliminada(Categoria categoria);
+        Task<bool> TieneProductosAsync(int categoriaId);
         Task<bool> ExisteNombreAsync(string nombre, int? idExcluir = null);
     }
 }

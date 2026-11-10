@@ -59,10 +59,6 @@ namespace Negocio.Validators
             RuleFor(x => x.CompraID)
                 .GreaterThan(0).WithMessage("ID de compra no válido.");
 
-            RuleFor(x => x.Estado)
-                .NotEmpty().WithMessage("El estado de la compra es obligatorio.")
-                .MaximumLength(20).WithMessage("El estado no puede exceder los 20 caracteres.");
-
             RuleFor(x => x.Observacion)
                 .MaximumLength(255).WithMessage("La observación no puede exceder los 255 caracteres.");
         }

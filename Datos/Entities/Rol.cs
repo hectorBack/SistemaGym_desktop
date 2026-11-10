@@ -12,5 +12,6 @@ namespace Datos.Entities
         public string Nombre { get; set; } = string.Empty;
         public string? Descripcion { get; set; }
         public string ModulosPermitidos { get; set; } = "[]";
+        public string Estado { get; set; } = "Activo"; // Activo / Inactivo / Eliminado
     }
 }

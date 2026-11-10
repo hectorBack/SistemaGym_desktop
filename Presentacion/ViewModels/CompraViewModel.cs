@@ -13,7 +13,7 @@ namespace Presentacion.ViewModels
         public int CompraID { get; set; }
         public string Codigo { get; set; } = string.Empty;
         public decimal Total { get; set; }
-        public string Estado { get; set; } = "Completada"; 
+        public string Estado => Activo ? "Completada" : "Anulada";
         public string? Observacion { get; set; }
         public int UsuarioID { get; set; }
         public string UsuarioNombre { get; set; } = string.Empty;
@@ -21,7 +21,6 @@ namespace Presentacion.ViewModels
         public DateTime? CreatedAt { get; set; }
 
         // Propiedades calculadas para visualización en DataGridView / UI
-        public string EstadoTexto => Activo ? Estado : "Inactivo";
         public string TotalTexto => MonedaHelper.Formatear(Total);
         public string FechaTexto => CreatedAt.HasValue ? CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "-";
 

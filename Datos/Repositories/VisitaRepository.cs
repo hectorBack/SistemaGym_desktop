@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Datos.Repositories
 {
+
     public class VisitaRepository : IVisitaRepository
     {
         private readonly GimnasioDbContext _context;
@@ -22,6 +23,7 @@ namespace Datos.Repositories
         public async Task<IEnumerable<Visita>> ObtenerTodasAsync()
         {
             return await _context.Visitas
+                .Where(v => v.Estado != "Eliminado")
                 .Include(v => v.Socio)
                 .Include(v => v.Membresia)
                 .OrderByDescending(v => v.CreatedAt)
@@ -33,7 +35,7 @@ namespace Datos.Repositories
             return await _context.Visitas
                 .Include(v => v.Socio)
                 .Include(v => v.Membresia)
-                .Where(v => v.CreatedAt >= fechaInicio && v.CreatedAt <= fechaFin)
+                .Where(v => v.Estado != "Eliminado" && v.CreatedAt >= fechaInicio && v.CreatedAt <= fechaFin)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }
@@ -50,7 +52,7 @@ namespace Datos.Repositories
         {
             return await _context.Visitas
                 .Include(v => v.Membresia)
-                .Where(v => v.SocioID == socioId)
+                .Where(v => v.Estado != "Eliminado" && v.SocioID == socioId)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }
@@ -65,15 +67,17 @@ namespace Datos.Repositories
             _context.Entry(visita).State = EntityState.Modified;
         }
 
-        public void EliminarFisico(Visita visita)
+        public void MarcarComoEliminada(Visita visita)
         {
-            _context.Visitas.Remove(visita);
+            visita.Activo = false;
+            visita.Estado = "Eliminado";
+            _context.Entry(visita).State = EntityState.Modified;
         }
 
         public async Task<IEnumerable<Visita>> ObtenerPorSocioYFechasAsync(int socioId, DateTime inicioSemana, DateTime finSemana)
         {
             return await _context.Visitas
-                .Where(v => v.SocioID == socioId && v.CreatedAt >= inicioSemana && v.CreatedAt <= finSemana)
+                .Where(v => v.Estado != "Eliminado" && v.SocioID == socioId && v.CreatedAt >= inicioSemana && v.CreatedAt <= finSemana)
                 .OrderBy(v => v.CreatedAt)
                 .ToListAsync();
         }
@@ -84,18 +88,9 @@ namespace Datos.Repositories
 
             return await _context.Visitas
                 .Include(v => v.Membresia)
-                .Where(v => v.SocioID == socioId && v.CreatedAt >= desde.Date && v.CreatedAt <= fechaHastaFinDia)
+                .Where(v => v.Estado != "Eliminado" && v.SocioID == socioId && v.CreatedAt >= desde.Date && v.CreatedAt <= fechaHastaFinDia)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
-        }
-
-        public async Task<bool> EliminarPorIdAsync(int id)
-        {
-            var visita = await _context.Visitas.FindAsync(id);
-            if (visita == null) return false;
-
-            _context.Visitas.Remove(visita);
-            return true;
         }
 
         // Solo lo que muestra Inicio: sin Include (no necesita Socio ni Membresia) y sin rastreo.

@@ -19,15 +19,21 @@ namespace Datos.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Compra>> ObtenerTodasAsync(bool incluirInactivas = false)
+        public async Task<IEnumerable<Compra>> ObtenerTodasAsync(string? estadoFiltro = "Activo")
         {
             var query = _context.Compras
                 .Include(c => c.Detalles)
                 .AsQueryable();
 
-            if (!incluirInactivas)
+            // Con un estado ("Activo", "Inactivo" o "Eliminado") se devuelven solo las compras en ese estado;
+            // sin estado (null o vacío) se devuelven todas menos las eliminadas.
+            if (!string.IsNullOrEmpty(estadoFiltro))
             {
-                query = query.Where(c => c.Activo && c.Estado != "Cancelada");
+                query = query.Where(c => c.Estado == estadoFiltro);
+            }
+            else
+            {
+                query = query.Where(c => c.Estado != "Eliminado");
             }
 
             return await query
@@ -39,7 +45,7 @@ namespace Datos.Repositories
         {
             return await _context.Compras
                 .Include(c => c.Detalles)
-                .FirstOrDefaultAsync(c => c.CompraID == id);
+                .FirstOrDefaultAsync(c => c.CompraID == id && c.Estado != "Eliminado");
         }
 
         public async Task<Compra?> ObtenerPorCodigoAsync(string codigo)
@@ -53,7 +59,7 @@ namespace Datos.Repositories
         {
             return await _context.Compras
                 .Include(c => c.Detalles)
-                .Where(c => c.CreatedAt.Date >= fechaInicio.Date && c.CreatedAt.Date <= fechaFin.Date)
+                .Where(c => c.Activo && c.CreatedAt.Date >= fechaInicio.Date && c.CreatedAt.Date <= fechaFin.Date)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
@@ -67,7 +73,7 @@ namespace Datos.Repositories
 
             return await _context.Compras
                 .AsNoTracking()
-                .Where(c => c.CreatedAt >= desde && c.CreatedAt < hasta)
+               .Where(c => c.Estado != "Eliminado" && c.CreatedAt >= desde && c.CreatedAt < hasta)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
@@ -82,20 +88,19 @@ namespace Datos.Repositories
             _context.Compras.Update(compra);
         }
 
-        public void EliminarLogico(Compra compra)
+        public void MarcarComoEliminado(Compra compra)
         {
-            // Cambia el estado al opuesto (Activar/Desactivar) y marca como Cancelada si se desactiva
-            compra.Activo = !compra.Activo;
-            if (!compra.Activo)
-            {
-                compra.Estado = "Cancelada";
-            }
+            compra.Activo = false;
+            compra.Estado = "Eliminado"; // O el campo que utilices para distinguir el estado
             _context.Compras.Update(compra);
         }
 
-        public void EliminarFisico(Compra compra)
+        // Cambia el estado a Inactivo (Anulado)
+        public void MarcarComoInactivo(Compra compra)
         {
-            _context.Compras.Remove(compra);
+            compra.Activo = false;
+            compra.Estado = "Inactivo";
+            _context.Compras.Update(compra);
         }
 
         public async Task<bool> ExisteCodigoAsync(string codigo, int? idExcluir = null)

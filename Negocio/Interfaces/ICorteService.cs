@@ -14,7 +14,7 @@ namespace Negocio.Interfaces
         Task<CorteDto> AbrirCorteAsync(CorteCreateDto dto);
         Task CerrarCorteAsync(CorteUpdateDto dto);
         Task EliminarLogicoAsync(int id);
-        Task EliminarFisicoAsync(int id);
+        Task EliminarAsync(int id);
 
         // Métodos de negocio específicos del módulo de Corte
         Task<CorteDto?> ObtenerCorteAbiertoPorUsuarioAsync(int usuarioId);

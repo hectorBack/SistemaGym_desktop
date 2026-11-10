@@ -14,7 +14,8 @@ namespace Datos.Interfaces
         Task AgregarAsync(PagoSocioMembresia pago);
         void Actualizar(PagoSocioMembresia pago);
         void EliminarLogico(PagoSocioMembresia pago);
-        void EliminarFisico(PagoSocioMembresia pago);
+
+        void MarcarComoEliminado(PagoSocioMembresia pago);
 
         // Métodos específicos para la gestión de pagos de membresía
         Task<IEnumerable<PagoSocioMembresia>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = false);

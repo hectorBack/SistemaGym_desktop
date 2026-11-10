@@ -14,7 +14,7 @@ namespace Datos.Interfaces
         Task AgregarAsync(Socio socio);
         void Actualizar(Socio socio);
         void EliminarLogico(Socio socio);
-        void EliminarFisico(Socio socio);
+        void MarcarComoEliminado(Socio socio);
         Task<bool> ExisteClaveAsync(string clave, int? idExcluir = null);
         Task<Socio?> ObtenerPorClaveAsync(string clave);
         Task<int> ObtenerSiguienteNumeroClaveAsync();

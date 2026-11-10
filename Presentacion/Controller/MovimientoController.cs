@@ -93,9 +93,9 @@ namespace Presentacion.Controller
             await _movimientoService.EliminarLogicoAsync(id);
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            await _movimientoService.EliminarFisicoAsync(id);
+            await _movimientoService.EliminarAsync(id);
         }
 
         public async Task<IEnumerable<MovimientoViewModel>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin)

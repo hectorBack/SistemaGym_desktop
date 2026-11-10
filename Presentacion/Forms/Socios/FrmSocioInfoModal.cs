@@ -165,7 +165,7 @@ namespace Presentacion.Forms.Socios
                 return;
 
             bool eliminada = await FormHelper.EjecutarAsync(
-                () => _visitaController.EliminarFisicoAsync(visita.VisitaID),
+                () => _visitaController.EliminarAsync(visita.VisitaID),
                 "No se pudo eliminar la visita.",
                 panelFiltrosVisitas);
 

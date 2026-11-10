@@ -164,7 +164,7 @@ namespace Negocio.Services
                 throw new BusinessException(string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage)));
 
             var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(dto.VisitaID);
-            if (visita == null)
+            if (visita == null || visita.Estado == "Eliminado")
                 throw new BusinessException("La visita que intenta actualizar no existe.");
 
             visita.Nombre = dto.Nombre!.Trim();
@@ -172,24 +172,25 @@ namespace Negocio.Services
             visita.Telefono = dto.Telefono?.Trim();
             visita.Observaciones = dto.Observaciones?.Trim();
             visita.Activo = dto.Activo;
+            visita.Estado = dto.Activo ? "Activo" : "Inactivo";
 
             _unitOfWork.Visita.Actualizar(visita);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task EliminarFisicoAsync(int id)
+        public async Task EliminarAsync(int id)
         {
             var visita = await _unitOfWork.Visita.ObtenerPorIdAsync(id);
-            if (visita == null)
+            if (visita == null || visita.Estado == "Eliminado")
                 throw new BusinessException("La visita a eliminar no existe.");
 
-            // Borrar una visita cobrada dejaría su ingreso en caja sin respaldo y el corte no cuadraría.
+            // Eliminar una visita cobrada dejaría su ingreso en caja sin respaldo y el corte no cuadraría.
             if (visita.MontoPagado > 0)
                 throw new BusinessException(
                     "Esta visita tiene un cobro registrado en caja y no puede eliminarse. " +
                     "Cancélela para generar la devolución correspondiente.");
 
-            _unitOfWork.Visita.EliminarFisico(visita);
+            _unitOfWork.Visita.MarcarComoEliminada(visita);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -214,6 +215,7 @@ namespace Negocio.Services
             visita.Observaciones = string.Join(" | ", partes);
             visita.MontoPagado = 0m;
             visita.Activo = false;
+            visita.Estado = "Inactivo";
             _unitOfWork.Visita.Actualizar(visita);
 
             // La devolución siempre queda registrada: en el corte abierto, o sin corte si no hay uno.
@@ -451,8 +453,5 @@ namespace Negocio.Services
             Exitoso = false,
             MensajeError = mensaje
         };
-
-      
     }
-
 }

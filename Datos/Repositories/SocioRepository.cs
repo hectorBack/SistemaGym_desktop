@@ -21,12 +21,9 @@ namespace Datos.Repositories
 
         public async Task<IEnumerable<Socio>> ObtenerTodosAsync(bool incluirInactivos = false, bool incluirFoto = true)
         {
-            var query = _context.Socios.AsQueryable();
-
-            if (!incluirInactivos)
-            {
-                query = query.Where(s => s.Activo);
-            }
+            var query = incluirInactivos
+                ? _context.Socios.Where(s => s.Estado != "Eliminado")
+                : _context.Socios.Where(s => s.Activo);
 
             if (incluirFoto)
                 return await query.ToListAsync();
@@ -45,6 +42,7 @@ namespace Datos.Repositories
                     FechaNacimiento = s.FechaNacimiento,
                     Observaciones = s.Observaciones,
                     Activo = s.Activo,
+                    Estado = s.Estado,
                     CreatedAt = s.CreatedAt,
                     UpdatedAt = s.UpdatedAt
                 })
@@ -70,12 +68,15 @@ namespace Datos.Repositories
         {
             // Cambia el estado al opuesto (Activar/Desactivar)
             socio.Activo = !socio.Activo;
+            socio.Estado = socio.Activo ? "Activo" : "Inactivo";
             _context.Socios.Update(socio);
         }
 
-        public void EliminarFisico(Socio socio)
+        public void MarcarComoEliminado(Socio socio)
         {
-            _context.Socios.Remove(socio);
+            socio.Activo = false;
+            socio.Estado = "Eliminado";
+            _context.Socios.Update(socio);
         }
 
         public async Task<bool> ExisteClaveAsync(string clave, int? idExcluir = null)
@@ -93,7 +94,7 @@ namespace Datos.Repositories
         public async Task<Socio?> ObtenerPorClaveAsync(string clave)
         {
             return await _context.Socios
-                .FirstOrDefaultAsync(s => s.Clave.ToLower() == clave.ToLower());
+                .FirstOrDefaultAsync(s => s.Estado != "Eliminado" && s.Clave.ToLower() == clave.ToLower());
         }
 
         public async Task<int> ObtenerSiguienteNumeroClaveAsync()
@@ -134,7 +135,7 @@ namespace Datos.Repositories
             return await _context.Socios
                 .Include(s => s.Visitas)
                 .Include(s => s.SocioMembresias)
-                .Where(m => m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
+                .Where(m => m.Estado != "Eliminado" && m.CreatedAt >= fechaInicio && m.CreatedAt <= fechaFin)
                 .OrderByDescending(v => v.CreatedAt)
                 .ToListAsync();
         }

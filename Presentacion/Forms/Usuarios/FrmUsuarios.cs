@@ -223,14 +223,14 @@ namespace Presentacion.Forms.Usuarios
             if (usuario == null || RolesSistema.EsAdministrador(usuario.RolNombre) || EsUsuarioActual(usuario)) return;
 
             if (!FormHelper.ConfirmarAccion(
-                    $"¿Desea eliminar PERMANENTEMENTE al usuario '{usuario.NombreUsuario}' de la base de datos?\n\nEsta acción no se puede deshacer.",
-                    "Eliminación definitiva",
+                    $"¿Desea eliminar al usuario '{usuario.NombreUsuario}'?\n\nDejará de mostrarse y ya no podrá iniciar sesión. Sus ventas, movimientos y cortes se conservan.",
+                    "Eliminar usuario",
                     destructiva: true))
                 return;
 
             bool correcto = await FormHelper.EjecutarAsync(
-                () => _controller.EliminarFisicoAsync(usuario.UsuarioID),
-                "No se pudo eliminar el usuario. Si ya tiene ventas o movimientos registrados, desactívalo en su lugar.",
+                () => _controller.EliminarAsync(usuario.UsuarioID),
+                "No se pudo eliminar el usuario.",
                 panelTop);
 
             if (correcto)

@@ -9,14 +9,17 @@ namespace Datos.Interfaces
 {
     public interface ICompraRepository
     {
-        Task<IEnumerable<Compra>> ObtenerTodasAsync(bool incluirInactivas = false);
+        Task<IEnumerable<Compra>> ObtenerTodasAsync(string? estadoFiltro = "Activo");
         Task<Compra?> ObtenerPorIdAsync(int id);
         Task<Compra?> ObtenerPorCodigoAsync(string codigo);
         Task<IEnumerable<Compra>> ObtenerPorRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
         Task AgregarAsync(Compra compra);
         void Actualizar(Compra compra);
-        void EliminarFisico(Compra compra);
-        void EliminarLogico(Compra compra);
+        // Cambiar EliminarFisico por un Soft Delete que marque como "Eliminado"
+        void MarcarComoEliminado(Compra compra);
+
+        // Mantener o ajustar anulación lógica si "Inactivo" representa una compra anulada
+        void MarcarComoInactivo(Compra compra);
         Task<bool> ExisteCodigoAsync(string codigo, int? idExcluir = null);
         Task<string> GenerarSiguienteCodigoAsync();
 
