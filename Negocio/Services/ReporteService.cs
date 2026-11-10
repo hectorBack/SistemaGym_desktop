@@ -229,7 +229,7 @@ namespace Negocio.Services
 
             // Filtrar para obtener ÚNICAMENTE las visitas casuales (donde SocioID es nulo)
             return visitas
-                .Where(v => !v.SocioID.HasValue)
+                .Where(v => !v.SocioID.HasValue && v.Activo && v.Estado == "Activo")
                 .Select(v => new ReporteVisitaDto
                 {
                     VisitaID = v.VisitaID,
