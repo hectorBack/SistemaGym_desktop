@@ -143,6 +143,7 @@ namespace Negocio.Services
                 Activo = socio.Activo,
 
                 HistorialMembresias = (socio.SocioMembresias ?? Enumerable.Empty<SocioMembresia>())
+                    .Where(sm => sm.Estado != "Eliminado") // las eliminadas ya no forman parte del historial
                     .OrderByDescending(sm => sm.FechaInicio)
                     .Select(sm => new SocioMembresiaHistorialDto
                     {
@@ -157,6 +158,7 @@ namespace Negocio.Services
                     }).ToList(),
 
                 HistorialVisitas = (socio.Visitas ?? Enumerable.Empty<Visita>())
+                    .Where(v => v.Estado != "Eliminado")
                     .OrderByDescending(v => v.CreatedAt)
                     .Select(v => new SocioVisitaHistorialDto
                     {

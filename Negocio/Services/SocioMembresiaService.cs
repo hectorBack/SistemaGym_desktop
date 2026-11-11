@@ -179,8 +179,8 @@ namespace Negocio.Services
 
                 foreach (var pago in pagosActivos)
                 {
-                    pago.Activo = false;
-                    _unitOfWork.PagoSocioMembresia.Actualizar(pago);
+                   
+                    _unitOfWork.PagoSocioMembresia.EliminarLogico(pago);
                 }
             }
 

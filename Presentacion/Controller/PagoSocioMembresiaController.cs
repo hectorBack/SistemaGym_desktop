@@ -27,7 +27,7 @@ namespace Presentacion.Controller
             return dtos.Select(MapToViewModel);
         }
 
-        public async Task<IEnumerable<PagoSocioMembresiaViewModel>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = true)
+        public async Task<IEnumerable<PagoSocioMembresiaViewModel>> ObtenerPorSocioMembresiaIdAsync(int socioMembresiaId, bool incluirInactivos = false)
         {
             var dtos = await _pagoSocioMembresiaService.ObtenerPorSocioMembresiaIdAsync(socioMembresiaId, incluirInactivos);
 
