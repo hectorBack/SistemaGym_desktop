@@ -140,14 +140,22 @@ namespace Presentacion.Forms.Membresias
             var membresia = MembresiaSeleccionada;
             bool haySeleccion = membresia != null;
 
+            // La membresía de Visita viene por defecto en el sistema: se puede editar (por ejemplo su precio),
+            // pero no desactivar ni eliminar.
+            bool esDeSistema = membresia != null && EsMembresiaDeVisita(membresia);
+
             btnEditar.Enabled = haySeleccion;
-            btnDesactivar.Enabled = haySeleccion;
-            btnEliminarFisico.Enabled = haySeleccion;
+            btnDesactivar.Enabled = haySeleccion && !esDeSistema;
+            btnEliminarFisico.Enabled = haySeleccion && !esDeSistema;
 
             bool inactiva = membresia is { Activo: false };
             btnDesactivar.Text = inactiva ? "Activar" : "Desactivar";
             btnDesactivar.Estilo = inactiva ? EstiloBoton.Exito : EstiloBoton.Advertencia;
         }
+
+        // Misma regla que usa VisitaService para reconocer el pase de visita: el nombre contiene "Visita".
+        private static bool EsMembresiaDeVisita(MembresiaViewModel membresia) =>
+            membresia.Nombre.Contains("Visita", StringComparison.OrdinalIgnoreCase);
 
         private void dgvMembresias_SelectionChanged(object? sender, EventArgs e) => ActualizarEstadoBotones();
 
@@ -198,7 +206,7 @@ namespace Presentacion.Forms.Membresias
         private async void btnDesactivar_Click(object? sender, EventArgs e)
         {
             var membresia = MembresiaSeleccionada;
-            if (membresia == null) return;
+            if (membresia == null || EsMembresiaDeVisita(membresia)) return;
 
             string accion = membresia.Activo ? "desactivar" : "activar";
 
@@ -219,7 +227,7 @@ namespace Presentacion.Forms.Membresias
         private async void btnEliminarFisico_Click(object? sender, EventArgs e)
         {
             var membresia = MembresiaSeleccionada;
-            if (membresia == null) return;
+            if (membresia == null || EsMembresiaDeVisita(membresia)) return;
 
             if (!FormHelper.ConfirmarAccion(
                     $"¿Desea eliminar la membresía '{membresia.Nombre}'?\n\nDejará de mostrarse y de ofrecerse. Los socios que ya la tienen conservan su registro.",
@@ -235,5 +243,5 @@ namespace Presentacion.Forms.Membresias
             if (correcto)
                 await CargarMembresiasAsync();
         }
-    }
+    } 
 }

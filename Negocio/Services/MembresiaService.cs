@@ -14,6 +14,12 @@ namespace Negocio.Services
 {
     public class MembresiaService : IMembresiaService
     {
+        // El pase de visita se reconoce por su nombre (misma regla que usa VisitaService).
+        private const string PALABRA_VISITA = "Visita";
+
+        private static bool EsMembresiaDeVisita(string? nombre) =>
+            nombre != null && nombre.Contains(PALABRA_VISITA, StringComparison.OrdinalIgnoreCase);
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<MembresiaCreateDto> _createValidator;
         private readonly IValidator<MembresiaUpdateDto> _updateValidator;
@@ -127,6 +133,12 @@ namespace Negocio.Services
                 throw new BusinessException("La membresía que intenta actualizar no existe.");
             }
 
+            // Se puede editar (p. ej. el precio), pero no perder la palabra "Visita": el sistema la usa para localizarla.
+            if (EsMembresiaDeVisita(membresia.Nombre) && !EsMembresiaDeVisita(dto.Nombre))
+            {
+                throw new BusinessException($"El nombre de la membresía de visita debe conservar la palabra '{PALABRA_VISITA}'.");
+            }
+
             if (await _unitOfWork.Membresia.ExisteNombreAsync(dto.Nombre, dto.MembresiaID))
             {
                 throw new BusinessException($"Ya existe otra membresía con el nombre '{dto.Nombre}'.");
@@ -152,6 +164,11 @@ namespace Negocio.Services
                 throw new BusinessException("La membresía a cambiar de estado no existe.");
             }
 
+            if (EsMembresiaDeVisita(membresia.Nombre))
+            {
+                throw new BusinessException("La membresía de visita es del sistema y no se puede activar ni desactivar.");
+            }
+
             _unitOfWork.Membresia.EliminarLogico(membresia);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -162,6 +179,11 @@ namespace Negocio.Services
             if (membresia == null)
             {
                 throw new BusinessException("La membresía a eliminar no existe.");
+            }
+
+            if (EsMembresiaDeVisita(membresia.Nombre))
+            {
+                throw new BusinessException("La membresía de visita es del sistema y no se puede eliminar.");
             }
 
             _unitOfWork.Membresia.MarcarComoEliminada(membresia);
